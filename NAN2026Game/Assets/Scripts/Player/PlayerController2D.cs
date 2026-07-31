@@ -16,7 +16,9 @@ public class PlayerController2D : MonoBehaviour
     private float inputX;
     private bool runHeld;
     private bool jumpQueued;
-    private bool attackQueued;
+    private string queuedAttack;
+    private float queuedAttackDuration;
+    private string activeAttack;
     private float attackTimer;
     private bool grounded;
     private string currentState;
@@ -43,12 +45,13 @@ public class PlayerController2D : MonoBehaviour
             if (kb.rightArrowKey.isPressed || kb.dKey.isPressed) inputX += 1f;
             runHeld = kb.leftShiftKey.isPressed || kb.rightShiftKey.isPressed;
             if (kb.spaceKey.wasPressedThisFrame || kb.upArrowKey.wasPressedThisFrame) jumpQueued = true;
+            if (kb.kKey.wasPressedThisFrame) QueueAttack("Combo2", config.combo2Duration);
+            if (kb.lKey.wasPressedThisFrame) QueueAttack("Combo3", config.combo3Duration);
         }
-        if (mouse != null && mouse.leftButton.wasPressedThisFrame) attackQueued = true;
+        if (mouse != null && mouse.leftButton.wasPressedThisFrame) QueueAttack("Slash", config.slashDuration);
 
-        bool attacking = attackTimer > 0f;
         sr.flipX = PlayerLocomotionLogic.ShouldFlipLeft(inputX, sr.flipX);
-        string next = PlayerLocomotionLogic.SelectAnimState(attacking, grounded, inputX, runHeld);
+        string next = PlayerLocomotionLogic.SelectAnimState(activeAttack, grounded, inputX, runHeld);
         if (next != currentState)
         {
             currentState = next;
@@ -56,20 +59,31 @@ public class PlayerController2D : MonoBehaviour
         }
     }
 
+    private void QueueAttack(string stateName, float duration)
+    {
+        queuedAttack = stateName;
+        queuedAttackDuration = duration;
+    }
+
     private void FixedUpdate()
     {
         grounded = col.Cast(Vector2.down, castHits, config.groundCheckDistance) > 0;
         bool attacking = attackTimer > 0f;
-        if (attacking) attackTimer -= Time.fixedDeltaTime;
-
-        if (attackQueued)
+        if (attacking)
         {
-            attackQueued = false;
+            attackTimer -= Time.fixedDeltaTime;
+            if (attackTimer <= 0f) activeAttack = null;
+        }
+
+        if (queuedAttack != null)
+        {
             if (PlayerLocomotionLogic.CanAttack(grounded, attacking))
             {
-                attackTimer = config.attackDuration;
+                activeAttack = queuedAttack;
+                attackTimer = queuedAttackDuration;
                 attacking = true;
             }
+            queuedAttack = null;
         }
 
         float vx = attacking && grounded

@@ -271,3 +271,20 @@ SPEC.md / STATE.md / FAIL.md 읽음 (execute_code). 컨셉 패키지 3안(A: 폐
 - 컴파일 에러 0건
 ### 실패와 수정
 - 재생 모드 중 테스트 차단 → 사용자 정지 대기 후 마감 (FAIL #5 규칙 준수)
+
+
+## [수정] 신규 스프라이트 시트 2장 교체 + 공격 3종 입력 배선 — 2026-08-01 08:22
+### 프롬프트
+[수정]C:\Users\edwin\OneDrive\Desktop\NHN 대회 에셋\공주를 구하라\n기사_스프라이트시트, 기사_스프라이트시트(2)로 넣었놨어. IDLE, 걷기, 뛰기, 마우스 한번 클릭으로 SLASH , k버튼 COMBO2 , L 버튼 COMBO3 구현하게 해줘.
+### 조작 내역
+- 시트 2장 복사·투명화·슬라이스: 이동(RUN6/WALK6/IDLE4=16), 공격(COMBO3 6/COMBO2 5/SLASH 5=16). 공격 시트 병합 런은 기대 프레임 수 기반 최소값 분할로 해소
+- 클립 6종 재구축(Idle/Walk/Run/Slash/Combo2/Combo3), 컨트롤러에 Combo2·Combo3 상태 추가
+- MovementConfig: attackDuration → slashDuration(0.4)/combo2Duration(0.4)/combo3Duration(0.55)
+- PlayerLocomotionLogic.SelectAnimState 시그니처 변경(공격 상태명 전달), 테스트 갱신
+- PlayerController2D: 좌클릭=Slash, K=Combo2, L=Combo3 큐잉
+### 검증
+- 슬라이스: 시트1 sprites=16, 시트2 sprites=16 (기대치 일치)
+- 클립/상태: Idle(4f@6) Walk(6f@10) Run(6f@12) Slash(5f@14) Combo2(5f@14) Combo3(6f@12), state+Combo2, state+Combo3
+- EditMode 테스트 15/15, 컴파일 에러 0, 씬 오브젝트 무변경(exists, animator=True)
+### 실패와 수정
+- 공격 시트에서 검기 프레임 병합 재발(프롬프트 간격 지시에도 불구) → 기대 수 기반 분할로 처리. 라벨(WALK 170px)이 프레임 임계 초과 → 라벨 판정을 시작 x<220 && 폭<220으로 변경

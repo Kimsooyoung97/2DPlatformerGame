@@ -22,11 +22,12 @@ namespace NAN2026.Tests
         }
         [Test] public void AnimState_Priority()
         {
-            Assert.AreEqual("Slash", PlayerLocomotionLogic.SelectAnimState(true, true, 1f, true));
-            Assert.AreEqual("Idle", PlayerLocomotionLogic.SelectAnimState(false, false, 1f, true));
-            Assert.AreEqual("Run", PlayerLocomotionLogic.SelectAnimState(false, true, 1f, true));
-            Assert.AreEqual("Walk", PlayerLocomotionLogic.SelectAnimState(false, true, -1f, false));
-            Assert.AreEqual("Idle", PlayerLocomotionLogic.SelectAnimState(false, true, 0f, false));
+            Assert.AreEqual("Slash", PlayerLocomotionLogic.SelectAnimState("Slash", true, 1f, true));
+            Assert.AreEqual("Combo3", PlayerLocomotionLogic.SelectAnimState("Combo3", false, 1f, true));
+            Assert.AreEqual("Idle", PlayerLocomotionLogic.SelectAnimState(null, false, 1f, true));
+            Assert.AreEqual("Run", PlayerLocomotionLogic.SelectAnimState("", true, 1f, true));
+            Assert.AreEqual("Walk", PlayerLocomotionLogic.SelectAnimState(null, true, -1f, false));
+            Assert.AreEqual("Idle", PlayerLocomotionLogic.SelectAnimState(null, true, 0f, false));
         }
         [Test] public void Flip_KeepsFacingWhenIdle()
         {

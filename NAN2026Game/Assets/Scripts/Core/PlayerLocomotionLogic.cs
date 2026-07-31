@@ -20,9 +20,9 @@ namespace NAN2026.Core
             return grounded && !attacking;
         }
 
-        public static string SelectAnimState(bool attacking, bool grounded, float inputX, bool runHeld)
+        public static string SelectAnimState(string activeAttack, bool grounded, float inputX, bool runHeld)
         {
-            if (attacking) return "Slash";
+            if (!string.IsNullOrEmpty(activeAttack)) return activeAttack;
             if (!grounded) return "Idle";
             if (inputX != 0f) return runHeld ? "Run" : "Walk";
             return "Idle";

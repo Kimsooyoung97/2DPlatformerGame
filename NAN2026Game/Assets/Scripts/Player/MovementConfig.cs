@@ -15,6 +15,8 @@ namespace NAN2026
         public float groundCheckDistance = 0.08f;
 
         [Header("공격")]
-        public float attackDuration = 0.5f;
+        public float slashDuration = 0.4f;
+        public float combo2Duration = 0.4f;
+        public float combo3Duration = 0.55f;
     }
 }
