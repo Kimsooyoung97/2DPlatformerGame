@@ -23,3 +23,8 @@
 - **증상**: execute_code로 git을 돌리면 `Timeout receiving Unity response`가 빈발. 실행 여부를 알 수 없어 상태가 불명해짐
 - **원인**: `Process.Start` + `StandardOutput.ReadToEnd()`가 Unity 메인 스레드를 블록하여 MCP 응답 시한 초과
 - **방지 규칙**: git 호출 시 출력 리다이렉트를 쓰지 말고 `WaitForExit(ms)`로 exit code만 받는다. 출력이 필요하면 `cmd /c "... > 파일"`로 파일에 받은 뒤 읽는다. 타임아웃이 나면 재시도 전에 반드시 상태를 재확인한다
+
+## 5. 재생 모드 중 씬 저장·테스트 실행 실패
+- **증상**: `EditorSceneManager.SaveScene`이 `This cannot be used during play mode`로, `run_tests`가 `Cannot start a test run while the Editor is in or entering Play Mode`로 실패
+- **원인**: 에디터가 재생 중이면 씬 저장과 테스트 실행이 모두 차단됨. 재생 중 만든 씬 오브젝트는 재생 종료 시 소멸
+- **방지 규칙**: 씬을 건드리거나 테스트를 돌리기 전에 `EditorApplication.isPlaying`을 먼저 확인한다. 재생 중이면 임의로 정지하지 말고 사람에게 정지를 요청한 뒤 대기한다. 정지 후에는 오브젝트 존재 여부를 반드시 재확인한다

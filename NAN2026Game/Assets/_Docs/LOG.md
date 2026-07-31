@@ -99,3 +99,40 @@ MonoBehaviour에 숫자 리터럴 금지.
 
 ### 실패와 수정
 없음
+
+## [구현] 검기 피격 시 깜빡이는 오브젝트 생성 — 2026-08-01 05:15
+
+### 프롬프트
+[구현] 검기를 날리면 피격을 받아 깜빡거리는 오브젝트를 맵에 생성하라
+
+(후속 지시) 추천으로 가자 — 조사 결과 제시한 C+A안: Map/을 gitignore에서 해제하고 BiomeActionMap.unity에 배치
+
+### 조작 내역
+- `.gitignore` — `NAN2026Game/Assets/Map/` 2줄, `Assets/Map.meta` 1줄 제거 (총 3줄)
+- `create_script` — `Assets/Scripts/Core/HitFlashBlinker.cs` (순수 static, UnityEngine 비의존)
+- `create_script` — `Assets/Scripts/Combat/HitFlashOnSlash.cs` (MonoBehaviour)
+- `create_script` — `Assets/Tests/EditMode/HitFlashBlinkerTests.cs` (테스트 8개)
+- `execute_code` — `NAN2026.Core.asmdef`, `NAN2026.Tests.EditMode.asmdef` 생성
+- `execute_code` — `FeelConfig.cs`에 `hitFlashDuration` / `hitFlashInterval` 2필드 추가
+- `execute_code` — `FeelConfig.asset`의 깜빡임 2값만 설정 (0.3 / 0.05). 나머지 8개는 0 유지
+- `execute_code` — `BiomeActionMap.unity`에 `HitFlashDummy_S1` 생성 후 씬 저장
+- **`SlashProjectile.cs` 미수정** — 더미가 자기 트리거로 검기를 감지하는 구조
+
+### 검증
+- 컴파일: `isCompiling=False`, `HitFlashBlinker resolved=True asm=NAN2026.Core`,
+  `HitFlashOnSlash resolved=True asm=Assembly-CSharp`, `hitFlashDuration/Interval field=True`
+- EditMode 테스트: `total=8, passed=8, failed=0, skipped=0, resultState=Passed` (0.226초)
+- `.gitignore` 검증: 제거 3줄, `남은 'Assets/Map' 언급: 0`,
+  Player/Art/Screenshots/_Recovery/Biome 제외는 전부 유지됨
+- `Map/` 내용물 확인: `.unity` 4개 + `.meta` 5개뿐, 아트 바이너리 0개 → 제3자 에셋 재배포 아님
+- 씬 저장: `SaveScene=True`, `isDirty(저장후)=False`
+- 배치 검증: `HitFlashDummy_S1 pos=(7.00, 1.80, 0.00)`, `feelConfig=FeelConfig`,
+  `targetRenderer=연결됨`, `BoxCollider2D isTrigger=True`, `bounds=(6.50,0.80) ~ (7.50,2.80)`
+- `read_console(error)`: 1건 — `Failed to store screen shot (.../NHNDemo/ShowcasePreview.png)`.
+  기존 NHNDemo 스크린샷 저장 실패로 본 작업과 무관
+
+### 실패와 수정
+- EditMode 테스트 1차 실행이 `Cannot start a test run while the Editor is in or entering Play Mode`로 실패.
+  재생 정지를 임의로 하지 않고 사람에게 요청 → 정지 후 재실행하여 8/8 통과
+- 씬 저장 1차 시도가 `This cannot be used during play mode`로 실패. 재생이 순간적으로 걸린 상태였음.
+  재생 종료 확인(`isPlaying=False`, `dummy개수=1`) 후 저장 성공. FAIL.md #5로 기록

@@ -43,4 +43,11 @@ public class FeelConfig : ScriptableObject
     [Header("입력 버퍼")]
     [Tooltip("선입력을 기억하는 길이(초)")]
     public float inputBufferTime;
+
+    [Header("피격 깜빡임")]
+    [Tooltip("피격 후 깜빡임이 지속되는 길이(초)")]
+    public float hitFlashDuration;
+
+    [Tooltip("보임/숨김이 뒤집히는 간격(초)")]
+    public float hitFlashInterval;
 }
