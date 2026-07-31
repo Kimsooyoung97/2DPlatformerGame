@@ -304,3 +304,21 @@ SPEC.md / STATE.md / FAIL.md 읽음 (execute_code). 컨셉 패키지 3안(A: 폐
 - 씬 무변경
 ### 실패와 수정
 없음
+
+
+## [수정+구현] 걷기 교체, 점프·착지·2단 점프 구현 (COMBO2 보류) — 2026-08-01 08:53
+### 프롬프트
+[수정] 걷기, COMBO2 수정, [구현] 점프, 착지, 점프는 2단 점프 구현
+### 조작 내역
+- Knight_MoveExtra.png 임포트·투명화·슬라이스: WALK 4 / JUMP 4 / LAND 5 (착지는 3f 지시였으나 5f로 생성됨 — 그대로 사용)
+- 클립: Walk 4f@8 재구축, JumpRise/JumpApex/JumpFall 단일 프레임, Land 5f@14. 컨트롤러 상태 4개 추가
+- MovementConfig += maxJumps(2)/apexSpeedThreshold(1.2)/landDuration(0.36)
+- 로직: CanJump(attacking,jumpsUsed,maxJumps)로 2단 점프, SelectAnimState에 수직속도 기반 공중 상태·착지 분기
+- 컨트롤러: 접지 시 jumpsUsed 리셋, 착지 타이머, 공중 점프 허용
+- Knight_Combo2.png: 1행 8f 지시였으나 3행 13런으로 생성 → 매핑 불가로 보류. 기존 COMBO2 유지
+### 검증
+- 슬라이스: sprites=13 (JUMP4/LAND5/WALK4)
+- EditMode 테스트 17/17 (DoubleJump_Rules, AnimState_AirStates 신규 포함), 컴파일 에러 0
+- 씬 무변경
+### 실패와 수정
+- COMBO2 시트 레이아웃 불일치(모델이 1행 지시 무시) → 추측 슬라이스 대신 보류, 사용자에게 이미지 첨부 요청

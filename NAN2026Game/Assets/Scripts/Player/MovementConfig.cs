@@ -13,6 +13,9 @@ namespace NAN2026
         public float jumpVelocity = 8f;
         public float gravityScale = 2.5f;
         public float groundCheckDistance = 0.08f;
+        public int maxJumps = 2;
+        public float apexSpeedThreshold = 1.2f;
+        public float landDuration = 0.36f;
 
         [Header("공격")]
         public float slashDuration = 0.4f;

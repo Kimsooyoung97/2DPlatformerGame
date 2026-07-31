@@ -16,3 +16,9 @@
 - 출처: Google Nano Banana 2, 사용자 생성. 얇은 암갈색 아웃라인·프레임 간격 확보·과장된 공격 모션 프롬프트(Claude 작성) 사용
 - 라이선스: 사용자 생성 AI 산출물, NAN 2026 규정 확인 대기
 - 후처리: 외곽 플러드필 투명화 (시트1 3,081,182px / 시트2 2,879,401px)
+
+## Knight_MoveExtra.png / Knight_Combo2.png — 2026-08-01
+- 파일: Assets/Sprites_AI/Player/Knight_MoveExtra.png (걷기4·점프4·착지5), Knight_Combo2.png (보류: 레이아웃 불일치)
+- 출처: Google Nano Banana 2, 사용자 생성. 안무 지정·글자 금지 프롬프트(Claude 작성)
+- 라이선스: 사용자 생성 AI 산출물, NAN 2026 규정 확인 대기
+- 후처리: 외곽 플러드필 투명화

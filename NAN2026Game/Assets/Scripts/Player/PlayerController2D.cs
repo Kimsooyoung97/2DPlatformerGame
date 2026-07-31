@@ -23,6 +23,9 @@ public class PlayerController2D : MonoBehaviour
     private float activeAttackLunge;
     private float attackTimer;
     private bool grounded;
+    private bool wasGrounded;
+    private int jumpsUsed;
+    private float landTimer;
     private string currentState;
 
     private void Awake()
@@ -53,7 +56,8 @@ public class PlayerController2D : MonoBehaviour
         if (mouse != null && mouse.leftButton.wasPressedThisFrame) QueueAttack("Slash", config.slashDuration, config.slashLungeSpeed);
 
         sr.flipX = PlayerLocomotionLogic.ShouldFlipLeft(inputX, sr.flipX);
-        string next = PlayerLocomotionLogic.SelectAnimState(activeAttack, grounded, inputX, runHeld);
+        string next = PlayerLocomotionLogic.SelectAnimState(
+            activeAttack, grounded, landTimer > 0f, rb.linearVelocity.y, config.apexSpeedThreshold, inputX, runHeld);
         if (next != currentState)
         {
             currentState = next;
@@ -70,7 +74,12 @@ public class PlayerController2D : MonoBehaviour
 
     private void FixedUpdate()
     {
+        wasGrounded = grounded;
         grounded = col.Cast(Vector2.down, castHits, config.groundCheckDistance) > 0;
+        if (grounded && !wasGrounded) landTimer = config.landDuration;
+        if (landTimer > 0f) landTimer -= Time.fixedDeltaTime;
+        if (grounded && rb.linearVelocity.y <= 0.01f) jumpsUsed = 0;
+
         bool attacking = attackTimer > 0f;
         if (attacking)
         {
@@ -98,7 +107,12 @@ public class PlayerController2D : MonoBehaviour
         if (jumpQueued)
         {
             jumpQueued = false;
-            if (PlayerLocomotionLogic.CanJump(grounded, attacking)) vy = config.jumpVelocity;
+            if (PlayerLocomotionLogic.CanJump(attacking, jumpsUsed, config.maxJumps))
+            {
+                vy = config.jumpVelocity;
+                jumpsUsed++;
+                landTimer = 0f;
+            }
         }
         rb.linearVelocity = new Vector2(vx, vy);
     }

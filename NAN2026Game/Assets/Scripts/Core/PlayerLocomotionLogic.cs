@@ -10,9 +10,9 @@ namespace NAN2026.Core
             return inputX * (runHeld ? runSpeed : walkSpeed);
         }
 
-        public static bool CanJump(bool grounded, bool attacking)
+        public static bool CanJump(bool attacking, int jumpsUsed, int maxJumps)
         {
-            return grounded && !attacking;
+            return !attacking && jumpsUsed < maxJumps;
         }
 
         public static bool CanAttack(bool grounded, bool attacking)
@@ -20,10 +20,16 @@ namespace NAN2026.Core
             return grounded && !attacking;
         }
 
-        public static string SelectAnimState(string activeAttack, bool grounded, float inputX, bool runHeld)
+        public static string SelectAnimState(string activeAttack, bool grounded, bool landing, float verticalVelocity, float apexThreshold, float inputX, bool runHeld)
         {
             if (!string.IsNullOrEmpty(activeAttack)) return activeAttack;
-            if (!grounded) return "Idle";
+            if (!grounded)
+            {
+                if (verticalVelocity > apexThreshold) return "JumpRise";
+                if (verticalVelocity < -apexThreshold) return "JumpFall";
+                return "JumpApex";
+            }
+            if (landing && inputX == 0f) return "Land";
             if (inputX != 0f) return runHeld ? "Run" : "Walk";
             return "Idle";
         }
