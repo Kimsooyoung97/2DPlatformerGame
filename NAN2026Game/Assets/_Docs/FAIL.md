@@ -28,3 +28,8 @@
 - **증상**: `EditorSceneManager.SaveScene`이 `This cannot be used during play mode`로, `run_tests`가 `Cannot start a test run while the Editor is in or entering Play Mode`로 실패
 - **원인**: 에디터가 재생 중이면 씬 저장과 테스트 실행이 모두 차단됨. 재생 중 만든 씬 오브젝트는 재생 종료 시 소멸
 - **방지 규칙**: 씬을 건드리거나 테스트를 돌리기 전에 `EditorApplication.isPlaying`을 먼저 확인한다. 재생 중이면 임의로 정지하지 말고 사람에게 정지를 요청한 뒤 대기한다. 정지 후에는 오브젝트 존재 여부를 반드시 재확인한다
+
+## 6. 트리거끼리는 Rigidbody2D 없이 충돌하지 않음
+- **증상**: 검기가 더미를 통과하는데 `OnTriggerEnter2D`가 한 번도 호출되지 않음. 콘솔 에러도 없어 원인이 드러나지 않음
+- **원인**: Unity 2D 물리는 두 콜라이더 중 최소 하나에 non-static Rigidbody2D가 있어야 접촉 이벤트를 발생시킨다. 검기와 더미 모두 Collider2D만 가진 트리거였음
+- **방지 규칙**: 트리거로 피격을 받는 오브젝트에는 Kinematic Rigidbody2D를 붙이고 `useFullKinematicContacts=true`로 둔다. 위치 고정이 필요하면 `constraints=FreezeAll`. 새 피격 대상을 만들 때마다 Rigidbody2D 유무를 먼저 확인한다

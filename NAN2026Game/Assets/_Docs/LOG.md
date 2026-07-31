@@ -136,3 +136,27 @@ MonoBehaviour에 숫자 리터럴 금지.
   재생 정지를 임의로 하지 않고 사람에게 요청 → 정지 후 재실행하여 8/8 통과
 - 씬 저장 1차 시도가 `This cannot be used during play mode`로 실패. 재생이 순간적으로 걸린 상태였음.
   재생 종료 확인(`isPlaying=False`, `dummy개수=1`) 후 저장 성공. FAIL.md #5로 기록
+
+## [수정] 더미가 검기에 맞아도 깜빡이지 않는 버그 — 2026-08-01 05:32
+
+### 프롬프트
+캐릭터 앞에 노란색 박스가 더미지? 검기를 날리고 맞아도 깜빡이지 않는데?
+
+### 조작 내역
+- `execute_code(safety_checks=false)` — `HitFlashDummy_S1`에 `Rigidbody2D` 추가
+  (bodyType=Kinematic, simulated=true, useFullKinematicContacts=true, constraints=FreezeAll)
+- 씬 저장 (`BiomeActionMap.unity`)
+- 코드 변경 없음. 씬 인스턴스에만 컴포넌트 추가
+
+### 검증
+- 원인 확인: 더미 컴포넌트가 Transform/SpriteRenderer/BoxCollider2D/HitFlashOnSlash 뿐,
+  `Rigidbody2D on dummy = False`. 검기(SlashWave)도 BoxCollider2D만 가짐
+  → Rigidbody2D 없는 트리거 두 개는 OnTriggerEnter2D가 발생하지 않음
+- 물리 설정 정상 확인: `Default↔Default 충돌 허용=True`, `queriesHitTriggers=True`, `simulationMode=FixedUpdate`
+- 수정 후: `bodyType=Kinematic simulated=True useFullKinematicContacts=True constraints=FreezeAll`
+- 기하 검증(Physics2D.OverlapBox로 검기 경로 훑기):
+  `검기 생성 지점=(3.35, 1.85)` → `HIT: x=6.35 에서 더미와 겹침 확인`, `attachedRigidbody=Kinematic`
+- 씬 저장: `SaveScene=True`, `isDirty=False`
+
+### 실패와 수정
+- 최초 구현에서 더미에 Rigidbody2D를 붙이지 않아 트리거가 전혀 발생하지 않았음. FAIL.md #6으로 기록
