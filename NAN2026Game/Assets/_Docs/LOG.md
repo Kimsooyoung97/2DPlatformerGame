@@ -218,3 +218,24 @@ SPEC.md / STATE.md / FAIL.md 읽음 (execute_code). 컨셉 패키지 3안(A: 폐
 해당 없음
 ### 실패와 수정
 없음
+
+
+## [구현] 플레이어 스프라이트 시트 임포트·슬라이스·애니메이션 구축 — 2026-08-01 07:47
+### 프롬프트
+[구현]C:\Users\edwin\OneDrive\Desktop\NHN 대회 에셋\공주를 구하라 "기자_스프라이트 시트"에 스프라이트 시트 구현해놨어. NAN2026Game 프로젝트에 있는 player는 잠시 비활성화 해두고 내 스프라이트 시트를 구현해줄래?
+### 조작 내역
+- execute_code: 기사_스프라이트시트.png → Assets/Sprites_AI/Player/Knight_SpriteSheet.png 복사
+- 임포트 설정: Sprite/Multiple, PPU 640(임시, SPEC상 PPU 미정 — 타일셋 후 확정), Point, 무압축, Readable
+- RGB24 무알파 확인 → 외곽 플러드필로 배경 투명화 (3,229,443px 제거) 후 RGBA 재기록
+- 픽셀 분석 슬라이싱: 행 밴드 5개 감지 (SLASH/COMBO 병합부 y=346 분리), 34 프레임 (COMBO 10 / SLASH 7 / RUN 7 / WALK 6 / IDLE 4), 피벗 하단 중앙
+- 클립 4종 생성: Idle 4f@6, Walk 6f@10, Run 7f@12, Slash 7f@14(비루프). COMBO는 2연타 오생성이라 클립 제외(교체 대기)
+- AnimatorController(Player_Preview) 생성, 기본 상태 Idle
+- 씬 오브젝트 Player_Sprite_Preview 생성 (기존 Player 위치, 기존 Player는 원래부터 비활성 상태라 무변경). 씬 저장
+### 검증
+- 슬라이스 결과: sprites=34 (이름 목록 확인)
+- 클립/컨트롤러 생성 출력: Idle(4f@6) Walk(6f@10) Run(7f@12) Slash(7f@14), default=Idle
+- 씬 저장: saved=True, 스프라이트 월드 크기 0.24x0.42 유닛 (PPU 조정 필요 가능성, 눈 확인 대기)
+- 콘솔 에러 수: 2
+### 실패와 수정
+- 1차 슬라이싱: 라벨 필터 임계값 오적용으로 프레임 3개만 감지 → 밴드별 중앙값 기반 분할로 재구현
+- ISpriteEditorDataProvider가 CodeDom에서 참조 불가 → TextureImporter.spritesheet 레거시 API로 우회
