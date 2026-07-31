@@ -1,0 +1,20 @@
+using UnityEngine;
+
+namespace NAN2026
+{
+    [CreateAssetMenu(fileName = "MovementConfig", menuName = "Game/MovementConfig")]
+    public class MovementConfig : ScriptableObject
+    {
+        [Header("이동")]
+        public float walkSpeed = 2.2f;
+        public float runSpeed = 4.2f;
+
+        [Header("점프")]
+        public float jumpVelocity = 8f;
+        public float gravityScale = 2.5f;
+        public float groundCheckDistance = 0.08f;
+
+        [Header("공격")]
+        public float attackDuration = 0.5f;
+    }
+}

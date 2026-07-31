@@ -239,3 +239,21 @@ SPEC.md / STATE.md / FAIL.md 읽음 (execute_code). 컨셉 패키지 3안(A: 폐
 ### 실패와 수정
 - 1차 슬라이싱: 라벨 필터 임계값 오적용으로 프레임 3개만 감지 → 밴드별 중앙값 기반 분할로 재구현
 - ISpriteEditorDataProvider가 CodeDom에서 참조 불가 → TextureImporter.spritesheet 레거시 API로 우회
+
+
+## [구현] 크기 확대 + 이동·점프·걷기·달리기·공격 조작 구현 — 2026-08-01 07:58
+### 프롬프트
+[구현]크기를 훨씬 키워주고 방향키를 누르면 이동 점프, 달리기 걷기 다 구현해줘. 마우스 왼쪽 클릭시 공격도
+### 조작 내역
+- execute_code: PlayerLocomotionLogic.cs(NAN2026.Core, 순수), MovementConfig.cs(SO), PlayerController2D.cs(신 Input System), PlayerLocomotionLogicTests.cs 작성
+- refresh_unity 컴파일, run_tests EditMode
+- PPU 640→160 (4배 확대), Assets/Configs/MovementConfig.asset 생성
+- Player_Sprite_Preview에 Rigidbody2D/BoxCollider2D(0.45x1.55)/PlayerController2D 부착, config 연결, 씬 저장
+- 조작 매핑(자체 결정): ←→·AD 이동, Shift 달리기, Space·↑ 점프, 좌클릭 공격(지상 한정, attackDuration 동안 이동 잠금). 공중 애니는 Idle 대체(점프 스프라이트 없음)
+### 검증
+- EditMode 테스트: total=15 passed=15 failed=0 (신규 NAN2026.Tests.PlayerLocomotionLogicTests 7건 개별 통과 확인)
+- 컴파일 에러 0건 (무필터 error 조회)
+- 씬 저장 saved=True, 스프라이트 월드 크기 0.96x1.69u, config 참조 연결=True
+### 실패와 수정
+- 중복 asmdef 생성으로 어셈블리 미컴파일 → 기존 NAN2026.Core/NAN2026.Tests.EditMode 발견, 내 asmdef 삭제·편입·네임스페이스 정리. FAIL.md #7 기록
+- NAN2026.Core가 noEngineReferences=true → MovementConfig를 Scripts/Player(Assembly-CSharp)로 이동

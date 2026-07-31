@@ -33,3 +33,8 @@
 - **증상**: 검기가 더미를 통과하는데 `OnTriggerEnter2D`가 한 번도 호출되지 않음. 콘솔 에러도 없어 원인이 드러나지 않음
 - **원인**: Unity 2D 물리는 두 콜라이더 중 최소 하나에 non-static Rigidbody2D가 있어야 접촉 이벤트를 발생시킨다. 검기와 더미 모두 Collider2D만 가진 트리거였음
 - **방지 규칙**: 트리거로 피격을 받는 오브젝트에는 Kinematic Rigidbody2D를 붙이고 `useFullKinematicContacts=true`로 둔다. 위치 고정이 필요하면 `constraints=FreezeAll`. 새 피격 대상을 만들 때마다 Rigidbody2D 유무를 먼저 확인한다
+
+## 7. 기존 asmdef 미확인으로 중복 asmdef 생성, 컴파일 무력화
+- **증상**: 새 asmdef 2개를 만들자 해당 폴더 어셈블리가 아예 컴파일되지 않고 테스트 0건 발견. CS 에러 필터에는 안 잡힘
+- **원인**: 폴더에 이미 asmdef(NAN2026.Core, NAN2026.Tests.EditMode)가 있는데 확인 없이 같은 폴더에 새 asmdef를 생성 → 'multiple assembly definition files' 충돌
+- **방지 규칙**: 스크립트·asmdef를 만들기 전에 대상 폴더와 상위 폴더의 기존 asmdef를 먼저 조회한다. 콘솔 확인은 CS 필터가 아니라 무필터 error로 본다

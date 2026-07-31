@@ -2,20 +2,24 @@
 
 ## 현재 단계
 
-**S0 — 문서 체계 구축 (완료)**
+**S1 — 조작감 판정 (진행 중)**
 
 ## 완료
 
-- 베이스라인 커밋 (기존 스크립트 및 프로젝트 설정)
-- `_Docs/` 문서 5종 생성
-- SPEC.md 본문 작성 (제품 정의 / 핵심 루프 / 조작 / 제출 범위 / 범위 밖 / 미정 / 기술 기준 / 단일 기준 모듈)
+- S0 문서 체계 (기존)
+- 플레이어 스프라이트 시트 임포트·슬라이스 34프레임, 클립 4종(Idle/Walk/Run/Slash) + 컨트롤러
+- MovementConfig(SO) + PlayerLocomotionLogic(순수, NAN2026.Core) + PlayerController2D 구현
+- 조작: ←→/AD 이동, Shift 달리기, Space/↑ 점프, 좌클릭 공격(지상, 이동잠금 0.5s)
+- EditMode 테스트 15/15 (신규 7 포함)
+- PPU 160 (임시), 캐릭터 월드 크기 0.96x1.69u
 
 ## 다음 단계
 
-- **S1 — 조작감 판정**. SPEC의 '미정' 항목은 S1 이후 결정한다.
-- PPU 확정 (타일셋 타일 크기 확인 후)
-- 단일 기준 모듈 3종 구축: MovementConfig / FeelConfig / CombatFormula
+- 사용자 플레이 확인 → 수치 튜닝 (MovementConfig)
+- COMBO2/COMBO3 시트 수급 → 3연타 콤보 구현
+- FeelConfig / CombatFormula 구축, 대시·패링
+- PPU 확정 (타일셋 기준)
 
 ## 대기 중
 
-- 없음
+- 컨셉 시트 잔여: 제목, 참조 이미지(적 4종 생성물)
