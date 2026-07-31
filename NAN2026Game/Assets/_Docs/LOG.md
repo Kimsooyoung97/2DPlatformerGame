@@ -257,3 +257,17 @@ SPEC.md / STATE.md / FAIL.md 읽음 (execute_code). 컨셉 패키지 3안(A: 폐
 ### 실패와 수정
 - 중복 asmdef 생성으로 어셈블리 미컴파일 → 기존 NAN2026.Core/NAN2026.Tests.EditMode 발견, 내 asmdef 삭제·편입·네임스페이스 정리. FAIL.md #7 기록
 - NAN2026.Core가 noEngineReferences=true → MovementConfig를 Scripts/Player(Assembly-CSharp)로 이동
+
+
+## [수정] 공격 짤림·흰 섬광 수정 — 2026-08-01 08:17
+### 프롬프트
+[수정] 마우스 왼쪽 버튼을 누르면 공격 버튼이 나오기는 하나 공격이 짤리고 공격하는 순간 흰색 섬광이 번쩍해서 어색해 보여
+### 조작 내역
+- Knight_SpriteSheet.png SLASH·COMBO 밴드의 고휘도 검기 픽셀 30,605개를 강청색(190,205,232) 알파150으로 틴트
+- MovementConfig.asset attackDuration 0.5→0.6 (클립 길이와 타이머 경합으로 마지막 프레임 짤림 방지)
+### 검증
+- 사용자 플레이 영상 프레임 분석: 검기 청색 궤적 확인, 공격 포즈 전 구간 재생 확인
+- EditMode 테스트 15/15 통과 (재생 정지 후 실행)
+- 컴파일 에러 0건
+### 실패와 수정
+- 재생 모드 중 테스트 차단 → 사용자 정지 대기 후 마감 (FAIL #5 규칙 준수)
