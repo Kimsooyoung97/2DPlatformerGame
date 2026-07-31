@@ -73,3 +73,29 @@ MonoBehaviour에 숫자 리터럴 금지.
 
 ### 실패와 수정
 없음
+
+## [구현] FeelConfig ScriptableObject 생성 — 2026-08-01 04:52
+
+### 프롬프트
+[구현] FeelConfig ScriptableObject 생성
+히트스톱 시간, 넉백 세기, 무적 시간, 화면 흔들림 강도, 공격 선딜/후딜, 입력 버퍼 시간.
+값은 비워두고 필드만 만들어라. Assets/Settings/FeelConfig.asset 으로 생성.
+
+### 조작 내역
+- `create_script` — `Assets/Scripts/Config/FeelConfig.cs` 신규 생성
+- `refresh_unity` — 컴파일
+- `execute_code(safety_checks=false)` — `ScriptableObject.CreateInstance` + `AssetDatabase.CreateAsset`로 `Assets/Settings/FeelConfig.asset` 생성
+- 기존 스크립트·씬·프리팹 변경 없음
+
+### 검증
+- `isCompiling=False | FeelConfig type resolved=True | base=ScriptableObject`
+- `read_console(error)` → 0건
+- 에셋 생성 확인: `created=True | type=FeelConfig | path=Assets/Settings/FeelConfig.asset`
+- SerializedObject 순회로 직렬화 필드 10개 전부 확인, 값 전부 0 (미설정):
+  hitStopDuration / knockbackForce / knockbackDuration / invincibilityDuration /
+  dashInvincibilityDuration / screenShakeAmplitude / screenShakeDuration /
+  attackStartupTime / attackRecoveryTime / inputBufferTime
+- .asset YAML 원문 확인: `m_EditorClassIdentifier: Assembly-CSharp::FeelConfig`, 필드 10개 직렬화됨
+
+### 실패와 수정
+없음
