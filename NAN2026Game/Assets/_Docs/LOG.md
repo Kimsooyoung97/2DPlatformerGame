@@ -288,3 +288,19 @@ SPEC.md / STATE.md / FAIL.md 읽음 (execute_code). 컨셉 패키지 3안(A: 폐
 - EditMode 테스트 15/15, 컴파일 에러 0, 씬 오브젝트 무변경(exists, animator=True)
 ### 실패와 수정
 - 공격 시트에서 검기 프레임 병합 재발(프롬프트 간격 지시에도 불구) → 기대 수 기반 분할로 처리. 라벨(WALK 170px)이 프레임 임계 초과 → 라벨 판정을 시작 x<220 && 폭<220으로 변경
+
+
+## [수정] 공격 시트 글자 제거 + COMBO2 런지 이동 구현 — 2026-08-01 08:33
+### 프롬프트
+[수정] COMBO2, COMBO3 스프라이트 시트 글자 제거, COMBO2 구현시 제자리로 돌아오지 않게 수정
+### 조작 내역
+- Knight_AttackSheet.png COMBO2·COMBO3 밴드 연결요소 분석: 크기<3500px·높이<130·폭<420 컴포넌트 13개(글리프 12+잔해 1, 14,184px) 제거. 캐릭터·검기 컴포넌트 무손상
+- MovementConfig += slashLungeSpeed(1.5)/combo2LungeSpeed(3.5)/combo3LungeSpeed(0)
+- PlayerLocomotionLogic += AttackVelocity(facingLeft, lungeSpeed) 순수 함수 + 테스트
+- PlayerController2D: 공격 중 vx=0 고정 → 바라보는 방향×런지 속도로 대체 (제자리 복귀 현상 해소)
+### 검증
+- 글자 제거 출력: 높이 48~50px 글리프 12개 제거 확인 (COMBO2/COMBO3 각 6자)
+- EditMode 테스트 16/16 통과 (AttackVelocity 신규 포함), 컴파일 에러 0
+- 씬 무변경
+### 실패와 수정
+없음

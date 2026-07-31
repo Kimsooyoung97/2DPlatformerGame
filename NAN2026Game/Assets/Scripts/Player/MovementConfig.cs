@@ -18,5 +18,10 @@ namespace NAN2026
         public float slashDuration = 0.4f;
         public float combo2Duration = 0.4f;
         public float combo3Duration = 0.55f;
+
+        [Header("공격 전진(런지) 속도")]
+        public float slashLungeSpeed = 1.5f;
+        public float combo2LungeSpeed = 3.5f;
+        public float combo3LungeSpeed = 0f;
     }
 }

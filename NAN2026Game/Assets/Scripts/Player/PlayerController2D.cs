@@ -18,7 +18,9 @@ public class PlayerController2D : MonoBehaviour
     private bool jumpQueued;
     private string queuedAttack;
     private float queuedAttackDuration;
+    private float queuedAttackLunge;
     private string activeAttack;
+    private float activeAttackLunge;
     private float attackTimer;
     private bool grounded;
     private string currentState;
@@ -45,10 +47,10 @@ public class PlayerController2D : MonoBehaviour
             if (kb.rightArrowKey.isPressed || kb.dKey.isPressed) inputX += 1f;
             runHeld = kb.leftShiftKey.isPressed || kb.rightShiftKey.isPressed;
             if (kb.spaceKey.wasPressedThisFrame || kb.upArrowKey.wasPressedThisFrame) jumpQueued = true;
-            if (kb.kKey.wasPressedThisFrame) QueueAttack("Combo2", config.combo2Duration);
-            if (kb.lKey.wasPressedThisFrame) QueueAttack("Combo3", config.combo3Duration);
+            if (kb.kKey.wasPressedThisFrame) QueueAttack("Combo2", config.combo2Duration, config.combo2LungeSpeed);
+            if (kb.lKey.wasPressedThisFrame) QueueAttack("Combo3", config.combo3Duration, config.combo3LungeSpeed);
         }
-        if (mouse != null && mouse.leftButton.wasPressedThisFrame) QueueAttack("Slash", config.slashDuration);
+        if (mouse != null && mouse.leftButton.wasPressedThisFrame) QueueAttack("Slash", config.slashDuration, config.slashLungeSpeed);
 
         sr.flipX = PlayerLocomotionLogic.ShouldFlipLeft(inputX, sr.flipX);
         string next = PlayerLocomotionLogic.SelectAnimState(activeAttack, grounded, inputX, runHeld);
@@ -59,10 +61,11 @@ public class PlayerController2D : MonoBehaviour
         }
     }
 
-    private void QueueAttack(string stateName, float duration)
+    private void QueueAttack(string stateName, float duration, float lungeSpeed)
     {
         queuedAttack = stateName;
         queuedAttackDuration = duration;
+        queuedAttackLunge = lungeSpeed;
     }
 
     private void FixedUpdate()
@@ -80,6 +83,7 @@ public class PlayerController2D : MonoBehaviour
             if (PlayerLocomotionLogic.CanAttack(grounded, attacking))
             {
                 activeAttack = queuedAttack;
+                activeAttackLunge = queuedAttackLunge;
                 attackTimer = queuedAttackDuration;
                 attacking = true;
             }
@@ -87,7 +91,7 @@ public class PlayerController2D : MonoBehaviour
         }
 
         float vx = attacking && grounded
-            ? 0f
+            ? PlayerLocomotionLogic.AttackVelocity(sr.flipX, activeAttackLunge)
             : PlayerLocomotionLogic.HorizontalVelocity(inputX, runHeld, config.walkSpeed, config.runSpeed);
         float vy = rb.linearVelocity.y;
 

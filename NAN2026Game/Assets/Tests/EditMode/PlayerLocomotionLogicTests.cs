@@ -29,6 +29,13 @@ namespace NAN2026.Tests
             Assert.AreEqual("Walk", PlayerLocomotionLogic.SelectAnimState(null, true, -1f, false));
             Assert.AreEqual("Idle", PlayerLocomotionLogic.SelectAnimState(null, true, 0f, false));
         }
+        [Test] public void AttackVelocity_FollowsFacing()
+        {
+            Assert.AreEqual(3.5f, PlayerLocomotionLogic.AttackVelocity(false, 3.5f));
+            Assert.AreEqual(-3.5f, PlayerLocomotionLogic.AttackVelocity(true, 3.5f));
+            Assert.AreEqual(0f, PlayerLocomotionLogic.AttackVelocity(true, 0f));
+        }
+
         [Test] public void Flip_KeepsFacingWhenIdle()
         {
             Assert.IsTrue(PlayerLocomotionLogic.ShouldFlipLeft(-1f, false));

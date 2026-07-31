@@ -28,6 +28,11 @@ namespace NAN2026.Core
             return "Idle";
         }
 
+        public static float AttackVelocity(bool facingLeft, float lungeSpeed)
+        {
+            return facingLeft ? -lungeSpeed : lungeSpeed;
+        }
+
         public static bool ShouldFlipLeft(float inputX, bool currentFlip)
         {
             if (inputX < 0f) return true;
