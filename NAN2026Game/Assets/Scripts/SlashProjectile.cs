@@ -81,12 +81,12 @@ namespace NAN2026.Showroom
             if (other.GetComponentInParent<PlayerHealth>() != null)
                 return;
 
-            /*NHNDemo.MonsterHealth monster = other.GetComponentInParent<NHNDemo.MonsterHealth>();
+            NHNDemo.MonsterHealth monster = other.GetComponentInParent<NHNDemo.MonsterHealth>();
             if (monster != null)
             {
                 monster.TakeDamage(damage, Vector2.right * direction);
                 return;
-            }*/
+            }
 
             // Slice incoming boss orbs out of the air.
             OrbProjectile orb = other.GetComponentInParent<OrbProjectile>();

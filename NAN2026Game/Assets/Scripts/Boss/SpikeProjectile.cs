@@ -1,5 +1,5 @@
 using UnityEngine;
-
+using NAN2026.Showroom;
 /// <summary>
 /// "3연속 가시 투사체 발사" 패턴에서 사용하는 조준 탄환.
 /// 발사 시점 플레이어 위치를 향해 직선으로 날아가고,

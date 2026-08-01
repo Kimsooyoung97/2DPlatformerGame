@@ -28,7 +28,7 @@ namespace NAN2026.Showroom
                 return;
 
             reached = true;
-            //player.SetCheckpoint(transform.position + spawnOffset);
+            player.SetCheckpoint(transform.position + spawnOffset);
         }
 
         private void OnDrawGizmos()
