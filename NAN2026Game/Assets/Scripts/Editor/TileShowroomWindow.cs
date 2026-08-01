@@ -71,6 +71,8 @@ namespace NAN2026.EditorTools
 
         private void OnEnable()
         {
+            // 미리보기 캐시 확대: 수백 개 썸네일 상호 축출(깜빡임) 방지
+            AssetPreview.SetPreviewTextureCacheSize(2048);
             EnsureInit();
             RefreshAll();
             SceneView.duringSceneGui += OnSceneGUI;
@@ -228,14 +230,20 @@ namespace NAN2026.EditorTools
             int rows = Mathf.CeilToInt(items.Count / (float)cols);
             scroll = EditorGUILayout.BeginScrollView(scroll);
             Rect area = GUILayoutUtility.GetRect(cols * cw, rows * ch);
+            // 가시 행 범위 계산: 보이는 칸만 미리보기 요청 (캐시 폭주 방지)
+            float viewH = position.height;
+            int firstRow = Mathf.Max(0, Mathf.FloorToInt(scroll.y / ch) - 1);
+            int lastRow = Mathf.Min(rows - 1, Mathf.CeilToInt((scroll.y + viewH) / ch) + 1);
             for (int i = 0; i < items.Count; i++)
             {
                 var o = items[i];
-                Rect cell = new Rect(area.x + (i % cols) * cw, area.y + (i / cols) * ch, cw, ch);
+                int rowIdx = i / cols;
+                Rect cell = new Rect(area.x + (i % cols) * cw, area.y + rowIdx * ch, cw, ch);
                 if (o == highlight)
                     EditorGUI.DrawRect(cell, new Color(1f, 0.9f, 0.2f, 0.28f));
                 Rect img = new Rect(cell.x + 4f, cell.y + 4f, cw - 8f, cw - 26f);
-                Texture2D preview = AssetPreview.GetAssetPreview(o);
+                bool visible = rowIdx >= firstRow && rowIdx <= lastRow;
+                Texture2D preview = visible ? AssetPreview.GetAssetPreview(o) : null;
                 if (preview != null) GUI.DrawTexture(img, preview, ScaleMode.ScaleToFit);
                 else EditorGUI.DrawRect(img, new Color(0.2f, 0.2f, 0.2f));
                 string label = tab == 0 ? NumberOf(o.name).ToString()
