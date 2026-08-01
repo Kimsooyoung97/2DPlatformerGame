@@ -1,76 +1,214 @@
-
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
-/// <summary>
-/// 플레이어가 아직 체력 시스템을 갖고 있지 않아서, 보스가 데미지를 줄 대상으로 사용할
-/// 최소한의 체력 컴포넌트입니다. 이미 자체 체력 시스템이 있다면 이 스크립트 대신
-/// 그 시스템에 맞춰 OrkanBoss.cs / SpikeProjectile.cs / SpikeShockwave.cs 안의
-/// TakeDamage 호출부만 교체해주면 됩니다.
-/// </summary>
-[DisallowMultipleComponent]
-public class PlayerHealth : MonoBehaviour
+namespace NAN2026.Showroom
 {
-    [Header("Health")]
-    [SerializeField] private float maxHealth = 100f;
-    [SerializeField] private float currentHealth;
-
-    [Header("Hit Feedback")]
-    [SerializeField] private float invincibleDuration = 0.5f; // 피격 후 잠깐 무적
-    [SerializeField] private float knockbackForce = 6f;
-
-    private Rigidbody2D rb;
-    private PlayerController playerController;
-    private float invincibleTimer = 0f;
-
-    public float CurrentHealth => currentHealth;
-    public float MaxHealth => maxHealth;
-    public bool IsDead { get; private set; } = false;
-
-    void Awake()
+    /// <summary>
+    /// Cat-Mario style life handling: one touch of any hazard kills, respawn is
+    /// almost instant, and every trap in the level snaps back to its untriggered
+    /// state so each attempt is identical.
+    ///
+    /// Testing aids: F2 toggles invincibility, F3 resets every trap by hand.
+    /// </summary>
+    [DisallowMultipleComponent]
+    [RequireComponent(typeof(Rigidbody2D))]
+    public sealed class PlayerHealth : MonoBehaviour
     {
-        currentHealth = maxHealth;
-        rb = GetComponent<Rigidbody2D>();
-        playerController = GetComponent<PlayerController>();
+        [Header("Testing")]
+        [Tooltip("While on, hazards cannot kill. Toggle in play mode with F2.")]
+        [SerializeField] private bool invincible = true;
 
-        var bar = gameObject.AddComponent<HealthBarUI>();
-        bar.Init(() => currentHealth, () => maxHealth, Color.green);
-    }
+        [Header("Death")]
+        [SerializeField] private float respawnDelay = 0.2f;
+        [SerializeField] private float spawnGrace = 0.5f;
+        [SerializeField] private float fallKillY = -18f;
 
-    void Update()
-    {
-        if (invincibleTimer > 0f)
-            invincibleTimer -= Time.deltaTime;
-    }
+        [Header("Hazards")]
+        [SerializeField] private string hazardNameContains = "Spikes";
 
-    public bool IsInvincible => invincibleTimer > 0f;
+        private Rigidbody2D body;
+        private MonoBehaviour movementController;
+        private SpriteRenderer[] visuals;
+        private Vector3 checkpoint;
+        private float graceUntil;
+        private bool dying;
+        private int deaths;
 
-    /// <param name="damage">최종 데미지(이미 보스 쪽 계산이 끝난 값)</param>
-    /// <param name="attackerPosition">넉백 방향 계산용 공격자 위치</param>
-    public void TakeDamage(float damage, Vector3 attackerPosition)
-    {
-        if (IsDead || IsInvincible) return;
-
-        currentHealth -= damage;
-        invincibleTimer = invincibleDuration;
-
-        if (rb != null)
+        public int Deaths { get { return deaths; } }
+        public bool IsDying { get { return dying; } }
+        public bool Invincible
         {
-            float dir = Mathf.Sign(transform.position.x - attackerPosition.x);
-            rb.linearVelocity = new Vector2(dir * knockbackForce, rb.linearVelocity.y);
+            get { return invincible; }
+            set { invincible = value; }
         }
 
-        if (currentHealth <= 0f)
+        private void Awake()
         {
-            currentHealth = 0f;
-            IsDead = true;
-            if (playerController != null)
-                playerController.Die();
+            body = GetComponent<Rigidbody2D>();
+            visuals = GetComponentsInChildren<SpriteRenderer>(true);
+
+            foreach (MonoBehaviour behaviour in GetComponents<MonoBehaviour>())
+            {
+                if (behaviour != this && behaviour.GetType().Name == "PixelPlayerController")
+                {
+                    movementController = behaviour;
+                    break;
+                }
+            }
+
+            checkpoint = transform.position;
+            graceUntil = Time.time + spawnGrace;
         }
-    }
+        public void TakeDamage(float damage, Vector3 pos)
+        {
 
-    public void TakeDamage(float damage)
-    {
-        TakeDamage(damage, transform.position + Vector3.left);
+        }
+        public void SetCheckpoint(Vector3 position)
+        {
+            checkpoint = position;
+        }
 
+        private void Update()
+        {
+            Keyboard keyboard = Keyboard.current;
+            if (keyboard != null)
+            {
+                if (keyboard.f2Key.wasPressedThisFrame)
+                    invincible = !invincible;
+                if (keyboard.f3Key.wasPressedThisFrame)
+                    ResetAllTraps();
+            }
+
+            // Falling out of the world still resets you, even while invincible.
+            if (!dying && transform.position.y < fallKillY)
+                Respawn();
+        }
+
+        private void OnTriggerEnter2D(Collider2D other)
+        {
+            TryHazard(other);
+        }
+
+        private void OnTriggerStay2D(Collider2D other)
+        {
+            TryHazard(other);
+        }
+
+        private void TryHazard(Collider2D other)
+        {
+            if (other == null || dying || invincible || Time.time < graceUntil)
+                return;
+
+            Hazard2D hazard = other.GetComponentInParent<Hazard2D>();
+            bool lethal = (hazard != null && hazard.enabled) ||
+                          other.gameObject.name.Contains(hazardNameContains);
+
+            if (lethal)
+                Kill();
+        }
+
+        public void Kill()
+        {
+            if (dying || invincible)
+                return;
+
+            deaths++;
+            Respawn();
+        }
+
+        /// <summary>Sends the player back to the checkpoint and rearms every trap.</summary>
+        public void Respawn()
+        {
+            if (dying)
+                return;
+
+            dying = true;
+            StartCoroutine(RespawnRoutine());
+        }
+
+        private IEnumerator RespawnRoutine()
+        {
+            SetControllerEnabled(false);
+            body.linearVelocity = Vector2.zero;
+            body.gravityScale = 0f;
+            SetVisible(false);
+
+            yield return new WaitForSeconds(respawnDelay);
+
+            ResetAllTraps();
+
+            transform.position = checkpoint;
+            transform.rotation = Quaternion.identity;
+            body.SetRotation(0f);
+            body.linearVelocity = Vector2.zero;
+
+            SetVisible(true);
+            SetControllerEnabled(true);
+
+            graceUntil = Time.time + spawnGrace;
+            dying = false;
+        }
+
+        /// <summary>Returns every trap in the scene to its untriggered state.</summary>
+        public static int ResetAllTraps()
+        {
+            int count = 0;
+            MonoBehaviour[] all = FindObjectsByType<MonoBehaviour>(
+                FindObjectsInactive.Include, FindObjectsSortMode.None);
+
+            foreach (MonoBehaviour behaviour in all)
+            {
+                ITrapResettable trap = behaviour as ITrapResettable;
+                if (trap == null)
+                    continue;
+
+                trap.ResetTrap();
+                count++;
+            }
+            return count;
+        }
+
+        private void SetControllerEnabled(bool value)
+        {
+            if (movementController != null)
+                movementController.enabled = value;
+        }
+
+        private void SetVisible(bool value)
+        {
+            foreach (SpriteRenderer renderer in visuals)
+            {
+                if (renderer != null)
+                    renderer.enabled = value;
+            }
+        }
+
+        private void OnGUI()
+        {
+            GUIStyle style = new GUIStyle(GUI.skin.box)
+            {
+                fontSize = 17,
+                alignment = TextAnchor.MiddleCenter,
+                fontStyle = FontStyle.Bold
+            };
+
+            const float width = 170f;
+            GUI.Box(new Rect(Screen.width - width - 16f, 14f, width, 32f),
+                "DEATHS   " + deaths, style);
+
+            if (invincible)
+            {
+                Color previous = GUI.color;
+                GUI.color = new Color(0.45f, 1f, 0.6f);
+                GUI.Box(new Rect(Screen.width - width - 16f, 50f, width, 28f),
+                    "INVINCIBLE  (F2)", style);
+                GUI.color = previous;
+            }
+
+            GUI.Label(new Rect(Screen.width - width - 16f, 82f, width, 22f),
+                "   F2 invincible · F3 reset traps");
+        }
     }
 }

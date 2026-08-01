@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using NAN2026.Showroom;
 /// <summary>
 /// 고대의 가시 기사 오르칸(Orkan) - 1페이즈(체력 100%~50%) 보스 스크립트.
 ///

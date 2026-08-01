@@ -68,7 +68,7 @@ namespace NAN2026.Showroom
                 return;
             }
 
-            //health.Kill();
+            health.Kill();
             Destroy(gameObject);
         }
 

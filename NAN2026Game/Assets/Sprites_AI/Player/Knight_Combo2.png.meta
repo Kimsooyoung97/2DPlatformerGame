@@ -129,12 +129,12 @@ TextureImporter:
       name: Knight_Combo2_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 2752
-        height: 1536
+        x: 171
+        y: 1043
+        width: 437
+        height: 362
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -147,11 +147,275 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: Knight_Combo2_1
+      rect:
+        serializedVersion: 2
+        x: 815
+        y: 1043
+        width: 561
+        height: 384
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4d0b6678048475c4e9654aacbabc5fb6
+      internalID: 2070915209
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Knight_Combo2_2
+      rect:
+        serializedVersion: 2
+        x: 1456
+        y: 1043
+        width: 596
+        height: 401
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9bf2e94934f411a4195b65802b15ab09
+      internalID: 1838003393
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Knight_Combo2_3
+      rect:
+        serializedVersion: 2
+        x: 257
+        y: 530
+        width: 483
+        height: 400
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4b628013c0933e04b9f27cb9bf6aef24
+      internalID: 1110319628
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Knight_Combo2_4
+      rect:
+        serializedVersion: 2
+        x: 802
+        y: 538
+        width: 562
+        height: 402
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c6014201559379b43a890f260e88ab9a
+      internalID: 1687229534
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Knight_Combo2_5
+      rect:
+        serializedVersion: 2
+        x: 1382
+        y: 538
+        width: 435
+        height: 448
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2336d159d06583f4ba64f43fbdc7ab31
+      internalID: 1731477995
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Knight_Combo2_6
+      rect:
+        serializedVersion: 2
+        x: 1857
+        y: 538
+        width: 478
+        height: 368
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6f232adcc5f4f5446a532e491bd567fb
+      internalID: 398122461
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Knight_Combo2_7
+      rect:
+        serializedVersion: 2
+        x: 281
+        y: 39
+        width: 303
+        height: 338
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c576d1efc2f38b2418aab4e61b0c94fb
+      internalID: 155473724
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Knight_Combo2_8
+      rect:
+        serializedVersion: 2
+        x: 688
+        y: 39
+        width: 303
+        height: 350
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a487491a82aa3524394350aa2aba9aaa
+      internalID: 2121039519
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Knight_Combo2_9
+      rect:
+        serializedVersion: 2
+        x: 1074
+        y: 37
+        width: 278
+        height: 375
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5fcc9e829f4a269478dc6ffc10d1617b
+      internalID: -1694149214
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Knight_Combo2_10
+      rect:
+        serializedVersion: 2
+        x: 1468
+        y: 39
+        width: 299
+        height: 344
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 01c5c10e38a0aff45b771d58db26d5c8
+      internalID: -1383894361
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Knight_Combo2_11
+      rect:
+        serializedVersion: 2
+        x: 1904
+        y: 39
+        width: 308
+        height: 373
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f92221594c843df4bafffb1243d93fc6
+      internalID: -609956492
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Knight_Combo2_12
+      rect:
+        serializedVersion: 2
+        x: 2329
+        y: 37
+        width: 268
+        height: 407
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e735c05fe76a81d4e88c9469c2ea93ef
+      internalID: -495390446
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 01f7f82454fbddf4ca3f8c6362c9164a
     internalID: 0
     vertices: []
     indices: 
@@ -159,9 +423,23 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
-      entries: []
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":64.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":0,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
       Knight_Combo2_0: 5194682116715548349
+      Knight_Combo2_1: 2070915209
+      Knight_Combo2_10: -1383894361
+      Knight_Combo2_11: -609956492
+      Knight_Combo2_12: -495390446
+      Knight_Combo2_2: 1838003393
+      Knight_Combo2_3: 1110319628
+      Knight_Combo2_4: 1687229534
+      Knight_Combo2_5: 1731477995
+      Knight_Combo2_6: 398122461
+      Knight_Combo2_7: 155473724
+      Knight_Combo2_8: 2121039519
+      Knight_Combo2_9: -1694149214
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
