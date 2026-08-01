@@ -63,3 +63,8 @@
 - **증상**: execute_code로 씬에 다수 GameObject(Grid/Tilemap/배경 등)를 만든 뒤 저장 없이 refresh_unity → run_tests(EditMode) 순으로 진행하자, 테스트 종료 후 씬이 편집 전 원본 상태로 복귀. GameObject.Find로 확인한 결과 신규 오브젝트가 전부 사라짐. git checkpoint 커밋과 최종 저장 파일이 바이트 단위로 동일해 편집이 아예 반영되지 않았음을 뒤늦게 발견
 - **원인**: EditMode 테스트 실행이 씬을 리로드하면서 저장되지 않은(dirty) 변경사항을 버림. 작업 방식 SOP의 '컴파일→콘솔→테스트→저장' 순서를 스크립트 수정이 없는 순수 씬 편집 작업에도 그대로 적용한 것이 원인
 - **방지 규칙**: 씬(GameObject/Tilemap 등)만 변경하고 C# 스크립트 변경이 없는 작업은 refresh_unity/run_tests 이전에 먼저 manage_scene(action=save)로 저장한다. 저장 후 파일 내용에 신규 오브젝트명이 실제로 포함되는지 텍스트로 재확인한 뒤 테스트를 실행한다. 테스트 실행 후에도 GameObject.Find로 씬 오브젝트 생존 여부를 반드시 재확인한다
+
+## 13. 커밋 메시지용 임시 파일이 git add -A에 함께 스테이징됨
+- **증상**: git commit -F용 임시 파일(_commit_msg.txt)을 프로젝트 루트에 만들고 커밋 후 삭제했는데, `git add -A`가 삭제 전 시점에 실행되어 임시 파일이 커밋 이력에 포함됨
+- **원인**: 임시 파일을 저장소 내부(projRoot)에 만들고 커밋 프로세스 종료 후에야 삭제함. add→commit 사이에 파일이 여전히 디스크에 존재
+- **방지 규칙**: git commit -F에 쓰는 메시지 임시 파일은 저장소 밖(OS temp 디렉터리, 예: %TEMP%)에 만든다. 저장소 내부에 임시 파일을 꼭 만들어야 한다면 git add -A 실행 전에 반드시 삭제하거나, add 범위를 -A 대신 특정 경로로 제한한다
