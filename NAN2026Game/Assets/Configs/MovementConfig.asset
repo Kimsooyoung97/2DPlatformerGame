@@ -14,7 +14,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NAN2026.MovementConfig
   walkSpeed: 2.2
   runSpeed: 4.2
-  jumpVelocity: 8
+  jumpVelocity: 12
   gravityScale: 2.5
   groundCheckDistance: 0.08
-  attackDuration: 0.6
+  maxJumps: 2
+  onewayRiseThreshold: 0.05
+  apexSpeedThreshold: 1.2
+  landDuration: 0.36
+  slashDuration: 0.4
+  combo2Duration: 0.4
+  combo3Duration: 0.55
+  slashLungeSpeed: 1.5
+  combo2LungeSpeed: 3.5
+  combo3LungeSpeed: 0

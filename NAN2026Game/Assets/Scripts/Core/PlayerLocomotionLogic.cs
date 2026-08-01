@@ -34,6 +34,11 @@ namespace NAN2026.Core
             return "Idle";
         }
 
+        public static float EffectDirection(bool facingLeft)
+        {
+            return facingLeft ? -1f : 1f;
+        }
+
         public static bool ShouldIgnoreGround(float verticalVelocity, float riseThreshold)
         {
             return verticalVelocity > riseThreshold;

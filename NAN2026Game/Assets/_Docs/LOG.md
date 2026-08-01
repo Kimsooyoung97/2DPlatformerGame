@@ -336,3 +336,20 @@ SPEC.md / STATE.md / FAIL.md 읽음 (execute_code). 컨셉 패키지 3안(A: 폐
 - EditMode 18/18 (OnewayIgnore_OnlyWhileRising 신규), 컴파일 에러 0, 씬 저장 True
 ### 실패와 수정
 없음
+
+
+## [구현] 공격 이펙트 발사(BASIC/POWERED) + 카메라 추적 + 점프력 1.5배 — 2026-08-01 09:18
+### 프롬프트
+[구현]마우스 왼쪽 버튼을 눌렀을때는 BASIC 이펙트가 나가게 해주고 K 버튼을 누르면 애니메이션 칼 끝으로 POWERED 이펙트가 나가게 해줘. "공격 이펙트" 위치 C:\...\공주를 구하라, 그리고 캐릭터가 이동하는 방향에 맞춰서 카메라도 이동시켜서 자연스럽게 맵 이동을 구현해주고 캐릭터 기본 점프력을 1.5배 높혀줘.
+### 조작 내역
+- 공격 이펙트.png 임포트: AI가 그린 가짜 체커보드 배경을 무채색·밝기 조건 플러드필로 제거, 4행 22프레임 슬라이스
+- 매핑(가정): band2(2번째 큰 행)=BASIC, band0(최대·최고채도 행)=POWERED — 눈 확인 후 스왑 가능
+- EffectProjectile/AttackEffectConfig/CameraFollow2D/CameraConfig 신규, 프리팹 2종(Effect_Basic/Effect_Powered)
+- 컨트롤러: Slash→BASIC, Combo2→POWERED 발사(칼끝 오프셋 0.45,0.95 / 속도 7·9 / 수명 0.8s / 16fps)
+- Main Camera에 CameraFollow2D 부착(target=플레이어, smoothTime 0.15)
+- jumpVelocity 8→12 (1.5배)
+- FAIL #5 방지 규칙 갱신: 재생 중 자동 정지로 변경(사용자 지시)
+### 검증
+- fx sprites=22 슬라이스, EditMode 19/19(EffectDirection 신규), 컴파일 에러 0, 씬 저장 True
+### 실패와 수정
+- 이펙트 배경이 진짜 알파가 아닌 그림 체커보드 → 색차 기반 플러드필로 해소

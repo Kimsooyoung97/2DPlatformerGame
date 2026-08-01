@@ -6,6 +6,11 @@ using NAN2026.Core;
 public class PlayerController2D : MonoBehaviour
 {
     [SerializeField] private MovementConfig config;
+    [SerializeField] private AttackEffectConfig effectConfig;
+    [SerializeField] private GameObject basicEffectPrefab;
+    [SerializeField] private GameObject poweredEffectPrefab;
+    [SerializeField] private Sprite[] basicEffectFrames;
+    [SerializeField] private Sprite[] poweredEffectFrames;
 
     private Rigidbody2D rb;
     private Animator anim;
@@ -91,6 +96,21 @@ public class PlayerController2D : MonoBehaviour
         }
     }
 
+    private void SpawnAttackEffect(string attackName)
+    {
+        GameObject prefab = null;
+        Sprite[] frames = null;
+        float speed = 0f;
+        if (attackName == "Slash") { prefab = basicEffectPrefab; frames = basicEffectFrames; speed = effectConfig.basicSpeed; }
+        else if (attackName == "Combo2") { prefab = poweredEffectPrefab; frames = poweredEffectFrames; speed = effectConfig.poweredSpeed; }
+        if (prefab == null || effectConfig == null) return;
+        float dir = PlayerLocomotionLogic.EffectDirection(sr.flipX);
+        Vector3 pos = transform.position + new Vector3(effectConfig.spawnOffset.x * dir, effectConfig.spawnOffset.y, 0f);
+        var go = Instantiate(prefab, pos, Quaternion.identity);
+        var ep = go.GetComponent<EffectProjectile>();
+        if (ep != null) ep.Launch(dir, speed, effectConfig.lifetime, frames, effectConfig.frameRate);
+    }
+
     private void QueueAttack(string stateName, float duration, float lungeSpeed)
     {
         queuedAttack = stateName;
@@ -125,6 +145,7 @@ public class PlayerController2D : MonoBehaviour
                 activeAttackLunge = queuedAttackLunge;
                 attackTimer = queuedAttackDuration;
                 attacking = true;
+                SpawnAttackEffect(queuedAttack);
             }
             queuedAttack = null;
         }
