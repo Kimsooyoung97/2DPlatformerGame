@@ -13,6 +13,7 @@ namespace NAN2026
         public float orbSpeed = 6f;
         public float orbLifetime = 4f;
         public float orbSpawnHeight = 2.6f;
+        public float orbAimHeight = 0.45f;
 
         [Header("리듬 빔")]
         public int orbsPerCycle = 3;

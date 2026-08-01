@@ -18,7 +18,7 @@ namespace NAN2026
         {
             base.Tick();
             if (missReported || missTarget == null) return;
-            bool passed = dir < 0f
+            bool passed = moveDir.x < 0f
                 ? transform.position.x < missTarget.position.x - missBehind
                 : transform.position.x > missTarget.position.x + missBehind;
             if (passed)

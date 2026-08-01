@@ -38,11 +38,10 @@ namespace NAN2026
             timer -= Time.deltaTime;
             if (timer > 0f) return;
             timer = config.orbInterval;
-            float dir = target.position.x > transform.position.x ? 1f : -1f;
             Vector3 pos = transform.position + new Vector3(0f, config.orbSpawnHeight, 0f);
             var go = Instantiate(orbPrefab, pos, Quaternion.identity);
             var ob = go.GetComponent<BossOrb>();
-            if (ob != null) ob.Launch(dir, config.orbSpeed, config.orbLifetime);
+            if (ob != null) ob.LaunchAt(target.position + Vector3.up * config.orbAimHeight, config.orbSpeed, config.orbLifetime);
             orbsFired++;
         }
     }
