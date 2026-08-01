@@ -1,7 +1,8 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem; // 신규 Input System 네임스페이스 추가
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : MonoBehaviour, IParryReflector
 {
     [Header("Movement Settings")]
     [SerializeField] private float moveSpeed = 5f;
@@ -17,6 +18,26 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private float groundCheckRadius = 0.2f;
 
+    [Header("Attack Settings")]
+    [Tooltip("공격 판정 데미지")]
+    [SerializeField] private float attackDamage = 15f;
+    [Tooltip("캐릭터 정면 기준 공격 판정이 생기는 위치까지의 거리")]
+    [SerializeField] private float attackRange = 1.0f;
+    [Tooltip("공격 판정의 반지름")]
+    [SerializeField] private float attackRadius = 0.9f;
+    [Tooltip("애니메이션 스윙 타이밍에 맞춰 실제 판정이 발생하기까지의 지연시간")]
+    [SerializeField] private float attackHitDelay = 0.15f;
+    [Tooltip("이 시간 안에 다시 공격하면 콤보(Attack1->2->3)로 이어짐")]
+    [SerializeField] private float attackComboWindow = 1.0f;
+    [Tooltip("공격 간 최소 간격 (연타 방지)")]
+    [SerializeField] private float attackMinInterval = 0.25f;
+
+    [Header("Parry Settings")]
+    [Tooltip("Parry 입력 시 이 시간 동안 패링 판정이 유효함")]
+    [SerializeField] private float parryWindowDuration = 0.3f;
+    [Tooltip("패링 성공 후 다시 패링하기까지 대기시간")]
+    [SerializeField] private float parryCooldown = 0.6f;
+
     private Rigidbody2D rb;
     private Animator anim;
     private SpriteRenderer spriteRenderer;
@@ -30,6 +51,14 @@ public class PlayerController : MonoBehaviour
     private float rollDirection = 1f;
     private float rollTimer = 0f;
     private float lastRollTime = -999f;
+
+    // 공격 관련 변수
+    private int currentAttackCombo = 0;
+    private float timeSinceAttack = 999f;
+
+    // 패링 관련 변수
+    private float parryTimer = 0f;
+    private float lastParryTime = -999f;
 
     void Start()
     {
@@ -54,6 +83,11 @@ public class PlayerController : MonoBehaviour
                 isRolling = false;
             }
         }
+
+        // 공격/패링 타이머 처리
+        timeSinceAttack += Time.deltaTime;
+        if (parryTimer > 0f)
+            parryTimer -= Time.deltaTime;
 
         // 스프라이트 반전 및 애니메이션 업데이트
         Flip();
@@ -109,7 +143,65 @@ public class PlayerController : MonoBehaviour
             StartRoll();
         }
     }
+
+    // Player Input 컴포넌트의 "OnAttack" 이벤트에 의해 자동으로 호출됨
+    // (Input Actions 에셋에 기본 포함된 Attack 액션: 좌클릭 / Enter 등)
+    public void OnAttack(InputValue value)
+    {
+        if (isDead || isRolling) return;
+        if (!value.isPressed) return;
+        if (timeSinceAttack < attackMinInterval) return;
+
+        currentAttackCombo++;
+        if (currentAttackCombo > 3 || timeSinceAttack > attackComboWindow)
+            currentAttackCombo = 1;
+
+        anim.SetTrigger("Attack" + currentAttackCombo);
+        timeSinceAttack = 0f;
+
+        StartCoroutine(PerformMeleeHit());
+    }
+
+    // Player Input 컴포넌트의 "OnParry" 이벤트에 의해 자동으로 호출됨
+    // (Input Actions 에셋에 Parry 액션 추가: 우클릭 / Q 키)
+    public void OnParry(InputValue value)
+    {
+        if (isDead || isRolling) return;
+        if (!value.isPressed) return;
+        if (Time.time < lastParryTime + parryCooldown) return;
+
+        anim.SetTrigger("Block");
+        parryTimer = parryWindowDuration;
+        lastParryTime = Time.time;
+    }
     #endregion
+
+    // 공격 애니메이션 스윙 타이밍에 맞춰 실제 데미지 판정을 수행
+    private IEnumerator PerformMeleeHit()
+    {
+        yield return new WaitForSeconds(attackHitDelay);
+
+        float dir = spriteRenderer.flipX ? -1f : 1f;
+        Vector2 origin = (Vector2)transform.position + new Vector2(dir * attackRange, 0.5f);
+
+        Collider2D[] hits = Physics2D.OverlapCircleAll(origin, attackRadius);
+        foreach (var hit in hits)
+        {
+            // 보스 이외의 다른 적이 추가되면 여기에 타입을 늘려주면 됩니다.
+            var boss = hit.GetComponent<OrkanBoss>();
+            if (boss != null)
+            {
+                boss.TakeDamage(attackDamage);
+            }
+        }
+    }
+
+    // IParryReflector 구현 - SpikeProjectile 등 보스 투사체가 이 함수를 호출해서
+    // 지금이 패링 타이밍인지 물어봅니다.
+    public bool TryParry(GameObject attacker)
+    {
+        return !isDead && parryTimer > 0f;
+    }
 
     private void StartRoll()
     {
@@ -170,5 +262,10 @@ public class PlayerController : MonoBehaviour
             Gizmos.color = Color.red;
             Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
         }
+
+        Gizmos.color = Color.cyan;
+        float dir = (spriteRenderer != null && spriteRenderer.flipX) ? -1f : 1f;
+        Vector3 origin = transform.position + new Vector3(dir * attackRange, 0.5f, 0f);
+        Gizmos.DrawWireSphere(origin, attackRadius);
     }
 }
