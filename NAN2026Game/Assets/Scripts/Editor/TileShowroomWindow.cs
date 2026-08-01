@@ -169,6 +169,10 @@ namespace NAN2026.EditorTools
                 var target = GameObject.Find(targetName);
                 if (target != null) GridPaintingState.scenePaintTarget = target;
                 TilemapEditorTool.SetActiveEditorTool(typeof(PaintTool));
+                EditorApplication.delayCall += () =>
+                {
+                    try { TilemapEditorTool.SetActiveEditorTool(typeof(PaintTool)); SceneView.RepaintAll(); } catch { }
+                };
                 SceneView.RepaintAll();
                 return target != null ? targetName + "에 칠할 준비 완료" : "붓 장전(대상 타일맵은 팔레트에서 지정)";
             }
@@ -274,16 +278,31 @@ namespace NAN2026.EditorTools
                 {
                     if (e.type == EventType.MouseDown)
                     {
-                        Selection.activeObject = o;
-                        EditorGUIUtility.PingObject(o);
                         highlight = o;
-                        // 타일 탭: 클릭 즉시 붓 장전 → 씬에서 바로 칠하기 가능
                         if (tab == 0 && o is TileBase)
                         {
+                            // 타일 탭: 선택 변경 없이(도구 풀림 방지) 핑만 + 즉시 붓 장전
+                            EditorGUIUtility.PingObject(o);
                             inspectMode = false;
-                            string curFam = familyNames[0][Mathf.Clamp(familyIndex[0], 0, familyNames[0].Length - 1)];
-                            string targetTm = curFam.Contains("Stage_Wall") ? "Stage_Wall" : "Stage_Ground";
-                            ShowNotification(new GUIContent(PaintWith((TileBase)o, targetTm)), 1.2d);
+                            try
+                            {
+                                string targetTm = "Stage_Ground";
+                                if (familyNames[0].Length > 0)
+                                {
+                                    string curFam = familyNames[0][Mathf.Clamp(familyIndex[0], 0, familyNames[0].Length - 1)];
+                                    if (curFam.Contains("Stage_Wall")) targetTm = "Stage_Wall";
+                                }
+                                ShowNotification(new GUIContent(PaintWith((TileBase)o, targetTm)), 1.2d);
+                            }
+                            catch (System.Exception ex)
+                            {
+                                ShowNotification(new GUIContent("오류: " + ex.Message), 2d);
+                            }
+                        }
+                        else
+                        {
+                            Selection.activeObject = o;
+                            EditorGUIUtility.PingObject(o);
                         }
                         e.Use();
                     }
