@@ -671,3 +671,17 @@ Roll 에셋은 추가해도 돼.
 - 컴파일 에러 0 (씬 미싱 스크립트 1건은 별도 점검)
 ### 실패와 수정
 - GetEntityId 패치는 물 팩 제거로 불필요화
+
+
+## [구현] SecondScene 소품 맵 구축 (숲→마을→불타는 성) — 2026-08-02 02:18
+### 프롬프트
+공주를 구하러 가는길을 구현한 2D 횡스크롤 맵을 SecondScene에 구현을 할건데 Piexl Art Platformer -Dungeon, Village Props의 각 요소들을 적절히 섞어서 맵을 구현해줄래? 필요하면 Pixelab mcp도 사용하렴
+### 조작 내역
+- 머지 잔재 정리: 팀 Player·MainCamera·CinemachineCamera·CameraBoundary 비활성(삭제 안 함), Portal·Background·Global Light 유지
+- Stage_Props 아래 44개 배치: A 죽은숲(묘비·고목·허수아비 11), B 버려진 마을(상자·모닥불·밀단 9), C 불타는 성(성문·기둥·깃발·횃불6·해골·석상·코인·감옥 24)
+- 장식은 콜라이더 제거, 공중 발판 2개(Platform Broken 01/Platform 01)는 콜라이더 유지
+- 정렬: 대형 배경 -6, 소품 -3. Dungeon 접두 불일치로 퍼지 매칭 도입. PixelLab 미사용(기존 팩으로 충분)
+### 검증
+- 배치 44/45 (Hay 01 팩에 부재), 씬 저장 True, 코드 무변경
+### 실패와 수정
+- 1차 접두 고정 경로로 31건 누락 → 전수 파일맵+퍼지 매칭으로 재배치 30건 성공
