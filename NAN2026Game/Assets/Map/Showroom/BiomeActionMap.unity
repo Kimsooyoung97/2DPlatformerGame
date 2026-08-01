@@ -21508,6 +21508,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NAN2026.BossOrbLauncher
   config: {fileID: 11400000, guid: e1ddb49152ea6f645b4e3b82669ea8e8, type: 2}
   orbPrefab: {fileID: 1129173775211991002, guid: 2e71bf0658700e74093087ad4f1558e4, type: 3}
+  notePrefab: {fileID: 5001505844812354367, guid: aea54f73ff71de2468eb888a3574a96b, type: 3}
+  beamPrefab: {fileID: 5975606763669314071, guid: ba8fac7c9feb3774fa0548a652837bc4, type: 3}
   target: {fileID: 1016964600}
 --- !u!1 &1113677238
 GameObject:
