@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 1969551489728518721}
   - component: {fileID: 6106126568641880459}
   - component: {fileID: 331120028900823849}
+  - component: {fileID: 8512720496894719783}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -147,6 +148,14 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   groundCheckRadius: 0.2
+  attackDamage: 15
+  attackRange: 1
+  attackRadius: 0.9
+  attackHitDelay: 0.15
+  attackComboWindow: 1
+  attackMinInterval: 0.25
+  parryWindowDuration: 0.3
+  parryCooldown: 0.6
 --- !u!61 &1969551489728518721
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -245,6 +254,22 @@ MonoBehaviour:
   m_DefaultActionMap: Player
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
+--- !u!114 &8512720496894719783
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5098315629970546112}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b014f9d04ae1db4e840a7b955a9e3f8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
+  maxHealth: 100
+  currentHealth: 0
+  invincibleDuration: 0.5
+  knockbackForce: 6
 --- !u!1 &5344619607097389760
 GameObject:
   m_ObjectHideFlags: 0
