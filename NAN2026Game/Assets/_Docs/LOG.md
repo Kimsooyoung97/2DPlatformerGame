@@ -700,3 +700,25 @@ FirstScene에서 2D Pixel Art Platformer Biome - American Forest 폴더와 2D Pi
 ### 실패와 수정
 - 없음 (이전 턴 FAIL.md #12 교훈을 저장 순서에 선반영해 재발 없었음)
 - 사용자 지침 변경: git commit을 다시 Claude가 직접 실행하는 방식으로 환원
+
+## [수정] FirstScene 배경 레퍼런스 스타일로 전면 재작업 — 2026-08-02 04:10
+### 프롬프트
+배경이 마음에 안들어서 싹 다시 만들어줘 레퍼런스 자료를 줄테니까 이거랑 비슷하게 만들어봐 (첨부 이미지 3장: 뜬 섬 형태 잔디/흙 플랫폼 + 산/숲 실루엣 배경, "Parallax Layers Ready Background")
+### 조작 내역
+- 스프라이트 좌표 분석으로 TileGround1~9가 3x3 오토타일(상단 코너/중간/코너, 중간 채움 좌/중/우, 하단 삐죽 코너/중간/코너) 구조임을 확인. 팀 준비 Tile 에셋(1,2,3,5)에 없던 4,6,7,8,9를 두 바이옴 폴더에 새로 생성(AssetDatabase.CreateAsset)
+- 기존 Grid/Backdrop/Walls/Decoration 전부 삭제 후 재구성:
+  - Ground: x=-12~114, 3단(top/fill/bottom-jagged) 오토타일. 좌우 끝(x=-12, x=113)만 코너 타일, 나머지는 중간 타일
+  - Platforms: 연속 띠 대신 폭 4~7, 높이 tier {-3,-2,0,1,3} 를 순환하는 11개의 독립된 "뜬 섬"으로 재배치, 섬마다 좌/우 코너+중간 타일 적용, 2단(top/bottom-jagged) 두께
+  - Backdrop: Ground 시작점(x=-12)과 정확히 일치하도록 재배치, 패널 8장
+  - Decoration: 나무 18 + 지면 돌 9 + 섬 위 돌/식물 소품 17 = 35개, 레퍼런스처럼 플랫폼 상단에 디테일 추가
+  - Walls: 새 범위 끝(x=-12.5 / x=114.5)
+### 검증
+- 1차 저장 시도가 재생모드로 실패(FAIL.md #5) → 정지 후 재저장
+- 저장 후 GetTile 검증에서 Ground 타일이 이전 턴 패턴으로 부분 되돌아간 것을 발견(FAIL.md #14 신규) → ClearAllTiles 후 재도장 → 저장 → **manage_scene(load)로 강제 재로드 후 GetTile 재검증**하여 실제 반영 확인
+- 재로드 후: Ground x=0 top=TileGround2/fill=TileGround5/bottom=TileGround8 (의도대로), Ground bounds(-12,-8,0)Size(126,3,1), Platform bounds(-9,-4,0)Size(114,8,1), Decoration 35/Backdrop 8/Walls 2 전부 일치
+- refresh_unity 컴파일 요청 후 read_console(types=error) → 0건
+- run_tests(EditMode) 1차 연결 오류(No Unity Editor instances found) → 즉시 ping 확인 후 정상 확인, 재시도하여 25/25 통과 (job 7ab2009806314dff85c9eb4ead7b96b3)
+- 테스트 이후 GetTile 재검증으로 데이터 유지 확인
+### 실패와 수정
+- FAIL.md #14: 저장 성공 메시지에도 불구하고 Tilemap 타일 데이터가 이전 턴 상태로 부분 되돌아가는 현상 발견. 원인 미확정(재생모드 이력 추정). GetTile 즉시검증 + 재로드검증 절차로 재발 확인 및 정상화
+- run_tests 1차 호출이 'No Unity Editor instances found' 오류 반환 → 연결 재확인(execute_code ping) 후 정상 작동 확인되어 재시도로 해결 (일시적 통신 문제로 판단, 별도 FAIL 항목 없음)
