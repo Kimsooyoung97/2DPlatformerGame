@@ -12,6 +12,10 @@ public class PlayerController2D : MonoBehaviour
     [SerializeField] private Sprite[] basicEffectFrames;
     [SerializeField] private Sprite[] poweredEffectFrames;
 
+    [Header("Roll")]
+    [SerializeField] private float rollDuration = 0.75f;
+    [SerializeField] private float rollSpeed = 4f;
+
     private Rigidbody2D rb;
     private Animator anim;
     private SpriteRenderer sr;
@@ -92,6 +96,7 @@ public class PlayerController2D : MonoBehaviour
             if (kb.spaceKey.wasPressedThisFrame || kb.upArrowKey.wasPressedThisFrame) jumpQueued = true;
             if (kb.kKey.wasPressedThisFrame) QueueAttack("Combo2", config.combo2Duration, config.combo2LungeSpeed);
             if (kb.lKey.wasPressedThisFrame) QueueAttack("Combo3", config.combo3Duration, config.combo3LungeSpeed);
+            if (kb.gKey.wasPressedThisFrame) QueueAttack("Roll", rollDuration, rollSpeed);
         }
         if (mouse != null && mouse.leftButton.wasPressedThisFrame) QueueAttack("Slash", config.slashDuration, config.slashLungeSpeed);
         if (mouse != null)

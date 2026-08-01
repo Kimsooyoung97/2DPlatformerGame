@@ -596,3 +596,55 @@ SPEC 갱신안 승인한다.
 - ls-files 오염 카운트 전부 0, .gitignore 커밋 완료
 ### 실패와 수정
 없음
+
+
+## [구현] SecondScene 스테이지 구축 + 플레이어·보스 프리팹화 — 2026-08-01 20:55
+### 프롬프트
+일단 맵부터 만들어화
+### 조작 내역
+- BossOrbLauncher target 자동 탐색 추가(프리팹 씬 참조 단절 대비)
+- Player.prefab / Princess_Boss.prefab 생성(SaveAsPrefabAssetAndConnect), Knight2_ScenePreview 제거
+- SecondScene에 Stage_Grid/Stage_Ground(Tilemap+Composite) 생성: x0~119, 숲(0~44 Forest TileGround1)→중간(45~84 Plains)→성 안뜰(85~119), 언덕·계단, 낙사 구덩이 x30~33/x60~64, 1,110타일
+- Player 프리팹 (2.5,0.6) / 보스 (110,2) 배치, Main Camera+Brain+CM_PlayerCamera(lens 13.5, 기존 손맛 설정 복제)
+- 미추적 바이옴 팩 참조 발견: 타일 에셋이 라이선스 미확인 폴더 소속 → 스테이징 보류, 사용자 확인 요청
+### 검증
+- 타일 1,110개 설치, 배치 좌표 출력, EditMode 25/25, SecondScene 저장 True
+### 실패와 수정
+없음
+
+
+## [수정] Roll(구르기) 에셋 커밋 — 2026-08-01 23:35
+### 프롬프트
+Roll 에셋은 추가해도 돼.
+### 조작 내역
+- 사용자 수작업분 검수 후 커밋: Knight_Roll.png(9f 슬라이스, PPU 490.3 정밀 보정), Player_Roll.anim(9키 12fps 0.75s), 컨트롤러 Roll 상태(사전 커밋됨)
+- 대시 발동 로직은 미구현 — 별도 [구현] 대기
+### 검증
+- 스프라이트 9개, 클립 null 키 0, 컨트롤러 상태 연결 확인
+### 실패와 수정
+없음
+
+
+## [수정] Knight_Roll.png를 Prefabs 폴더로 이동 — 2026-08-01 23:42
+### 프롬프트
+우리 Roll 관련 스프라이트 시트는 Prefab 폴더에 넣어줄래?
+### 조작 내역
+- AssetDatabase.MoveAsset로 GUID 보존 이동: Sprites_AI/Player → Assets/Prefabs/Knight_Roll.png
+### 검증
+- Player_Roll.anim 키 9/null 0 (연결 무손상)
+### 실패와 수정
+없음
+
+
+## [수정] GUID 충돌 수리 + Cainos·Map_Castle 커밋 — 2026-08-01 23:56
+### 프롬프트
+그거 일단 다 넣어줘
+### 조작 내역
+- GUID 사고 수리: 루트 떠돌이 사본 2종 삭제(Player/Player_Sprite_Preview), Prefabs/Player.prefab.meta GUID를 팀 원본 e6b88b5e로 복원(정규식 재기록+강제 리임포트)
+- 검증: 4개 프리팹 GUID 전부 기대값 일치 (팀 씬 참조 보호)
+- 스테이징분 커밋: Cainos 팩 3,511파일 33.3MB(에셋스토어 표준 라이선스 확인), Map_Castle 12파일 6.2MB, Cainos API 자동 업데이트, ASSET_CREDITS 기록
+- 제외 유지: _Recovery, Screenshots, 실험 파일들 (언스테이징 상태)
+### 검증
+- GUID 4종 일치, git 커밋 exit 0
+### 실패와 수정
+- meta 복원 1차가 Unity 캐시에 되돌려짐 → 디스크 직접 재기록+ForceUpdate로 확정
