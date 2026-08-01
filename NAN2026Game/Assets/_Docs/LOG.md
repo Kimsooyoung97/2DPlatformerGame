@@ -596,3 +596,18 @@ SPEC 갱신안 승인한다.
 - ls-files 오염 카운트 전부 0, .gitignore 커밋 완료
 ### 실패와 수정
 없음
+
+
+## [구현] SecondScene 스테이지 구축 + 플레이어·보스 프리팹화 — 2026-08-01 20:55
+### 프롬프트
+일단 맵부터 만들어화
+### 조작 내역
+- BossOrbLauncher target 자동 탐색 추가(프리팹 씬 참조 단절 대비)
+- Player.prefab / Princess_Boss.prefab 생성(SaveAsPrefabAssetAndConnect), Knight2_ScenePreview 제거
+- SecondScene에 Stage_Grid/Stage_Ground(Tilemap+Composite) 생성: x0~119, 숲(0~44 Forest TileGround1)→중간(45~84 Plains)→성 안뜰(85~119), 언덕·계단, 낙사 구덩이 x30~33/x60~64, 1,110타일
+- Player 프리팹 (2.5,0.6) / 보스 (110,2) 배치, Main Camera+Brain+CM_PlayerCamera(lens 13.5, 기존 손맛 설정 복제)
+- 미추적 바이옴 팩 참조 발견: 타일 에셋이 라이선스 미확인 폴더 소속 → 스테이징 보류, 사용자 확인 요청
+### 검증
+- 타일 1,110개 설치, 배치 좌표 출력, EditMode 25/25, SecondScene 저장 True
+### 실패와 수정
+없음

@@ -23,3 +23,9 @@
 ## 대기 중
 
 - 컨셉 시트 잔여: 제목, 참조 이미지(적 4종 생성물)
+
+
+## 팀 통합 메모 (2026-08-01)
+- 우리 스테이지 = Assets/Scenes/SecondScene.unity (팀 규약). 쇼룸(BiomeActionMap)은 테스트장으로 유지
+- Player.prefab / Princess_Boss.prefab 사용 가능
+- 차단 요소: 바이옴 팩 2종(American Forest/Plains) 미커밋 — 라이선스 확인 시 커밋 필요 (없으면 팀원 화면에서 타일 깨짐)
