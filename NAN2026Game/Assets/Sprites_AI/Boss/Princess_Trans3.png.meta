@@ -20,6 +20,9 @@ TextureImporter:
   - first:
       213: 5133033798096447027
     second: PTRANS3_4
+  - first:
+      213: -8188234679396082070
+    second: PTRANS3_5
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -144,10 +147,10 @@ TextureImporter:
       name: PTRANS3_0
       rect:
         serializedVersion: 2
-        x: 18
+        x: 28
         y: 114
-        width: 581
-        height: 1422
+        width: 588
+        height: 1371
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -166,10 +169,10 @@ TextureImporter:
       name: PTRANS3_1
       rect:
         serializedVersion: 2
-        x: 599
+        x: 616
         y: 114
-        width: 560
-        height: 1422
+        width: 509
+        height: 1371
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -188,10 +191,10 @@ TextureImporter:
       name: PTRANS3_2
       rect:
         serializedVersion: 2
-        x: 1159
+        x: 1125
         y: 114
-        width: 479
-        height: 1422
+        width: 530
+        height: 1371
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -210,10 +213,10 @@ TextureImporter:
       name: PTRANS3_3
       rect:
         serializedVersion: 2
-        x: 1638
+        x: 1655
         y: 114
-        width: 582
-        height: 1422
+        width: 576
+        height: 1371
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -232,10 +235,10 @@ TextureImporter:
       name: PTRANS3_4
       rect:
         serializedVersion: 2
-        x: 2220
+        x: 2231
         y: 114
-        width: 532
-        height: 1422
+        width: 505
+        height: 1371
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -269,6 +272,7 @@ TextureImporter:
       PTRANS3_2: -6011300878985575598
       PTRANS3_3: 2456250085081515245
       PTRANS3_4: 5133033798096447027
+      PTRANS3_5: -8188234679396082070
       Princess_Trans3_0: 3468982165201750425
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
