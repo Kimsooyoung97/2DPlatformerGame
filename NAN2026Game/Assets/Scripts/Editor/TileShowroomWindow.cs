@@ -286,11 +286,15 @@ namespace NAN2026.EditorTools
                             inspectMode = false;
                             try
                             {
+                                // 타일 성격으로 대상 결정: 벽 타일은 항상 벽 겹으로 (사용자 팔레트 설정 존중)
                                 string targetTm = "Stage_Ground";
+                                if (o.name.Contains("Tileable") || o.name.Contains("Wall"))
+                                    targetTm = "Stage_Wall";
                                 if (familyNames[0].Length > 0)
                                 {
                                     string curFam = familyNames[0][Mathf.Clamp(familyIndex[0], 0, familyNames[0].Length - 1)];
                                     if (curFam.Contains("Stage_Wall")) targetTm = "Stage_Wall";
+                                    else if (curFam.Contains("Stage_Ground")) targetTm = "Stage_Ground";
                                 }
                                 ShowNotification(new GUIContent(PaintWith((TileBase)o, targetTm)), 1.2d);
                             }
