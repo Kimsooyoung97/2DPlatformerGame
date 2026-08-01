@@ -34,6 +34,18 @@ namespace NAN2026.Core
             return "Idle";
         }
 
+        /// 누적 지속시간 배열에서 현재 단계 인덱스. 끝을 넘으면 배열 길이 반환
+        public static int SequenceStage(float elapsed, float[] stageDurations)
+        {
+            float acc = 0f;
+            for (int i = 0; i < stageDurations.Length; i++)
+            {
+                acc += stageDurations[i];
+                if (elapsed < acc) return i;
+            }
+            return stageDurations.Length;
+        }
+
         /// 0=대기, 1=경고(점멸), 2=소멸, 3=재생성 가능
         public static int CrumblePhase(float timeSinceTrigger, float disappearDelay, float respawnDelay)
         {
