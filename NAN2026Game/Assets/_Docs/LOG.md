@@ -660,3 +660,14 @@ Roll 에셋은 추가해도 돼.
 - 콘솔 에러 0, Safe Mode 해제, SecondScene 정상 로드
 ### 실패와 수정
 - GetEntityId 교체 시도는 Safe Mode로 MCP 불가 + 후속 에러 다수로 폐기, 팩 제거로 전환
+
+
+## [수정] Cainos 호환 수리 (사용자 PowerShell 수행) — 2026-08-02 02:15
+### 프롬프트
+아냐. 우리 프로젝트에 필요한거라서 해결을 해야해. 할 수 있어?
+### 조작 내역
+- Lucid Editor/Editor/Experimental 절제(TreeView 에러 10건 소멸), Interactive Pixel Water 제거 확정(불필요 판정), Dungeon 팩 신규 임포트 확인
+### 검증
+- 컴파일 에러 0 (씬 미싱 스크립트 1건은 별도 점검)
+### 실패와 수정
+- GetEntityId 패치는 물 팩 제거로 불필요화
