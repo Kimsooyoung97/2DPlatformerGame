@@ -47,6 +47,10 @@ public class PlayerController2D : MonoBehaviour
         var found = new System.Collections.Generic.List<Collider2D>();
         foreach (var tc in FindObjectsByType<UnityEngine.Tilemaps.TilemapCollider2D>(FindObjectsSortMode.None)) found.Add(tc);
         foreach (var cc in FindObjectsByType<CompositeCollider2D>(FindObjectsSortMode.None)) found.Add(cc);
+        foreach (var bc in FindObjectsByType<BoxCollider2D>(FindObjectsSortMode.None))
+        {
+            if (bc.gameObject.name.StartsWith("Platform_")) found.Add(bc);
+        }
         groundColliders = found.ToArray();
     }
 
