@@ -366,3 +366,17 @@ SPEC.md / STATE.md / FAIL.md 읽음 (execute_code). 컨셉 패키지 3안(A: 폐
 - EditMode 20/20 (CameraDeadzone 신규), 컴파일 에러 0. 씬 무변경(컴포넌트 필드 변화 없음)
 ### 실패와 수정
 없음
+
+
+## [수정] Cinemachine 2D 카메라 전환 — 2026-08-01 09:30
+### 프롬프트
+Cinemachine 카메라에 2D Camera를 추가하고 내 player를 넣어버리자. 그게 더 좋아보인다.
+### 조작 내역
+- Cinemachine 3.1.7 설치 확인(기설치, 패키지 추가 없음)
+- Main Camera에 CinemachineBrain 부착, 자작 CameraFollow2D는 비활성(롤백 대비 보존)
+- CM_PlayerCamera 생성: CinemachineCamera + PositionComposer, Follow=Player_Sprite_Preview
+- 기존 손맛 이관: Damping(0.5,1.0), DeadZone(0.12,0.2 화면비), Lookahead(0.3s, smoothing 5), Lens ortho 9
+### 검증
+- 설정 적용 확인(전 속성 경로 적용 성공), 컴파일 에러 0, 씬 저장 True. 코드 변경 없어 테스트 생략(직전 20/20 유지)
+### 실패와 수정
+- codedom 삼항 null 표현식 컴파일 오류 1회 → 해당 라인 제거 후 재실행
