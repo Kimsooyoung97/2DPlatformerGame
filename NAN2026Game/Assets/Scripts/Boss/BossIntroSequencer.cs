@@ -56,6 +56,8 @@ namespace NAN2026
             else
             {
                 anim.Play("PIdle2", 0, 0f);
+                var launcher = GetComponent<BossOrbLauncher>();
+                if (launcher != null) launcher.enabled = true;
                 enabled = false;
             }
         }

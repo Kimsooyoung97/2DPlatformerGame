@@ -34,3 +34,7 @@
 - 출처: 사용자 생성 AI 산출물 (공주 원본: Higgsfield AI 표기 확인. 각 시트 생성 프롬프트: Claude 작성)
 - 라이선스: Higgsfield 및 NAN 2026 생성형 AI 규정 확인 필요 (사용자 확인 대기)
 - 후처리: 플러드필 투명화, 병합 런 분할 슬라이스 (Trans2는 6f 지시였으나 5f로 생성 확인)
+
+## Knight_Parry.png / BossOrb.png — 2026-08-01
+- Knight_Parry.png: 사용자 생성 AI 산출물(나노바나나2, Claude 프롬프트), 파편 소거 후처리
+- BossOrb.png: Claude 절차 생성(코드로 그린 분홍 구슬 48px, 임시 — 아트 교체 예정)

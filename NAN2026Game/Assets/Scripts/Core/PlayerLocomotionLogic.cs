@@ -34,6 +34,20 @@ namespace NAN2026.Core
             return "Idle";
         }
 
+        /// 0=패링 아님, 1=가드 유지(홀드), 2=해제 모션
+        public static int ParryPhase(bool held, bool releasing)
+        {
+            if (held) return 1;
+            if (releasing) return 2;
+            return 0;
+        }
+
+        /// 판정 창: 패링 시작 후 window 이내인가
+        public static bool ParrySuccessWindow(float timeSincePress, float window)
+        {
+            return timeSincePress >= 0f && timeSincePress <= window;
+        }
+
         /// 누적 지속시간 배열에서 현재 단계 인덱스. 끝을 넘으면 배열 길이 반환
         public static int SequenceStage(float elapsed, float[] stageDurations)
         {

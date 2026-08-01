@@ -35,6 +35,20 @@ namespace NAN2026.Tests
             Assert.AreEqual("Run", PlayerLocomotionLogic.SelectAnimState(null, true, false, 0f, 1.2f, 1f, true));
             Assert.AreEqual("Idle", PlayerLocomotionLogic.SelectAnimState(null, true, false, 0f, 1.2f, 0f, false));
         }
+        [Test] public void ParryPhase_HoldAndRelease()
+        {
+            Assert.AreEqual(1, PlayerLocomotionLogic.ParryPhase(true, false));
+            Assert.AreEqual(2, PlayerLocomotionLogic.ParryPhase(false, true));
+            Assert.AreEqual(0, PlayerLocomotionLogic.ParryPhase(false, false));
+        }
+
+        [Test] public void ParryWindow_OnlyEarly()
+        {
+            Assert.IsTrue(PlayerLocomotionLogic.ParrySuccessWindow(0.1f, 0.18f));
+            Assert.IsFalse(PlayerLocomotionLogic.ParrySuccessWindow(0.3f, 0.18f));
+            Assert.IsFalse(PlayerLocomotionLogic.ParrySuccessWindow(-1f, 0.18f));
+        }
+
         [Test] public void SequenceStage_Progression()
         {
             float[] d = new float[] { 2f, 1f, 1f };

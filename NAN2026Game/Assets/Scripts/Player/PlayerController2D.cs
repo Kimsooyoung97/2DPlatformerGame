@@ -27,6 +27,10 @@ public class PlayerController2D : MonoBehaviour
     private string activeAttack;
     private float activeAttackLunge;
     private float attackTimer;
+    private bool parryHeld;
+    private float parryEndTimer;
+    private float parryPressTime = -999f;
+    private readonly Collider2D[] parryHits = new Collider2D[6];
     private bool grounded;
     private bool wasGrounded;
     private int jumpsUsed;
@@ -90,9 +94,25 @@ public class PlayerController2D : MonoBehaviour
             if (kb.lKey.wasPressedThisFrame) QueueAttack("Combo3", config.combo3Duration, config.combo3LungeSpeed);
         }
         if (mouse != null && mouse.leftButton.wasPressedThisFrame) QueueAttack("Slash", config.slashDuration, config.slashLungeSpeed);
+        if (mouse != null)
+        {
+            if (mouse.middleButton.wasPressedThisFrame && attackTimer <= 0f)
+            {
+                parryHeld = true;
+                parryPressTime = Time.time;
+            }
+            if (mouse.middleButton.wasReleasedThisFrame && parryHeld)
+            {
+                parryHeld = false;
+                parryEndTimer = config.parryEndDuration;
+            }
+        }
 
         sr.flipX = PlayerLocomotionLogic.ShouldFlipLeft(inputX, sr.flipX);
-        string next = PlayerLocomotionLogic.SelectAnimState(
+        int parryPhase = PlayerLocomotionLogic.ParryPhase(parryHeld, parryEndTimer > 0f);
+        string next = parryPhase == 1 ? "ParryStart"
+            : parryPhase == 2 ? "ParryEnd"
+            : PlayerLocomotionLogic.SelectAnimState(
             activeAttack, grounded, landTimer > 0f, rb.linearVelocity.y, config.apexSpeedThreshold, inputX, runHeld);
         if (next != currentState)
         {
@@ -137,6 +157,25 @@ public class PlayerController2D : MonoBehaviour
         if (landTimer > 0f) landTimer -= Time.fixedDeltaTime;
         if (grounded && rb.linearVelocity.y <= 0.01f) jumpsUsed = 0;
 
+        if (parryEndTimer > 0f) parryEndTimer -= Time.fixedDeltaTime;
+        // 패링 판정: 홀드 중 + 판정 창 이내 + 전방 박스에 BossOrb
+        if (parryHeld && PlayerLocomotionLogic.ParrySuccessWindow(Time.time - parryPressTime, config.parryWindow))
+        {
+            float pdir = PlayerLocomotionLogic.EffectDirection(sr.flipX);
+            Vector2 center = (Vector2)transform.position + new Vector2(config.parryBoxOffsetX * pdir, config.parryBoxSize.y * 0.5f);
+            int n = Physics2D.OverlapBoxNonAlloc(center, config.parryBoxSize, 0f, parryHits);
+            for (int i = 0; i < n; i++)
+            {
+                if (parryHits[i] == null) continue;
+                var orb = parryHits[i].GetComponent<BossOrb>();
+                if (orb != null)
+                {
+                    FloatingText.Spawn(transform.position + Vector3.up * 2.2f, "success", Color.yellow);
+                    Destroy(orb.gameObject);
+                }
+            }
+        }
+
         bool attacking = attackTimer > 0f;
         if (attacking)
         {
@@ -157,7 +196,9 @@ public class PlayerController2D : MonoBehaviour
             queuedAttack = null;
         }
 
-        float vx = attacking
+        bool parrying = parryHeld || parryEndTimer > 0f;
+        float vx = parrying && grounded ? 0f
+            : attacking
             ? PlayerLocomotionLogic.AttackVelocity(sr.flipX, activeAttackLunge)
             : PlayerLocomotionLogic.HorizontalVelocity(inputX, runHeld, config.walkSpeed, config.runSpeed);
         float vy = rb.linearVelocity.y;

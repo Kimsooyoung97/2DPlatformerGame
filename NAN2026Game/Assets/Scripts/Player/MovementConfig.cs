@@ -23,6 +23,12 @@ namespace NAN2026
         public float combo2Duration = 0.4f;
         public float combo3Duration = 0.55f;
 
+        [Header("패링")]
+        public float parryWindow = 0.18f;
+        public float parryEndDuration = 0.22f;
+        public Vector2 parryBoxSize = new Vector2(1.0f, 1.4f);
+        public float parryBoxOffsetX = 0.6f;
+
         [Header("공격 전진(런지) 속도")]
         public float slashLungeSpeed = 1.5f;
         public float combo2LungeSpeed = 3.5f;
