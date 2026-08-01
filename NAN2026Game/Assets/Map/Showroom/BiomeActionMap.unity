@@ -21376,6 +21376,7 @@ GameObject:
   - component: {fileID: 1100190283}
   - component: {fileID: 1100190282}
   - component: {fileID: 1100190281}
+  - component: {fileID: 1100190285}
   m_Layer: 0
   m_Name: Princess_Boss
   m_TagString: Untagged
@@ -21487,12 +21488,27 @@ Transform:
   m_GameObject: {fileID: 1100190280}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 6.5, y: 1, z: 0}
+  m_LocalPosition: {x: 18.46, y: -0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1100190285
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1100190280}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60e95b947099ede44b0b27c303a2a9bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NAN2026.BossOrbLauncher
+  config: {fileID: 11400000, guid: e1ddb49152ea6f645b4e3b82669ea8e8, type: 2}
+  orbPrefab: {fileID: 1129173775211991002, guid: 2e71bf0658700e74093087ad4f1558e4, type: 3}
+  target: {fileID: 1016964600}
 --- !u!1 &1113677238
 GameObject:
   m_ObjectHideFlags: 0
