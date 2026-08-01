@@ -142,7 +142,7 @@ public class PlayerController2D : MonoBehaviour
 
         if (queuedAttack != null)
         {
-            if (PlayerLocomotionLogic.CanAttack(grounded, attacking))
+            if (PlayerLocomotionLogic.CanAttack(attacking))
             {
                 activeAttack = queuedAttack;
                 activeAttackLunge = queuedAttackLunge;
@@ -153,7 +153,7 @@ public class PlayerController2D : MonoBehaviour
             queuedAttack = null;
         }
 
-        float vx = attacking && grounded
+        float vx = attacking
             ? PlayerLocomotionLogic.AttackVelocity(sr.flipX, activeAttackLunge)
             : PlayerLocomotionLogic.HorizontalVelocity(inputX, runHeld, config.walkSpeed, config.runSpeed);
         float vy = rb.linearVelocity.y;

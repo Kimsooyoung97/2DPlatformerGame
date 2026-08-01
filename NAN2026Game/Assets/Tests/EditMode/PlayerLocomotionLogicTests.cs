@@ -15,11 +15,10 @@ namespace NAN2026.Tests
             Assert.IsFalse(PlayerLocomotionLogic.CanJump(false, 2, 2));
             Assert.IsFalse(PlayerLocomotionLogic.CanJump(true, 0, 2));
         }
-        [Test] public void Attack_OnlyWhenGroundedAndNotAttacking()
+        [Test] public void Attack_AllowedInAir_BlockedWhileAttacking()
         {
-            Assert.IsTrue(PlayerLocomotionLogic.CanAttack(true, false));
-            Assert.IsFalse(PlayerLocomotionLogic.CanAttack(false, false));
-            Assert.IsFalse(PlayerLocomotionLogic.CanAttack(true, true));
+            Assert.IsTrue(PlayerLocomotionLogic.CanAttack(false));
+            Assert.IsFalse(PlayerLocomotionLogic.CanAttack(true));
         }
         [Test] public void AnimState_AirStates()
         {

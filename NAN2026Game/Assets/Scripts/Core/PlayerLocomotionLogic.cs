@@ -15,9 +15,9 @@ namespace NAN2026.Core
             return !attacking && jumpsUsed < maxJumps;
         }
 
-        public static bool CanAttack(bool grounded, bool attacking)
+        public static bool CanAttack(bool attacking)
         {
-            return grounded && !attacking;
+            return !attacking;
         }
 
         public static string SelectAnimState(string activeAttack, bool grounded, bool landing, float verticalVelocity, float apexThreshold, float inputX, bool runHeld)
