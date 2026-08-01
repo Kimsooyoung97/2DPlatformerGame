@@ -186,6 +186,7 @@ namespace NAN2026.EditorTools
         {
             EnsureInit();
             if (familyNames[0].Length == 0 && familyNames[1].Length == 0) RefreshAll();
+            DrawSceneSwitcher();
             tab = GUILayout.Toolbar(tab, Tabs);
             using (new EditorGUILayout.HorizontalScope(EditorStyles.toolbar))
             {
@@ -262,6 +263,38 @@ namespace NAN2026.EditorTools
             }
             EditorGUILayout.EndScrollView();
             if (AssetPreview.IsLoadingAssetPreviews()) Repaint();
+        }
+
+        // 원클릭 씬 전환 바 (수정 씬은 저장 확인 후 전환, 팩 원본은 저장하지 않음)
+        private void DrawSceneSwitcher()
+        {
+            using (new EditorGUILayout.HorizontalScope(EditorStyles.toolbar))
+            {
+                GUILayout.Label("씬:", GUILayout.Width(24f));
+                SceneButton("우리 맵", "Assets/Scenes/SecondScene.unity");
+                SceneButton("데모(정답지)", "Assets/Cainos/Pixel Art Platformer - Dungeon/Scene/SC Demo Scene.unity");
+                SceneButton("소품 카탈로그", "Assets/Cainos/Pixel Art Platformer - Dungeon/Scene/SC All Props.unity");
+                GUILayout.FlexibleSpace();
+                GUILayout.Label(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name, EditorStyles.miniLabel);
+            }
+        }
+
+        private void SceneButton(string label, string scenePath)
+        {
+            var active = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+            bool isCurrent = active.path == scenePath;
+            using (new EditorGUI.DisabledScope(isCurrent))
+            {
+                if (!GUILayout.Button(label, EditorStyles.toolbarButton)) return;
+                // 우리 씬만 저장 대상 — 팩 원본 수정본은 저장 확인 창에 맡김
+                if (active.isDirty && active.path.StartsWith("Assets/Scenes/"))
+                    UnityEditor.SceneManagement.EditorSceneManager.SaveScene(active);
+                else if (active.isDirty)
+                {
+                    if (!UnityEditor.SceneManagement.EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+                }
+                UnityEditor.SceneManagement.EditorSceneManager.OpenScene(scenePath);
+            }
         }
 
         // 검사 결과 패널: 클릭한 타일들의 이미지·이름 즉시 표시
