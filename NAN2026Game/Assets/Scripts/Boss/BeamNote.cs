@@ -24,7 +24,7 @@ namespace NAN2026
             if (passed)
             {
                 missReported = true;
-                FloatingText.Spawn(missTarget.position + Vector3.up * 2.2f, "miss", Color.red);
+                FloatingText.Spawn(missTarget.position + Vector3.up * 1.1f, "miss", Color.red);
                 Destroy(gameObject);
             }
         }

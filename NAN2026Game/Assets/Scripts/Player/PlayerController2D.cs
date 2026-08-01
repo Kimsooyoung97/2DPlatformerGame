@@ -171,7 +171,7 @@ public class PlayerController2D : MonoBehaviour
                 if (orb != null)
                 {
                     int judge = PlayerLocomotionLogic.NoteJudgment(orb.transform.position.x - center.x, config.parryPerfectDistance);
-                    FloatingText.Spawn(transform.position + Vector3.up * 2.2f,
+                    FloatingText.Spawn(transform.position + Vector3.up * 1.1f,
                         judge == 0 ? "PERFECT" : "GOOD",
                         judge == 0 ? Color.yellow : Color.white);
                     Destroy(orb.gameObject);

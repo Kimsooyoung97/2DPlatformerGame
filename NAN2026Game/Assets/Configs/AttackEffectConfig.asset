@@ -15,5 +15,7 @@ MonoBehaviour:
   basicSpeed: 7
   poweredSpeed: 9
   lifetime: 0.8
-  spawnOffset: {x: 0.45, y: 0.95}
+  spawnOffset: {x: 0.225, y: 0.475}
+  basicScale: 2.95
+  poweredScale: 3.3
   frameRate: 16

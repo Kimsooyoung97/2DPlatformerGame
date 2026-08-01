@@ -16,7 +16,7 @@ MonoBehaviour:
   runSpeed: 4.2
   jumpVelocity: 12
   gravityScale: 2.5
-  groundCheckDistance: 0.08
+  groundCheckDistance: 0.06
   maxJumps: 2
   onewayRiseThreshold: 0.05
   apexSpeedThreshold: 1.2
@@ -24,6 +24,11 @@ MonoBehaviour:
   slashDuration: 0.4
   combo2Duration: 0.4
   combo3Duration: 0.55
+  parryWindow: 0.18
+  parryEndDuration: 0.22
+  parryBoxSize: {x: 0.5, y: 0.7}
+  parryBoxOffsetX: 0.3
+  parryPerfectDistance: 0.15
   slashLungeSpeed: 1.5
   combo2LungeSpeed: 3.5
   combo3LungeSpeed: 0

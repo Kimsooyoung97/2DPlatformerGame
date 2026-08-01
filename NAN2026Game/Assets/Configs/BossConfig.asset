@@ -13,3 +13,28 @@ MonoBehaviour:
   m_Name: BossConfig
   m_EditorClassIdentifier: Assembly-CSharp::NAN2026.BossConfig
   idle1Loops: 2
+  orbInterval: 1.6
+  orbSpeed: 6
+  orbLifetime: 4
+  orbSpawnHeight: 1.3
+  orbsPerCycle: 3
+  beamNoteSpeed: 7
+  beamThickness: 0.45
+  beamHeightOffset: 0.45
+  beamOverreach: 2
+  beamLeadIn: 0.6
+  beamTailTime: 1.2
+  noteScale: 0.75
+  missBehindDistance: 0.8
+  beamColor: {r: 1, g: 0.5, b: 0.8, a: 0.35}
+  notePattern:
+  - 0
+  - 0.5
+  - 1
+  - 1.25
+  - 1.5
+  - 2.5
+  - 3
+  - 3.25
+  - 3.5
+  - 3.75
