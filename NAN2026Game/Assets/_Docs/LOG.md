@@ -774,3 +774,16 @@ ground 부분만 각 타일만 각자 띄워서 한꺼번에 볼 수 있도록 �
 - 3계열 725타일 전량 진열, 씬 저장 True
 ### 실패와 수정
 없음
+
+
+## [구현] 쇼룸 씬 롤백 → 에디터 툴 전환 — 2026-08-02 03:24
+### 프롬프트
+[구현] 기능을 롤백하고 tool에 기능을 만들어서 쇼룸 기능을 넣어달라
+### 조작 내역
+- TileShowroom_Ground.unity 삭제(정방향 롤백 — revert는 사람 전용 규칙 준수)
+- Assets/Scripts/Editor/TileShowroomWindow.cs 신설: 메뉴 NAN2026/타일 쇼룸, Cainos 전체 타일 자동 스캔·계열 드롭다운·격자 미리보기·번호 라벨·줌 슬라이더·클릭 시 에셋 핑+선택
+- 순수 로직(FamilyKeyOf/NumberOf)은 에디터 어셈블리 내 정적 함수 — 게임플레이 아님이라 Core 편입 대신 스모크 테스트로 검증
+### 검증
+- 컴파일 에러 0, 타입 로드 OK, FamilyKeyOf/NumberOf 스모크 통과, 메뉴 활성 True
+### 실패와 수정
+없음
