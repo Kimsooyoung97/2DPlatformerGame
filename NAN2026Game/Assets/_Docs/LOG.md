@@ -584,3 +584,15 @@ SPEC 갱신안 승인한다.
 - 2912x1440, 월드 6.07x3.0u, 씬 저장 True
 ### 실패와 수정
 없음
+
+
+## [수정] .gitignore 팀 표준 교체 — 2026-08-01 19:21
+### 프롬프트
+팀원이 git ignore 여기 있는것만 하면 문제 없다고 해서 이렇게 바꿔줄래? (Unity 공식 템플릿, NAN2026Game/ 접두)
+### 조작 내역
+- git 루트=C:/Users/edwin/Dev/NAN2026Game(바깥) 확인 → 접두 경로 유효. 루트 .gitignore 교체
+- 사전 검증: 추적 610파일 중 Library/Temp/csproj/sln/.vs 오염 0건 (정리 불필요)
+### 검증
+- ls-files 오염 카운트 전부 0, .gitignore 커밋 완료
+### 실패와 수정
+없음
