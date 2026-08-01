@@ -22,6 +22,8 @@ namespace NAN2026.EditorTools
         private Vector2 scroll;
         private float zoom = 1.0f;
         private int tab;
+        private bool inspectMode;
+        private string inspectResult = "";
 
         private void EnsureInit()
         {
@@ -41,6 +43,39 @@ namespace NAN2026.EditorTools
             // 도메인 리로드·구버전 직렬화 잔재 복구
             EnsureInit();
             RefreshAll();
+            SceneView.duringSceneGui += OnSceneGUI;
+        }
+
+        private void OnDisable()
+        {
+            SceneView.duringSceneGui -= OnSceneGUI;
+        }
+
+        // 검사 모드: 씬 뷰 클릭 지점의 타일을 판독
+        private void OnSceneGUI(SceneView sv)
+        {
+            if (!inspectMode) return;
+            var e = Event.current;
+            // 클릭 가로채기 (선택 방지)
+            int id = GUIUtility.GetControlID(FocusType.Passive);
+            HandleUtility.AddDefaultControl(id);
+            if (e.type != EventType.MouseDown || e.button != 0) return;
+            Ray ray = HandleUtility.GUIPointToWorldRay(e.mousePosition);
+            float t2 = -ray.origin.z / (Mathf.Approximately(ray.direction.z, 0f) ? 1f : ray.direction.z);
+            Vector3 world = ray.origin + ray.direction * Mathf.Max(0f, t2);
+            var sb = new System.Text.StringBuilder();
+            sb.Append("월드 ").Append(world.x.ToString("F1")).Append(", ").Append(world.y.ToString("F1")).AppendLine();
+            foreach (var tm in Object.FindObjectsByType<Tilemap>(FindObjectsSortMode.None))
+            {
+                var cell = tm.WorldToCell(world);
+                var tile = tm.GetTile(cell);
+                if (tile == null) continue;
+                sb.Append("[").Append(tm.gameObject.name).Append("] 셀(").Append(cell.x).Append(",").Append(cell.y)
+                  .Append(") → ").Append(tile.name).AppendLine();
+            }
+            inspectResult = sb.Length == 0 ? "(타일 없음)" : sb.ToString().TrimEnd();
+            e.Use();
+            Repaint();
         }
 
         [MenuItem("NAN2026/에셋 쇼룸")]
@@ -124,6 +159,9 @@ namespace NAN2026.EditorTools
                     GUILayout.Label("(비어 있음)", EditorStyles.toolbarButton, GUILayout.Width(280f));
                 zoom = GUILayout.HorizontalSlider(zoom, 0.6f, 1.8f, GUILayout.Width(110f));
                 if (GUILayout.Button("새로고침", EditorStyles.toolbarButton, GUILayout.Width(70f))) RefreshAll();
+                bool prevInspect = inspectMode;
+                inspectMode = GUILayout.Toggle(inspectMode, "씬 클릭 검사", EditorStyles.toolbarButton, GUILayout.Width(90f));
+                if (inspectMode != prevInspect) SceneView.RepaintAll();
                 GUILayout.FlexibleSpace();
                 if (familyNames[tab].Length > 0)
                     GUILayout.Label(families[tab][familyNames[tab][familyIndex[tab]]].Count + "개");
@@ -131,6 +169,8 @@ namespace NAN2026.EditorTools
             if (familyNames[tab].Length == 0) { EditorGUILayout.HelpBox("자산 없음: " + SearchRoot, MessageType.Info); return; }
             if (tab == 1)
                 EditorGUILayout.HelpBox("클릭=프로젝트에서 선택 / 셀을 잡고 씬 뷰로 드래그=바로 배치", MessageType.None);
+            if (inspectMode)
+                EditorGUILayout.HelpBox("검사 모드 ON — 씬 뷰에서 타일을 클릭하면 이름이 여기 표시됩니다.\n" + (inspectResult.Length == 0 ? "(아직 클릭 없음)" : inspectResult), MessageType.Info);
 
             var items = families[tab][familyNames[tab][familyIndex[tab]]];
             float cw = CellSize.x * zoom, ch = CellSize.y * zoom;
