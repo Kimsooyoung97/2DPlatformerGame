@@ -2669,6 +2669,7 @@ GameObject:
   - component: {fileID: 233736681}
   - component: {fileID: 233736683}
   - component: {fileID: 233736682}
+  - component: {fileID: 233736684}
   m_Layer: 0
   m_Name: Platform_S1_0
   m_TagString: Untagged
@@ -2797,6 +2798,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &233736684
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 233736680}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3ad5fffe6169d14e86d7675e992ebb7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NAN2026.CrumblingPlatform
+  config: {fileID: 11400000, guid: 01628baccf26b0041a2c75914abac45b, type: 2}
 --- !u!1 &242518464
 GameObject:
   m_ObjectHideFlags: 0
@@ -20094,6 +20108,7 @@ GameObject:
   - component: {fileID: 1003570269}
   - component: {fileID: 1003570271}
   - component: {fileID: 1003570270}
+  - component: {fileID: 1003570272}
   m_Layer: 0
   m_Name: Platform_S2_1
   m_TagString: Untagged
@@ -20222,6 +20237,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &1003570272
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1003570268}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3ad5fffe6169d14e86d7675e992ebb7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NAN2026.CrumblingPlatform
+  config: {fileID: 11400000, guid: 01628baccf26b0041a2c75914abac45b, type: 2}
 --- !u!1 &1016964597
 GameObject:
   m_ObjectHideFlags: 0
@@ -20546,6 +20574,7 @@ GameObject:
   - component: {fileID: 1043405030}
   - component: {fileID: 1043405032}
   - component: {fileID: 1043405031}
+  - component: {fileID: 1043405033}
   m_Layer: 0
   m_Name: Platform_S1_2
   m_TagString: Untagged
@@ -20674,6 +20703,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &1043405033
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1043405029}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3ad5fffe6169d14e86d7675e992ebb7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NAN2026.CrumblingPlatform
+  config: {fileID: 11400000, guid: 01628baccf26b0041a2c75914abac45b, type: 2}
 --- !u!1 &1066373881
 GameObject:
   m_ObjectHideFlags: 0
@@ -20929,6 +20971,7 @@ GameObject:
   - component: {fileID: 1085312426}
   - component: {fileID: 1085312428}
   - component: {fileID: 1085312427}
+  - component: {fileID: 1085312429}
   m_Layer: 0
   m_Name: Platform_S2_0
   m_TagString: Untagged
@@ -21057,6 +21100,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &1085312429
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1085312425}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3ad5fffe6169d14e86d7675e992ebb7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NAN2026.CrumblingPlatform
+  config: {fileID: 11400000, guid: 01628baccf26b0041a2c75914abac45b, type: 2}
 --- !u!1 &1089317817
 GameObject:
   m_ObjectHideFlags: 0
@@ -23026,6 +23082,7 @@ GameObject:
   - component: {fileID: 1246416315}
   - component: {fileID: 1246416317}
   - component: {fileID: 1246416316}
+  - component: {fileID: 1246416318}
   m_Layer: 0
   m_Name: Platform_S1_1
   m_TagString: Untagged
@@ -23154,6 +23211,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &1246416318
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1246416314}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3ad5fffe6169d14e86d7675e992ebb7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NAN2026.CrumblingPlatform
+  config: {fileID: 11400000, guid: 01628baccf26b0041a2c75914abac45b, type: 2}
 --- !u!1 &1247033113
 GameObject:
   m_ObjectHideFlags: 0
