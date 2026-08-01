@@ -61,7 +61,10 @@ namespace NAN2026.Showroom
             checkpoint = transform.position;
             graceUntil = Time.time + spawnGrace;
         }
+        public void TakeDamage(float damage, Vector3 pos)
+        {
 
+        }
         public void SetCheckpoint(Vector3 position)
         {
             checkpoint = position;
