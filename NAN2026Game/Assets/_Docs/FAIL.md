@@ -27,7 +27,7 @@
 ## 5. 재생 모드 중 씬 저장·테스트 실행 실패
 - **증상**: `EditorSceneManager.SaveScene`이 `This cannot be used during play mode`로, `run_tests`가 `Cannot start a test run while the Editor is in or entering Play Mode`로 실패
 - **원인**: 에디터가 재생 중이면 씬 저장과 테스트 실행이 모두 차단됨. 재생 중 만든 씬 오브젝트는 재생 종료 시 소멸
-- **방지 규칙**: 씬을 건드리거나 테스트를 돌리기 전에 `EditorApplication.isPlaying`을 먼저 확인한다. 재생 중이면 임의로 정지하지 말고 사람에게 정지를 요청한 뒤 대기한다. 정지 후에는 오브젝트 존재 여부를 반드시 재확인한다
+- **방지 규칙**: 씬을 건드리거나 테스트를 돌리기 전에 `EditorApplication.isPlaying`을 먼저 확인한다. 재생 중이면 자동으로 정지하고 진행한다(사용자 지시 2026-08-01). 정지 후에는 도메인 리로드 완료와 오브젝트 존재 여부를 반드시 재확인한다
 
 ## 6. 트리거끼리는 Rigidbody2D 없이 충돌하지 않음
 - **증상**: 검기가 더미를 통과하는데 `OnTriggerEnter2D`가 한 번도 호출되지 않음. 콘솔 에러도 없어 원인이 드러나지 않음
