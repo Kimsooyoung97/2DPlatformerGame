@@ -1,0 +1,413 @@
+fileFormatVersion: 2
+guid: c4fed6c7212fa0643a159888d9cebbbc
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -6910602328538897677
+    second: Knight_Roll_0
+  - first:
+      213: 4801364790214290289
+    second: Knight_Roll_1
+  - first:
+      213: -8250516626271969606
+    second: Knight_Roll_2
+  - first:
+      213: 6585156678947744900
+    second: Knight_Roll_3
+  - first:
+      213: -5564483415606331932
+    second: Knight_Roll_4
+  - first:
+      213: 9180758497820150662
+    second: Knight_Roll_5
+  - first:
+      213: -2694277346645263660
+    second: Knight_Roll_6
+  - first:
+      213: 4364443553334684423
+    second: Knight_Roll_7
+  - first:
+      213: 1256908216262830932
+    second: Knight_Roll_8
+  - first:
+      213: -1318852041914897242
+    second: ROLL_0
+  - first:
+      213: -58979818883486300
+    second: ROLL_1
+  - first:
+      213: 9166600071246884813
+    second: ROLL_2
+  - first:
+      213: 5896472140935880039
+    second: ROLL_3
+  - first:
+      213: 2430793400379738172
+    second: ROLL_4
+  - first:
+      213: 3235111502565298294
+    second: ROLL_5
+  - first:
+      213: -1536059007549902723
+    second: ROLL_6
+  - first:
+      213: 4900536671213567443
+    second: ROLL_7
+  - first:
+      213: 1242084407812174190
+    second: ROLL_8
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 490.34482
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 4096
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: ROLL_0
+      rect:
+        serializedVersion: 2
+        x: 8
+        y: 8
+        width: 357
+        height: 362
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6ac2d523e0f72bde0800000000000000
+      internalID: -1318852041914897242
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ROLL_6
+      rect:
+        serializedVersion: 2
+        x: 373
+        y: 8
+        width: 360
+        height: 308
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d70f2f49872deaae0800000000000000
+      internalID: -1536059007549902723
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ROLL_3
+      rect:
+        serializedVersion: 2
+        x: 741
+        y: 8
+        width: 306
+        height: 303
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 76d587cdb2a74d150800000000000000
+      internalID: 5896472140935880039
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ROLL_1
+      rect:
+        serializedVersion: 2
+        x: 1055
+        y: 8
+        width: 365
+        height: 329
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4ad688eca267e2ff0800000000000000
+      internalID: -58979818883486300
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ROLL_4
+      rect:
+        serializedVersion: 2
+        x: 1428
+        y: 8
+        width: 428
+        height: 327
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c388ffff7b9ebb120800000000000000
+      internalID: 2430793400379738172
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ROLL_7
+      rect:
+        serializedVersion: 2
+        x: 1864
+        y: 8
+        width: 340
+        height: 380
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3ddb5786324320440800000000000000
+      internalID: 4900536671213567443
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ROLL_5
+      rect:
+        serializedVersion: 2
+        x: 2212
+        y: 8
+        width: 329
+        height: 300
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6705f2f65cc65ec20800000000000000
+      internalID: 3235111502565298294
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ROLL_2
+      rect:
+        serializedVersion: 2
+        x: 2549
+        y: 8
+        width: 297
+        height: 334
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dcfadb4b23e463f70800000000000000
+      internalID: 9166600071246884813
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ROLL_8
+      rect:
+        serializedVersion: 2
+        x: 2854
+        y: 8
+        width: 257
+        height: 444
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e6132b42035cc3110800000000000000
+      internalID: 1242084407812174190
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Knight_Roll_0: -6910602328538897677
+      Knight_Roll_1: 4801364790214290289
+      Knight_Roll_2: -8250516626271969606
+      Knight_Roll_3: 6585156678947744900
+      Knight_Roll_4: -5564483415606331932
+      Knight_Roll_5: 9180758497820150662
+      Knight_Roll_6: -2694277346645263660
+      Knight_Roll_7: 4364443553334684423
+      Knight_Roll_8: 1256908216262830932
+      ROLL_0: -1318852041914897242
+      ROLL_1: -58979818883486300
+      ROLL_2: 9166600071246884813
+      ROLL_3: 5896472140935880039
+      ROLL_4: 2430793400379738172
+      ROLL_5: 3235111502565298294
+      ROLL_6: -1536059007549902723
+      ROLL_7: 4900536671213567443
+      ROLL_8: 1242084407812174190
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

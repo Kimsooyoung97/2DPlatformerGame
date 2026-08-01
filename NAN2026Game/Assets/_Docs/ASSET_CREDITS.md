@@ -38,3 +38,8 @@
 ## Knight_Parry.png / BossOrb.png — 2026-08-01
 - Knight_Parry.png: 사용자 생성 AI 산출물(나노바나나2, Claude 프롬프트), 파편 소거 후처리
 - BossOrb.png: Claude 절차 생성(코드로 그린 분홍 구슬 48px, 임시 — 아트 교체 예정)
+
+## Knight_Roll.png — 2026-08-01
+- 파일: Assets/Sprites_AI/Player/Knight_Roll.png (9프레임 구르기)
+- 출처: 사용자 생성 AI 산출물, 슬라이스·PPU 보정·클립·컨트롤러 연결 전부 사용자 수작업
+- 라이선스: NAN 2026 생성형 AI 규정 확인 대기
