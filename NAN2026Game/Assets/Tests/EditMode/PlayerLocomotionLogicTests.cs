@@ -36,6 +36,13 @@ namespace NAN2026.Tests
             Assert.AreEqual("Run", PlayerLocomotionLogic.SelectAnimState(null, true, false, 0f, 1.2f, 1f, true));
             Assert.AreEqual("Idle", PlayerLocomotionLogic.SelectAnimState(null, true, false, 0f, 1.2f, 0f, false));
         }
+        [Test] public void CameraDeadzone_HoldsInsideMovesOutside()
+        {
+            Assert.AreEqual(5f, PlayerLocomotionLogic.CameraDeadzoneTargetX(5f, 5.4f, 1.2f));
+            Assert.AreEqual(6.4f, PlayerLocomotionLogic.CameraDeadzoneTargetX(5f, 7f, 1.2f), 0.0001f);
+            Assert.AreEqual(3.6f, PlayerLocomotionLogic.CameraDeadzoneTargetX(5f, 3f, 1.2f), 0.0001f);
+        }
+
         [Test] public void EffectDirection_FollowsFacing()
         {
             Assert.AreEqual(1f, PlayerLocomotionLogic.EffectDirection(false));

@@ -32,6 +32,7 @@ public class PlayerController2D : MonoBehaviour
     private int jumpsUsed;
     private float landTimer;
     private string currentState;
+    public bool IsGrounded { get { return grounded; } }
     private UnityEngine.Collider2D[] groundColliders;
     private bool ignoringGround;
 
@@ -101,12 +102,14 @@ public class PlayerController2D : MonoBehaviour
         GameObject prefab = null;
         Sprite[] frames = null;
         float speed = 0f;
-        if (attackName == "Slash") { prefab = basicEffectPrefab; frames = basicEffectFrames; speed = effectConfig.basicSpeed; }
-        else if (attackName == "Combo2") { prefab = poweredEffectPrefab; frames = poweredEffectFrames; speed = effectConfig.poweredSpeed; }
+        float scale = 1f;
+        if (attackName == "Slash") { prefab = basicEffectPrefab; frames = basicEffectFrames; speed = effectConfig.basicSpeed; scale = effectConfig.basicScale; }
+        else if (attackName == "Combo2") { prefab = poweredEffectPrefab; frames = poweredEffectFrames; speed = effectConfig.poweredSpeed; scale = effectConfig.poweredScale; }
         if (prefab == null || effectConfig == null) return;
         float dir = PlayerLocomotionLogic.EffectDirection(sr.flipX);
         Vector3 pos = transform.position + new Vector3(effectConfig.spawnOffset.x * dir, effectConfig.spawnOffset.y, 0f);
         var go = Instantiate(prefab, pos, Quaternion.identity);
+        go.transform.localScale = new Vector3(scale, scale, 1f);
         var ep = go.GetComponent<EffectProjectile>();
         if (ep != null) ep.Launch(dir, speed, effectConfig.lifetime, frames, effectConfig.frameRate);
     }

@@ -11,6 +11,10 @@ namespace NAN2026
         public float lifetime = 0.8f;
         public Vector2 spawnOffset = new Vector2(0.45f, 0.95f);
 
+        [Header("크기 (캐릭터 대비)")]
+        public float basicScale = 5.9f;
+        public float poweredScale = 6.6f;
+
         [Header("애니메이션")]
         public float frameRate = 16f;
     }

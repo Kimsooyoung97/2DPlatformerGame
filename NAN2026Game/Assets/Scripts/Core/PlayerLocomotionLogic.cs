@@ -34,6 +34,14 @@ namespace NAN2026.Core
             return "Idle";
         }
 
+        public static float CameraDeadzoneTargetX(float camX, float playerX, float deadzoneWidth)
+        {
+            float half = deadzoneWidth * 0.5f;
+            if (playerX > camX + half) return playerX - half;
+            if (playerX < camX - half) return playerX + half;
+            return camX;
+        }
+
         public static float EffectDirection(bool facingLeft)
         {
             return facingLeft ? -1f : 1f;
