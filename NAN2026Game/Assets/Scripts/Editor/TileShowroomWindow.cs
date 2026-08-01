@@ -23,6 +23,8 @@ namespace NAN2026.EditorTools
         private int tab;
 
         private bool inspectMode;
+        private static TileBase armedTile;
+        private static string armedTarget = "Stage_Ground";
         private readonly List<TileBase> hitTiles = new List<TileBase>();
         private readonly List<string> hitMeta = new List<string>();
         private Object highlight;
@@ -154,6 +156,10 @@ namespace NAN2026.EditorTools
         // 유니티 붓에 타일 장전 + 칠 대상 Stage_Ground + 페인트 도구 활성
         public static string PaintWith(TileBase tile, string targetName = "Stage_Ground")
         {
+            // 자체 붓: 유니티 팔레트 상태와 무관하게 항상 동작
+            armedTile = tile;
+            armedTarget = targetName;
+            SceneView.RepaintAll();
             try
             {
                 var brush = GridPaintingState.gridBrush as GridBrush;
@@ -174,16 +180,17 @@ namespace NAN2026.EditorTools
                     try { TilemapEditorTool.SetActiveEditorTool(typeof(PaintTool)); SceneView.RepaintAll(); } catch { }
                 };
                 SceneView.RepaintAll();
-                return target != null ? targetName + "에 칠할 준비 완료" : "붓 장전(대상 타일맵은 팔레트에서 지정)";
+                return targetName + "에 칠할 준비 완료 — 씬에서 드래그 (Shift=지우기, Esc=해제)";
             }
-            catch (System.Exception ex)
+            catch (System.Exception)
             {
-                return "실패: " + ex.Message;
+                return targetName + "에 칠할 준비 완료(자체 붓) — 씬에서 드래그";
             }
         }
 
         private void OnSceneGUI(SceneView sv)
         {
+            if (!inspectMode && armedTile != null) { HandleBrush(sv); return; }
             if (!inspectMode) return;
             var e = Event.current;
             int id = GUIUtility.GetControlID(FocusType.Passive);
@@ -205,6 +212,45 @@ namespace NAN2026.EditorTools
             if (hitTiles.Count > 0) JumpTo(hitTiles[0]);
             e.Use();
             Repaint();
+        }
+
+        // 자체 붓: 장전된 타일을 씬 클릭·드래그로 직접 찍는다 (Shift=지우기, Esc=해제)
+        private void HandleBrush(SceneView sv)
+        {
+            var e = Event.current;
+            if (e.type == EventType.KeyDown && e.keyCode == KeyCode.Escape)
+            {
+                armedTile = null;
+                sv.Repaint();
+                Repaint();
+                return;
+            }
+            var go = GameObject.Find(armedTarget);
+            if (go == null) return;
+            var tm = go.GetComponent<Tilemap>();
+            if (tm == null) return;
+            int id = GUIUtility.GetControlID(FocusType.Passive);
+            HandleUtility.AddDefaultControl(id);
+            Ray ray = HandleUtility.GUIPointToWorldRay(e.mousePosition);
+            float dz = Mathf.Approximately(ray.direction.z, 0f) ? 1f : ray.direction.z;
+            Vector3 world = ray.origin + ray.direction * Mathf.Max(0f, -ray.origin.z / dz);
+            var cell = tm.WorldToCell(world);
+            // 셀 미리보기 테두리
+            Vector3 c0 = tm.CellToWorld(cell);
+            var cs = tm.cellSize;
+            Handles.color = e.shift ? new Color(1f, 0.35f, 0.3f, 0.9f) : new Color(0.3f, 1f, 0.5f, 0.9f);
+            Handles.DrawSolidRectangleWithOutline(new[] {
+                c0, c0 + new Vector3(cs.x, 0f), c0 + new Vector3(cs.x, cs.y), c0 + new Vector3(0f, cs.y) },
+                new Color(1f, 1f, 1f, 0.06f), Handles.color);
+            if (e.type == EventType.MouseMove) sv.Repaint();
+            if ((e.type == EventType.MouseDown || e.type == EventType.MouseDrag) && e.button == 0)
+            {
+                Undo.RegisterCompleteObjectUndo(tm, "쇼룸 붓");
+                tm.SetTile(cell, e.shift ? null : armedTile);
+                UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(tm.gameObject.scene);
+                e.Use();
+                sv.Repaint();
+            }
         }
 
         private void OnGUI()
@@ -231,6 +277,15 @@ namespace NAN2026.EditorTools
                         ShowNotification(new GUIContent(PaintWith((TileBase)highlight)));
                     }
                 GUILayout.FlexibleSpace();
+                if (armedTile != null)
+                {
+                    GUILayout.Label("장전: " + armedTile.name + " → " + armedTarget, EditorStyles.miniLabel);
+                    if (GUILayout.Button("해제", EditorStyles.toolbarButton, GUILayout.Width(40f)))
+                    {
+                        armedTile = null;
+                        SceneView.RepaintAll();
+                    }
+                }
                 if (familyNames[tab].Length > 0)
                     GUILayout.Label(families[tab][familyNames[tab][familyIndex[tab]]].Count + "개");
             }
