@@ -101,15 +101,34 @@ namespace NAN2026.EditorTools
                 if (go == null) continue;
                 Add(1, PropFamilyOf(go.name, p.Contains("Village")), go);
             }
+            // 현재 씬 사용중 분류 (바닥/벽 겹별 실사용 타일)
+            AddUsageFamily("★ 바닥(Stage_Ground) 사용중", "Stage_Ground");
+            AddUsageFamily("★ 벽(Stage_Wall) 사용중", "Stage_Wall");
             for (int t = 0; t < 2; t++)
             {
                 foreach (var list in families[t].Values)
                     list.Sort((a, b) => NumberOf(a.name) != NumberOf(b.name)
                         ? NumberOf(a.name).CompareTo(NumberOf(b.name))
                         : string.CompareOrdinal(a.name, b.name));
-                familyNames[t] = families[t].Keys.OrderBy(k => k).ToArray();
+                familyNames[t] = families[t].Keys.OrderBy(k => k.StartsWith("★") ? "0" + k : "1" + k).ToArray();
                 familyIndex[t] = Mathf.Clamp(familyIndex[t], 0, Mathf.Max(0, familyNames[t].Length - 1));
             }
+        }
+
+        private void AddUsageFamily(string familyName, string tilemapGoName)
+        {
+            var go = GameObject.Find(tilemapGoName);
+            if (go == null) return;
+            var tm = go.GetComponent<Tilemap>();
+            if (tm == null) return;
+            var set = new HashSet<TileBase>();
+            foreach (var pos in tm.cellBounds.allPositionsWithin)
+            {
+                var t = tm.GetTile(pos);
+                if (t != null) set.Add(t);
+            }
+            if (set.Count == 0) return;
+            families[0][familyName] = set.Cast<Object>().ToList();
         }
 
         private void Add(int t, string key, Object o)
@@ -133,7 +152,7 @@ namespace NAN2026.EditorTools
         }
 
         // 유니티 붓에 타일 장전 + 칠 대상 Stage_Ground + 페인트 도구 활성
-        public static string PaintWith(TileBase tile)
+        public static string PaintWith(TileBase tile, string targetName = "Stage_Ground")
         {
             try
             {
@@ -147,11 +166,11 @@ namespace NAN2026.EditorTools
                 brush.cells[0].tile = tile;
                 brush.cells[0].matrix = Matrix4x4.identity;
                 brush.cells[0].color = Color.white;
-                var target = GameObject.Find("Stage_Ground");
+                var target = GameObject.Find(targetName);
                 if (target != null) GridPaintingState.scenePaintTarget = target;
                 TilemapEditorTool.SetActiveEditorTool(typeof(PaintTool));
                 SceneView.RepaintAll();
-                return target != null ? "Stage_Ground에 칠할 준비 완료" : "붓 장전(대상 타일맵은 팔레트에서 지정)";
+                return target != null ? targetName + "에 칠할 준비 완료" : "붓 장전(대상 타일맵은 팔레트에서 지정)";
             }
             catch (System.Exception ex)
             {
@@ -262,7 +281,9 @@ namespace NAN2026.EditorTools
                         if (tab == 0 && o is TileBase)
                         {
                             inspectMode = false;
-                            ShowNotification(new GUIContent(PaintWith((TileBase)o)), 1.2d);
+                            string curFam = familyNames[0][Mathf.Clamp(familyIndex[0], 0, familyNames[0].Length - 1)];
+                            string targetTm = curFam.Contains("Stage_Wall") ? "Stage_Wall" : "Stage_Ground";
+                            ShowNotification(new GUIContent(PaintWith((TileBase)o, targetTm)), 1.2d);
                         }
                         e.Use();
                     }
