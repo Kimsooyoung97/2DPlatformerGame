@@ -22,7 +22,13 @@ namespace NAN2026
 
         private void Update()
         {
-            if (config == null || target == null) return;
+            if (config == null) return;
+            if (target == null)
+            {
+                var pc = FindFirstObjectByType<PlayerController2D>();
+                if (pc != null) target = pc.transform;
+                else return;
+            }
             if (activeBeam != null) return; // 빔 진행 중 (파괴되면 null)
             if (orbsFired >= config.orbsPerCycle)
             {
