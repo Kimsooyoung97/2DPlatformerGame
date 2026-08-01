@@ -648,3 +648,15 @@ Roll 에셋은 추가해도 돼.
 - GUID 4종 일치, git 커밋 exit 0
 ### 실패와 수정
 - meta 복원 1차가 Unity 캐시에 되돌려짐 → 디스크 직접 재기록+ForceUpdate로 확정
+
+
+## [수정] Cainos 팩 전체 제거 (Unity 6.3 비호환) — 2026-08-02 01:08
+### 프롬프트
+(Safe Mode 사태) Interactive Pixel Water → Lucid Editor → Cainos 전체 삭제
+### 조작 내역
+- PixelWater.cs GetInstanceID 에러(CS0619) → 물 팩 삭제 → Lucid Editor 에러 10건 → 삭제 → 참조 도미노 119건 → Cainos 전체 삭제(사용자 수행)
+- Village Props 포함 손실이나 씬 미사용으로 실손실 0. FAIL #11 규칙 추가
+### 검증
+- 콘솔 에러 0, Safe Mode 해제, SecondScene 정상 로드
+### 실패와 수정
+- GetEntityId 교체 시도는 Safe Mode로 MCP 불가 + 후속 에러 다수로 폐기, 팩 제거로 전환
