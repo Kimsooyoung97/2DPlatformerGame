@@ -623,3 +623,14 @@ Roll 에셋은 추가해도 돼.
 - 스프라이트 9개, 클립 null 키 0, 컨트롤러 상태 연결 확인
 ### 실패와 수정
 없음
+
+
+## [수정] Knight_Roll.png를 Prefabs 폴더로 이동 — 2026-08-01 23:42
+### 프롬프트
+우리 Roll 관련 스프라이트 시트는 Prefab 폴더에 넣어줄래?
+### 조작 내역
+- AssetDatabase.MoveAsset로 GUID 보존 이동: Sprites_AI/Player → Assets/Prefabs/Knight_Roll.png
+### 검증
+- Player_Roll.anim 키 9/null 0 (연결 무손상)
+### 실패와 수정
+없음
