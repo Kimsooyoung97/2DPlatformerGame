@@ -1,3 +1,4 @@
+
 using UnityEngine;
 
 /// <summary>
@@ -70,5 +71,6 @@ public class PlayerHealth : MonoBehaviour
     public void TakeDamage(float damage)
     {
         TakeDamage(damage, transform.position + Vector3.left);
+
     }
 }
