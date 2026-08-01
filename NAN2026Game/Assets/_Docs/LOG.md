@@ -419,3 +419,18 @@ Cinemachine 카메라에 2D Camera를 추가하고 내 player를 넣어버리자
 - 스캔 리포트 Temp/terrain_issues.txt, 생성 좌표 출력, 씬 저장 True. 코드 무변경(테스트 20/20 유지)
 ### 실패와 수정
 없음
+
+
+## [구현] 사라지는 발판 기능 복원 (5개 적용) — 2026-08-01 09:55
+### 프롬프트
+B로 복원 (사라지는 발판 기능을 배치된 발판에 구현)
+### 조작 내역
+- CrumblingPlatform: 밟으면 경고 점멸(0.8s) → 소멸 → 2.5s 후 재생성(플레이어 겹침 시 대기). CrumblePhase 순수 함수 + 테스트
+- PlatformConfig SO 신규 (disappearDelay/respawnDelay/blinkHz)
+- 컨트롤러: 비활성 콜라이더를 원웨이 무시·겹침 검사에서 스킵
+- Platform_ 5개 전부에 부착·설정 연결
+### 검증
+- attached=5, EditMode 21/21(CrumblePhase 신규), 씬 저장 True
+### 실패와 수정
+- 작업 중 재생 모드 2회 감지 → 자동 정지 후 재부착 (재생 중 부착분 소멸 확인)
+- 백그라운드 컴파일 정체 → 에디터 포커스 후 완료. 타일드 스프라이트 Full Rect 경고 2건(표시 품질 이슈, 기능 무관 — 추후 임포트 설정 개선 후보)

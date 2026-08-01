@@ -35,6 +35,14 @@ namespace NAN2026.Tests
             Assert.AreEqual("Run", PlayerLocomotionLogic.SelectAnimState(null, true, false, 0f, 1.2f, 1f, true));
             Assert.AreEqual("Idle", PlayerLocomotionLogic.SelectAnimState(null, true, false, 0f, 1.2f, 0f, false));
         }
+        [Test] public void CrumblePhase_Progression()
+        {
+            Assert.AreEqual(0, PlayerLocomotionLogic.CrumblePhase(-1f, 0.8f, 2.5f));
+            Assert.AreEqual(1, PlayerLocomotionLogic.CrumblePhase(0.3f, 0.8f, 2.5f));
+            Assert.AreEqual(2, PlayerLocomotionLogic.CrumblePhase(1.5f, 0.8f, 2.5f));
+            Assert.AreEqual(3, PlayerLocomotionLogic.CrumblePhase(3.4f, 0.8f, 2.5f));
+        }
+
         [Test] public void CameraDeadzone_HoldsInsideMovesOutside()
         {
             Assert.AreEqual(5f, PlayerLocomotionLogic.CameraDeadzoneTargetX(5f, 5.4f, 1.2f));

@@ -59,7 +59,7 @@ public class PlayerController2D : MonoBehaviour
         if (ignoringGround == ignore) return;
         foreach (var g in groundColliders)
         {
-            if (g != null && !g.isTrigger) Physics2D.IgnoreCollision(col, g, ignore);
+            if (g != null && g.enabled && !g.isTrigger) Physics2D.IgnoreCollision(col, g, ignore);
         }
         ignoringGround = ignore;
     }
@@ -68,7 +68,7 @@ public class PlayerController2D : MonoBehaviour
     {
         foreach (var g in groundColliders)
         {
-            if (g == null || g.isTrigger) continue;
+            if (g == null || !g.enabled || g.isTrigger) continue;
             if (col.Distance(g).isOverlapped) return true;
         }
         return false;

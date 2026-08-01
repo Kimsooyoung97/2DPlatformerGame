@@ -34,6 +34,15 @@ namespace NAN2026.Core
             return "Idle";
         }
 
+        /// 0=대기, 1=경고(점멸), 2=소멸, 3=재생성 가능
+        public static int CrumblePhase(float timeSinceTrigger, float disappearDelay, float respawnDelay)
+        {
+            if (timeSinceTrigger < 0f) return 0;
+            if (timeSinceTrigger < disappearDelay) return 1;
+            if (timeSinceTrigger < disappearDelay + respawnDelay) return 2;
+            return 3;
+        }
+
         public static float CameraDeadzoneTargetX(float camX, float playerX, float deadzoneWidth)
         {
             float half = deadzoneWidth * 0.5f;
