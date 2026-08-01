@@ -4,10 +4,10 @@ namespace NAN2026
 {
     public class BossOrb : MonoBehaviour
     {
-        private float dir = -1f;
-        private float speed;
-        private float life;
-        private float age;
+        protected float dir = -1f;
+        protected float speed;
+        protected float life;
+        protected float age;
 
         public void Launch(float direction, float moveSpeed, float lifetime)
         {
@@ -16,11 +16,16 @@ namespace NAN2026
             life = lifetime;
         }
 
+        protected virtual void Tick()
+        {
+            transform.position += new Vector3(dir * speed * Time.deltaTime, 0f, 0f);
+        }
+
         private void Update()
         {
             age += Time.deltaTime;
             if (age >= life) { Destroy(gameObject); return; }
-            transform.position += new Vector3(dir * speed * Time.deltaTime, 0f, 0f);
+            Tick();
         }
     }
 }

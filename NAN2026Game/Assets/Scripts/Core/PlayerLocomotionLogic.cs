@@ -42,6 +42,13 @@ namespace NAN2026.Core
             return 0;
         }
 
+        /// 0=PERFECT, 1=GOOD
+        public static int NoteJudgment(float distanceFromCenter, float perfectDistance)
+        {
+            float d = distanceFromCenter < 0f ? -distanceFromCenter : distanceFromCenter;
+            return d <= perfectDistance ? 0 : 1;
+        }
+
         /// 판정 창: 패링 시작 후 window 이내인가
         public static bool ParrySuccessWindow(float timeSincePress, float window)
         {

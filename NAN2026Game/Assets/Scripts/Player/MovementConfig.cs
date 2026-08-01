@@ -28,6 +28,7 @@ namespace NAN2026
         public float parryEndDuration = 0.22f;
         public Vector2 parryBoxSize = new Vector2(1.0f, 1.4f);
         public float parryBoxOffsetX = 0.6f;
+        public float parryPerfectDistance = 0.25f;
 
         [Header("공격 전진(런지) 속도")]
         public float slashLungeSpeed = 1.5f;

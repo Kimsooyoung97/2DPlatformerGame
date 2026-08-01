@@ -35,6 +35,13 @@ namespace NAN2026.Tests
             Assert.AreEqual("Run", PlayerLocomotionLogic.SelectAnimState(null, true, false, 0f, 1.2f, 1f, true));
             Assert.AreEqual("Idle", PlayerLocomotionLogic.SelectAnimState(null, true, false, 0f, 1.2f, 0f, false));
         }
+        [Test] public void NoteJudgment_PerfectInsideThreshold()
+        {
+            Assert.AreEqual(0, PlayerLocomotionLogic.NoteJudgment(0.1f, 0.25f));
+            Assert.AreEqual(0, PlayerLocomotionLogic.NoteJudgment(-0.2f, 0.25f));
+            Assert.AreEqual(1, PlayerLocomotionLogic.NoteJudgment(0.4f, 0.25f));
+        }
+
         [Test] public void ParryPhase_HoldAndRelease()
         {
             Assert.AreEqual(1, PlayerLocomotionLogic.ParryPhase(true, false));
