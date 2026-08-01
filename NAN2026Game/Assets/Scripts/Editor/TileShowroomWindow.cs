@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using UnityEditor.Tilemaps;
 
 namespace NAN2026.EditorTools
 {
@@ -129,6 +130,33 @@ namespace NAN2026.EditorTools
             Repaint();
         }
 
+        // 유니티 붓에 타일 장전 + 칠 대상 Stage_Ground + 페인트 도구 활성
+        public static string PaintWith(TileBase tile)
+        {
+            try
+            {
+                var brush = GridPaintingState.gridBrush as GridBrush;
+                if (brush == null)
+                {
+                    brush = ScriptableObject.CreateInstance<GridBrush>();
+                    GridPaintingState.gridBrush = brush;
+                }
+                brush.Init(Vector3Int.one, Vector3Int.zero);
+                brush.cells[0].tile = tile;
+                brush.cells[0].matrix = Matrix4x4.identity;
+                brush.cells[0].color = Color.white;
+                var target = GameObject.Find("Stage_Ground");
+                if (target != null) GridPaintingState.scenePaintTarget = target;
+                TilemapEditorTool.SetActiveEditorTool(typeof(PaintTool));
+                SceneView.RepaintAll();
+                return target != null ? "Stage_Ground에 칠할 준비 완료" : "붓 장전(대상 타일맵은 팔레트에서 지정)";
+            }
+            catch (System.Exception ex)
+            {
+                return "실패: " + ex.Message;
+            }
+        }
+
         private void OnSceneGUI(SceneView sv)
         {
             if (!inspectMode) return;
@@ -170,6 +198,12 @@ namespace NAN2026.EditorTools
                 bool prev = inspectMode;
                 inspectMode = GUILayout.Toggle(inspectMode, "씬 클릭 검사", EditorStyles.toolbarButton, GUILayout.Width(88f));
                 if (inspectMode != prev) SceneView.RepaintAll();
+                using (new EditorGUI.DisabledScope(!(highlight is TileBase)))
+                    if (GUILayout.Button("선택 타일로 칠하기", EditorStyles.toolbarButton, GUILayout.Width(110f)))
+                    {
+                        inspectMode = false;
+                        ShowNotification(new GUIContent(PaintWith((TileBase)highlight)));
+                    }
                 GUILayout.FlexibleSpace();
                 if (familyNames[tab].Length > 0)
                     GUILayout.Label(families[tab][familyNames[tab][familyIndex[tab]]].Count + "개");
@@ -257,6 +291,11 @@ namespace NAN2026.EditorTools
                         }
                         if (GUILayout.Button("격자에서 보기", GUILayout.Width(96f), GUILayout.Height(24f)))
                             JumpTo(t);
+                        if (GUILayout.Button("🖌 이 타일로 칠하기", GUILayout.Width(124f), GUILayout.Height(24f)))
+                        {
+                            inspectMode = false;
+                            ShowNotification(new GUIContent(PaintWith(t)));
+                        }
                     }
                 }
             }
