@@ -660,3 +660,23 @@ Roll 에셋은 추가해도 돼.
 - 콘솔 에러 0, Safe Mode 해제, SecondScene 정상 로드
 ### 실패와 수정
 - GetEntityId 교체 시도는 Safe Mode로 MCP 불가 + 후속 에러 다수로 폐기, 팩 제거로 전환
+
+## [구현] FirstScene 배경(바이옴 타일맵) 구성 — 2026-08-02 02:50
+### 프롬프트
+FirstScene에서 2D Pixel Art Platformer Biome - American Forest 폴더와 2D Pixel Art Platformer Biome - Plains 폴더안의 타일을  사용해서 횡스크롤 액션 게임( 게임 진행 도중 몬스터를 잡으면서 앞으로 나아가야함. 층계는 3층까지 허용됨, 좌측 끝과 우측 끝에는 벽 오브젝트를 만들어 떨어지지 않게 설정, 가로로 현재 메인카메라 사이즈가 5개 이상 들어갈 분량)의 배경을 만들어줘
+### 조작 내역
+- execute_code로 FirstScene의 기존 빈 오브젝트 BackgroundFirstScene 하위에 구성 (기존 Player/Portal/CameraBoundary/Orkan/MainCamera/CinemachineCamera는 손대지 않음)
+- Grid(cellSize 1,1,1) 하위: Tilemap_Ground(바닥, x=-12~30, 2단, Plains/Forest 타일 x=9 기준 zone 전환, TilemapCollider2D+CompositeCollider2D+Rigidbody2D Static), Tilemap_Platforms(중간tier y cell -3, 상단tier y cell 1, 총 3층 구성, 동일 콜라이더 세팅), Tilemap_BackTile(예비, 미사용)
+- Backdrop: Background1~5 대형 배경 스프라이트 6장 타일링 (x=-40~56, 총 96유닛; 카메라 폭 17.78유닛×5=88.89유닛 요건 충족), sortingOrder -20
+- Decoration: Tree 11그루 (Plains 5 / Forest 6), sortingOrder -10, 지면 상단(y=-5)에 맞춰 배치
+- Walls: Wall_Left(x=-12.5), Wall_Right(x=30.5) BoxCollider2D(size 1x13) 낙사 방지
+- Assets/2D Pixel Art Platformer Biome - Plains/Tilemap/TileGround1,2,3,5.asset, Assets/2D Pixel Art Platformer Biome - American Forest/Tilemap/TileGround1,2,3,5.asset 재사용 (기존 팀 준비 에셋, 신규 Tile 에셋 생성 없음)
+- manage_scene(action=save)로 Assets/Scenes/FirstScene.unity 저장
+### 검증
+- refresh_unity(compile=request) 후 read_console(types=error) → 0건
+- run_tests(EditMode) → 25/25 통과 (job 7c6975baef71482a90cf968997a67978)
+- 저장 후 디스크 파일 텍스트에 Tilemap_Ground/BackdropPanel/Wall_Left/Tree_Forest 포함 확인 (length=140474), scene.isDirty=False
+- 테스트 실행 후 GameObject.Find("Grid") 재확인 → 생존 확인 (children=3)
+### 실패와 수정
+- 1차 시도: 씬 편집 후 저장 없이 refresh_unity→run_tests를 먼저 실행 → EditMode 테스트가 씬을 리로드하며 저장되지 않은 모든 신규 오브젝트가 소실됨 (git checkpoint와 최종 파일이 바이트 단위로 동일했던 것으로 뒤늦게 발견). FAIL.md #12로 기록. 저장 순서를 '씬 편집→저장→refresh_unity→테스트'로 바꿔 2차 시도에서 재현·해결
+- 사용자 지침 변경: 이번 작업부터 git commit은 사용자가 직접 실행. Claude는 커밋 메시지만 제공
