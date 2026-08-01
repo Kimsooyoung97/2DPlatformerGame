@@ -1,0 +1,5 @@
+fix: FirstScene 배경 Ground 정렬 및 3배 확장
+
+명령: 지금 씬을 확인해봤는데 Backdrop의 시작부분이 Tilemap_Ground 랑 붙어야하고 Tree_Plains_Tree1이랑 Tree_Plains_Tree2 또한 같은 이유로 범위가 벗어나있어 Tree들이 Ground 타일들과 붙어 있어야하고 나는 Ground 타일을 기준으로 처음과 끝 범위를 매기는데 지금보다 3배 길게 만들어줘
+검증: 컴파일 에러 0건, EditMode 테스트 25/25 통과 (job 2ababb34408f43619bc4bf9d251dfe4c)
+LOG: LOG.md #39

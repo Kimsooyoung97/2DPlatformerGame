@@ -680,3 +680,23 @@ FirstScene에서 2D Pixel Art Platformer Biome - American Forest 폴더와 2D Pi
 ### 실패와 수정
 - 1차 시도: 씬 편집 후 저장 없이 refresh_unity→run_tests를 먼저 실행 → EditMode 테스트가 씬을 리로드하며 저장되지 않은 모든 신규 오브젝트가 소실됨 (git checkpoint와 최종 파일이 바이트 단위로 동일했던 것으로 뒤늦게 발견). FAIL.md #12로 기록. 저장 순서를 '씬 편집→저장→refresh_unity→테스트'로 바꿔 2차 시도에서 재현·해결
 - 사용자 지침 변경: 이번 작업부터 git commit은 사용자가 직접 실행. Claude는 커밋 메시지만 제공
+
+## [수정] FirstScene 배경 정렬·3배 확장 — 2026-08-02 03:15
+### 프롬프트
+지금 씬을 확인해봤는데 Backdrop의 시작부분이 Tilemap_Ground 랑 붙어야하고 Tree_Plains_Tree1이랑 Tree_Plains_Tree2 또한 같은 이유로 범위가 벗어나있어 Tree들이 Ground 타일들과 붙어 있어야하고 나는 Ground 타일을 기준으로 처음과 끝 범위를 매기는데 지금보다 3배 길게 만들어줘 마지막으로 다시 지침을 변경해서 커밋을 해주면 될 것 같아 너가
+### 조작 내역
+- BackgroundFirstScene 하위 Grid/Backdrop/Walls/Decoration(전부 이전 턴에 Claude가 생성한 오브젝트) DestroyImmediate 후 재생성
+- Ground 범위를 x=-12~30(폭42) → x=-12~114(폭126, 정확히 3배)로 확장. 좌측 시작점(-12)은 고정
+- Platforms: 중간tier(cellY -3, 5칸 세그먼트 14유닛 간격)/상단tier(cellY 1, 4칸 세그먼트 20유닛 간격)로 확장 범위 전체에 재분배, 총 3층 유지
+- Backdrop: 시작점을 Ground 시작점(x=-12)과 정확히 일치시킴. 패널 8장(폭128)로 x=-12~116 커버
+- Decoration: 트리 18그루를 간격 7유닛으로 재배치, 각 트리 스프라이트 절반폭+margin(0.3)만큼 Ground 경계 안쪽으로 clamp하여 Ground 범위를 벗어나지 않도록 보장 (기존 Tree_Plains_Tree1/2의 좌측 오버행 버그 수정)
+- Walls: Wall_Left(x=-12.5), Wall_Right(x=114.5)로 새 범위 끝에 재배치
+- Zone split(Plains/Forest)을 새 범위 중앙 x=51로 이동 (기존 -12~30의 중앙 x=9와 동일 비율)
+### 검증
+- 저장을 refresh_unity/run_tests보다 먼저 실행 (FAIL.md #12 반영), 저장 직후 디스크 파일에 Wall_Right/BackdropPanel_7/Tree_Forest 포함 확인 (length=219024), isDirty=False
+- refresh_unity(compile=request) 후 read_console(types=error) → 0건
+- run_tests(EditMode) → 25/25 통과 (job 2ababb34408f43619bc4bf9d251dfe4c)
+- 테스트 실행 후 GameObject.Find("Grid") 재확인 → 생존 확인, Ground bounds=(-12,-7,0) Size(126,2,1) 로 3배 확장 반영 확인
+### 실패와 수정
+- 없음 (이전 턴 FAIL.md #12 교훈을 저장 순서에 선반영해 재발 없었음)
+- 사용자 지침 변경: git commit을 다시 Claude가 직접 실행하는 방식으로 환원
