@@ -258,6 +258,12 @@ namespace NAN2026.EditorTools
                         Selection.activeObject = o;
                         EditorGUIUtility.PingObject(o);
                         highlight = o;
+                        // 타일 탭: 클릭 즉시 붓 장전 → 씬에서 바로 칠하기 가능
+                        if (tab == 0 && o is TileBase)
+                        {
+                            inspectMode = false;
+                            ShowNotification(new GUIContent(PaintWith((TileBase)o)), 1.2d);
+                        }
                         e.Use();
                     }
                     else if (e.type == EventType.MouseDrag && tab == 1)
