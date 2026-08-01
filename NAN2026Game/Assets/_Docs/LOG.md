@@ -634,3 +634,17 @@ Roll 에셋은 추가해도 돼.
 - Player_Roll.anim 키 9/null 0 (연결 무손상)
 ### 실패와 수정
 없음
+
+
+## [수정] GUID 충돌 수리 + Cainos·Map_Castle 커밋 — 2026-08-01 23:56
+### 프롬프트
+그거 일단 다 넣어줘
+### 조작 내역
+- GUID 사고 수리: 루트 떠돌이 사본 2종 삭제(Player/Player_Sprite_Preview), Prefabs/Player.prefab.meta GUID를 팀 원본 e6b88b5e로 복원(정규식 재기록+강제 리임포트)
+- 검증: 4개 프리팹 GUID 전부 기대값 일치 (팀 씬 참조 보호)
+- 스테이징분 커밋: Cainos 팩 3,511파일 33.3MB(에셋스토어 표준 라이선스 확인), Map_Castle 12파일 6.2MB, Cainos API 자동 업데이트, ASSET_CREDITS 기록
+- 제외 유지: _Recovery, Screenshots, 실험 파일들 (언스테이징 상태)
+### 검증
+- GUID 4종 일치, git 커밋 exit 0
+### 실패와 수정
+- meta 복원 1차가 Unity 캐시에 되돌려짐 → 디스크 직접 재기록+ForceUpdate로 확정

@@ -43,3 +43,7 @@
 - 파일: Assets/Sprites_AI/Player/Knight_Roll.png (9프레임 구르기)
 - 출처: 사용자 생성 AI 산출물, 슬라이스·PPU 보정·클립·컨트롤러 연결 전부 사용자 수작업
 - 라이선스: NAN 2026 생성형 AI 규정 확인 대기
+
+## Cainos 에셋 팩 / Map_Castle — 2026-08-01
+- Assets/Cainos/ (Pixel Art Platformer - Village Props, Interactive Pixel Water 등): 유니티 에셋 스토어, 표준 라이선스 (사용자 다운로드)
+- Assets/Sprites_AI/Map_Castle/: 사용자 생성 AI 산출물 (성 안뜰 구간용)
