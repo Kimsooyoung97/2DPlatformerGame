@@ -36,6 +36,13 @@ namespace NAN2026.Tests
             Assert.AreEqual("Run", PlayerLocomotionLogic.SelectAnimState(null, true, false, 0f, 1.2f, 1f, true));
             Assert.AreEqual("Idle", PlayerLocomotionLogic.SelectAnimState(null, true, false, 0f, 1.2f, 0f, false));
         }
+        [Test] public void OnewayIgnore_OnlyWhileRising()
+        {
+            Assert.IsTrue(PlayerLocomotionLogic.ShouldIgnoreGround(3f, 0.05f));
+            Assert.IsFalse(PlayerLocomotionLogic.ShouldIgnoreGround(0f, 0.05f));
+            Assert.IsFalse(PlayerLocomotionLogic.ShouldIgnoreGround(-2f, 0.05f));
+        }
+
         [Test] public void AttackVelocity_FollowsFacing()
         {
             Assert.AreEqual(3.5f, PlayerLocomotionLogic.AttackVelocity(false, 3.5f));

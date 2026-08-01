@@ -27,6 +27,8 @@ public class PlayerController2D : MonoBehaviour
     private int jumpsUsed;
     private float landTimer;
     private string currentState;
+    private UnityEngine.Collider2D[] groundColliders;
+    private bool ignoringGround;
 
     private void Awake()
     {
@@ -36,6 +38,30 @@ public class PlayerController2D : MonoBehaviour
         col = GetComponent<Collider2D>();
         rb.gravityScale = config.gravityScale;
         rb.freezeRotation = true;
+        var found = new System.Collections.Generic.List<Collider2D>();
+        foreach (var tc in FindObjectsByType<UnityEngine.Tilemaps.TilemapCollider2D>(FindObjectsSortMode.None)) found.Add(tc);
+        foreach (var cc in FindObjectsByType<CompositeCollider2D>(FindObjectsSortMode.None)) found.Add(cc);
+        groundColliders = found.ToArray();
+    }
+
+    private void SetGroundIgnored(bool ignore)
+    {
+        if (ignoringGround == ignore) return;
+        foreach (var g in groundColliders)
+        {
+            if (g != null && !g.isTrigger) Physics2D.IgnoreCollision(col, g, ignore);
+        }
+        ignoringGround = ignore;
+    }
+
+    private bool OverlappingGround()
+    {
+        foreach (var g in groundColliders)
+        {
+            if (g == null || g.isTrigger) continue;
+            if (col.Distance(g).isOverlapped) return true;
+        }
+        return false;
     }
 
     private void Update()
@@ -74,8 +100,12 @@ public class PlayerController2D : MonoBehaviour
 
     private void FixedUpdate()
     {
+        bool wantIgnore = PlayerLocomotionLogic.ShouldIgnoreGround(rb.linearVelocity.y, config.onewayRiseThreshold);
+        if (wantIgnore) SetGroundIgnored(true);
+        else if (ignoringGround && !OverlappingGround()) SetGroundIgnored(false);
+
         wasGrounded = grounded;
-        grounded = col.Cast(Vector2.down, castHits, config.groundCheckDistance) > 0;
+        grounded = !ignoringGround && col.Cast(Vector2.down, castHits, config.groundCheckDistance) > 0;
         if (grounded && !wasGrounded) landTimer = config.landDuration;
         if (landTimer > 0f) landTimer -= Time.fixedDeltaTime;
         if (grounded && rb.linearVelocity.y <= 0.01f) jumpsUsed = 0;

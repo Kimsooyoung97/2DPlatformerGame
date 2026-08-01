@@ -34,6 +34,11 @@ namespace NAN2026.Core
             return "Idle";
         }
 
+        public static bool ShouldIgnoreGround(float verticalVelocity, float riseThreshold)
+        {
+            return verticalVelocity > riseThreshold;
+        }
+
         public static float AttackVelocity(bool facingLeft, float lungeSpeed)
         {
             return facingLeft ? -lungeSpeed : lungeSpeed;
