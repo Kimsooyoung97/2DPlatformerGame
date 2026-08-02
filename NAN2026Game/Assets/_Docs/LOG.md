@@ -740,3 +740,17 @@ FirstScene에서 2D Pixel Art Platformer Biome - American Forest 폴더와 2D Pi
 - 테스트 이후 재확인: Decoration 75 유지, Ground bounds 유지, isDirty=False
 ### 실패와 수정
 - 없음 (FAIL.md #5/#14 절차를 선반영해 이번엔 재현 없었음)
+
+## [수정] 배경 레이어에 패럴랙스 모션 적용 — 2026-08-02 15:45
+### 프롬프트
+계속
+### 조작 내역
+- Assets/Scripts/ParallaxLayer.cs (기존 미사용 스크립트 발견, 신규 작성 안 함) 를 Backdrop의 5개 레이어(sky/cloud/mountain/pine1/pine2) 산하 25개 패널 오브젝트에 부착
+- parallaxEffect 계수: sky=0.05, cloud=0.1, mountain=0.3, pine1=0.5, pine2=0.7 (먼 레이어일수록 낮게, 가까운 레이어일수록 1에 가깝게)
+- STATE.md에 이번 세션 전체 FirstScene 배경 작업 내역 반영 (그동안 갱신 누락되어 있었음), CameraBoundary/Portal 미갱신 미해결 항목 명시
+### 검증
+- 저장 → manage_scene(load) 강제 재로드 → 각 레이어 5/5 부착·계수 정확히 일치 확인
+- refresh_unity 컴파일 요청 후 read_console(types=error) → 0건
+- run_tests(EditMode) → 25/25 통과 (job 7d2c3632f714462ebc11677965c92da4)
+### 실패와 수정
+- 없음

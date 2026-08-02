@@ -850,6 +850,7 @@ GameObject:
   m_Component:
   - component: {fileID: 246099215}
   - component: {fileID: 246099216}
+  - component: {fileID: 246099217}
   m_Layer: 0
   m_Name: mountain_0
   m_TagString: Untagged
@@ -932,6 +933,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &246099217
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 246099214}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5447a599f44c76438f2f96fb2e980f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
+  parallaxEffect: 0.3
 --- !u!1 &285767278
 GameObject:
   m_ObjectHideFlags: 0
@@ -942,6 +956,7 @@ GameObject:
   m_Component:
   - component: {fileID: 285767279}
   - component: {fileID: 285767280}
+  - component: {fileID: 285767281}
   m_Layer: 0
   m_Name: mountain_2
   m_TagString: Untagged
@@ -1024,6 +1039,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &285767281
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 285767278}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5447a599f44c76438f2f96fb2e980f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
+  parallaxEffect: 0.3
 --- !u!1 &292472700
 GameObject:
   m_ObjectHideFlags: 0
@@ -2813,6 +2841,7 @@ GameObject:
   m_Component:
   - component: {fileID: 343734169}
   - component: {fileID: 343734170}
+  - component: {fileID: 343734171}
   m_Layer: 0
   m_Name: mountain_3
   m_TagString: Untagged
@@ -2895,6 +2924,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &343734171
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343734168}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5447a599f44c76438f2f96fb2e980f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
+  parallaxEffect: 0.3
 --- !u!1 &434908714
 GameObject:
   m_ObjectHideFlags: 0
@@ -3232,6 +3274,7 @@ GameObject:
   m_Component:
   - component: {fileID: 464909406}
   - component: {fileID: 464909407}
+  - component: {fileID: 464909408}
   m_Layer: 0
   m_Name: cloud_1
   m_TagString: Untagged
@@ -3314,6 +3357,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &464909408
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 464909405}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5447a599f44c76438f2f96fb2e980f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
+  parallaxEffect: 0.1
 --- !u!1 &480482633
 GameObject:
   m_ObjectHideFlags: 0
@@ -3973,6 +4029,7 @@ GameObject:
   m_Component:
   - component: {fileID: 550324316}
   - component: {fileID: 550324317}
+  - component: {fileID: 550324318}
   m_Layer: 0
   m_Name: cloud_2
   m_TagString: Untagged
@@ -4055,6 +4112,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &550324318
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 550324315}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5447a599f44c76438f2f96fb2e980f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
+  parallaxEffect: 0.1
 --- !u!1 &565970093
 GameObject:
   m_ObjectHideFlags: 0
@@ -4065,6 +4135,7 @@ GameObject:
   m_Component:
   - component: {fileID: 565970094}
   - component: {fileID: 565970095}
+  - component: {fileID: 565970096}
   m_Layer: 0
   m_Name: pine2_4
   m_TagString: Untagged
@@ -4147,6 +4218,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &565970096
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 565970093}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5447a599f44c76438f2f96fb2e980f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
+  parallaxEffect: 0.7
 --- !u!1 &572848801
 GameObject:
   m_ObjectHideFlags: 0
@@ -8711,6 +8795,7 @@ GameObject:
   m_Component:
   - component: {fileID: 673557132}
   - component: {fileID: 673557133}
+  - component: {fileID: 673557134}
   m_Layer: 0
   m_Name: pine1_0
   m_TagString: Untagged
@@ -8793,6 +8878,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &673557134
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 673557131}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5447a599f44c76438f2f96fb2e980f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
+  parallaxEffect: 0.5
 --- !u!1 &674044520
 GameObject:
   m_ObjectHideFlags: 0
@@ -9539,6 +9637,7 @@ GameObject:
   m_Component:
   - component: {fileID: 766342157}
   - component: {fileID: 766342158}
+  - component: {fileID: 766342159}
   m_Layer: 0
   m_Name: pine1_1
   m_TagString: Untagged
@@ -9621,6 +9720,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &766342159
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 766342156}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5447a599f44c76438f2f96fb2e980f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
+  parallaxEffect: 0.5
 --- !u!1 &767597307
 GameObject:
   m_ObjectHideFlags: 0
@@ -9631,6 +9743,7 @@ GameObject:
   m_Component:
   - component: {fileID: 767597308}
   - component: {fileID: 767597309}
+  - component: {fileID: 767597310}
   m_Layer: 0
   m_Name: sky_2
   m_TagString: Untagged
@@ -9713,6 +9826,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &767597310
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 767597307}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5447a599f44c76438f2f96fb2e980f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
+  parallaxEffect: 0.05
 --- !u!1 &770396559
 GameObject:
   m_ObjectHideFlags: 0
@@ -9769,6 +9895,7 @@ GameObject:
   m_Component:
   - component: {fileID: 795965872}
   - component: {fileID: 795965873}
+  - component: {fileID: 795965874}
   m_Layer: 0
   m_Name: cloud_4
   m_TagString: Untagged
@@ -9851,6 +9978,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &795965874
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 795965871}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5447a599f44c76438f2f96fb2e980f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
+  parallaxEffect: 0.1
 --- !u!1 &864664835
 GameObject:
   m_ObjectHideFlags: 0
@@ -9953,6 +10093,7 @@ GameObject:
   m_Component:
   - component: {fileID: 886341923}
   - component: {fileID: 886341924}
+  - component: {fileID: 886341925}
   m_Layer: 0
   m_Name: pine2_0
   m_TagString: Untagged
@@ -10035,6 +10176,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &886341925
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 886341922}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5447a599f44c76438f2f96fb2e980f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
+  parallaxEffect: 0.7
 --- !u!1 &894436933
 GameObject:
   m_ObjectHideFlags: 0
@@ -10725,6 +10879,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1068321414}
   - component: {fileID: 1068321415}
+  - component: {fileID: 1068321416}
   m_Layer: 0
   m_Name: cloud_0
   m_TagString: Untagged
@@ -10807,6 +10962,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &1068321416
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1068321413}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5447a599f44c76438f2f96fb2e980f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
+  parallaxEffect: 0.1
 --- !u!1 &1089656859
 GameObject:
   m_ObjectHideFlags: 0
@@ -10817,6 +10985,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1089656860}
   - component: {fileID: 1089656861}
+  - component: {fileID: 1089656862}
   m_Layer: 0
   m_Name: pine1_3
   m_TagString: Untagged
@@ -10899,6 +11068,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &1089656862
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1089656859}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5447a599f44c76438f2f96fb2e980f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
+  parallaxEffect: 0.5
 --- !u!1 &1131639699
 GameObject:
   m_ObjectHideFlags: 0
@@ -12105,6 +12287,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1280253130}
   - component: {fileID: 1280253131}
+  - component: {fileID: 1280253132}
   m_Layer: 0
   m_Name: sky_4
   m_TagString: Untagged
@@ -12187,6 +12370,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &1280253132
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1280253129}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5447a599f44c76438f2f96fb2e980f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
+  parallaxEffect: 0.05
 --- !u!1 &1296752033
 GameObject:
   m_ObjectHideFlags: 0
@@ -12197,6 +12393,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1296752034}
   - component: {fileID: 1296752035}
+  - component: {fileID: 1296752036}
   m_Layer: 0
   m_Name: pine2_2
   m_TagString: Untagged
@@ -12279,6 +12476,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &1296752036
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1296752033}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5447a599f44c76438f2f96fb2e980f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
+  parallaxEffect: 0.7
 --- !u!1 &1300634928
 GameObject:
   m_ObjectHideFlags: 0
@@ -12325,6 +12535,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1335845495}
   - component: {fileID: 1335845496}
+  - component: {fileID: 1335845497}
   m_Layer: 0
   m_Name: sky_0
   m_TagString: Untagged
@@ -12407,6 +12618,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &1335845497
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1335845494}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5447a599f44c76438f2f96fb2e980f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
+  parallaxEffect: 0.05
 --- !u!1 &1341868498
 GameObject:
   m_ObjectHideFlags: 0
@@ -12509,6 +12733,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1354734775}
   - component: {fileID: 1354734776}
+  - component: {fileID: 1354734777}
   m_Layer: 0
   m_Name: pine1_2
   m_TagString: Untagged
@@ -12591,6 +12816,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &1354734777
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1354734774}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5447a599f44c76438f2f96fb2e980f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
+  parallaxEffect: 0.5
 --- !u!1 &1382691949
 GameObject:
   m_ObjectHideFlags: 0
@@ -12785,6 +13023,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1387787479}
   - component: {fileID: 1387787480}
+  - component: {fileID: 1387787481}
   m_Layer: 0
   m_Name: mountain_4
   m_TagString: Untagged
@@ -12867,6 +13106,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &1387787481
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1387787478}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5447a599f44c76438f2f96fb2e980f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
+  parallaxEffect: 0.3
 --- !u!1 &1390661230
 GameObject:
   m_ObjectHideFlags: 0
@@ -13061,6 +13313,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1446668021}
   - component: {fileID: 1446668022}
+  - component: {fileID: 1446668023}
   m_Layer: 0
   m_Name: pine1_4
   m_TagString: Untagged
@@ -13143,6 +13396,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &1446668023
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1446668020}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5447a599f44c76438f2f96fb2e980f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
+  parallaxEffect: 0.5
 --- !u!1 &1461449090
 GameObject:
   m_ObjectHideFlags: 0
@@ -13649,6 +13915,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1675060455}
   - component: {fileID: 1675060456}
+  - component: {fileID: 1675060457}
   m_Layer: 0
   m_Name: mountain_1
   m_TagString: Untagged
@@ -13731,6 +13998,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &1675060457
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1675060454}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5447a599f44c76438f2f96fb2e980f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
+  parallaxEffect: 0.3
 --- !u!1 &1693312407
 GameObject:
   m_ObjectHideFlags: 0
@@ -14404,6 +14684,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1793227066}
   - component: {fileID: 1793227067}
+  - component: {fileID: 1793227068}
   m_Layer: 0
   m_Name: pine2_3
   m_TagString: Untagged
@@ -14486,6 +14767,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &1793227068
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1793227065}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5447a599f44c76438f2f96fb2e980f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
+  parallaxEffect: 0.7
 --- !u!1 &1814136686
 GameObject:
   m_ObjectHideFlags: 0
@@ -15212,6 +15506,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1963752003}
   - component: {fileID: 1963752004}
+  - component: {fileID: 1963752005}
   m_Layer: 0
   m_Name: pine2_1
   m_TagString: Untagged
@@ -15294,6 +15589,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &1963752005
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1963752002}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5447a599f44c76438f2f96fb2e980f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
+  parallaxEffect: 0.7
 --- !u!1 &1970191578
 GameObject:
   m_ObjectHideFlags: 0
@@ -15396,6 +15704,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2010765556}
   - component: {fileID: 2010765557}
+  - component: {fileID: 2010765558}
   m_Layer: 0
   m_Name: cloud_3
   m_TagString: Untagged
@@ -15478,6 +15787,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &2010765558
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2010765555}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5447a599f44c76438f2f96fb2e980f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
+  parallaxEffect: 0.1
 --- !u!1 &2028736001
 GameObject:
   m_ObjectHideFlags: 0
@@ -15488,6 +15810,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2028736002}
   - component: {fileID: 2028736003}
+  - component: {fileID: 2028736004}
   m_Layer: 0
   m_Name: sky_3
   m_TagString: Untagged
@@ -15570,6 +15893,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &2028736004
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2028736001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5447a599f44c76438f2f96fb2e980f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
+  parallaxEffect: 0.05
 --- !u!1 &2042996141
 GameObject:
   m_ObjectHideFlags: 0
@@ -15856,6 +16192,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2072150172}
   - component: {fileID: 2072150173}
+  - component: {fileID: 2072150174}
   m_Layer: 0
   m_Name: sky_1
   m_TagString: Untagged
@@ -15938,6 +16275,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &2072150174
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2072150171}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5447a599f44c76438f2f96fb2e980f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
+  parallaxEffect: 0.05
 --- !u!1 &2094627652
 GameObject:
   m_ObjectHideFlags: 0
