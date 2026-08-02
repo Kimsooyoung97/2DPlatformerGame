@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using NAN2026.Core;
+using UnityEngine.InputSystem;
 
 namespace NAN2026
 {
@@ -22,6 +23,7 @@ namespace NAN2026
         private float attackElapsed;
         private int hp;
         private bool hitApplied;
+        private bool forceAwaken;
 
         private void Awake()
         {
@@ -46,11 +48,19 @@ namespace NAN2026
             }
         }
 
+        private void Update()
+        {
+            // 공주 보스와 동일: 마우스 오른쪽 버튼으로 강제 각성 (근접 감지와 병행)
+            if (state == StatueLogic.Dormant && Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame)
+                forceAwaken = true;
+        }
+
         private void FixedUpdate()
         {
             if (player == null || state == StatueLogic.Dead) return;
             float dx = player.position.x - transform.position.x;
             float dist = Vector2.Distance(player.position, transform.position);
+            if (forceAwaken && state == StatueLogic.Dormant) dist = 0f;
             timer -= Time.fixedDeltaTime;
             int next = StatueLogic.Next(state, dist, config.awakenRange, config.attackRange, timer <= 0f);
             if (next != state) Enter(next);
