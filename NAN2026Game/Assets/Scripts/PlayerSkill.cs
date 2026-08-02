@@ -79,8 +79,19 @@ namespace NAN2026
 
         private void SpawnEffect(Vector3 pos)
         {
+            // 지면 스냅: 해당 x에서 아래로 지형 탐색 — 없으면(구덩이·허공) 이펙트 생략
+            float groundY = float.NaN;
+            var origin = new Vector2(pos.x, transform.position.y + 0.5f);
+            foreach (var hit in Physics2D.RaycastAll(origin, Vector2.down, config.groundSnapDepth))
+            {
+                if (hit.collider == null || hit.collider.isTrigger) continue;
+                if (!(hit.collider is UnityEngine.Tilemaps.TilemapCollider2D) && !(hit.collider is CompositeCollider2D)) continue;
+                groundY = hit.point.y;
+                break;
+            }
+            if (float.IsNaN(groundY)) return;
             var go = new GameObject("SkillSlash_Effect");
-            // 이펙트 하단이 지면(플레이어 발 높이)에 닿도록 절반 높이 보정
+            pos.y = groundY;
             if (effectSprites != null && effectSprites.Length > 0)
                 pos.y += effectSprites[0].bounds.extents.y * config.effectScale;
             go.transform.position = pos;

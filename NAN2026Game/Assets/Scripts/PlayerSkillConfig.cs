@@ -15,5 +15,6 @@ namespace NAN2026
         public float effectScale;
         public int effectSortingOrder;
         public float cooldown;
+        public float groundSnapDepth;  // 이펙트 지면 탐색 깊이 (없으면 생략)
     }
 }
