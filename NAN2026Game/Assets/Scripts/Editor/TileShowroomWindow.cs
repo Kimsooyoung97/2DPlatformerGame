@@ -152,6 +152,12 @@ namespace NAN2026.EditorTools
             }
         }
 
+        private static bool IsForestDeco(string n)
+        {
+            var m = System.Text.RegularExpressions.Regex.Match(n, @"forest_tileset_(\d+)$");
+            return m.Success && int.Parse(m.Groups[1].Value) <= 6;
+        }
+
         private void AddUsageFamily(string familyName, string tilemapGoName)
         {
             var go = GameObject.Find(tilemapGoName);
@@ -768,7 +774,7 @@ namespace NAN2026.EditorTools
                             {
                                 // 타일 성격으로 대상 결정: 벽 타일은 항상 벽 겹으로 (사용자 팔레트 설정 존중)
                                 string targetTm = "Stage_Ground";
-                                if (o.name.Contains("Tileable") || o.name.Contains("Wall"))
+                                if (o.name.Contains("Tileable") || o.name.Contains("Wall") || IsForestDeco(o.name))
                                     targetTm = "Stage_Wall";
                                 if (familyNames[0].Length > 0)
                                 {
@@ -873,7 +879,7 @@ namespace NAN2026.EditorTools
                         if (GUILayout.Button("🖌 이 타일로 칠하기", GUILayout.Width(124f), GUILayout.Height(24f)))
                         {
                             inspectMode = false;
-                            string tgt = (t.name.Contains("Tileable") || t.name.Contains("Wall")) ? "Stage_Wall" : "Stage_Ground";
+                            string tgt = (t.name.Contains("Tileable") || t.name.Contains("Wall") || IsForestDeco(t.name)) ? "Stage_Wall" : "Stage_Ground";
                             if (!string.IsNullOrEmpty(customBrushTarget)) tgt = customBrushTarget;
                             ShowNotification(new GUIContent(PaintWith(t, tgt)));
                         }
