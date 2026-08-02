@@ -47,3 +47,6 @@
 ## Cainos 에셋 팩 / Map_Castle — 2026-08-01
 - Assets/Cainos/ (Pixel Art Platformer - Village Props, Interactive Pixel Water 등): 유니티 에셋 스토어, 표준 라이선스 (사용자 다운로드)
 - Assets/Sprites_AI/Map_Castle/: 사용자 생성 AI 산출물 (성 안뜰 구간용)
+
+- Effect_Vol.3 (에셋 팩, Assets/Effect_Vol.3): Effect_1.png 9프레임을 플레이어 스킬 내려찍기 이펙트로 사용. 라이선스: 팀 도입 팩(확인 필요 시 팀 문의)
+- 기사_스킬대기.png (생성형 AI 산출물, Assets/Map): 플레이어 스킬 모션용. 생성 프롬프트 미제공 — 불투명 배경으로 슬라이싱 보류 중

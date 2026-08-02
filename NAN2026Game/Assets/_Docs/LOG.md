@@ -1308,3 +1308,16 @@ A로 가자
 - 프리팹 실측: PlayerHealth(maxHp=5, blink 0.08x4) 포함, scale=1.5, 컴포넌트 7종. 씬 저장 True
 ### 실패와 수정
 없음
+
+
+## [구현] 플레이어 스킬 (1키) — 양옆 3연 내려찍기 이펙트 — 2026-08-02 23:25
+### 프롬프트
+[구현]기사_스킬대기 라는 이름으로 C:\Users\edwin\OneDrive\Desktop\NHN 대회 에셋\공주를 구하라 여기 경로에 넣어놨어. 1번을 누르면 player가 스킬을 쓰는데 4프레임이 시작되면 Assets > Effect_vol.3> Effect Effect_12 애니메이션이 player를 기준으로 양옆에 3개씩 내려찍도록 구현해줘. (후속 정정: Effect_12→Effect_1)
+### 조작 내역
+- SkillLogic(Core: OffsetX·FrameTime)+테스트 5건, PlayerSkillConfig(SO: fps10·트리거4프레임·3쌍·간격1.4·시차0.09·이펙트14fps·쿨2s)
+- PlayerSkill: 1키(신형 Input) → 4프레임 시점부터 좌우 대칭 쌍을 바깥으로 시차 소환, EffectPlayback(1회 재생 자멸). skillSprites 비면 타이밍만 진행(시트 후속 연결 설계)
+- Effect_1 9프레임 숫자 정렬 배선, Player 부착 후 프리팹 반영. 기사_스킬대기.png는 불투명·비균일 배경으로 자동 처리 불가 — 원본 복구 후 보류(업로드 or 재출력 대기)
+### 검증
+- 컴파일 에러 0(기존 결손 잡음 2건 무관), EditMode 51/51, 씬·프리팹 저장 True. 연출 체감은 사용자 재생 판정
+### 실패와 수정
+- Effect_12 미존재→사용자 정정 Effect_1. 배경 키잉 4% 실패→원본 복구·보류
