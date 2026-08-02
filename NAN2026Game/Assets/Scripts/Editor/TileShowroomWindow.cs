@@ -34,8 +34,11 @@ namespace NAN2026.EditorTools
         private static readonly List<TileBase> clipGroundTile = new List<TileBase>();
         private static readonly List<Vector3Int> clipWallOff = new List<Vector3Int>();
         private static readonly List<TileBase> clipWallTile = new List<TileBase>();
-        private static readonly List<GameObject> clipPropSrc = new List<GameObject>();
+        private static readonly List<GameObject> clipPropAsset = new List<GameObject>();
         private static readonly List<Vector3> clipPropOff = new List<Vector3>();
+        private static readonly List<Vector3> clipPropScale = new List<Vector3>();
+        private static readonly List<int> clipPropOrder = new List<int>();
+        private static readonly List<bool> clipPropFlipX = new List<bool>();
         private readonly List<GameObject> hitProps = new List<GameObject>();
         private readonly List<string> hitPropMeta = new List<string>();
         private static string armedTarget = "Stage_Ground";
@@ -231,7 +234,7 @@ namespace NAN2026.EditorTools
             return mray.origin + mray.direction * Mathf.Max(0f, -mray.origin.z / mdz);
         }
 
-        // 구간 복사: 드래그로 범위 지정 → 클릭으로 붙여넣기 (바닥·벽 타일 + 소품 통째)
+        // 구간 복사: 어느 씬에서든 드래그 캡처(에셋 참조 저장) → 우리 맵에서 붙여넣기(덮어쓰기)
         private void HandleRegionCopy(SceneView sv)
         {
             var e = Event.current;
@@ -244,11 +247,6 @@ namespace NAN2026.EditorTools
                 Repaint();
                 return;
             }
-            var gGo = GameObject.Find("Stage_Ground");
-            if (gGo == null) return;
-            var gtm = gGo.GetComponent<Tilemap>();
-            var wGo = GameObject.Find("Stage_Wall");
-            var wtm = wGo != null ? wGo.GetComponent<Tilemap>() : null;
             int id = GUIUtility.GetControlID(FocusType.Passive);
             HandleUtility.AddDefaultControl(id);
             Vector3 world = MouseWorld(e);
@@ -270,7 +268,7 @@ namespace NAN2026.EditorTools
                     if (e.type == EventType.MouseDrag && e.button == 0) { e.Use(); sv.Repaint(); }
                     if (e.type == EventType.MouseUp && e.button == 0)
                     {
-                        CaptureRegion(gtm, wtm, mn, mx);
+                        CaptureRegion(mn, mx);
                         regionDragStart = null;
                         e.Use();
                         sv.Repaint();
@@ -280,8 +278,8 @@ namespace NAN2026.EditorTools
             }
             else
             {
-                var anchorCell = gtm.WorldToCell(world);
-                Vector3 aw = gtm.CellToWorld(anchorCell);
+                var anchorCell = new Vector3Int(Mathf.FloorToInt(world.x), Mathf.FloorToInt(world.y), 0);
+                Vector3 aw = new Vector3(anchorCell.x, anchorCell.y, 0f);
                 Vector3 sz = new Vector3(clipSize.x, clipSize.y, 0f);
                 Handles.color = new Color(0.3f, 0.9f, 1f, 0.95f);
                 Handles.DrawSolidRectangleWithOutline(new[] {
@@ -291,7 +289,7 @@ namespace NAN2026.EditorTools
                 if (e.type == EventType.MouseMove) sv.Repaint();
                 if (e.type == EventType.MouseDown && e.button == 0)
                 {
-                    PasteRegion(gtm, wtm, anchorCell);
+                    PasteRegion(anchorCell);
                     e.Use();
                     sv.Repaint();
                 }
@@ -303,48 +301,79 @@ namespace NAN2026.EditorTools
             hasClip = false;
             clipGroundOff.Clear(); clipGroundTile.Clear();
             clipWallOff.Clear(); clipWallTile.Clear();
-            clipPropSrc.Clear(); clipPropOff.Clear();
+            clipPropAsset.Clear(); clipPropOff.Clear();
+            clipPropScale.Clear(); clipPropOrder.Clear(); clipPropFlipX.Clear();
         }
 
-        private void CaptureRegion(Tilemap gtm, Tilemap wtm, Vector3 mn, Vector3 mx)
+        private static readonly string[] PropExclude = { "Player", "Princess", "Boss", "Portal", "Camera", "Background", "Global", "HitFlash", "EventSystem" };
+
+        // 씬 무관 캡처: 모든 타일맵을 콜라이더 유무로 바닥/벽 분류, 소품은 프리팹 에셋 참조로 저장
+        private void CaptureRegion(Vector3 mn, Vector3 mx)
         {
             ClearClip();
-            var cellMin = gtm.WorldToCell(mn);
-            var cellMax = gtm.WorldToCell(mx);
-            for (int x = cellMin.x; x <= cellMax.x; x++)
-                for (int y = cellMin.y; y <= cellMax.y; y++)
-                {
-                    var p = new Vector3Int(x, y, 0);
-                    var gt = gtm.GetTile(p);
-                    if (gt != null) { clipGroundOff.Add(p - cellMin); clipGroundTile.Add(gt); }
-                    if (wtm != null)
+            var cellMin = new Vector3Int(Mathf.FloorToInt(mn.x), Mathf.FloorToInt(mn.y), 0);
+            var cellMax = new Vector3Int(Mathf.FloorToInt(mx.x), Mathf.FloorToInt(mx.y), 0);
+            foreach (var tm in Object.FindObjectsByType<Tilemap>(FindObjectsSortMode.None))
+            {
+                bool isWall = tm.GetComponent<TilemapCollider2D>() == null;
+                for (int x = cellMin.x; x <= cellMax.x; x++)
+                    for (int y = cellMin.y; y <= cellMax.y; y++)
                     {
-                        var wt = wtm.GetTile(p);
-                        if (wt != null) { clipWallOff.Add(p - cellMin); clipWallTile.Add(wt); }
+                        var p = new Vector3Int(x, y, 0);
+                        var t = tm.GetTile(p);
+                        if (t == null) continue;
+                        if (isWall) { clipWallOff.Add(p - cellMin); clipWallTile.Add(t); }
+                        else { clipGroundOff.Add(p - cellMin); clipGroundTile.Add(t); }
                     }
-                }
-            Vector3 anchorW = gtm.CellToWorld(cellMin);
-            var parentGo = GameObject.Find("Stage_Props");
-            if (parentGo != null)
-                foreach (Transform c in parentGo.transform)
-                {
-                    var pp = c.position;
-                    if (pp.x < mn.x || pp.x > mx.x || pp.y < mn.y || pp.y > mx.y) continue;
-                    clipPropSrc.Add(c.gameObject);
-                    clipPropOff.Add(pp - anchorW);
-                }
+            }
+            Vector3 anchorW = new Vector3(cellMin.x, cellMin.y, 0f);
+            var seenRoots = new HashSet<GameObject>();
+            foreach (var sr in Object.FindObjectsByType<SpriteRenderer>(FindObjectsSortMode.None))
+            {
+                var root = PrefabUtility.GetNearestPrefabInstanceRoot(sr.gameObject);
+                if (root == null || seenRoots.Contains(root)) continue;
+                seenRoots.Add(root);
+                var pos = root.transform.position;
+                if (pos.x < mn.x || pos.x > mx.x || pos.y < mn.y || pos.y > mx.y) continue;
+                bool skip = false;
+                foreach (var ex in PropExclude) if (root.name.Contains(ex)) { skip = true; break; }
+                if (skip) continue;
+                var asset = PrefabUtility.GetCorrespondingObjectFromSource(root) as GameObject;
+                if (asset == null) continue;
+                var firstSr = root.GetComponentInChildren<SpriteRenderer>();
+                clipPropAsset.Add(asset);
+                clipPropOff.Add(pos - anchorW);
+                clipPropScale.Add(root.transform.localScale);
+                clipPropOrder.Add(firstSr != null ? firstSr.sortingOrder : 0);
+                clipPropFlipX.Add(firstSr != null && firstSr.flipX);
+            }
             clipSize = cellMax - cellMin + new Vector3Int(1, 1, 0);
-            hasClip = clipGroundOff.Count + clipWallOff.Count + clipPropSrc.Count > 0;
+            hasClip = clipGroundOff.Count + clipWallOff.Count + clipPropAsset.Count > 0;
             ShowNotification(new GUIContent(hasClip
-                ? "복사됨: 바닥 " + clipGroundOff.Count + "·벽 " + clipWallOff.Count + "·소품 " + clipPropSrc.Count + " — 클릭=붙여넣기, Esc=비우기"
-                : "빈 범위"), 1.6d);
+                ? "복사됨: 바닥 " + clipGroundOff.Count + "·벽 " + clipWallOff.Count + "·소품 " + clipPropAsset.Count + " — [우리 맵]에서 클릭=붙여넣기"
+                : "빈 범위"), 1.8d);
         }
 
-        private void PasteRegion(Tilemap gtm, Tilemap wtm, Vector3Int anchorCell)
+        // 우리 씬 전용 붙여넣기 (덮어쓰기). 팩 원본 씬 보호
+        private void PasteRegion(Vector3Int anchorCell)
         {
             try
             {
-                // ① 덮어쓰기: 대상 사각형의 기존 타일 전부 제거
+                var scenePath = UnityEngine.SceneManagement.SceneManager.GetActiveScene().path;
+                if (scenePath.StartsWith("Assets/Cainos"))
+                {
+                    ShowNotification(new GUIContent("팩 원본 씬에는 붙여넣기 금지 — [우리 맵]으로 전환하세요"), 2.5d);
+                    return;
+                }
+                var gGo = GameObject.Find("Stage_Ground");
+                if (gGo == null)
+                {
+                    ShowNotification(new GUIContent("Stage_Ground 없음 — 우리 맵에서 붙여넣으세요"), 2.5d);
+                    return;
+                }
+                var gtm = gGo.GetComponent<Tilemap>();
+                var wGo = GameObject.Find("Stage_Wall");
+                var wtm = wGo != null ? wGo.GetComponent<Tilemap>() : null;
                 Undo.RegisterCompleteObjectUndo(gtm, "구간 붙여넣기");
                 if (wtm != null) Undo.RegisterCompleteObjectUndo(wtm, "구간 붙여넣기");
                 for (int x = 0; x < clipSize.x; x++)
@@ -354,8 +383,7 @@ namespace NAN2026.EditorTools
                         gtm.SetTile(p, null);
                         if (wtm != null) wtm.SetTile(p, null);
                     }
-                // ② 덮어쓰기: 대상 사각형 안의 기존 소품 삭제
-                Vector3 anchorW = gtm.CellToWorld(anchorCell);
+                Vector3 anchorW = new Vector3(anchorCell.x, anchorCell.y, 0f);
                 Vector3 maxW = anchorW + new Vector3(clipSize.x, clipSize.y, 0f);
                 var parentGo = GameObject.Find("Stage_Props");
                 int removedProps = 0;
@@ -366,38 +394,41 @@ namespace NAN2026.EditorTools
                     {
                         var pp = c.position;
                         if (pp.x >= anchorW.x && pp.x <= maxW.x && pp.y >= anchorW.y && pp.y <= maxW.y)
-                        {
-                            bool isClipSource = clipPropSrc.Contains(c.gameObject);
-                            if (!isClipSource) doomed.Add(c.gameObject);
-                        }
+                            doomed.Add(c.gameObject);
                     }
                     foreach (var d in doomed) { Undo.DestroyObjectImmediate(d); removedProps++; }
                 }
-                // ③ 클립 내용 기록
                 for (int i = 0; i < clipGroundOff.Count; i++)
                     gtm.SetTile(anchorCell + clipGroundOff[i], clipGroundTile[i]);
                 if (wtm != null)
                     for (int i = 0; i < clipWallOff.Count; i++)
                         wtm.SetTile(anchorCell + clipWallOff[i], clipWallTile[i]);
-                int placedProps = 0;
-                for (int i = 0; i < clipPropSrc.Count; i++)
-                {
-                    var srcGo = clipPropSrc[i];
-                    if (srcGo == null) continue;
-                    var pf = PrefabUtility.GetCorrespondingObjectFromSource(srcGo) as GameObject;
-                    GameObject inst;
-                    if (pf != null)
+                // 소품: 캡처 정렬 순서를 보존하며 우리 -300대역 고유값으로 재부여
+                int next = -300;
+                if (parentGo != null)
+                    foreach (Transform c in parentGo.transform)
                     {
-                        inst = (GameObject)PrefabUtility.InstantiatePrefab(pf);
-                        inst.transform.localScale = srcGo.transform.localScale;
+                        var sr0 = c.GetComponentInChildren<SpriteRenderer>();
+                        if (sr0 != null && sr0.sortingOrder >= -300 && sr0.sortingOrder < 0 && sr0.sortingOrder >= next)
+                            next = sr0.sortingOrder + 1;
                     }
-                    else inst = Object.Instantiate(srcGo);
+                var order = new List<int>();
+                for (int i = 0; i < clipPropAsset.Count; i++) order.Add(i);
+                order.Sort((a, b) => clipPropOrder[a].CompareTo(clipPropOrder[b]));
+                int placedProps = 0;
+                foreach (int i in order)
+                {
+                    if (clipPropAsset[i] == null) continue;
+                    var inst = (GameObject)PrefabUtility.InstantiatePrefab(clipPropAsset[i]);
                     inst.transform.position = anchorW + clipPropOff[i];
+                    inst.transform.localScale = clipPropScale[i];
                     if (parentGo != null) inst.transform.SetParent(parentGo.transform);
-                    var srcSrs = srcGo.GetComponentsInChildren<SpriteRenderer>();
-                    var dstSrs = inst.GetComponentsInChildren<SpriteRenderer>();
-                    for (int k = 0; k < dstSrs.Length && k < srcSrs.Length; k++)
-                        dstSrs[k].sortingOrder = srcSrs[k].sortingOrder;
+                    foreach (var sr2 in inst.GetComponentsInChildren<SpriteRenderer>())
+                    {
+                        sr2.sortingOrder = next;
+                        sr2.flipX = clipPropFlipX[i];
+                    }
+                    next++;
                     foreach (var col in inst.GetComponentsInChildren<Collider2D>()) Object.DestroyImmediate(col);
                     Undo.RegisterCreatedObjectUndo(inst, "구간 붙여넣기");
                     placedProps++;
@@ -405,8 +436,7 @@ namespace NAN2026.EditorTools
                 UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(gtm.gameObject.scene);
                 ShowNotification(new GUIContent("붙여넣음: 바닥 " + clipGroundOff.Count + "·벽 " + clipWallOff.Count
                     + "·소품 " + placedProps + (removedProps > 0 ? " (기존 소품 " + removedProps + "개 덮어씀)" : "")), 1.8d);
-                Debug.Log("[쇼룸] 구간 붙여넣기 @셀(" + anchorCell.x + "," + anchorCell.y + ") 바닥 " + clipGroundOff.Count
-                    + " 벽 " + clipWallOff.Count + " 소품 " + placedProps + " 제거 " + removedProps);
+                Debug.Log("[쇼룸] 붙여넣기 @셀(" + anchorCell.x + "," + anchorCell.y + ") G" + clipGroundOff.Count + " W" + clipWallOff.Count + " P" + placedProps + " 제거 " + removedProps);
             }
             catch (System.Exception ex)
             {

@@ -931,8 +931,6 @@ Transform:
   - {fileID: 929640512}
   - {fileID: 694287650}
   - {fileID: 1278551027}
-  - {fileID: 878322914}
-  - {fileID: 2037585822}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &61672648
@@ -7587,72 +7585,6 @@ PrefabInstance:
 Transform:
   m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: 25468e7645e30f84bbf09744c9fe7352, type: 3}
   m_PrefabInstance: {fileID: 869869128}
-  m_PrefabAsset: {fileID: 0}
---- !u!1001 &878322913
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 53985794}
-    m_Modifications:
-    - target: {fileID: 390456860282783827, guid: a7ac723283557cc48abb5cba28e36587, type: 3}
-      propertyPath: m_Name
-      value: PF Dungeon Props - Debris Brick 01 B
-      objectReference: {fileID: 0}
-    - target: {fileID: 6265670936862214329, guid: a7ac723283557cc48abb5cba28e36587, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 143.38
-      objectReference: {fileID: 0}
-    - target: {fileID: 6265670936862214329, guid: a7ac723283557cc48abb5cba28e36587, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6265670936862214329, guid: a7ac723283557cc48abb5cba28e36587, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6265670936862214329, guid: a7ac723283557cc48abb5cba28e36587, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6265670936862214329, guid: a7ac723283557cc48abb5cba28e36587, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6265670936862214329, guid: a7ac723283557cc48abb5cba28e36587, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6265670936862214329, guid: a7ac723283557cc48abb5cba28e36587, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6265670936862214329, guid: a7ac723283557cc48abb5cba28e36587, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6265670936862214329, guid: a7ac723283557cc48abb5cba28e36587, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6265670936862214329, guid: a7ac723283557cc48abb5cba28e36587, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8930051543745126958, guid: a7ac723283557cc48abb5cba28e36587, type: 3}
-      propertyPath: m_SortingOrder
-      value: -230
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: a7ac723283557cc48abb5cba28e36587, type: 3}
---- !u!4 &878322914 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: a7ac723283557cc48abb5cba28e36587, type: 3}
-  m_PrefabInstance: {fileID: 878322913}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &881678251
 PrefabInstance:
@@ -30463,10 +30395,10 @@ Tilemap:
     m_Data: {fileID: 11400000, guid: 0a0d0241c66500c40898288f39115e4d, type: 2}
   - serializedVersion: 2
     m_RefCount: 0
-    m_Data: {fileID: 11400000, guid: 7cab14a8492bbb84c8871cc6dc607d85, type: 2}
+    m_Data: {fileID: 11400000, guid: 8a5f531c8a71551489c477eb8a129cd8, type: 2}
   - serializedVersion: 2
     m_RefCount: 0
-    m_Data: {fileID: 11400000, guid: d40f8a9557294d44bad7bb5b9254fee6, type: 2}
+    m_Data: {fileID: 11400000, guid: 03294fbe8813d9b45bd5dbc08a6a5fa2, type: 2}
   - serializedVersion: 2
     m_RefCount: 2
     m_Data: {fileID: 11400000, guid: 60d46bb4cd7c1384dabd49c37b37d6ad, type: 2}
@@ -31049,7 +30981,7 @@ Tilemap:
     m_Data: {fileID: -297413531, guid: 9b639766cca19b8448c0b6024f5e3552, type: 3}
   - serializedVersion: 2
     m_RefCount: 0
-    m_Data: {fileID: 1884002069, guid: 9b639766cca19b8448c0b6024f5e3552, type: 3}
+    m_Data: {fileID: -242940400640730147, guid: 1061b915ffc9af143a59aa0d12c234dd, type: 3}
   - serializedVersion: 2
     m_RefCount: 4
     m_Data: {fileID: 2005368470, guid: 9b639766cca19b8448c0b6024f5e3552, type: 3}
@@ -31070,7 +31002,7 @@ Tilemap:
     m_Data: {fileID: 201373558, guid: 5da750f36e60e0949ba7085b5e1788ce, type: 3}
   - serializedVersion: 2
     m_RefCount: 0
-    m_Data: {fileID: -1068556619, guid: 9b639766cca19b8448c0b6024f5e3552, type: 3}
+    m_Data: {fileID: 764265028, guid: 5da750f36e60e0949ba7085b5e1788ce, type: 3}
   - serializedVersion: 2
     m_RefCount: 1
     m_Data: {fileID: 6418188606106268938, guid: 1061b915ffc9af143a59aa0d12c234dd, type: 3}
@@ -31174,7 +31106,7 @@ Tilemap:
   m_AnimationFrameRate: 1
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Origin: {x: -6, y: -7, z: 0}
-  m_Size: {x: 150, y: 28, z: 1}
+  m_Size: {x: 152, y: 28, z: 1}
   m_TileAnchor: {x: 0.5, y: 0.5, z: 0}
   m_TileOrientation: 0
   m_TileOrientationMatrix:
@@ -63635,7 +63567,7 @@ Tilemap:
     m_Data: {fileID: 11400000, guid: 31264943224e73642a60da048dfca153, type: 2}
   - serializedVersion: 2
     m_RefCount: 0
-    m_Data: {fileID: 11400000, guid: f498c5c4e729ee54ba95258f0ebf0924, type: 2}
+    m_Data: {fileID: 11400000, guid: 03294fbe8813d9b45bd5dbc08a6a5fa2, type: 2}
   m_TileSpriteArray:
   - serializedVersion: 2
     m_RefCount: 61
@@ -63832,6 +63764,9 @@ Tilemap:
   - serializedVersion: 2
     m_RefCount: 48
     m_Data: {fileID: -1108446467, guid: 696dadb57c80a0744be25cd33ceff002, type: 3}
+  - serializedVersion: 2
+    m_RefCount: 0
+    m_Data: {fileID: 764265028, guid: 5da750f36e60e0949ba7085b5e1788ce, type: 3}
   m_TileMatrixArray:
   - serializedVersion: 2
     m_RefCount: 3166
@@ -63860,7 +63795,7 @@ Tilemap:
   m_AnimationFrameRate: 1
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Origin: {x: -6, y: -8, z: 0}
-  m_Size: {x: 150, y: 29, z: 1}
+  m_Size: {x: 152, y: 29, z: 1}
   m_TileAnchor: {x: 0.5, y: 0.5, z: 0}
   m_TileOrientation: 0
   m_TileOrientationMatrix:
@@ -67923,72 +67858,6 @@ PrefabInstance:
 Transform:
   m_CorrespondingSourceObject: {fileID: 7292622582502913521, guid: 05f5d6480bf7a2c4aaba7ddc3a3a9c69, type: 3}
   m_PrefabInstance: {fileID: 2026535596}
-  m_PrefabAsset: {fileID: 0}
---- !u!1001 &2037585821
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 53985794}
-    m_Modifications:
-    - target: {fileID: 390456860282783827, guid: ce0e18c5c1bce204a8554533338c7c96, type: 3}
-      propertyPath: m_Name
-      value: PF Dungeon Props - Debris Wood 01 A
-      objectReference: {fileID: 0}
-    - target: {fileID: 6265670936862214329, guid: ce0e18c5c1bce204a8554533338c7c96, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 141.69
-      objectReference: {fileID: 0}
-    - target: {fileID: 6265670936862214329, guid: ce0e18c5c1bce204a8554533338c7c96, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0.060000002
-      objectReference: {fileID: 0}
-    - target: {fileID: 6265670936862214329, guid: ce0e18c5c1bce204a8554533338c7c96, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6265670936862214329, guid: ce0e18c5c1bce204a8554533338c7c96, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6265670936862214329, guid: ce0e18c5c1bce204a8554533338c7c96, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6265670936862214329, guid: ce0e18c5c1bce204a8554533338c7c96, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6265670936862214329, guid: ce0e18c5c1bce204a8554533338c7c96, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6265670936862214329, guid: ce0e18c5c1bce204a8554533338c7c96, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6265670936862214329, guid: ce0e18c5c1bce204a8554533338c7c96, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6265670936862214329, guid: ce0e18c5c1bce204a8554533338c7c96, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8930051543745126958, guid: ce0e18c5c1bce204a8554533338c7c96, type: 3}
-      propertyPath: m_SortingOrder
-      value: -227
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: ce0e18c5c1bce204a8554533338c7c96, type: 3}
---- !u!4 &2037585822 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: ce0e18c5c1bce204a8554533338c7c96, type: 3}
-  m_PrefabInstance: {fileID: 2037585821}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &2066405020
 PrefabInstance:
