@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 783986966763930922}
   - component: {fileID: 7362309472688433499}
   - component: {fileID: 2704266015604190542}
+  - component: {fileID: 8664581510947316077}
   m_Layer: 0
   m_Name: Orkan
   m_TagString: Untagged
@@ -135,7 +136,7 @@ MonoBehaviour:
   shellBrokenDamageMultiplier: 1
   shellBrokenDuration: 3
   playerTag: Player
-  aggroRange: 9
+  aggroRange: 25
   chaseStopDistance: 1.6
   moveSpeed: 2.2
   minAttackCooldown: 1.2
@@ -146,7 +147,7 @@ MonoBehaviour:
   shockwaveSpeed: 7
   shockwaveRange: 6
   shockwaveDamage: 15
-  shockwavePrefab: {fileID: 0}
+  shockwavePrefab: {fileID: 7945142998041502555, guid: 30c09c43cfb77de418afe2d69d58dcd9, type: 3}
   chargeWindup: 0.7
   chargeSpeed: 11
   chargeMaxDistance: 10
@@ -161,6 +162,33 @@ MonoBehaviour:
   throwInterval: 0.25
   rockSpikeSpeed: 9
   rockSpikeDamage: 10
-  rockSpikePrefab: {fileID: 0}
+  rockSpikePrefab: {fileID: 6897040213144945556, guid: 38ce7c5cbeba58b45bf8a28e2ab55357, type: 3}
   windupColor: {r: 1, g: 0.35, b: 0.35, a: 1}
   groggyColor: {r: 1, g: 0.85, b: 0.3, a: 1}
+--- !u!50 &8664581510947316077
+Rigidbody2D:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2176467059452972726}
+  m_BodyType: 0
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_GravityScale: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0
