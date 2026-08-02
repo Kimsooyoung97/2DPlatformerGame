@@ -152,6 +152,14 @@ namespace NAN2026.EditorTools
                 }
             }
 
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                if (GUILayout.Button("투명 발판 (솔리드)"))
+                    MakeInvisibleBox(false);
+                if (GUILayout.Button("투명 발판 (원웨이 Platform_)"))
+                    MakeInvisibleBox(true);
+            }
+
             foreach (var tm in FindObjectsByType<Tilemap>(FindObjectsSortMode.None))
             {
                 using (new EditorGUILayout.HorizontalScope())
@@ -216,6 +224,23 @@ namespace NAN2026.EditorTools
             }
             EditorGUILayout.EndHorizontal();
             EditorGUILayout.Space(4);
+        }
+
+        private static void MakeInvisibleBox(bool oneway)
+        {
+            int n = 1;
+            string prefix = oneway ? "Platform_Invisible_" : "Solid_Invisible_";
+            while (GameObject.Find(prefix + n) != null) n++;
+            var go = new GameObject(prefix + n);
+            var box = go.AddComponent<BoxCollider2D>();
+            box.size = new Vector2(3f, 0.5f);
+            var t = System.Type.GetType("NAN2026.InvisiblePlatform, Assembly-CSharp");
+            if (t != null) go.AddComponent(t);
+            var sv = SceneView.lastActiveSceneView;
+            go.transform.position = sv != null ? (Vector3)(Vector2)sv.pivot : Vector3.zero;
+            Undo.RegisterCreatedObjectUndo(go, "투명 발판");
+            Selection.activeGameObject = go;
+            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(go.scene);
         }
     }
 }
