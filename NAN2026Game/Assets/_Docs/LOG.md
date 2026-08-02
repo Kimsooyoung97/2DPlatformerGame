@@ -1634,3 +1634,27 @@ A로 가자
 - 없음 (이전 두 차례 시도는 근본 원인이 아니었을 뿐, 별도 실수라기보다 접근 자체를 바꾼 것)
 ### 눈으로 확인 필요
 - 실제 재생에서 공중에 벽을 밀며 이동해도 이제 정상 낙하하는지 최종 확인 부탁드립니다
+
+## [구현] 엑셀(CSV) 데이터 테이블로 Config 일괄 관리하는 에디터 도구 — 2026-08-03 01:10
+### 프롬프트
+지금 이 게임내에 존재하는 데이터 플레이어 체력, 패링 쿨타임, 각 몬스터별 체력 등등 이런 데이터를 엑셀 데이터 테이블로 관리해서 유지보수 하고 싶어
+### 설계 결정
+바이너리 .xlsx를 직접 파싱하는 외부 라이브러리(EPPlus 등)를 새로 들이면 의존성·라이선스 리스크가 커서, 엑셀에서 그대로 열고 저장 가능한 CSV를 왕복 포맷으로 채택. 런타임 코드는 전혀 바꾸지 않고(여전히 ScriptableObject Config가 수치를 소유, SPEC.md 규칙 그대로), CSV는 에디터 전용 왕복 수단으로만 사용
+### 조작 내역
+- **몬스터 체력을 Config로 이관**: 기존엔 각 MonsterHealth 컴포넌트 인스턴스마다 개별 maxHealth 필드가 흩어져 있어 CSV(에셋 단위) 관리가 불가능했음. EnemyAIConfig에 maxHealth 필드 추가, MonsterHealth.SetMaxHealth(int) 신규(Awake 순서에 무관하게 동작), EnemyAI.Awake에서 config.maxHealth를 적용하도록 연결. DeathDog/MiddleBoss 기존 인스턴스 값(4)과 동일하게 맞춰 밸런스 변화 없음
+- Assets/Scripts/Editor/GameDataTableTool.cs 신규(에디터 전용, 기존 Assets/Scripts/Editor 폴더 재사용, 새 asmdef 없음): 메뉴 'NAN2026/데이터 테이블/CSV로 내보내기'와 'CSV 적용하기' 2개
+  - 내보내기: Assets/Configs 아래 모든 ScriptableObject를 리플렉션으로 스캔해 float/int/bool/string 공개 필드를 AssetPath,FieldName,Value,Note(Tooltip에서 추출) 4열 CSV로 저장
+  - 적용하기: CSV를 읽어 각 행을 해당 에셋의 필드에 다시 써넣고 SetDirty+SaveAssets. Vector/Color/LayerMask/배열 등 복합 타입은 지원 범위 밖(인스펙터에서 직접 편집)
+- Assets/_Data/GameDataTable.csv 최초 생성(Export 실행): 134개 필드, 12개 에셋(PlayerCombatConfig, MovementConfig, EnemyAIConfig ×2, MiddleBossAttackConfig, LevelProgressionConfig, AttackEffectConfig 등 — 팀원이 만든 BossConfig/CameraConfig/StatueConfig/FogOfWarConfig/PlatformConfig 포함)
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- Export 실행 → 134개 필드 CSV 생성 확인(직접 파일 내용 확인)
+- Import 왕복 테스트: 방금 내보낸 CSV를 그대로 다시 적용 → '134개 필드 적용, 0개 건너뜀 (12개 에셋 갱신)' 로그 확인, PlayerCombatConfig.maxHealth/DeathDog.maxHealth·xpReward 값이 그대로 유지됐는지 스팟 체크
+- 저장 → manage_scene(load) 강제 재로드 → run_tests(EditMode) → 91/91 통과 (job a168fcfb2a9840f89b6fc9ad098ef481, 런타임 순수 로직 변경 없어 테스트 수 그대로)
+### 실패와 수정
+- 없음
+### 사용법 (사람이 할 일)
+- Unity 메뉴 'NAN2026 > 데이터 테이블 > CSV로 내보내기' 실행 → Assets/_Data/GameDataTable.csv 생성/갱신
+- 엑셀로 GameDataTable.csv를 열어 Value 칸만 수정 후 CSV 형식 그대로 저장(파일 형식을 xlsx로 바꾸지 말 것)
+- Unity로 돌아와 'NAN2026 > 데이터 테이블 > CSV 적용하기' 실행 → 모든 Config 에셋에 즉시 반영
+- 새 float/int/bool/string 필드를 Config에 추가하면 다음 '내보내기' 실행 시 자동으로 CSV에 포함됨(코드 수정 불필요)

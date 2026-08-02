@@ -29,6 +29,10 @@ public sealed class EnemyAIConfig : ScriptableObject
     public float attackCooldown = 1.2f;
     public float attackDamage = 1f;
 
+    [Header("체력")]
+    [Tooltip("이 몬스터 타입의 최대 체력 (MonsterHealth 컴포넌트에 적용됨)")]
+    public int maxHealth = 4;
+
     [Header("보상")]
     [Tooltip("이 몬스터가 죽었을 때 플레이어에게 주는 경험치")]
     public int xpReward = 5;

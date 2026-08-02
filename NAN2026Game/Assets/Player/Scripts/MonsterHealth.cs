@@ -23,6 +23,15 @@ namespace NHNDemo
         public int CurrentHealth => currentHealth;
         public int MaxHealth => maxHealth;
 
+        /// <summary>몬스터 타입별 Config(EnemyAIConfig 등)가 최대 체력을 강제 적용할 때 사용.
+        /// Awake 실행 순서에 관계없이 정확히 동작하도록 maxHealth/currentHealth를 함께 갱신한다.</summary>
+        public void SetMaxHealth(int newMax)
+        {
+            if (newMax <= 0) return;
+            maxHealth = newMax;
+            currentHealth = newMax;
+        }
+
         private void Awake()
         {
             currentHealth = maxHealth;

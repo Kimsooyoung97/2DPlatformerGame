@@ -21,6 +21,7 @@ MonoBehaviour:
   chargeHitDistance: 1
   chargeDamage: 2
   wallCheckDistance: 0.6
+  wallCheckOriginOffset: 0.5
   wallLayerMask:
     serializedVersion: 2
     m_Bits: 1
