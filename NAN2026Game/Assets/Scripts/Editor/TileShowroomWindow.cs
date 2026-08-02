@@ -342,39 +342,77 @@ namespace NAN2026.EditorTools
 
         private void PasteRegion(Tilemap gtm, Tilemap wtm, Vector3Int anchorCell)
         {
-            Undo.RegisterCompleteObjectUndo(gtm, "구간 붙여넣기");
-            for (int i = 0; i < clipGroundOff.Count; i++)
-                gtm.SetTile(anchorCell + clipGroundOff[i], clipGroundTile[i]);
-            if (wtm != null && clipWallOff.Count > 0)
+            try
             {
-                Undo.RegisterCompleteObjectUndo(wtm, "구간 붙여넣기");
-                for (int i = 0; i < clipWallOff.Count; i++)
-                    wtm.SetTile(anchorCell + clipWallOff[i], clipWallTile[i]);
-            }
-            Vector3 anchorW = gtm.CellToWorld(anchorCell);
-            var parentGo = GameObject.Find("Stage_Props");
-            for (int i = 0; i < clipPropSrc.Count; i++)
-            {
-                var srcGo = clipPropSrc[i];
-                if (srcGo == null) continue;
-                var pf = PrefabUtility.GetCorrespondingObjectFromSource(srcGo) as GameObject;
-                GameObject inst;
-                if (pf != null)
+                // ① 덮어쓰기: 대상 사각형의 기존 타일 전부 제거
+                Undo.RegisterCompleteObjectUndo(gtm, "구간 붙여넣기");
+                if (wtm != null) Undo.RegisterCompleteObjectUndo(wtm, "구간 붙여넣기");
+                for (int x = 0; x < clipSize.x; x++)
+                    for (int y = 0; y < clipSize.y; y++)
+                    {
+                        var p = anchorCell + new Vector3Int(x, y, 0);
+                        gtm.SetTile(p, null);
+                        if (wtm != null) wtm.SetTile(p, null);
+                    }
+                // ② 덮어쓰기: 대상 사각형 안의 기존 소품 삭제
+                Vector3 anchorW = gtm.CellToWorld(anchorCell);
+                Vector3 maxW = anchorW + new Vector3(clipSize.x, clipSize.y, 0f);
+                var parentGo = GameObject.Find("Stage_Props");
+                int removedProps = 0;
+                if (parentGo != null)
                 {
-                    inst = (GameObject)PrefabUtility.InstantiatePrefab(pf);
-                    inst.transform.localScale = srcGo.transform.localScale;
+                    var doomed = new List<GameObject>();
+                    foreach (Transform c in parentGo.transform)
+                    {
+                        var pp = c.position;
+                        if (pp.x >= anchorW.x && pp.x <= maxW.x && pp.y >= anchorW.y && pp.y <= maxW.y)
+                        {
+                            bool isClipSource = clipPropSrc.Contains(c.gameObject);
+                            if (!isClipSource) doomed.Add(c.gameObject);
+                        }
+                    }
+                    foreach (var d in doomed) { Undo.DestroyObjectImmediate(d); removedProps++; }
                 }
-                else inst = Object.Instantiate(srcGo);
-                inst.transform.position = anchorW + clipPropOff[i];
-                if (parentGo != null) inst.transform.SetParent(parentGo.transform);
-                var srcSrs = srcGo.GetComponentsInChildren<SpriteRenderer>();
-                var dstSrs = inst.GetComponentsInChildren<SpriteRenderer>();
-                for (int k = 0; k < dstSrs.Length && k < srcSrs.Length; k++)
-                    dstSrs[k].sortingOrder = srcSrs[k].sortingOrder;
-                foreach (var col in inst.GetComponentsInChildren<Collider2D>()) Object.DestroyImmediate(col);
-                Undo.RegisterCreatedObjectUndo(inst, "구간 붙여넣기");
+                // ③ 클립 내용 기록
+                for (int i = 0; i < clipGroundOff.Count; i++)
+                    gtm.SetTile(anchorCell + clipGroundOff[i], clipGroundTile[i]);
+                if (wtm != null)
+                    for (int i = 0; i < clipWallOff.Count; i++)
+                        wtm.SetTile(anchorCell + clipWallOff[i], clipWallTile[i]);
+                int placedProps = 0;
+                for (int i = 0; i < clipPropSrc.Count; i++)
+                {
+                    var srcGo = clipPropSrc[i];
+                    if (srcGo == null) continue;
+                    var pf = PrefabUtility.GetCorrespondingObjectFromSource(srcGo) as GameObject;
+                    GameObject inst;
+                    if (pf != null)
+                    {
+                        inst = (GameObject)PrefabUtility.InstantiatePrefab(pf);
+                        inst.transform.localScale = srcGo.transform.localScale;
+                    }
+                    else inst = Object.Instantiate(srcGo);
+                    inst.transform.position = anchorW + clipPropOff[i];
+                    if (parentGo != null) inst.transform.SetParent(parentGo.transform);
+                    var srcSrs = srcGo.GetComponentsInChildren<SpriteRenderer>();
+                    var dstSrs = inst.GetComponentsInChildren<SpriteRenderer>();
+                    for (int k = 0; k < dstSrs.Length && k < srcSrs.Length; k++)
+                        dstSrs[k].sortingOrder = srcSrs[k].sortingOrder;
+                    foreach (var col in inst.GetComponentsInChildren<Collider2D>()) Object.DestroyImmediate(col);
+                    Undo.RegisterCreatedObjectUndo(inst, "구간 붙여넣기");
+                    placedProps++;
+                }
+                UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(gtm.gameObject.scene);
+                ShowNotification(new GUIContent("붙여넣음: 바닥 " + clipGroundOff.Count + "·벽 " + clipWallOff.Count
+                    + "·소품 " + placedProps + (removedProps > 0 ? " (기존 소품 " + removedProps + "개 덮어씀)" : "")), 1.8d);
+                Debug.Log("[쇼룸] 구간 붙여넣기 @셀(" + anchorCell.x + "," + anchorCell.y + ") 바닥 " + clipGroundOff.Count
+                    + " 벽 " + clipWallOff.Count + " 소품 " + placedProps + " 제거 " + removedProps);
             }
-            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(gtm.gameObject.scene);
+            catch (System.Exception ex)
+            {
+                Debug.LogError("[쇼룸] 붙여넣기 실패: " + ex);
+                ShowNotification(new GUIContent("붙여넣기 오류: " + ex.Message), 3d);
+            }
         }
 
         // 소품 배치 모드: 클릭 지점에 프리팹 생성
