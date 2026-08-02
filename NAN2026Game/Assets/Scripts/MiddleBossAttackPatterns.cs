@@ -125,7 +125,7 @@ public sealed class MiddleBossAttackPatterns : MonoBehaviour, IEnemyAttackOverri
 
         PlayerHealth ph = player.GetComponentInParent<PlayerHealth>();
         if (ph != null)
-            ph.TakeDamage(damage, transform.position);
+            ph.TakeDamage(damage);
     }
 
     private void EndPattern()

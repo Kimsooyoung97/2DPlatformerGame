@@ -20,7 +20,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
     private Animator anim;
     private SpriteRenderer sr;
     private Collider2D col;
-    private NAN2026.Showroom.PlayerHealth health;
+    private PlayerHealth health;
     private PlayerProgression progression;
     private float parryReadyTime = -999f;
     private readonly RaycastHit2D[] castHits = new RaycastHit2D[4];
@@ -76,7 +76,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
         anim = GetComponent<Animator>();
         sr = GetComponent<SpriteRenderer>();
         col = GetComponent<Collider2D>();
-        health = GetComponent<NAN2026.Showroom.PlayerHealth>();
+        health = GetComponent<PlayerHealth>();
         progression = GetComponent<PlayerProgression>();
         rb.gravityScale = config.gravityScale;
         rb.freezeRotation = true;

@@ -70,7 +70,7 @@ public class SpikeProjectile : MonoBehaviour
 
             var hp = other.GetComponentInParent<PlayerHealth>();
             if (hp != null)
-                hp.TakeDamage(damage, transform.position);
+                hp.TakeDamage(damage);
 
             Destroy(gameObject);
         }

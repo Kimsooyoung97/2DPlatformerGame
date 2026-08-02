@@ -385,7 +385,7 @@ public class OrkanBoss : MonoBehaviour
                 Vector3.Distance(player.position, transform.position) < 1.0f)
             {
                 var hp = player.GetComponent<PlayerHealth>();
-                if (hp != null) hp.TakeDamage(chargeDamage, transform.position);
+                if (hp != null) hp.TakeDamage(chargeDamage);
                 hitPlayerOnce = true;
             }
 

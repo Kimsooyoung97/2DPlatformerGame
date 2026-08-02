@@ -1,7 +1,6 @@
-using System.Collections;
+using NAN2026.Showroom;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.SceneManagement;
 
 // 플레이어 HP. 전역 네임스페이스 — 팀 스크립트(OrkanBoss·Spike·Checkpoint2D·OrbProjectile) 계약 준수.
 // 사망: 체크포인트 있으면 그 지점 부활, 없으면 씬 재시작 (SPEC: 죽으면 처음부터)
@@ -113,7 +112,7 @@ public class PlayerHealth : MonoBehaviour
 
     /// <summary>몬스터의 공격 등으로 데미지를 받는다. 무적/스폰 그레이스/피격 직후 무적 중에는 무시된다.
     /// 체력이 0 이하가 되면 기존 Kill()/Respawn() 경로를 그대로 탄다 (죽으면 체크포인트에서 재시작).</summary>
-    public void TakeDamage(float damage, Vector3 attackerPosition)
+    public void TakeDamage(float damage)
     {
         if (dying || invincible || Time.time < graceUntil || Time.time < damageInvulnerableUntil || Time.time < rollInvulnerableUntil)
             return;
@@ -124,9 +123,6 @@ public class PlayerHealth : MonoBehaviour
         currentHealth -= Mathf.Max(1, Mathf.RoundToInt(damage));
         damageInvulnerableUntil = Time.time + combatConfig.hitInvulnerabilityDuration;
 
-        Vector2 knockDirection = ((Vector2)transform.position - (Vector2)attackerPosition).normalized;
-        if (knockDirection.sqrMagnitude < 0.0001f) knockDirection = Vector2.up;
-        body.position += knockDirection * combatConfig.knockbackDistance;
 
         OnHealthChanged?.Invoke(currentHealth, MaxHealth);
 

@@ -212,7 +212,7 @@ public sealed class EnemyAI : MonoBehaviour
 
         PlayerHealth playerHealth = player.GetComponentInParent<PlayerHealth>();
         if (playerHealth != null)
-            playerHealth.TakeDamage(config.attackDamage, transform.position);
+            playerHealth.TakeDamage(config.attackDamage);
     }
 
     private void OnDrawGizmosSelected()
