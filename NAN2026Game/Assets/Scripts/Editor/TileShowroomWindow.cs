@@ -648,6 +648,13 @@ namespace NAN2026.EditorTools
                     SceneView.RepaintAll();
                 }
                 bool prevR = regionMode;
+                GUILayout.Label("붓 대상:", EditorStyles.miniLabel, GUILayout.Width(50f));
+                bool selA = string.IsNullOrEmpty(customBrushTarget);
+                if (GUILayout.Toggle(selA, "자동", EditorStyles.toolbarButton, GUILayout.Width(40f)) && !selA) customBrushTarget = null;
+                bool selG = customBrushTarget == "Stage_Ground";
+                if (GUILayout.Toggle(selG, "Ground", EditorStyles.toolbarButton, GUILayout.Width(56f)) && !selG) customBrushTarget = "Stage_Ground";
+                bool selW = customBrushTarget == "Stage_Wall";
+                if (GUILayout.Toggle(selW, "Wall", EditorStyles.toolbarButton, GUILayout.Width(44f)) && !selW) customBrushTarget = "Stage_Wall";
                 regionMode = GUILayout.Toggle(regionMode, "구간 복사", EditorStyles.toolbarButton, GUILayout.Width(66f));
                 if (regionMode) layerMoveMode = false;
                 if (regionMode != prevR)
