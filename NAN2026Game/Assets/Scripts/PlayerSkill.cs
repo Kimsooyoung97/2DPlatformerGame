@@ -80,6 +80,9 @@ namespace NAN2026
         private void SpawnEffect(Vector3 pos)
         {
             var go = new GameObject("SkillSlash_Effect");
+            // 이펙트 하단이 지면(플레이어 발 높이)에 닿도록 절반 높이 보정
+            if (effectSprites != null && effectSprites.Length > 0)
+                pos.y += effectSprites[0].bounds.extents.y * config.effectScale;
             go.transform.position = pos;
             go.transform.localScale = Vector3.one * config.effectScale;
             var esr = go.AddComponent<SpriteRenderer>();
