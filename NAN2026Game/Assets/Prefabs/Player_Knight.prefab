@@ -253,7 +253,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NAN2026.PlayerSkill
   config: {fileID: 11400000, guid: 41d5aee7f72324d428b7e5581d92b433, type: 2}
-  skillSprites: []
+  skillSprites:
+  - {fileID: -2596143491987553945, guid: 78ccbe5217e5f844a838a74969c5150a, type: 3}
+  - {fileID: 343250204863874052, guid: 78ccbe5217e5f844a838a74969c5150a, type: 3}
+  - {fileID: -1917482722894365826, guid: 78ccbe5217e5f844a838a74969c5150a, type: 3}
+  - {fileID: -2907779354561935520, guid: 78ccbe5217e5f844a838a74969c5150a, type: 3}
+  - {fileID: -6226158559804673461, guid: 78ccbe5217e5f844a838a74969c5150a, type: 3}
   effectSprites:
   - {fileID: 7804507693618471803, guid: 669a8822d5fff2b44a51baeb016e6d20, type: 3}
   - {fileID: 1900847438843248427, guid: 669a8822d5fff2b44a51baeb016e6d20, type: 3}

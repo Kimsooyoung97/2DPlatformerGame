@@ -5,6 +5,18 @@ TextureImporter:
   - first:
       213: -2596143491987553945
     second: "\uAE30\uC0AC_\uC2A4\uD0AC\uB300\uAE30_0"
+  - first:
+      213: 343250204863874052
+    second: "\uAE30\uC0AC_\uC2A4\uD0AC\uB300\uAE30_1"
+  - first:
+      213: -1917482722894365826
+    second: "\uAE30\uC0AC_\uC2A4\uD0AC\uB300\uAE30_2"
+  - first:
+      213: -2907779354561935520
+    second: "\uAE30\uC0AC_\uC2A4\uD0AC\uB300\uAE30_3"
+  - first:
+      213: -6226158559804673461
+    second: "\uAE30\uC0AC_\uC2A4\uD0AC\uB300\uAE30_4"
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -37,7 +49,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -51,7 +63,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 446
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -72,10 +84,10 @@ TextureImporter:
   platformSettings:
   - serializedVersion: 4
     buildTarget: DefaultTexturePlatform
-    maxTextureSize: 2048
+    maxTextureSize: 4096
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -129,12 +141,12 @@ TextureImporter:
       name: "\uAE30\uC0AC_\uC2A4\uD0AC\uB300\uAE30_0"
       rect:
         serializedVersion: 2
-        x: 0
+        x: 40
         y: 0
-        width: 2752
+        width: 667
         height: 1536
-      alignment: 0
-      pivot: {x: 0, y: 0}
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -143,6 +155,94 @@ TextureImporter:
       bones: []
       spriteID: 761c32ebf35a8fbd0800000000000000
       internalID: -2596143491987553945
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "\uAE30\uC0AC_\uC2A4\uD0AC\uB300\uAE30_1"
+      rect:
+        serializedVersion: 2
+        x: 747
+        y: 0
+        width: 586
+        height: 1536
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 404cdf12e3873c400800000000000000
+      internalID: 343250204863874052
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "\uAE30\uC0AC_\uC2A4\uD0AC\uB300\uAE30_2"
+      rect:
+        serializedVersion: 2
+        x: 1373
+        y: 0
+        width: 550
+        height: 1536
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e7bbeee6f9bb365e0800000000000000
+      internalID: -1917482722894365826
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "\uAE30\uC0AC_\uC2A4\uD0AC\uB300\uAE30_3"
+      rect:
+        serializedVersion: 2
+        x: 1963
+        y: 0
+        width: 583
+        height: 1536
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0670f16451e75a7d0800000000000000
+      internalID: -2907779354561935520
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "\uAE30\uC0AC_\uC2A4\uD0AC\uB300\uAE30_4"
+      rect:
+        serializedVersion: 2
+        x: 2586
+        y: 0
+        width: 551
+        height: 1536
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b42b59707cd3899a0800000000000000
+      internalID: -6226158559804673461
       vertices: []
       indices: 
       edges: []
@@ -162,6 +262,10 @@ TextureImporter:
       entries: []
     nameFileIdTable:
       "\uAE30\uC0AC_\uC2A4\uD0AC\uB300\uAE30_0": -2596143491987553945
+      "\uAE30\uC0AC_\uC2A4\uD0AC\uB300\uAE30_1": 343250204863874052
+      "\uAE30\uC0AC_\uC2A4\uD0AC\uB300\uAE30_2": -1917482722894365826
+      "\uAE30\uC0AC_\uC2A4\uD0AC\uB300\uAE30_3": -2907779354561935520
+      "\uAE30\uC0AC_\uC2A4\uD0AC\uB300\uAE30_4": -6226158559804673461
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
