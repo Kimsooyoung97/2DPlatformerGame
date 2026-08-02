@@ -23,7 +23,8 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
     private PlayerHealth health;
     private PlayerProgression progression;
     private float parryReadyTime = -999f;
-    private readonly RaycastHit2D[] castHits = new RaycastHit2D[4];
+    private readonly RaycastHit2D[] castHits = new RaycastHit2D[8];
+    private ContactFilter2D groundCastFilter;
 
     private float inputX;
     private bool runHeld;
@@ -81,6 +82,12 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
         rb.gravityScale = config.gravityScale;
         rb.freezeRotation = true;
         rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+        // 지면 판정용 캐스트에서 트리거(카메라 경계, 볼륨 등)는 제외한다.
+        // 트리거가 섞여 들어오면 결과 배열이 오염되어(자리 차지) 정작 진짜 지면 히트가
+        // 배열에서 밀려날 수 있고, 트리거의 접촉 법선이 옆방향이라 오판의 원인도 됐다.
+        groundCastFilter = new ContactFilter2D();
+        groundCastFilter.NoFilter();
+        groundCastFilter.useTriggers = false;
         // 상승 시 충돌 무시는 원웨이 발판(Platform_ 접두)에만 적용한다.
         // 벽·바닥·천장(솔리드 지형)은 항상 충돌 유지 — 전체 무시는 벽 관통·중간 착지 사고의 원인이었다.
         // Stage_Platform(타일맵 원웨이)은 PlatformEffector2D가 전담하므로 여기서도 제외한다.
@@ -209,7 +216,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
             // 옆 벽에 붙어있을 때(콜라이더가 겹친 상태)도 아래로 스윕한 Cast에 그 벽이
             // 잡힐 수 있다. 접촉면 법선이 충분히 위쪽을 향하는 경우만 '지면'으로 인정해
             // 벽을 지면으로 오판하지 않게 한다 (무한 점프·공중 정지 버그의 원인이었음).
-            int hitCount = col.Cast(Vector2.down, castHits, config.groundCheckDistance);
+            int hitCount = col.Cast(Vector2.down, groundCastFilter, castHits, config.groundCheckDistance);
             for (int i = 0; i < hitCount; i++)
             {
                 if (PlayerLocomotionLogic.IsGroundNormal(castHits[i].normal.y, config.groundNormalMinY))

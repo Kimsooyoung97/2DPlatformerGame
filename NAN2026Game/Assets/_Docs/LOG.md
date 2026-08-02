@@ -1595,3 +1595,21 @@ A로 가자
 ### 눈으로 확인 필요
 - 실제로 공중에서 벽을 밀며 이동해도 이제 정상적으로 낙하하는지, 2단 점프 이후 벽 접촉으로 점프가 안 풀리는지 재생 모드에서 확인 부탁드립니다
 - groundNormalMinY=0.5(약 60도 이내만 지면 인정)가 실제 경사 있는 지형에서 너무 엄격하지 않은지도 함께 확인해주세요
+
+## [수정] 지면 판정이 트리거 콜라이더에 오염되어 점프 리셋 실패하는 문제 수정 — 2026-08-02 23:55
+### 프롬프트
+[수정] 현재 벽 접촉으로 점프가 안풀리는 상황이다.
+### 조사
+직전 수정(법선 필터)이 원인을 100% 없애지 못했음. 재생 모드에서 실시간으로 col.Cast(Vector2.down, castHits, 0.08f) 결과를 직접 찍어본 결과, 같은 위치에서 Stage_Ground(normal (0,1), 진짜 바닥)와 Stage_CameraBounds(normal (-1,0), **트리거 콜라이더**)가 동시에 거리 0으로 잡힘을 확인. 기존 col.Cast 오버로드(ContactFilter2D 없음)는 Physics2D 기본 설정상 트리거도 결과에 포함시킴 — castHits 배열 크기가 4뿐이라 겹치는 콜라이더(트리거 포함)가 많은 위치에서는 진짜 지면 히트가 배열에서 밀려날 수 있고, 트리거의 옆방향 법선이 섞여 들어와 오판의 소지가 있었음. useTriggers=false로 필터링한 동일 캐스트를 실측한 결과 Stage_Ground 하나만 정상적으로 잡힘을 확인해 원인을 확정함
+### 조작 내역
+- PlayerController2D.Awake에서 ContactFilter2D(useTriggers=false, 그 외 무필터) 준비
+- 지면 판정 캐스트를 col.Cast(Vector2.down, castHits, distance) → col.Cast(Vector2.down, groundCastFilter, castHits, distance)로 교체해 트리거를 원천 제외
+- castHits 배열 크기를 4→8로 확대(여러 콜라이더가 겹치는 위치에서의 안전 마진)
+- 직전 턴에 추가한 법선 필터(IsGroundNormal)는 그대로 유지 — 트리거 제외 + 법선 필터 이중 방어
+### 검증
+- 재생 모드에서 실측: useTriggers=false 캐스트 결과가 Stage_Ground 1건(normal (0,1))만 반환되는 것을 직접 확인 후 코드 반영
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- 저장 → manage_scene(load) 강제 재로드 → Player 생존 확인
+- run_tests(EditMode) → 86/86 통과 (job f7fdfd717da549298f6e8967496f692f, 순수 로직 변경 없어 테스트 수 그대로)
+### 실패와 수정
+- 직전 턴(법선 필터만 추가)이 근본 원인(트리거 오염)을 놓쳐 재발함. 재생 모드에서 실제 캐스트 결과를 직접 찍어보고 나서야 확정 — 앞으로 물리 판정 버그는 가설만으로 고치지 말고 재생 모드에서 실측 후 수정한다
