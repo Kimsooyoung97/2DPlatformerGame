@@ -123,6 +123,24 @@ namespace NAN2026.EditorTools
             // 현재 씬 사용중 분류 (바닥/벽 겹별 실사용 타일)
             AddUsageFamily("★ 바닥(Stage_Ground) 사용중", "Stage_Ground");
             AddUsageFamily("★ 벽(Stage_Wall) 사용중", "Stage_Wall");
+            // forest 팩 역할 분할 (데모 실측: 지형/잔디 장식)
+            if (families[0].ContainsKey("forest_tileset"))
+            {
+                var all = families[0]["forest_tileset"];
+                var gI = new HashSet<int> { 9,10,11,12,13,14,15,17,18,19,20,21,22,24 };
+                var wI = new HashSet<int> { 0,1,2,3,4,5,6 };
+                var fg = new List<Object>(); var fw = new List<Object>();
+                foreach (var o in all)
+                {
+                    var m = System.Text.RegularExpressions.Regex.Match(o.name, @"forest_tileset_(\d+)");
+                    if (!m.Success) continue;
+                    int n = int.Parse(m.Groups[1].Value);
+                    if (gI.Contains(n)) fg.Add(o);
+                    else if (wI.Contains(n)) fw.Add(o);
+                }
+                if (fg.Count > 0) families[0]["forest — Ground"] = fg;
+                if (fw.Count > 0) families[0]["forest — Wall(잔디)"] = fw;
+            }
             for (int t = 0; t < 2; t++)
             {
                 foreach (var list in families[t].Values)
