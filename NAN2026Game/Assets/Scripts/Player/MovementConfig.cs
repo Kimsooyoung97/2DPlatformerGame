@@ -14,6 +14,8 @@ namespace NAN2026
         public float gravityScale = 2.5f;
         public float groundCheckDistance = 0.08f;
         public float groundNormalMinY = 0.5f;
+        public float wallCheckDistance = 0.05f;
+        public float wallNormalMinX = 0.5f;
         public int maxJumps = 2;
         public float onewayRiseThreshold = 0.05f;
         public float apexSpeedThreshold = 1.2f;

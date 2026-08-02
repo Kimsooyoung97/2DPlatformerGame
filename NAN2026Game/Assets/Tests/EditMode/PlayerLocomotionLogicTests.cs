@@ -125,5 +125,30 @@ namespace NAN2026.Tests
         {
             Assert.IsFalse(PlayerLocomotionLogic.IsGroundNormal(0.4f, 0.5f));
         }
+
+        [Test] public void WallClamp_BlocksRightwardIntoRightWall()
+        {
+            Assert.AreEqual(0f, PlayerLocomotionLogic.ClampHorizontalVelocityAgainstWalls(3f, false, true));
+        }
+
+        [Test] public void WallClamp_BlocksLeftwardIntoLeftWall()
+        {
+            Assert.AreEqual(0f, PlayerLocomotionLogic.ClampHorizontalVelocityAgainstWalls(-3f, true, false));
+        }
+
+        [Test] public void WallClamp_AllowsMovementAwayFromWall()
+        {
+            Assert.AreEqual(-3f, PlayerLocomotionLogic.ClampHorizontalVelocityAgainstWalls(-3f, false, true));
+        }
+
+        [Test] public void WallClamp_NoWalls_Unaffected()
+        {
+            Assert.AreEqual(3f, PlayerLocomotionLogic.ClampHorizontalVelocityAgainstWalls(3f, false, false));
+        }
+
+        [Test] public void WallClamp_ZeroVelocity_Unaffected()
+        {
+            Assert.AreEqual(0f, PlayerLocomotionLogic.ClampHorizontalVelocityAgainstWalls(0f, true, true));
+        }
     }
 }

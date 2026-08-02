@@ -113,5 +113,16 @@ namespace NAN2026.Core
         {
             return normalY >= minNormalY;
         }
+
+        /// 진행 방향에 벽이 막혀있으면 그쪽으로의 속도를 0으로 자른다.
+        /// 매 프레임 velocity를 직접 덮어쓰는 캐릭터 컨트롤러는 물리 충돌 반응에
+        /// 의존하면 안 되고(코너 걸림·수직 이동 간섭의 원인), 이동 방향을 미리
+        /// 확인해 입력 자체를 막는 편이 안전하다.
+        public static float ClampHorizontalVelocityAgainstWalls(float vx, bool blockedLeft, bool blockedRight)
+        {
+            if (vx > 0f && blockedRight) return 0f;
+            if (vx < 0f && blockedLeft) return 0f;
+            return vx;
+        }
     }
 }

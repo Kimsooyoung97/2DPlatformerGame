@@ -127,6 +127,20 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
         return false;
     }
 
+    // 이동 방향(오른쪽/왼쪽)에 물리적으로 막힌(트리거 아닌) 콜라이더가 있는지 검사한다.
+    private bool WallInDirection(Vector2 direction)
+    {
+        int hitCount = col.Cast(direction, groundCastFilter, castHits, config.wallCheckDistance);
+        for (int i = 0; i < hitCount; i++)
+        {
+            if (castHits[i].collider == null) continue;
+            // 위/아래 방향에 가까운 법선(바닥·발판 경사면 등)은 벽으로 취급하지 않는다.
+            float absNormalX = Mathf.Abs(castHits[i].normal.x);
+            if (absNormalX >= config.wallNormalMinX) return true;
+        }
+        return false;
+    }
+
     private void Update()
     {
         var kb = Keyboard.current;
@@ -279,6 +293,14 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
             : attacking
             ? PlayerLocomotionLogic.AttackVelocity(sr.flipX, activeAttackLunge)
             : PlayerLocomotionLogic.HorizontalVelocity(inputX, runHeld, config.walkSpeed, config.runSpeed);
+
+        // 벽 쪽으로 velocity를 계속 밀어넣으면(매 프레임 덮어쓰기 방식) 물리 충돌 반응이
+        // 코너에서 수직 이동까지 간섭하는 경우가 있었다(공중에서 벽을 밀면 안 떨어지는 버그).
+        // 그래서 물리 반응에 맡기지 않고, 이동 방향에 벽이 있는지 미리 확인해 그쪽 속도를 0으로 자른다.
+        bool blockedRight = !parrying && vx > 0f && WallInDirection(Vector2.right);
+        bool blockedLeft = !parrying && vx < 0f && WallInDirection(Vector2.left);
+        vx = PlayerLocomotionLogic.ClampHorizontalVelocityAgainstWalls(vx, blockedLeft, blockedRight);
+
         float vy = rb.linearVelocity.y;
 
         if (jumpQueued)

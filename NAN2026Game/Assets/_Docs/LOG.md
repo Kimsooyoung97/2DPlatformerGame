@@ -1613,3 +1613,24 @@ A로 가자
 - run_tests(EditMode) → 86/86 통과 (job f7fdfd717da549298f6e8967496f692f, 순수 로직 변경 없어 테스트 수 그대로)
 ### 실패와 수정
 - 직전 턴(법선 필터만 추가)이 근본 원인(트리거 오염)을 놓쳐 재발함. 재생 모드에서 실제 캐스트 결과를 직접 찍어보고 나서야 확정 — 앞으로 물리 판정 버그는 가설만으로 고치지 말고 재생 모드에서 실측 후 수정한다
+
+## [수정] 벽 방향 이동 입력 사전 차단 (물리 반응 대신 이동 전 벽 체크) — 2026-08-03 00:25
+### 프롬프트
+아직 똑같은 현상(벽과 닿아 점프상태에서 이동키입력시 착지되지 않음)이 지속되고 있어 내 생각에는 이동경로가 벽에 막혀있으면 이동키 입력을 막는 식으로 하는게 가장 빠를거 같아
+### 방향 전환
+직전 두 차례 수정(법선 필터, 트리거 제외)은 '지면 판정'을 고치는 접근이었으나 증상이 재발함. 사용자 제안대로 접근을 바꿔 — 매 프레임 velocity를 직접 덮어쓰는 캐릭터 컨트롤러(kinematic 스타일)는 물리 충돌 반응에 의존하면 코너/연속 접촉에서 수직 이동까지 간섭될 수 있으므로, 물리 반응에 맡기지 않고 이동 방향에 벽이 있으면 애초에 그 방향 속도를 0으로 자르는 방식으로 전환
+### 조작 내역
+- NAN2026.Core.PlayerLocomotionLogic에 ClampHorizontalVelocityAgainstWalls(vx, blockedLeft, blockedRight) 순수 함수 추가. 테스트 5개
+- MovementConfig에 wallCheckDistance(0.05)/wallNormalMinX(0.5) 추가
+- PlayerController2D에 WallInDirection(direction) 헬퍼 추가: 이동 방향으로 col.Cast(트리거 제외, 기존 groundCastFilter 재사용)해 법선.x가 충분히 수평(벽)인 히트가 있는지 검사
+- FixedUpdate에서 vx 계산 직후, 패링 중이 아니고 이동 방향에 벽이 감지되면 ClampHorizontalVelocityAgainstWalls로 그쪽 속도를 0으로 자름 (물리 충돌이 실제로 일어나기 전에 입력 단계에서 차단)
+### 검증
+- 재생 모드에서 직접 실측: 임시 BoxCollider2D를 만들어 플레이어 바로 앞에 놓고 Cast 결과를 확인 → 정상적으로 벽 히트(normal (-1,0)) 감지됨을 확인 후 삭제(씬에 흔적 없음, 원위치 복구)
+- (진단 과정에서 Physics2D.SyncTransforms() 미호출로 인한 오탐도 겪음 — FixedUpdate 내부의 실제 코드 경로는 물리 스텝과 동기화되어 있어 문제 없음을 확인)
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- run_tests(EditMode) → 91/91 통과 (job 55625a87405842e3ab226dd1057aecbf, 신규 5개 포함)
+- 씬 오브젝트 변경 없음(스크립트만 수정) — manage_scene(save/load) 생략, isDirty=False 확인
+### 실패와 수정
+- 없음 (이전 두 차례 시도는 근본 원인이 아니었을 뿐, 별도 실수라기보다 접근 자체를 바꾼 것)
+### 눈으로 확인 필요
+- 실제 재생에서 공중에 벽을 밀며 이동해도 이제 정상 낙하하는지 최종 확인 부탁드립니다
