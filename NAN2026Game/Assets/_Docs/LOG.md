@@ -1454,3 +1454,14 @@ ThirdScene에 이 맵을 만들어야 해. (에셋스토어 쇼케이스 스크�
 - 배치 수치 실측, 저장 True ×2. 구도 판정은 사용자 스크린샷 피드백
 ### 실패와 수정
 없음
+
+
+## [수정] ThirdScene 잔디층 전면 배치 — 2026-08-03 00:28
+### 프롬프트
+stage_wall 풀을 ground 앞에 위치하도록 시각적 배치하고싶은데 어떻게 해야해?
+### 조작 내역
+- 원리 안내(동일 Sorting Layer 내 sortingOrder 우선) + Stage_Wall TilemapRenderer sortingOrder -1→1 적용 (Ground=0 앞)
+### 검증
+- 값 실측, 저장 True. 시각은 사용자 판정
+### 실패와 수정
+없음
