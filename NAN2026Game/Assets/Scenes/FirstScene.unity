@@ -361,6 +361,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 3322142329500899553, guid: db1260c4377feea49bddb13e8fee5f5f, type: 3}
+      propertyPath: MaxSpeed
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 3735750984202246086, guid: db1260c4377feea49bddb13e8fee5f5f, type: 3}
       propertyPath: m_Name
       value: DeathDog3
@@ -375,11 +379,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3735750984202246087, guid: db1260c4377feea49bddb13e8fee5f5f, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 22.95
+      value: 70
       objectReference: {fileID: 0}
     - target: {fileID: 3735750984202246087, guid: db1260c4377feea49bddb13e8fee5f5f, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -6.95
+      value: -6.79
       objectReference: {fileID: 0}
     - target: {fileID: 3735750984202246087, guid: db1260c4377feea49bddb13e8fee5f5f, type: 3}
       propertyPath: m_LocalPosition.z
@@ -10679,11 +10683,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 946586124018522109, guid: 25ab37668c412a441a40028cc08d8847, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 20.05
+      value: 52.42
       objectReference: {fileID: 0}
     - target: {fileID: 946586124018522109, guid: 25ab37668c412a441a40028cc08d8847, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -6.96
+      value: -6.62
       objectReference: {fileID: 0}
     - target: {fileID: 946586124018522109, guid: 25ab37668c412a441a40028cc08d8847, type: 3}
       propertyPath: m_LocalPosition.z
@@ -10720,6 +10724,10 @@ PrefabInstance:
     - target: {fileID: 946586125738398114, guid: 25ab37668c412a441a40028cc08d8847, type: 3}
       propertyPath: m_SpriteHash
       value: 288431053
+      objectReference: {fileID: 0}
+    - target: {fileID: 1216077943389837531, guid: 25ab37668c412a441a40028cc08d8847, type: 3}
+      propertyPath: MaxSpeed
+      value: 4
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -15715,6 +15723,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 7862834921201971433, guid: 2c8177f2561f13e4b9533fa5ac2d4244, type: 3}
+      propertyPath: MaxSpeed
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 8132645305167690128, guid: 2c8177f2561f13e4b9533fa5ac2d4244, type: 3}
       propertyPath: m_SpriteHash
       value: 288431053
@@ -15733,11 +15745,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8132645306870792143, guid: 2c8177f2561f13e4b9533fa5ac2d4244, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 16.92
+      value: 33.43
       objectReference: {fileID: 0}
     - target: {fileID: 8132645306870792143, guid: 2c8177f2561f13e4b9533fa5ac2d4244, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -6.95
+      value: -6.57
       objectReference: {fileID: 0}
     - target: {fileID: 8132645306870792143, guid: 2c8177f2561f13e4b9533fa5ac2d4244, type: 3}
       propertyPath: m_LocalPosition.z
@@ -17792,6 +17804,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: MiddleBoss
       objectReference: {fileID: 0}
+    - target: {fileID: 1434224767324407884, guid: 356063fcc455a094cbd5dafff615a1ff, type: 3}
+      propertyPath: MaxSpeed
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 1639189110148543846, guid: 356063fcc455a094cbd5dafff615a1ff, type: 3}
       propertyPath: m_LocalScale.x
       value: 1.2
@@ -17802,11 +17818,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1639189110148543846, guid: 356063fcc455a094cbd5dafff615a1ff, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 11.18
+      value: 107.43
       objectReference: {fileID: 0}
     - target: {fileID: 1639189110148543846, guid: 356063fcc455a094cbd5dafff615a1ff, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -6.97
+      value: -6.87
       objectReference: {fileID: 0}
     - target: {fileID: 1639189110148543846, guid: 356063fcc455a094cbd5dafff615a1ff, type: 3}
       propertyPath: m_LocalPosition.z
