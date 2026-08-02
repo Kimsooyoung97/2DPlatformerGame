@@ -3,7 +3,7 @@ using UnityEngine.InputSystem;
 using NAN2026;
 using NAN2026.Core;
 
-public class PlayerController2D : MonoBehaviour
+public class PlayerController2D : MonoBehaviour, IParryReflector
 {
     [SerializeField] private MovementConfig config;
     [SerializeField] private AttackEffectConfig effectConfig;
@@ -20,6 +20,9 @@ public class PlayerController2D : MonoBehaviour
     private Animator anim;
     private SpriteRenderer sr;
     private Collider2D col;
+    private PlayerHealth health;
+    private PlayerProgression progression;
+    private float parryReadyTime = -999f;
     private readonly RaycastHit2D[] castHits = new RaycastHit2D[4];
 
     private float inputX;
@@ -41,6 +44,29 @@ public class PlayerController2D : MonoBehaviour
     private float landTimer;
     private string currentState;
     public bool IsGrounded { get { return grounded; } }
+
+    /// <summary>지금 이 순간 패링 판정 창 안인지. EnemyAI 등 몬스터 공격 판정이 참조한다.</summary>
+    private float EffectiveParryWindow()
+    {
+        return config.parryWindow + (progression != null ? progression.ParryDurationBonus : 0f);
+    }
+
+    private float EffectiveParryCooldown()
+    {
+        float reduced = config.parryCooldown - (progression != null ? progression.ParryCooldownReduction : 0f);
+        return Mathf.Max(config.parryCooldownMinimum, reduced);
+    }
+
+    public bool IsParryWindowActive()
+    {
+        return parryHeld && PlayerLocomotionLogic.ParrySuccessWindow(Time.time - parryPressTime, EffectiveParryWindow());
+    }
+
+    /// <summary>IParryReflector 구현 — SpikeProjectile 등 투사체가 자동으로 패링 여부를 물어본다.</summary>
+    public bool TryParry(GameObject attacker)
+    {
+        return IsParryWindowActive();
+    }
     private UnityEngine.Collider2D[] groundColliders;
     private bool ignoringGround;
 
@@ -50,6 +76,8 @@ public class PlayerController2D : MonoBehaviour
         anim = GetComponent<Animator>();
         sr = GetComponent<SpriteRenderer>();
         col = GetComponent<Collider2D>();
+        health = GetComponent<PlayerHealth>();
+        progression = GetComponent<PlayerProgression>();
         rb.gravityScale = config.gravityScale;
         rb.freezeRotation = true;
         // 상승 시 충돌 무시는 원웨이 발판(Platform_ 접두)에만 적용한다.
@@ -110,10 +138,11 @@ public class PlayerController2D : MonoBehaviour
         if (mouse != null && mouse.leftButton.wasPressedThisFrame) QueueAttack("Slash", config.slashDuration, config.slashLungeSpeed);
         if (mouse != null)
         {
-            if (mouse.middleButton.wasPressedThisFrame && attackTimer <= 0f)
+            if (mouse.middleButton.wasPressedThisFrame && attackTimer <= 0f && Time.time >= parryReadyTime)
             {
                 parryHeld = true;
                 parryPressTime = Time.time;
+                parryReadyTime = Time.time + EffectiveParryCooldown();
             }
             if (mouse.middleButton.wasReleasedThisFrame && parryHeld)
             {
@@ -149,7 +178,14 @@ public class PlayerController2D : MonoBehaviour
         var go = Instantiate(prefab, pos, Quaternion.identity);
         go.transform.localScale = new Vector3(scale, scale, 1f);
         var ep = go.GetComponent<EffectProjectile>();
-        if (ep != null) ep.Launch(dir, speed, effectConfig.lifetime, frames, effectConfig.frameRate);
+        if (ep != null)
+        {
+            int baseDamage = AttackDamageLogic.DamageForAttack(attackName, effectConfig.basicDamage, effectConfig.poweredDamage);
+            int damageBonus = progression != null ? Mathf.RoundToInt(progression.DamageBonus) : 0;
+            float rangeMultiplier = progression != null ? progression.AttackRangeMultiplier : 1f;
+            ep.Launch(dir, speed, effectConfig.lifetime * rangeMultiplier, frames, effectConfig.frameRate,
+                baseDamage + damageBonus, effectConfig.hitboxSize);
+        }
     }
 
     private void QueueAttack(string stateName, float duration, float lungeSpeed)
@@ -173,7 +209,7 @@ public class PlayerController2D : MonoBehaviour
 
         if (parryEndTimer > 0f) parryEndTimer -= Time.fixedDeltaTime;
         // 패링 판정: 홀드 중 + 판정 창 이내 + 전방 박스에 BossOrb
-        if (parryHeld && PlayerLocomotionLogic.ParrySuccessWindow(Time.time - parryPressTime, config.parryWindow))
+        if (parryHeld && PlayerLocomotionLogic.ParrySuccessWindow(Time.time - parryPressTime, EffectiveParryWindow()))
         {
             float pdir = PlayerLocomotionLogic.EffectDirection(sr.flipX);
             Vector2 center = (Vector2)transform.position + new Vector2(config.parryBoxOffsetX * pdir, config.parryBoxSize.y * 0.5f);
@@ -209,6 +245,8 @@ public class PlayerController2D : MonoBehaviour
                 attackTimer = queuedAttackDuration;
                 attacking = true;
                 SpawnAttackEffect(queuedAttack);
+                if (queuedAttack == "Roll" && health != null)
+                    health.BeginRollInvincibility();
             }
             queuedAttack = null;
         }

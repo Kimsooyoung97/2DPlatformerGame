@@ -1,0 +1,151 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &7386623481608367449
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 641594539143589342, guid: 356063fcc455a094cbd5dafff615a1ff, type: 3}
+      propertyPath: m_Name
+      value: MiddleBoss Variant
+      objectReference: {fileID: 0}
+    - target: {fileID: 1434224767324407884, guid: 356063fcc455a094cbd5dafff615a1ff, type: 3}
+      propertyPath: MaxSpeed
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 1639189110148543846, guid: 356063fcc455a094cbd5dafff615a1ff, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1639189110148543846, guid: 356063fcc455a094cbd5dafff615a1ff, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1639189110148543846, guid: 356063fcc455a094cbd5dafff615a1ff, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 107.43
+      objectReference: {fileID: 0}
+    - target: {fileID: 1639189110148543846, guid: 356063fcc455a094cbd5dafff615a1ff, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -6.87
+      objectReference: {fileID: 0}
+    - target: {fileID: 1639189110148543846, guid: 356063fcc455a094cbd5dafff615a1ff, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1639189110148543846, guid: 356063fcc455a094cbd5dafff615a1ff, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1639189110148543846, guid: 356063fcc455a094cbd5dafff615a1ff, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1639189110148543846, guid: 356063fcc455a094cbd5dafff615a1ff, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1639189110148543846, guid: 356063fcc455a094cbd5dafff615a1ff, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1639189110148543846, guid: 356063fcc455a094cbd5dafff615a1ff, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1639189110148543846, guid: 356063fcc455a094cbd5dafff615a1ff, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1639189110148543846, guid: 356063fcc455a094cbd5dafff615a1ff, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3221677331066269865, guid: 356063fcc455a094cbd5dafff615a1ff, type: 3}
+      propertyPath: m_SpriteHash
+      value: 288431053
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 641594539143589342, guid: 356063fcc455a094cbd5dafff615a1ff, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1438292204412430102}
+    - targetCorrespondingSourceObject: {fileID: 641594539143589342, guid: 356063fcc455a094cbd5dafff615a1ff, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 995174744184015421}
+    - targetCorrespondingSourceObject: {fileID: 641594539143589342, guid: 356063fcc455a094cbd5dafff615a1ff, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 105498422231238318}
+    - targetCorrespondingSourceObject: {fileID: 641594539143589342, guid: 356063fcc455a094cbd5dafff615a1ff, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8996674705717649662}
+  m_SourcePrefab: {fileID: 100100000, guid: 356063fcc455a094cbd5dafff615a1ff, type: 3}
+--- !u!1 &7955019670437265543 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 641594539143589342, guid: 356063fcc455a094cbd5dafff615a1ff, type: 3}
+  m_PrefabInstance: {fileID: 7386623481608367449}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1438292204412430102
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7955019670437265543}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632dc363094c40f43889a661d45dbedd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NHNDemo.MonsterHealth
+  maxHealth: 4
+  knockbackDistance: 0.12
+--- !u!114 &995174744184015421
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7955019670437265543}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9fddf96ebd36b9f4383d1b9cea5838ad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyAI
+  config: {fileID: 11400000, guid: 61fb26d6d97403b449403a8541ef8c0f, type: 2}
+  patrolPointA: {fileID: 0}
+  patrolPointB: {fileID: 0}
+  usePatrol: 0
+  playerTag: Player
+--- !u!114 &105498422231238318
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7955019670437265543}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c60cd89d932b4440b71638c25a4f19b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WorldHealthBar
+  config: {fileID: 11400000, guid: 61fb26d6d97403b449403a8541ef8c0f, type: 2}
+  target: {fileID: 1438292204412430102}
+--- !u!114 &8996674705717649662
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7955019670437265543}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a2a8a5ab32b0ae24a9f4a8c55f3bc558, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MiddleBossAttackPatterns
+  config: {fileID: 11400000, guid: 4dfff5eaf3284774b86c9a99f3e08cd5, type: 2}
+  rockSpikePrefab: {fileID: 6897040213144945556, guid: 38ce7c5cbeba58b45bf8a28e2ab55357, type: 3}

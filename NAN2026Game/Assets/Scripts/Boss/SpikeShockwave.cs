@@ -60,7 +60,7 @@ public class SpikeShockwave : MonoBehaviour
             var hp = other.GetComponent<PlayerHealth>();
             if (hp != null)
             {
-                hp.TakeDamage(damage, transform.position);
+                hp.TakeDamage(damage);
                 hasHitPlayer = true;
             }
         }

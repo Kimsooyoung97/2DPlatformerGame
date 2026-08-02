@@ -661,6 +661,269 @@ Roll 에셋은 추가해도 돼.
 ### 실패와 수정
 - GetEntityId 교체 시도는 Safe Mode로 MCP 불가 + 후속 에러 다수로 폐기, 팩 제거로 전환
 
+## [구현] FirstScene 배경(바이옴 타일맵) 구성 — 2026-08-02 02:50
+### 프롬프트
+FirstScene에서 2D Pixel Art Platformer Biome - American Forest 폴더와 2D Pixel Art Platformer Biome - Plains 폴더안의 타일을  사용해서 횡스크롤 액션 게임( 게임 진행 도중 몬스터를 잡으면서 앞으로 나아가야함. 층계는 3층까지 허용됨, 좌측 끝과 우측 끝에는 벽 오브젝트를 만들어 떨어지지 않게 설정, 가로로 현재 메인카메라 사이즈가 5개 이상 들어갈 분량)의 배경을 만들어줘
+### 조작 내역
+- execute_code로 FirstScene의 기존 빈 오브젝트 BackgroundFirstScene 하위에 구성 (기존 Player/Portal/CameraBoundary/Orkan/MainCamera/CinemachineCamera는 손대지 않음)
+- Grid(cellSize 1,1,1) 하위: Tilemap_Ground(바닥, x=-12~30, 2단, Plains/Forest 타일 x=9 기준 zone 전환, TilemapCollider2D+CompositeCollider2D+Rigidbody2D Static), Tilemap_Platforms(중간tier y cell -3, 상단tier y cell 1, 총 3층 구성, 동일 콜라이더 세팅), Tilemap_BackTile(예비, 미사용)
+- Backdrop: Background1~5 대형 배경 스프라이트 6장 타일링 (x=-40~56, 총 96유닛; 카메라 폭 17.78유닛×5=88.89유닛 요건 충족), sortingOrder -20
+- Decoration: Tree 11그루 (Plains 5 / Forest 6), sortingOrder -10, 지면 상단(y=-5)에 맞춰 배치
+- Walls: Wall_Left(x=-12.5), Wall_Right(x=30.5) BoxCollider2D(size 1x13) 낙사 방지
+- Assets/2D Pixel Art Platformer Biome - Plains/Tilemap/TileGround1,2,3,5.asset, Assets/2D Pixel Art Platformer Biome - American Forest/Tilemap/TileGround1,2,3,5.asset 재사용 (기존 팀 준비 에셋, 신규 Tile 에셋 생성 없음)
+- manage_scene(action=save)로 Assets/Scenes/FirstScene.unity 저장
+### 검증
+- refresh_unity(compile=request) 후 read_console(types=error) → 0건
+- run_tests(EditMode) → 25/25 통과 (job 7c6975baef71482a90cf968997a67978)
+- 저장 후 디스크 파일 텍스트에 Tilemap_Ground/BackdropPanel/Wall_Left/Tree_Forest 포함 확인 (length=140474), scene.isDirty=False
+- 테스트 실행 후 GameObject.Find("Grid") 재확인 → 생존 확인 (children=3)
+### 실패와 수정
+- 1차 시도: 씬 편집 후 저장 없이 refresh_unity→run_tests를 먼저 실행 → EditMode 테스트가 씬을 리로드하며 저장되지 않은 모든 신규 오브젝트가 소실됨 (git checkpoint와 최종 파일이 바이트 단위로 동일했던 것으로 뒤늦게 발견). FAIL.md #12로 기록. 저장 순서를 '씬 편집→저장→refresh_unity→테스트'로 바꿔 2차 시도에서 재현·해결
+- 사용자 지침 변경: 이번 작업부터 git commit은 사용자가 직접 실행. Claude는 커밋 메시지만 제공
+
+## [수정] FirstScene 배경 정렬·3배 확장 — 2026-08-02 03:15
+### 프롬프트
+지금 씬을 확인해봤는데 Backdrop의 시작부분이 Tilemap_Ground 랑 붙어야하고 Tree_Plains_Tree1이랑 Tree_Plains_Tree2 또한 같은 이유로 범위가 벗어나있어 Tree들이 Ground 타일들과 붙어 있어야하고 나는 Ground 타일을 기준으로 처음과 끝 범위를 매기는데 지금보다 3배 길게 만들어줘 마지막으로 다시 지침을 변경해서 커밋을 해주면 될 것 같아 너가
+### 조작 내역
+- BackgroundFirstScene 하위 Grid/Backdrop/Walls/Decoration(전부 이전 턴에 Claude가 생성한 오브젝트) DestroyImmediate 후 재생성
+- Ground 범위를 x=-12~30(폭42) → x=-12~114(폭126, 정확히 3배)로 확장. 좌측 시작점(-12)은 고정
+- Platforms: 중간tier(cellY -3, 5칸 세그먼트 14유닛 간격)/상단tier(cellY 1, 4칸 세그먼트 20유닛 간격)로 확장 범위 전체에 재분배, 총 3층 유지
+- Backdrop: 시작점을 Ground 시작점(x=-12)과 정확히 일치시킴. 패널 8장(폭128)로 x=-12~116 커버
+- Decoration: 트리 18그루를 간격 7유닛으로 재배치, 각 트리 스프라이트 절반폭+margin(0.3)만큼 Ground 경계 안쪽으로 clamp하여 Ground 범위를 벗어나지 않도록 보장 (기존 Tree_Plains_Tree1/2의 좌측 오버행 버그 수정)
+- Walls: Wall_Left(x=-12.5), Wall_Right(x=114.5)로 새 범위 끝에 재배치
+- Zone split(Plains/Forest)을 새 범위 중앙 x=51로 이동 (기존 -12~30의 중앙 x=9와 동일 비율)
+### 검증
+- 저장을 refresh_unity/run_tests보다 먼저 실행 (FAIL.md #12 반영), 저장 직후 디스크 파일에 Wall_Right/BackdropPanel_7/Tree_Forest 포함 확인 (length=219024), isDirty=False
+- refresh_unity(compile=request) 후 read_console(types=error) → 0건
+- run_tests(EditMode) → 25/25 통과 (job 2ababb34408f43619bc4bf9d251dfe4c)
+- 테스트 실행 후 GameObject.Find("Grid") 재확인 → 생존 확인, Ground bounds=(-12,-7,0) Size(126,2,1) 로 3배 확장 반영 확인
+### 실패와 수정
+- 없음 (이전 턴 FAIL.md #12 교훈을 저장 순서에 선반영해 재발 없었음)
+- 사용자 지침 변경: git commit을 다시 Claude가 직접 실행하는 방식으로 환원
+
+## [수정] FirstScene 배경 레퍼런스 스타일로 전면 재작업 — 2026-08-02 04:10
+### 프롬프트
+배경이 마음에 안들어서 싹 다시 만들어줘 레퍼런스 자료를 줄테니까 이거랑 비슷하게 만들어봐 (첨부 이미지 3장: 뜬 섬 형태 잔디/흙 플랫폼 + 산/숲 실루엣 배경, "Parallax Layers Ready Background")
+### 조작 내역
+- 스프라이트 좌표 분석으로 TileGround1~9가 3x3 오토타일(상단 코너/중간/코너, 중간 채움 좌/중/우, 하단 삐죽 코너/중간/코너) 구조임을 확인. 팀 준비 Tile 에셋(1,2,3,5)에 없던 4,6,7,8,9를 두 바이옴 폴더에 새로 생성(AssetDatabase.CreateAsset)
+- 기존 Grid/Backdrop/Walls/Decoration 전부 삭제 후 재구성:
+  - Ground: x=-12~114, 3단(top/fill/bottom-jagged) 오토타일. 좌우 끝(x=-12, x=113)만 코너 타일, 나머지는 중간 타일
+  - Platforms: 연속 띠 대신 폭 4~7, 높이 tier {-3,-2,0,1,3} 를 순환하는 11개의 독립된 "뜬 섬"으로 재배치, 섬마다 좌/우 코너+중간 타일 적용, 2단(top/bottom-jagged) 두께
+  - Backdrop: Ground 시작점(x=-12)과 정확히 일치하도록 재배치, 패널 8장
+  - Decoration: 나무 18 + 지면 돌 9 + 섬 위 돌/식물 소품 17 = 35개, 레퍼런스처럼 플랫폼 상단에 디테일 추가
+  - Walls: 새 범위 끝(x=-12.5 / x=114.5)
+### 검증
+- 1차 저장 시도가 재생모드로 실패(FAIL.md #5) → 정지 후 재저장
+- 저장 후 GetTile 검증에서 Ground 타일이 이전 턴 패턴으로 부분 되돌아간 것을 발견(FAIL.md #14 신규) → ClearAllTiles 후 재도장 → 저장 → **manage_scene(load)로 강제 재로드 후 GetTile 재검증**하여 실제 반영 확인
+- 재로드 후: Ground x=0 top=TileGround2/fill=TileGround5/bottom=TileGround8 (의도대로), Ground bounds(-12,-8,0)Size(126,3,1), Platform bounds(-9,-4,0)Size(114,8,1), Decoration 35/Backdrop 8/Walls 2 전부 일치
+- refresh_unity 컴파일 요청 후 read_console(types=error) → 0건
+- run_tests(EditMode) 1차 연결 오류(No Unity Editor instances found) → 즉시 ping 확인 후 정상 확인, 재시도하여 25/25 통과 (job 7ab2009806314dff85c9eb4ead7b96b3)
+- 테스트 이후 GetTile 재검증으로 데이터 유지 확인
+### 실패와 수정
+- FAIL.md #14: 저장 성공 메시지에도 불구하고 Tilemap 타일 데이터가 이전 턴 상태로 부분 되돌아가는 현상 발견. 원인 미확정(재생모드 이력 추정). GetTile 즉시검증 + 재로드검증 절차로 재발 확인 및 정상화
+- run_tests 1차 호출이 'No Unity Editor instances found' 오류 반환 → 연결 재확인(execute_code ping) 후 정상 작동 확인되어 재시도로 해결 (일시적 통신 문제로 판단, 별도 FAIL 항목 없음)
+
+## [수정] FirstScene 배경 — forest_side_pack으로 전환, 레이어드 배경+계단형 섬 — 2026-08-02 15:20
+### 프롬프트
+우선 지금 배경이 그냥 옆으로 이어져 있는데 한 칸의 배경마다 paralle하게 이런식으로 산과 구름이 같이 보이게끔 해주면 될 거 같고 Tilemap_Platforms도 지금 너무 무난하게 1개 1개 있는게 별로야 이미지 처럼 좀 해줄 수 없나? 이제 배경을 제작할 때는 다른 에셋을 추가로 사용해도 돼
+### 조작 내역
+- 프로젝트 내 미사용 팩 조사 중 Assets/sanctum_pixel/forest_side_pack 발견 — 레퍼런스 이미지의 원본 에셋으로 확인(데모 씬 demo_scene.unity 포함, 배경이 sky/cloud/mountain/pine1/pine2로 완전히 분리된 레이어, 27개 타일 팔레트, 부시/바위/나무/꽃 등 풍부한 소품 보유)
+- 데모 씬의 Tilemap 직렬화 데이터(m_Tiles, m_TileAssetArray)를 직접 파싱해 실제 타일 사용 패턴을 확인하고, 텍스처 알파/색상 샘플링으로 타일셋 그리드(5열x6행, 27종)의 각 행 용도를 확정: row5(0,1,2)=잔디 상단, row2(12,13,14)=흙 채움, row0(22,23,24)=어두운 삐죽 하단, row4(7,8)=계단/노치 코너 조각
+- Tilemap_Ground: 기존 두 Biome 팩 타일 → forest_tileset 3단(상단/채움/하단)으로 교체, x=-12~113 전체
+- Tilemap_Platforms: 기존 단순 사각 섬 11개 → forest_tileset 기반 14개 섬으로 교체, 그 중 3개는 계단형 노치(단차) 적용해 레퍼런스의 스텝형 섬 재현
+- Backdrop: 평면 파노라마 패널 반복 → sky/cloud/mountain/pine1/pine2 5개 레이어를 데모 씬의 상대 Y좌표·스케일(5배)을 그대로 이식해 겹겹이 배치, 레이어별로 자체 폭만큼 반복 타일링해 전체 구간에서 산+구름이 항상 함께 보이도록 구성 (정적 레이어링; 실제 카메라 연동 패럴랙스 모션은 미구현 — 원본 데모 씬에도 패럴랙스 스크립트 없음)
+- Decoration: 기존 Biome 팩 나무/돌 소품 → forest_side_pack의 pine/pine_dead/tree/bush/rock/flower(4색)로 교체, 지면 61개 + 섬 위 14개 = 75개
+### 검증
+- 저장 → manage_scene(load)로 강제 재로드 → GetTile/GameObject.Find로 재검증 (FAIL.md #14 절차): Ground x=0 top=forest_tileset_0/fill=forest_tileset_12/bottom=forest_tileset_22, bounds 일치, Platform bounds(-9,-4,0)Size(115,8,1), Decoration 75/Backdrop 5레이어그룹/Walls 2 전부 일치
+- refresh_unity 컴파일 요청 후 read_console(types=error) → 0건
+- run_tests(EditMode) → 25/25 통과 (job 68020ca80c5a448aa96360b6f1c1aeee)
+- 테스트 이후 재확인: Decoration 75 유지, Ground bounds 유지, isDirty=False
+### 실패와 수정
+- 없음 (FAIL.md #5/#14 절차를 선반영해 이번엔 재현 없었음)
+
+## [수정] 배경 레이어에 패럴랙스 모션 적용 — 2026-08-02 15:45
+### 프롬프트
+계속
+### 조작 내역
+- Assets/Scripts/ParallaxLayer.cs (기존 미사용 스크립트 발견, 신규 작성 안 함) 를 Backdrop의 5개 레이어(sky/cloud/mountain/pine1/pine2) 산하 25개 패널 오브젝트에 부착
+- parallaxEffect 계수: sky=0.05, cloud=0.1, mountain=0.3, pine1=0.5, pine2=0.7 (먼 레이어일수록 낮게, 가까운 레이어일수록 1에 가깝게)
+- STATE.md에 이번 세션 전체 FirstScene 배경 작업 내역 반영 (그동안 갱신 누락되어 있었음), CameraBoundary/Portal 미갱신 미해결 항목 명시
+### 검증
+- 저장 → manage_scene(load) 강제 재로드 → 각 레이어 5/5 부착·계수 정확히 일치 확인
+- refresh_unity 컴파일 요청 후 read_console(types=error) → 0건
+- run_tests(EditMode) → 25/25 통과 (job 7d2c3632f714462ebc11677965c92da4)
+### 실패와 수정
+- 없음
+
+## [복구] Player/몬스터가 Ground를 그대로 통과해 추락하는 원인 진단 — 2026-08-02 16:05
+### 프롬프트
+지금 씬에서 run을 누르면 왜 몬스터랑 플레이어가 Ground에 안걸리고 쭊 떨어지지?
+### 조작 내역 (진단, 수정 없음)
+- Tilemap_Ground/Tilemap_Platforms의 TilemapCollider2D/CompositeCollider2D/Rigidbody2D 설정 확인 (isTrigger=false, usedByComposite=true, bodyType=Static — 정상)
+- Player/MiddleBoss/DeathDog1의 Rigidbody2D(Dynamic)/BoxCollider2D(isTrigger=false) 확인 — 정상
+- Physics2D 레이어 충돌 매트릭스 확인 (Ground-Player 무시 안 됨) — 정상
+- 타일 스프라이트의 Physics Shape 직접 확인 (forest_tileset_0/12/22 모두 유효한 폴리곤 보유) — 정상
+- **TilemapCollider2D.shapeCount=0, bounds가 사실상 0** (Ground/Platforms 둘 다 동일) 확인 — 비정상
+- 재생모드 진입해 직접 관찰: CompositeCollider2D.pathCount가 재생 중에도 0 유지, Player가 y=-637까지, MiddleBoss가 y=-260까지 추락 — 재생 종료, 변경사항 저장 안 함
+### 검증
+해당 없음 ([복구]는 진단만 수행)
+### 실패와 수정
+해당 없음
+
+## [구현] 적 유닛 AI(순찰/추적/공격/점프) + 월드스페이스 HP바 — 2026-08-02 17:40
+### 프롬프트
+내가 직접 에디터에서 확인해서 수정했어 현재 씬에 존재하는 MiddleBoss(중간보스), DeathDog1,2,3(쫄몹) 인데 쫄몹과 보스는 모두 내가 직접 씬에 미리 생성해놓을거야(동적으로 생성하지 않을 것임) 각 적 유닛은 aggroRange가 존재하고 공격 사거리, 플레이어를 쫓다 멈추는 거리들을 gizmos로 그려주는 OnDrawGizmosSelected를 포함하여라. 쫄몹들은 aggrorange에 player가 들어올 때 까지 지정해놓은 지점을 patrol한다. player가 aggrorange에 들어오게 되면 추적하며 player를 공격한다 만약 플레이어가 위 타일(맵의 층계에 따른 차이)에 존재할 경우 점프를 하여 따라온다 각 몬스터들은 머리위에 hpbar(UI canvas 사용하지 말 것)가 존재하여야 하고 데미지를 입을 때 마다 즉각적으로 동기화 되어야한다. 이 때 필요한 코드들을 작성하고 필요한 오브젝트에 컴포넌트로 넣어줘
+### 조작 내역
+- Assets/Scripts/Core/EnemyAILogic.cs 신규(순수 로직, NAN2026.Core): DetermineState(Patrol/Chase/Attack), NeedsJumpToFollow, PatrolDirection, HealthRatio
+- Assets/Tests/EditMode/EnemyAILogicTests.cs 신규: 16개 테스트
+- Assets/Scripts/Config/EnemyAIConfig.cs 신규(SO): aggroRange/attackRange/chaseStopDistance/이동속도/patrolRadius/jumpYThreshold/공격쿨다운·데미지/체력바 크기·색상 — MonoBehaviour 숫자 리터럴 금지 규칙 준수
+- Assets/Configs/DeathDogAIConfig.asset, MiddleBossAIConfig.asset 생성
+- Assets/Player/Scripts/MonsterHealth.cs 수정: CurrentHealth/MaxHealth public getter, OnHealthChanged(int,int) 이벤트 추가 (기존 데미지·넉백·플래시·사망 로직은 변경 없음). SlashProjectile이 이미 이 클래스로 검기 데미지를 주고 있어 기존 데미지 경로에 그대로 연결
+- Assets/Scripts/WorldHealthBar.cs 신규: UI Canvas 미사용, SpriteRenderer 2장(배경+채움, 1x1 흰 텍스처를 런타임 생성)으로 그리는 월드스페이스 체력바. MonsterHealth.OnHealthChanged 구독으로 즉시 동기화
+- Assets/Scripts/EnemyAI.cs 신규: 순찰→추적→공격 상태머신. 기존 PixelFantasy MonsterController2D(이동/점프 물리, IsGrounded)·MonsterAnimation(애니메이션 트리거)을 그대로 재사용. 데모용 MonsterControls(키보드 입력) 컴포넌트는 Input 충돌 방지를 위해 Awake에서 enabled=false 처리(삭제하지 않음). OnDrawGizmosSelected로 aggroRange(노랑)/attackRange(빨강)/chaseStopDistance(청록)/순찰 라인(초록) 표시
+- MiddleBoss/DeathDog1/DeathDog2/DeathDog3에 MonsterHealth+EnemyAI+WorldHealthBar 컴포넌트 부착, Config 연결 (보스=MiddleBossAIConfig·usePatrol=false, 쫄몹 3종=DeathDogAIConfig·usePatrol=true)
+- Player 오브젝트 태그가 Untagged로 방치되어 있던 것을 발견해 "Player"로 설정 (AI의 FindGameObjectWithTag 및 기존 Mine.cs 트랩도 이 태그에 의존)
+### 검증
+- 1차 시도: create_file 도구로 5개 스크립트를 작성했으나 실제로는 로컬 샌드박스에만 생성되고 원격 Unity 프로젝트에는 전혀 반영되지 않음 (Application.dataPath 기준 파일 존재 확인 결과 File.Exists=False). execute_code(File.WriteAllText)로 전량 재작성해 해결
+- refresh_unity(compile=force) 후 AppDomain 리플렉션으로 EnemyAIConfig/EnemyAI/WorldHealthBar/EnemyAILogic 타입이 실제 로드됐는지 확인 (문자열 컴파일 성공 메시지만으론 부족하다고 판단해 추가 검증)
+- 저장 → manage_scene(load) 강제 재로드 → 4개 오브젝트 전부 EnemyAI/WorldHealthBar/MonsterHealth 부착 및 config 연결 재확인 (FAIL.md #14 절차)
+- run_tests(EditMode) → 41/41 통과 (기존 25 + 신규 16, job 58a3d20ad4644d5ea1545903e79d897f)
+- 테스트 후 재확인: 컴포넌트 유지, isDirty=False
+### 실패와 수정
+- create_file 도구가 로컬 샌드박스에만 파일을 생성하고 원격 Unity 프로젝트 파일시스템에는 반영되지 않는 문제 발견. 이후 모든 .cs 파일 작성은 execute_code(File.WriteAllText)로 전환
+### 알려진 한계 (이번 작업 범위 밖)
+- Player 오브젝트에 PlayerHealth 컴포넌트가 아예 없고, PlayerHealth.TakeDamage() 자체도 빈 스텁이라 적의 공격이 실제 플레이어 체력에 영향을 주지 않음. EnemyAI는 PlayerHealth가 있으면 정확히 호출하도록 연결해뒀으나 활성화하려면 별도 작업 필요
+
+## [수정][구현] 점프 추적 디바운스 수정 + PlayerHealth 구현(상호 데미지) — 2026-08-02 18:35
+### 프롬프트
+[수정] 현재 NeedsJumpToFollow 함수로 플레이어가 위층에 있는지를 판단하고 점프하게 하는데 이 판단하는 프레임이 너무 빨라서 원래 의도한 (플레이어가 위층에 존재하는지)에 반응하는 것이 아니라 플레이어가 점프를 하면 따라 점프하게 되는 것을 수정해줘
+[구현] PlayerHealth 구현해주고 몬스터와 플레이어간의 공격시에 각자 데미지를 입도록 해줘
+### 조작 내역
+**[수정] 점프 디바운스**
+- NAN2026.Core.EnemyAILogic에 UpdateHeightGapTimer/ShouldJumpNow 순수 함수 추가. 높이차가 매 프레임 즉시 점프로 이어지던 것을, jumpConfirmDuration(기본 0.35초)만큼 '유지'된 경우에만 점프하도록 변경. 높이차가 사라지면 타이머 즉시 0으로 리셋
+- EnemyAIConfig에 jumpConfirmDuration 필드 추가
+- EnemyAI.Chase()가 매 프레임 즉시 판정 대신 heightGapTimer 누적 방식 사용. Patrol/Attack 진입 시 타이머 리셋(상태 전환 후 잔류 타이머로 인한 오탐 방지)
+- EditMode 테스트 5개 추가 (디바운스 누적/리셋, 플레이어 제자리 점프 시뮬레이션 케이스 포함)
+**[구현] PlayerHealth**
+- Assets/Scripts/Config/PlayerCombatConfig.cs 신규(SO): maxHealth/hitInvulnerabilityDuration/knockbackDistance
+- Assets/Scripts/PlayerHealth.cs 수정: 기존 해저드/리스폰 로직은 유지한 채 TakeDamage(빈 스텁)를 실제 구현 — 무적/스폰그레이스/피격직후무적 중엔 무시, 데미지 적용·넉백·OnHealthChanged 통지, 체력 0 이하 시 기존 Kill()/Respawn() 경로 재사용(죽으면 체크포인트에서 재시작). 리스폰 시 체력 풀피 회복. OnGUI에 HP 표시 추가
+- invincible 기본값을 true→false로 변경 (기존엔 테스트용으로 항상 무적이라 데미지 스텁이 비어있어도 티가 안 났는데, 이제 실제 데미지가 들어가므로 기본은 켜져 있어야 눈에 보임. F2로 여전히 토글 가능)
+- Player 오브젝트에 PlayerHealth 컴포넌트+PlayerCombatConfig(Assets/Configs/PlayerCombatConfig.asset, maxHealth=5) 연결 (기존엔 컴포넌트 자체가 없었음)
+- 몬스터→플레이어 데미지는 이미 지난 턴 EnemyAI.AttackPlayer()가 PlayerHealth.TakeDamage 호출로 연결해뒀던 것이 이제 실제로 동작. 플레이어→몬스터 데미지는 기존 SlashProjectile→MonsterHealth 경로 그대로(변경 없음) — 이번 작업으로 양방향 모두 실제 체력에 반영됨
+### 검증
+- refresh_unity 컴파일 요청 후 read_console(types=error) → 0건 (PlayerHealth.cs 편집 1건에서 execute_code 응답 타임아웃 발생 → 파일 내용 재확인으로 실제 반영 확인 후 재시도 없이 진행, FAIL.md #4 유사 패턴)
+- 저장 → manage_scene(load) 강제 재로드 → PlayerHealth 존재/Invincible=False/MaxHealth=5 재확인
+- run_tests(EditMode) → 46/46 통과 (기존 41 + 신규 5, job d572d1f162624b9c8568a16def25b443)
+- 테스트 후 재확인: PlayerHealth 유지, isDirty=False
+### 실패와 수정
+- PlayerHealth.cs OnGUI 수정 중 execute_code가 'Timeout receiving Unity response'를 반환했으나, 파일을 다시 읽어보니 실제로는 정상 반영되어 있었음. FAIL.md #4의 git 사례와 같은 패턴(Unity 메인 스레드 처리 중 응답 시한 초과로 추정)이라 재시도 없이 상태 확인 후 진행함
+
+## [구현] 플레이어 공격에 실제 데미지 판정 추가 — 2026-08-02 19:20
+### 프롬프트
+플레이어의 공격에 데미지를 추가해서 적에게 데미지가 들어가게 해줘
+### 조작 내역
+- 조사 결과: Player 오브젝트는 SwordSlashSpawner/SlashProjectile(반사식 PixelPlayerController 참조, 미부착) 계열이 아니라 실제로는 PlayerController2D + EffectProjectile 조합을 사용 중이었고, EffectProjectile은 순수 시각 이펙트(콜라이더/데미지 판정 전무)였음 — 그래서 지금까지 플레이어 공격이 실제로는 무피해였음
+- Assets/Scripts/Core/AttackDamageLogic.cs 신규(순수 로직): DamageForAttack(attackName, basicDamage, poweredDamage) — Slash=기본, Combo2/Combo3=강공격, 그 외=0. 테스트 5개
+- Assets/Scripts/Player/AttackEffectConfig.cs 수정: basicDamage/poweredDamage/hitboxSize 필드 추가
+- Assets/Scripts/Player/EffectProjectile.cs 수정: BoxCollider2D(트리거) 자동 추가, OnTriggerEnter2D로 NHNDemo.MonsterHealth 감지 시 TakeDamage 호출(플레이어 자신은 제외). 스윙 하나로 여러 적을 동시에 맞히는 클리브 허용(같은 적 중복 히트는 OnTriggerEnter2D의 겹침-시작 1회 호출 특성으로 자연 방지)
+- Assets/Scripts/Player/PlayerController2D.cs 수정: SpawnAttackEffect에서 AttackDamageLogic으로 데미지 계산 후 EffectProjectile.Launch에 데미지·히트박스 크기 전달
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- Player의 실제 AttackEffectConfig 에셋을 SerializedObject로 조회해 basicDamage=1/poweredDamage=3/hitboxSize=(0.9,0.9) 신규 필드가 정상 반영됐는지 확인, Effect_Basic/Effect_Powered 프리팹 연결도 확인
+- Effect_Basic.prefab 구조 확인(Transform/SpriteRenderer/EffectProjectile) — BoxCollider2D는 런타임 Awake에서 자동 추가되므로 프리팹 자체 수정은 없음 (절대 규칙: Prefab 자체 수정 금지 준수)
+- run_tests(EditMode) → 51/51 통과 (기존 46 + 신규 5, job ba0c2574fcd64ee88afbfa813fc90fdf)
+- 이번 턴은 씬 오브젝트 변경이 없어(스크립트/Config 에셋만 변경) manage_scene(save/load) 절차는 생략, isDirty=False 확인
+### 실패와 수정
+- 없음
+
+## [수정] 검기 사거리 절반 + 패링 무피해/반격 + MiddleBoss 돌진·투사체 공격 — 2026-08-02 20:30
+### 프롬프트
+[수정] 검기가 너무 멀리까지 날아가서 지금의 절반만 날아가게 해주고 몬스터의 공격을 패링했을 때 플레이어는 데미지를 입지 않고 적에게 데미지를 돌려주게끔 만들어줘 또한 OrkanBoss의 기능 중 돌진 공격, 투사체 공격을 MiddleBoss에게도 추가해줘
+### 조작 내역
+**검기 사거리 절반**
+- Assets/Configs/AttackEffectConfig.asset의 실제 lifetime 값(4초, 클래스 기본값 0.8과 달리 이미 커스텀되어 있었음)을 확인 후 정확히 2초로 절반 축소. 이동거리 = speed×lifetime 구조라 basic 28→14, powered 36→18로 비례 축소
+**패링 무피해 + 반격**
+- PlayerController2D가 IParryReflector를 구현하도록 수정, IsParryWindowActive() 공개 메서드 추가 (기존 parryHeld/parryPressTime/ParrySuccessWindow 로직 그대로 재사용, 새 판정 로직 추가 없음)
+- PlayerCombatConfig에 parryCounterDamage(기본 2) 추가, PlayerHealth에 getter 노출
+- EnemyAI.AttackPlayer()에 패링 체크 삽입: player의 IParryReflector.TryParry()가 true면 플레이어 데미지 대신 공격한 몬스터 자신이 parryCounterDamage만큼 MonsterHealth.TakeDamage를 받음
+**MiddleBoss 돌진/투사체 공격**
+- IEnemyAttackOverride 인터페이스 신규: 같은 오브젝트에 구현체가 있으면 EnemyAI가 이동/공격을 위임(IsBusy 동안 개입 안 함, TryStartAttack으로 패턴 시작 요청)
+- EnemyAI.Update/Chase/AttackPlayer에 훅 연결: 근접 사거리에선 항상 시도(짧으면 컴포넌트가 false 반환→기본 근접), 추적 중에도 매 프레임 시도해 원거리 패턴이 끼어들 수 있게 함
+- Boss/SpikeProjectile.cs를 OrkanBoss 전용 타입에서 NHNDemo.MonsterHealth 기반으로 일반화(재사용 가능하게). 기존 OrkanBoss.cs 호출부도 새 시그니처에 맞춰 수정(컴파일 유지 목적, 이 스크립트는 씬에서 미사용)
+- MiddleBossAttackConfig(SO) 신규: 패턴 선택 거리·쿨다운, 돌진(속도/최대거리/명중거리/데미지/벽감지레이캐스트+자기몸 오프셋), 투사체(선딜/개수/간격/속도/데미지) 수치
+- MiddleBossAttackPatterns 신규(IEnemyAttackOverride 구현): 코루틴으로 돌진(Rigidbody2D 직접 제어, 벽 Raycast 감지 시 정지)과 투사체 3연속 발사(SpikeProjectile 재사용, 패링 시 반사되어 보스 자신에게 데미지) 구현. 돌진 명중 시에도 동일한 패링 체크 적용
+- MiddleBoss에 MiddleBossAttackPatterns 부착, MiddleBossAttackConfig 연결, wallLayerMask=Default 레이어 설정
+- 셸/그로기 데미지 배율 시스템(OrkanBoss의 다른 기능)은 이번 요청 범위(돌진·투사체만)에 해당하지 않아 가져오지 않음
+### 검증
+- refresh_unity(compile=force) 3회(단계별) 후 read_console(types=error) → 매번 0건
+- AppDomain 리플렉션으로 MiddleBossAttackConfig/MiddleBossAttackPatterns/IEnemyAttackOverride 타입 실제 로드 확인
+- 저장 → manage_scene(load) 강제 재로드 → MiddleBossAttackPatterns 부착·config 연결, PlayerController2D의 IParryReflector 구현 여부, ParryCounterDamage=2, AttackEffectConfig.lifetime=2 전부 재확인
+- run_tests(EditMode) → 51/51 통과 (job 5e7aa76bdf6f486687c1136ace557179, 이번 턴은 신규 순수 로직 없어 테스트 수 변동 없음)
+- 테스트 후 재확인: MiddleBossAttackPatterns 유지, isDirty=False
+### 실패와 수정
+- 돌진 공격 벽 감지 Raycast를 보스 위치에서 그대로 쏘면 Physics2D.queriesStartInColliders 기본값(true) 때문에 보스 자기 자신의 non-trigger 콜라이더를 즉시 벽으로 오인해 돌진이 시작하자마자 멈추는 문제를 구현 중 미리 인지하고, wallCheckOriginOffset으로 레이 시작점을 진행 방향으로 미리 밀어내 예방함 (실제 발생 전에 설계 단계에서 방지, 별도 FAIL.md 항목 없음)
+
+## [수정] 몬스터-플레이어 물리 충돌 무시 — 2026-08-02 21:15
+### 프롬프트
+몬스터와 플레이어 오브젝트가 서로 통과할 수 있게 해야할 것 같아
+### 조작 내역
+- EnemyAI.Awake()에서 플레이어를 찾은 직후 Physics2D.IgnoreCollision(자신의 Collider2D, 플레이어의 Collider2D, true) 호출 (OrkanBoss.cs의 기존 IgnorePlayerCollision 패턴과 동일)
+- 바닥/벽/공격 판정용 트리거 콜라이더에는 영향 없음 — 몸통 콜라이더끼리의 물리 밀림만 무시됨
+- MiddleBoss/DeathDog1/DeathDog2/DeathDog3 전부 EnemyAI를 통해 동일하게 적용됨 (개별 설정 불필요)
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- 저장 → manage_scene(load) 강제 재로드 → 컴파일 정상 유지 확인
+- run_tests(EditMode) → 51/51 통과 (job 228a3d0ec9564c1ea6740a62ba42e670, 신규 순수 로직 없어 테스트 수 변동 없음)
+### 실패와 수정
+- 없음
+
+## [구현] 구르기 무적 프레임(0.25초) — 2026-08-02 21:55
+### 프롬프트
+플레이어 캐릭터가 구르기 할 때 0.25초동안 무적이 되게 한다. (경험치/레벨업/증강 부분은 SPEC.md 충돌로 별도 확인 요청 — 아래 답변 참조)
+### 조작 내역
+- PlayerCombatConfig에 rollInvincibilityDuration(기본 0.25초) 추가
+- PlayerHealth에 rollInvulnerableUntil 타이머 + BeginRollInvincibility() 공개 메서드 추가, TakeDamage의 무적 판정 조건에 합류(기존 invincible/graceUntil/damageInvulnerableUntil과 동일한 방식)
+- PlayerController2D가 PlayerHealth를 참조하도록 하고, 대시(Roll, G키)가 실제로 시작되는 시점(FixedUpdate에서 queuedAttack=="Roll"이 활성화될 때)에 BeginRollInvincibility() 호출
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- PlayerCombatConfig 실제 에셋에서 rollInvincibilityDuration=0.25 반영 확인
+- run_tests(EditMode) → 51/51 통과 (job 47e6fcc58bf44193aebede71f906485e, 신규 순수 로직 없어 테스트 수 변동 없음)
+### 실패와 수정
+- 없음
+### 별도 확인 요청 (SPEC.md 충돌)
+- 경험치/레벨업/브론즈·실버·골드 증강 시스템은 SPEC.md '범위 밖' 목록에 '레벨업'이 명시되어 있어 구현하지 않고 사용자에게 확인 요청함(대화 중 응답으로 처리, 이 LOG 항목에는 코드 변경 없음)
+
+## [구현] 경험치/레벨업/증강(브론즈·실버·골드) 시스템 — 2026-08-02 22:40
+### 프롬프트
+플레이어에게 경험치 데이터와 레벨을 만들어 적 몬스터가 죽을 때마다 경험치를 얻고 그것을 통해 레벨업을 하면 뱀서라이크류 게임처럼 3가지 증강(패링 쿨타임 감소, 패링 지속시간 증가, 데미지 증가, 체력 회복, 최대 체력 증가) *브론즈 증강, 실버 증강, 골드 증강으로 나누고 수치 조절한다* 또한 증강으로 현재 존재하는 공격의 범위(사거리)를 늘릴 수도 있게 해주고 싶음
+(다음 대화 턴에서 SPEC.md 미수정 조건으로 명시 승인받음: "Spec.md를 수정하지는 말고 그냥 직접적으로 승인할게 구현해줘")
+### SPEC.md 충돌 처리
+SPEC.md '범위 밖'에 '레벨업'이 명시되어 있어 구현 전 사용자에게 확인 요청(이전 LOG 항목 참조). 사용자가 SPEC.md는 수정하지 않되 예외로 구현을 명시 승인함 — SPEC.md 문서는 그대로 두고 STATE.md에 이 예외 사실을 기록함
+### 조작 내역
+- NAN2026.Core.LevelProgressionLogic 신규(순수): RequiredXpForLevel, TryLevelUp(다중 레벨업 처리), GoldChanceForLevel/SilverChanceForLevel(레벨에 따른 등급 확률 상승, 상한 존재), TierForRoll. 테스트 10개
+- LevelProgressionConfig(SO): XP 곡선(baseXpToLevel2/xpIncrementPerLevel), 등급 확률 곡선, 레벨업당 선택지 수(3)
+- AugmentConfig(SO) + AugmentType enum(6종: ParryCooldownDown/ParryDurationUp/DamageUp/Heal/MaxHealthUp/AttackRangeUp): 등급별([0]브론즈/[1]실버/[2]골드) 수치 배열, GetMagnitude(type,tier)
+- EnemyAIConfig에 xpReward 추가 (DeathDog=5, MiddleBoss=30)
+- NHNDemo.MonsterHealth에 OnDied 이벤트 추가(Die() 시점에 1회 발생)
+- PlayerHealth에 Heal(int)/AddMaxHealthBonus(int) 추가, MaxHealth가 combatConfig.maxHealth + maxHealthBonus를 반환하도록 변경. Awake/Respawn 시 currentHealth를 MaxHealth 기준으로 채워 최대체력 증강이 리스폰 후에도 유지되게 함
+- MovementConfig에 parryCooldown(1.5초)/parryCooldownMinimum(0.3초, 증강으로 무한히 줄어들지 않도록 하한선) 추가
+- PlayerController2D: 미들마우스 패링 입력에 실제 쿨타임 게이팅 추가(기존엔 쿨타임 개념 자체가 없었음), EffectiveParryWindow()/EffectiveParryCooldown() 헬퍼로 PlayerProgression의 누적 증강치를 반영. SpawnAttackEffect에서 데미지에 DamageBonus 가산, lifetime에 AttackRangeMultiplier 곱해 사거리 증가 반영
+- EnemyAI: MonsterHealth.OnDied 구독 → 사망 시 player의 PlayerProgression.AddXp(config.xpReward) 호출
+- PlayerProgression 신규(MonoBehaviour): 레벨/XP 추적, 레벨업 시 증강 3택 산출(등급 랜덤 롤 + 6종 중 중복없이 3개 랜덤 선택), 선택 시 즉시 효과 적용(패링/데미지/사거리는 내부 배율로 누적, 체력 관련은 PlayerHealth 직접 호출). 여러 레벨을 한번에 올랐을 때 선택지를 순차로 제공(pendingAugmentChoices 큐). OnGUI로 3장 카드 UI 표시(Canvas 미사용, 기존 PlayerHealth.OnGUI 관례와 동일한 방식), 선택 중 Time.timeScale=0으로 게임 일시정지
+- Player에 PlayerProgression 부착, LevelProgressionConfig.asset/AugmentConfig.asset 생성·연결
+### 검증
+- refresh_unity(compile=force) 3회(단계별) 후 read_console(types=error) → 매번 0건
+- AppDomain 리플렉션으로 PlayerProgression/LevelProgressionConfig/AugmentConfig/AugmentType 타입 실제 로드 확인
+- 저장 → manage_scene(load) 강제 재로드 → PlayerProgression 부착·config 2종 연결·Level=1 초기화 확인
+- run_tests(EditMode) → 61/61 통과 (기존 51 + 신규 10, job b8f33a9f046f4e8198d301c51761d44c)
+- 테스트 후 재확인: PlayerProgression 유지, isDirty=False
+### 실패와 수정
+- PlayerController2D.cs 편집 2건에서 execute_code가 'Timeout receiving Unity response'를 반환했으나, 파일을 다시 읽어 실제로는 정상 반영되어 있음을 확인 후 재시도 없이 진행 (FAIL.md #4/이전 세션과 동일 패턴, 새 항목 추가 안 함)
+### 눈으로 확인 필요
+- 레벨업 시 OnGUI 카드 3장이 실제로 겹치거나 화면 밖으로 나가지 않는지(해상도별)
+- 증강 등급 확률(브론즈/실버/골드)이 초반~후반 체감상 적절한지
+- 사거리 증강이 시각 이펙트 스케일과 별개로 판정만 늘어나는 구조라 위화감이 없는지
+
 
 ## [수정] Cainos 호환 수리 (사용자 PowerShell 수행) — 2026-08-02 02:15
 ### 프롬프트
