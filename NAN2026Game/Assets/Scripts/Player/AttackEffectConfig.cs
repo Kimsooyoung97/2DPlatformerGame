@@ -17,5 +17,10 @@ namespace NAN2026
 
         [Header("애니메이션")]
         public float frameRate = 16f;
+
+        [Header("데미지")]
+        public int basicDamage = 1;
+        public int poweredDamage = 3;
+        public Vector2 hitboxSize = new Vector2(0.9f, 0.9f);
     }
 }

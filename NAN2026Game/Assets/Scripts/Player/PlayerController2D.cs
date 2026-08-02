@@ -140,7 +140,11 @@ public class PlayerController2D : MonoBehaviour
         var go = Instantiate(prefab, pos, Quaternion.identity);
         go.transform.localScale = new Vector3(scale, scale, 1f);
         var ep = go.GetComponent<EffectProjectile>();
-        if (ep != null) ep.Launch(dir, speed, effectConfig.lifetime, frames, effectConfig.frameRate);
+        if (ep != null)
+        {
+            int hitDamage = AttackDamageLogic.DamageForAttack(attackName, effectConfig.basicDamage, effectConfig.poweredDamage);
+            ep.Launch(dir, speed, effectConfig.lifetime, frames, effectConfig.frameRate, hitDamage, effectConfig.hitboxSize);
+        }
     }
 
     private void QueueAttack(string stateName, float duration, float lungeSpeed)

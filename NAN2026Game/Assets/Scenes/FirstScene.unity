@@ -14355,7 +14355,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70dc81c5dcf02c547bf6157b1a734021, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NAN2026.Showroom.PlayerHealth
-  invincible: 0
+  invincible: 1
   respawnDelay: 0.2
   spawnGrace: 0.5
   fallKillY: -18

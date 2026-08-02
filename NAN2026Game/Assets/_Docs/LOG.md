@@ -817,3 +817,21 @@ FirstScene에서 2D Pixel Art Platformer Biome - American Forest 폴더와 2D Pi
 - 테스트 후 재확인: PlayerHealth 유지, isDirty=False
 ### 실패와 수정
 - PlayerHealth.cs OnGUI 수정 중 execute_code가 'Timeout receiving Unity response'를 반환했으나, 파일을 다시 읽어보니 실제로는 정상 반영되어 있었음. FAIL.md #4의 git 사례와 같은 패턴(Unity 메인 스레드 처리 중 응답 시한 초과로 추정)이라 재시도 없이 상태 확인 후 진행함
+
+## [구현] 플레이어 공격에 실제 데미지 판정 추가 — 2026-08-02 19:20
+### 프롬프트
+플레이어의 공격에 데미지를 추가해서 적에게 데미지가 들어가게 해줘
+### 조작 내역
+- 조사 결과: Player 오브젝트는 SwordSlashSpawner/SlashProjectile(반사식 PixelPlayerController 참조, 미부착) 계열이 아니라 실제로는 PlayerController2D + EffectProjectile 조합을 사용 중이었고, EffectProjectile은 순수 시각 이펙트(콜라이더/데미지 판정 전무)였음 — 그래서 지금까지 플레이어 공격이 실제로는 무피해였음
+- Assets/Scripts/Core/AttackDamageLogic.cs 신규(순수 로직): DamageForAttack(attackName, basicDamage, poweredDamage) — Slash=기본, Combo2/Combo3=강공격, 그 외=0. 테스트 5개
+- Assets/Scripts/Player/AttackEffectConfig.cs 수정: basicDamage/poweredDamage/hitboxSize 필드 추가
+- Assets/Scripts/Player/EffectProjectile.cs 수정: BoxCollider2D(트리거) 자동 추가, OnTriggerEnter2D로 NHNDemo.MonsterHealth 감지 시 TakeDamage 호출(플레이어 자신은 제외). 스윙 하나로 여러 적을 동시에 맞히는 클리브 허용(같은 적 중복 히트는 OnTriggerEnter2D의 겹침-시작 1회 호출 특성으로 자연 방지)
+- Assets/Scripts/Player/PlayerController2D.cs 수정: SpawnAttackEffect에서 AttackDamageLogic으로 데미지 계산 후 EffectProjectile.Launch에 데미지·히트박스 크기 전달
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- Player의 실제 AttackEffectConfig 에셋을 SerializedObject로 조회해 basicDamage=1/poweredDamage=3/hitboxSize=(0.9,0.9) 신규 필드가 정상 반영됐는지 확인, Effect_Basic/Effect_Powered 프리팹 연결도 확인
+- Effect_Basic.prefab 구조 확인(Transform/SpriteRenderer/EffectProjectile) — BoxCollider2D는 런타임 Awake에서 자동 추가되므로 프리팹 자체 수정은 없음 (절대 규칙: Prefab 자체 수정 금지 준수)
+- run_tests(EditMode) → 51/51 통과 (기존 46 + 신규 5, job ba0c2574fcd64ee88afbfa813fc90fdf)
+- 이번 턴은 씬 오브젝트 변경이 없어(스크립트/Config 에셋만 변경) manage_scene(save/load) 절차는 생략, isDirty=False 확인
+### 실패와 수정
+- 없음
