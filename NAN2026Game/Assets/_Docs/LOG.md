@@ -1184,3 +1184,17 @@ x좌표 50 y좌표 9~-1 / x 좌표 82 y좌표 9~-1의 범위를 x좌표 50 y좌�
 - 삭제 후 Find=null 확인, 씬 저장 True
 ### 실패와 수정
 없음
+
+
+## [구현] SecondScene 전장의 안개(Fog of War) — 2026-08-02 19:47
+### 프롬프트
+[구현] SecondScene Fog of War (전장의 안개) 가장 일반적으로 사용하는 용어입니다. 플레이어가 아직 방문하지 않은 영역 → 어둡게 표시 캐릭터가 접근하면 → 시야가 밝혀짐 탐험한 지역 → 계속 밝게 유지
+### 조작 내역
+- FogLogic(Core, 순수: RevealFactor·ShouldRestamp) + FogLogicTests 6건
+- FogOfWarConfig(SO 신설: 반경7·소프트3.5·알파0.96·4tpu·경계 0,-2~120,21·정렬40 등 수치 전량 소유)
+- FogOfWar.cs: 맵 덮는 어둠 텍스처(480×92) 생성, 플레이어 이동 시 원형 스탬프로 알파 영구 감소(밝힌 곳 유지), 임계 이동 시에만 갱신
+- SecondScene에 Stage_Fog 배선(config·target=Player)
+### 검증
+- 컴파일 에러 0, EditMode 31/31(신규 6 포함) 통과, 씬·에셋 저장 True. 시각 효과는 사용자 재생 판정
+### 실패와 수정
+- SPEC 범위 밖 기능의 사용자 승격 — SPEC 갱신 제안 필요 기록
