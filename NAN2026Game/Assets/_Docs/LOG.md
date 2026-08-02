@@ -1099,3 +1099,15 @@ x좌표 50 y좌표 9~-1 / x 좌표 82 y좌표 9~-1의 범위를 x좌표 50 y좌�
 해당 없음
 ### 커밋
 해당 없음(무수정)
+
+
+## [수정] 물리 뿌리 수리 — Ground Composite + arc 130 — 2026-08-02 17:51
+### 프롬프트
+[수정] 물리 뿌리 수리 — Ground Composite 병합 + arc 130
+### 조작 내역
+- Stage_Ground: CompositeCollider2D(Outlines)+Static Rigidbody2D, 타일별 1,400여 콜라이더 → 외곽선 15개 병합 (이음새 끼임 원천 제거)
+- Stage_Platform: PlatformEffector surfaceArc 170 → 130 (모서리 착지 오판 제거)
+### 검증
+- pathCount=15 실측, 씬 저장 True. 벽 파고들기·모서리 착지 재현 여부는 사용자 재생 판정. 콘솔 에러는 기존 팀 Player 결손 1건뿐
+### 실패와 수정
+없음
