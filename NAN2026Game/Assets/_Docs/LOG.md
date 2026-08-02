@@ -2046,3 +2046,16 @@ shift 지우기 기능 없앴니? 수동으로 수정하려고 하는데 안되�
 - 지형 내부 충돌 Stage_CameraBounds, 저장 True
 ### 실패와 수정
 - FAIL 후보: 컴포짓 생성은 콜라이더 갱신(ProcessTilemapChanges) 후에
+
+
+## [구현] ThirdScene 신축 — 레퍼런스 캡처 재현 — 2026-08-03 04:46
+### 프롬프트
+맵 그냥 새로 만들어야겠다. ThirdScene 생성하고 동영상 보여주면 그대로 맵 가능하니? (+캡처 2장)
+### 조작 내역
+- 발견: 사용자가 Third·ForthScene 삭제 — 완전 신축으로 전환
+- 표준 구조 신설(Ground 충돌/컴포짓 — ProcessTilemapChanges 후 지오메트리, Wall, Props, Background, 경계, Player 프리팹, 리그는 SecondScene 복사·재타깃)
+- 캡처 재현: 평탄 활주로 141x6(표면 13/흙 18), 지상 소품 30 밀식(침엽·활엽·고사목·덤불·바위·윗풀), 배경 65(sky_cloud3·구름4·산4·소나무 실루엣 54 밀집 띠 스케일 2.2)
+### 검증
+- 충돌 경로 생성 확인, 저장 True. 구도 정합은 캡처 대조 — 사용자 판정
+### 실패와 수정
+- Third·Forth 부재로 열기 2회 실패 → 신축·리그 원본 교체로 우회
