@@ -146,7 +146,15 @@ namespace NAN2026.EditorTools
                 var t = tm.GetTile(pos);
                 if (t != null) set.Add(t);
             }
-            if (set.Count == 0) return;
+            if (set.Count == 0)
+            {
+                // 씬 겹이 비어도 메뉴 유지: 이름에 대응 키워드가 든 팩 패밀리로 대체
+                string want = tilemapGoName == "Stage_Wall" ? "Wall" : "Ground";
+                foreach (var kv in families[0])
+                    if (!kv.Key.StartsWith("★") && kv.Key.Contains(want))
+                    { families[0][familyName] = new List<Object>(kv.Value); return; }
+                return;
+            }
             families[0][familyName] = set.Cast<Object>().ToList();
         }
 
