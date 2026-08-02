@@ -11,7 +11,7 @@ namespace NAN2026.EditorTools
     // 에셋 쇼룸 v4: 타일·소품 격자 진열 + 씬 클릭 검사(클릭한 타일 즉시 미리보기·격자 자동 점프)
     public class TileShowroomWindow : EditorWindow
     {
-        private const string SearchRoot = "Assets/Cainos";
+        private static readonly string[] SearchRoots = { "Assets/Cainos", "Assets/sanctum_pixel" };
         private static readonly Vector2 CellSize = new Vector2(84f, 104f);
         private static readonly string[] Tabs = { "타일", "소품" };
 
@@ -106,14 +106,14 @@ namespace NAN2026.EditorTools
         {
             EnsureInit();
             families[0].Clear();
-            foreach (string guid in AssetDatabase.FindAssets("t:TileBase", new[] { SearchRoot }))
+            foreach (string guid in AssetDatabase.FindAssets("t:TileBase", SearchRoots))
             {
                 var tile = AssetDatabase.LoadAssetAtPath<TileBase>(AssetDatabase.GUIDToAssetPath(guid));
                 if (tile == null) continue;
                 Add(0, TileFamilyOf(tile.name), tile);
             }
             families[1].Clear();
-            foreach (string guid in AssetDatabase.FindAssets("t:Prefab", new[] { SearchRoot }))
+            foreach (string guid in AssetDatabase.FindAssets("t:Prefab", SearchRoots))
             {
                 string p = AssetDatabase.GUIDToAssetPath(guid);
                 var go = AssetDatabase.LoadAssetAtPath<GameObject>(p);
@@ -748,6 +748,7 @@ namespace NAN2026.EditorTools
                 SceneButton("우리 맵", "Assets/Scenes/SecondScene.unity");
                 SceneButton("데모(정답지)", "Assets/Cainos/Pixel Art Platformer - Dungeon/Scene/SC Demo Scene.unity");
                 SceneButton("소품 카탈로그", "Assets/Cainos/Pixel Art Platformer - Dungeon/Scene/SC All Props.unity");
+                SceneButton("숲 데모", "Assets/sanctum_pixel/forest_side_pack/demo_scene.unity");
                 GUILayout.FlexibleSpace();
                 GUILayout.Label(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name, EditorStyles.miniLabel);
             }

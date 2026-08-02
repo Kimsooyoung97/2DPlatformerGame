@@ -50,3 +50,5 @@
 
 - Effect_Vol.3 (에셋 팩, Assets/Effect_Vol.3): Effect_1.png 9프레임을 플레이어 스킬 내려찍기 이펙트로 사용. 라이선스: 팀 도입 팩(확인 필요 시 팀 문의)
 - 기사_스킬대기.png (생성형 AI 산출물, Assets/Map): 플레이어 스킬 모션용. 생성 프롬프트 미제공 — 불투명 배경으로 슬라이싱 보류 중
+
+- Forest Platformer Pixel Art Tileset (sanctum pixel, Assets/sanctum_pixel/forest_side_pack): 에셋스토어 구매. 재배포 불가 — gitignore 등재, 각 팀원 개별 임포트 필요. 숲 타일 27종·패럴랙스 배경
