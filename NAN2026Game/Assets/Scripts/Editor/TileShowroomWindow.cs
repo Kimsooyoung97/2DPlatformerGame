@@ -188,7 +188,9 @@ namespace NAN2026.EditorTools
         {
             // 자체 붓: 유니티 팔레트 상태와 무관하게 항상 동작
             armedTile = tile;
+            armedProp = null;
             armedTarget = targetName;
+            regionMode = false;
             SceneView.RepaintAll();
             try
             {
@@ -222,6 +224,7 @@ namespace NAN2026.EditorTools
         {
             armedProp = prefab;
             armedTile = null;
+            regionMode = false;
             SceneView.RepaintAll();
             return prefab.name + " 배치 모드 — 씬 클릭=놓기 (Ctrl=0.5스냅, Esc=해제)";
         }
