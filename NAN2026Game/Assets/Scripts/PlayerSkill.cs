@@ -38,17 +38,18 @@ namespace NAN2026
             lastCast = Time.time;
             bool hasPose = skillSprites != null && skillSprites.Length > 0;
             if (hasPose && anim != null) anim.enabled = false;
-            float triggerTime = SkillLogic.FrameTime(config.triggerFrame, config.skillFps);
+            int skip = Mathf.Max(0, config.startFrame);
+            float triggerTime = SkillLogic.FrameTime(config.triggerFrame - skip, config.skillFps);
             float frameDur = config.skillFps > 0f ? 1f / config.skillFps : 0.1f;
             float t = 0f;
             int spawned = -1;
             int shownFrame = -1;
-            float total = hasPose ? skillSprites.Length * frameDur : triggerTime + config.sideCount * config.stagger + 0.2f;
+            float total = hasPose ? (skillSprites.Length - skip) * frameDur : triggerTime + config.sideCount * config.stagger + 0.2f;
             while (t < total)
             {
                 if (hasPose)
                 {
-                    int f = Mathf.Min(skillSprites.Length - 1, (int)(t / frameDur));
+                    int f = Mathf.Min(skillSprites.Length - 1, skip + (int)(t / frameDur));
                     if (f != shownFrame) { sr.sprite = skillSprites[f]; shownFrame = f; }
                 }
                 if (t >= triggerTime)
