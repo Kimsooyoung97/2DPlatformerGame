@@ -722,3 +722,21 @@ FirstScene에서 2D Pixel Art Platformer Biome - American Forest 폴더와 2D Pi
 ### 실패와 수정
 - FAIL.md #14: 저장 성공 메시지에도 불구하고 Tilemap 타일 데이터가 이전 턴 상태로 부분 되돌아가는 현상 발견. 원인 미확정(재생모드 이력 추정). GetTile 즉시검증 + 재로드검증 절차로 재발 확인 및 정상화
 - run_tests 1차 호출이 'No Unity Editor instances found' 오류 반환 → 연결 재확인(execute_code ping) 후 정상 작동 확인되어 재시도로 해결 (일시적 통신 문제로 판단, 별도 FAIL 항목 없음)
+
+## [수정] FirstScene 배경 — forest_side_pack으로 전환, 레이어드 배경+계단형 섬 — 2026-08-02 15:20
+### 프롬프트
+우선 지금 배경이 그냥 옆으로 이어져 있는데 한 칸의 배경마다 paralle하게 이런식으로 산과 구름이 같이 보이게끔 해주면 될 거 같고 Tilemap_Platforms도 지금 너무 무난하게 1개 1개 있는게 별로야 이미지 처럼 좀 해줄 수 없나? 이제 배경을 제작할 때는 다른 에셋을 추가로 사용해도 돼
+### 조작 내역
+- 프로젝트 내 미사용 팩 조사 중 Assets/sanctum_pixel/forest_side_pack 발견 — 레퍼런스 이미지의 원본 에셋으로 확인(데모 씬 demo_scene.unity 포함, 배경이 sky/cloud/mountain/pine1/pine2로 완전히 분리된 레이어, 27개 타일 팔레트, 부시/바위/나무/꽃 등 풍부한 소품 보유)
+- 데모 씬의 Tilemap 직렬화 데이터(m_Tiles, m_TileAssetArray)를 직접 파싱해 실제 타일 사용 패턴을 확인하고, 텍스처 알파/색상 샘플링으로 타일셋 그리드(5열x6행, 27종)의 각 행 용도를 확정: row5(0,1,2)=잔디 상단, row2(12,13,14)=흙 채움, row0(22,23,24)=어두운 삐죽 하단, row4(7,8)=계단/노치 코너 조각
+- Tilemap_Ground: 기존 두 Biome 팩 타일 → forest_tileset 3단(상단/채움/하단)으로 교체, x=-12~113 전체
+- Tilemap_Platforms: 기존 단순 사각 섬 11개 → forest_tileset 기반 14개 섬으로 교체, 그 중 3개는 계단형 노치(단차) 적용해 레퍼런스의 스텝형 섬 재현
+- Backdrop: 평면 파노라마 패널 반복 → sky/cloud/mountain/pine1/pine2 5개 레이어를 데모 씬의 상대 Y좌표·스케일(5배)을 그대로 이식해 겹겹이 배치, 레이어별로 자체 폭만큼 반복 타일링해 전체 구간에서 산+구름이 항상 함께 보이도록 구성 (정적 레이어링; 실제 카메라 연동 패럴랙스 모션은 미구현 — 원본 데모 씬에도 패럴랙스 스크립트 없음)
+- Decoration: 기존 Biome 팩 나무/돌 소품 → forest_side_pack의 pine/pine_dead/tree/bush/rock/flower(4색)로 교체, 지면 61개 + 섬 위 14개 = 75개
+### 검증
+- 저장 → manage_scene(load)로 강제 재로드 → GetTile/GameObject.Find로 재검증 (FAIL.md #14 절차): Ground x=0 top=forest_tileset_0/fill=forest_tileset_12/bottom=forest_tileset_22, bounds 일치, Platform bounds(-9,-4,0)Size(115,8,1), Decoration 75/Backdrop 5레이어그룹/Walls 2 전부 일치
+- refresh_unity 컴파일 요청 후 read_console(types=error) → 0건
+- run_tests(EditMode) → 25/25 통과 (job 68020ca80c5a448aa96360b6f1c1aeee)
+- 테스트 이후 재확인: Decoration 75 유지, Ground bounds 유지, isDirty=False
+### 실패와 수정
+- 없음 (FAIL.md #5/#14 절차를 선반영해 이번엔 재현 없었음)

@@ -47,3 +47,9 @@
 ## Cainos 에셋 팩 / Map_Castle — 2026-08-01
 - Assets/Cainos/ (Pixel Art Platformer - Village Props, Interactive Pixel Water 등): 유니티 에셋 스토어, 표준 라이선스 (사용자 다운로드)
 - Assets/Sprites_AI/Map_Castle/: 사용자 생성 AI 산출물 (성 안뜰 구간용)
+
+## sanctum_pixel/forest_side_pack (2026-08-02)
+- 파일: Assets/sanctum_pixel/forest_side_pack/** (Sprites/Background/{sky,sky_cloud,cloud,mountain,pine1,pine2}.png, Sprites/Tileset/forest_tileset.png + Palette 27종, Sprites/Props/{Bush,Pine,Pine_dead,Rock,Tree,Tree_dead,Upper_grass,Flower(5색)}
+- 출처: 프로젝트에 기존 임포트되어 있던 에셋(누가/언제 추가했는지 이번 세션에서는 확인 불가). 사용자 승인 하에 FirstScene 배경(Ground/Platforms/Backdrop/Decoration)에 신규 사용
+- 라이선스: 미확인 (두 Biome 팩과 동일하게 라이선스 확인 전까지 git 커밋에서 제외함)
+- 생성 프롬프트: 해당 없음 (기성 에셋, AI 생성 아님)
