@@ -500,6 +500,7 @@ namespace NAN2026.EditorTools
 
         private void OnSceneGUI(SceneView sv)
         {
+            if (layerMoveMode) { HandleLayerMove(sv); return; }
             if (regionMode) { HandleRegionCopy(sv); return; }
             if (!inspectMode && armedProp != null) { HandlePropPlace(sv); return; }
             if (!inspectMode && armedTile != null) { HandleBrush(sv); return; }
