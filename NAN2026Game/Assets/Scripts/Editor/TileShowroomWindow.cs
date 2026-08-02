@@ -24,6 +24,9 @@ namespace NAN2026.EditorTools
 
         private bool inspectMode;
         private static TileBase armedTile;
+        private static GameObject armedProp;
+        private readonly List<GameObject> hitProps = new List<GameObject>();
+        private readonly List<string> hitPropMeta = new List<string>();
         private static string armedTarget = "Stage_Ground";
         private readonly List<TileBase> hitTiles = new List<TileBase>();
         private readonly List<string> hitMeta = new List<string>();
@@ -153,6 +156,19 @@ namespace NAN2026.EditorTools
             Repaint();
         }
 
+        private void JumpToProp(GameObject prefabAsset)
+        {
+            if (prefabAsset == null) return;
+            tab = 1;
+            string ap = AssetDatabase.GetAssetPath(prefabAsset);
+            string fam = PropFamilyOf(prefabAsset.name, ap.Contains("Village"));
+            int idx = System.Array.IndexOf(familyNames[1], fam);
+            if (idx >= 0) familyIndex[1] = idx;
+            highlight = prefabAsset;
+            pendingScrollTo = prefabAsset;
+            Repaint();
+        }
+
         // 유니티 붓에 타일 장전 + 칠 대상 Stage_Ground + 페인트 도구 활성
         public static string PaintWith(TileBase tile, string targetName = "Stage_Ground")
         {
@@ -188,8 +204,67 @@ namespace NAN2026.EditorTools
             }
         }
 
+        public static string PlaceWith(GameObject prefab)
+        {
+            armedProp = prefab;
+            armedTile = null;
+            SceneView.RepaintAll();
+            return prefab.name + " 배치 모드 — 씬 클릭=놓기 (Ctrl=0.5스냅, Esc=해제)";
+        }
+
+        // 소품 배치 모드: 클릭 지점에 프리팹 생성
+        private void HandlePropPlace(SceneView sv)
+        {
+            var e = Event.current;
+            if (e.type == EventType.KeyDown && e.keyCode == KeyCode.Escape)
+            {
+                armedProp = null;
+                sv.Repaint();
+                Repaint();
+                return;
+            }
+            int id = GUIUtility.GetControlID(FocusType.Passive);
+            HandleUtility.AddDefaultControl(id);
+            Ray ray0 = HandleUtility.GUIPointToWorldRay(e.mousePosition);
+            float dz0 = Mathf.Approximately(ray0.direction.z, 0f) ? 1f : ray0.direction.z;
+            Vector3 world = ray0.origin + ray0.direction * Mathf.Max(0f, -ray0.origin.z / dz0);
+            if (e.control)
+            {
+                world.x = Mathf.Round(world.x * 2f) * 0.5f;
+                world.y = Mathf.Round(world.y * 2f) * 0.5f;
+            }
+            var srcSr = armedProp.GetComponentInChildren<SpriteRenderer>();
+            Vector3 psize = srcSr != null && srcSr.sprite != null ? (Vector3)(srcSr.sprite.bounds.size) : new Vector3(1f, 1f, 0f);
+            Handles.color = new Color(0.4f, 0.8f, 1f, 0.9f);
+            Handles.DrawWireCube(world + new Vector3(0f, psize.y * 0.5f, 0f), psize);
+            Handles.Label(world + new Vector3(0f, psize.y + 0.3f, 0f), armedProp.name);
+            if (e.type == EventType.MouseMove) sv.Repaint();
+            if (e.type == EventType.MouseDown && e.button == 0)
+            {
+                var inst = (GameObject)PrefabUtility.InstantiatePrefab(armedProp);
+                inst.transform.position = new Vector3(world.x, world.y, 0f);
+                var parentGo = GameObject.Find("Stage_Props");
+                if (parentGo != null) inst.transform.SetParent(parentGo.transform);
+                int next = -300;
+                if (parentGo != null)
+                    foreach (Transform c in parentGo.transform)
+                    {
+                        var sr2 = c.GetComponentInChildren<SpriteRenderer>();
+                        if (sr2 != null && sr2.sortingOrder >= -300 && sr2.sortingOrder < 0 && sr2.sortingOrder >= next)
+                            next = sr2.sortingOrder + 1;
+                    }
+                foreach (var sr2 in inst.GetComponentsInChildren<SpriteRenderer>()) sr2.sortingOrder = next;
+                foreach (var col in inst.GetComponentsInChildren<Collider2D>()) Object.DestroyImmediate(col);
+                Undo.RegisterCreatedObjectUndo(inst, "쇼룸 소품 배치");
+                UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(inst.scene);
+                e.Use();
+                sv.Repaint();
+            }
+        }
+
         private void OnSceneGUI(SceneView sv)
         {
+            if (!inspectMode && armedProp != null) { HandlePropPlace(sv); return; }
             if (!inspectMode && armedTile != null) { HandleBrush(sv); return; }
             if (!inspectMode) return;
             var e = Event.current;
@@ -209,7 +284,32 @@ namespace NAN2026.EditorTools
                 hitTiles.Add(tile);
                 hitMeta.Add("[" + tm.gameObject.name + "] 셀(" + cell.x + "," + cell.y + ")");
             }
+            // 소품 판독: 렌더러 경계 포함, 정렬 높은 순 3개
+            hitProps.Clear(); hitPropMeta.Clear();
+            var foundSr = new List<SpriteRenderer>();
+            foreach (var sr in Object.FindObjectsByType<SpriteRenderer>(FindObjectsSortMode.None))
+            {
+                if (sr.sprite == null) continue;
+                var bb = sr.bounds;
+                if (world.x < bb.min.x || world.x > bb.max.x || world.y < bb.min.y || world.y > bb.max.y) continue;
+                foundSr.Add(sr);
+            }
+            foundSr.Sort((a, b) => b.sortingOrder.CompareTo(a.sortingOrder));
+            int taken = 0;
+            foreach (var sr in foundSr)
+            {
+                if (taken >= 3) break;
+                GameObject srcPf = null;
+                var nearest = PrefabUtility.GetNearestPrefabInstanceRoot(sr.gameObject);
+                if (nearest != null) srcPf = PrefabUtility.GetCorrespondingObjectFromSource(nearest) as GameObject;
+                if (srcPf == null) continue;
+                if (hitProps.Contains(srcPf)) continue;
+                hitProps.Add(srcPf);
+                hitPropMeta.Add("위치(" + sr.transform.position.x.ToString("F1") + "," + sr.transform.position.y.ToString("F1") + ") 정렬 " + sr.sortingOrder);
+                taken++;
+            }
             if (hitTiles.Count > 0) JumpTo(hitTiles[0]);
+            else if (hitProps.Count > 0) JumpToProp(hitProps[0]);
             e.Use();
             Repaint();
         }
@@ -277,12 +377,14 @@ namespace NAN2026.EditorTools
                         ShowNotification(new GUIContent(PaintWith((TileBase)highlight)));
                     }
                 GUILayout.FlexibleSpace();
-                if (armedTile != null)
+                if (armedTile != null || armedProp != null)
                 {
-                    GUILayout.Label("장전: " + armedTile.name + " → " + armedTarget, EditorStyles.miniLabel);
+                    string armName = armedTile != null ? armedTile.name + " → " + armedTarget : armedProp.name + " → 배치";
+                    GUILayout.Label("장전: " + armName, EditorStyles.miniLabel);
                     if (GUILayout.Button("해제", EditorStyles.toolbarButton, GUILayout.Width(40f)))
                     {
                         armedTile = null;
+                        armedProp = null;
                         SceneView.RepaintAll();
                     }
                 }
@@ -299,7 +401,7 @@ namespace NAN2026.EditorTools
             float cw = CellSize.x * zoom, ch = CellSize.y * zoom;
             int cols = Mathf.Max(1, Mathf.FloorToInt((position.width - 24f) / cw));
             // 자동 스크롤 (검사 점프)
-            if (pendingScrollTo != null && tab == 0)
+            if (pendingScrollTo != null)
             {
                 int idx = items.IndexOf(pendingScrollTo);
                 if (idx >= 0) scroll.y = (idx / cols) * ch;
@@ -357,6 +459,12 @@ namespace NAN2026.EditorTools
                             {
                                 ShowNotification(new GUIContent("오류: " + ex.Message), 2d);
                             }
+                        }
+                        else if (tab == 1 && o is GameObject)
+                        {
+                            EditorGUIUtility.PingObject(o);
+                            inspectMode = false;
+                            ShowNotification(new GUIContent(PlaceWith((GameObject)o)), 1.2d);
                         }
                         else
                         {
@@ -440,7 +548,32 @@ namespace NAN2026.EditorTools
                         if (GUILayout.Button("🖌 이 타일로 칠하기", GUILayout.Width(124f), GUILayout.Height(24f)))
                         {
                             inspectMode = false;
-                            ShowNotification(new GUIContent(PaintWith(t)));
+                            string tgt = (t.name.Contains("Tileable") || t.name.Contains("Wall")) ? "Stage_Wall" : "Stage_Ground";
+                            ShowNotification(new GUIContent(PaintWith(t, tgt)));
+                        }
+                    }
+                }
+                for (int i = 0; i < hitProps.Count; i++)
+                {
+                    var p = hitProps[i];
+                    if (p == null) continue;
+                    using (new EditorGUILayout.HorizontalScope())
+                    {
+                        Rect r2 = GUILayoutUtility.GetRect(52f, 52f, GUILayout.Width(52f));
+                        Texture2D pv2 = AssetPreview.GetAssetPreview(p);
+                        if (pv2 != null) GUI.DrawTexture(r2, pv2, ScaleMode.ScaleToFit);
+                        else EditorGUI.DrawRect(r2, new Color(0.2f, 0.2f, 0.2f));
+                        using (new EditorGUILayout.VerticalScope())
+                        {
+                            GUILayout.Label(p.name, EditorStyles.boldLabel);
+                            GUILayout.Label(hitPropMeta[i], EditorStyles.miniLabel);
+                        }
+                        if (GUILayout.Button("소품 탭에서 보기", GUILayout.Width(108f), GUILayout.Height(24f)))
+                            JumpToProp(p);
+                        if (GUILayout.Button("📦 이 소품 배치", GUILayout.Width(108f), GUILayout.Height(24f)))
+                        {
+                            inspectMode = false;
+                            ShowNotification(new GUIContent(PlaceWith(p)));
                         }
                     }
                 }
