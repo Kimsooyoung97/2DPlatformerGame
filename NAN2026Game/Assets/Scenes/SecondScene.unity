@@ -631,9 +631,7 @@ Transform:
   - {fileID: 840638910}
   - {fileID: 173250601}
   - {fileID: 593113003}
-  - {fileID: 1608427418}
   - {fileID: 2002871092}
-  - {fileID: 916391923}
   - {fileID: 1760734910}
   - {fileID: 1516717102}
   - {fileID: 609006207}
@@ -5896,6 +5894,14 @@ PrefabInstance:
       value: Statue_Knight_R
       objectReference: {fileID: 0}
     - target: {fileID: 1581566398056570396, guid: 9debf96784759d64ea4f6a04538f1cdd, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1.2813
+      objectReference: {fileID: 0}
+    - target: {fileID: 1581566398056570396, guid: 9debf96784759d64ea4f6a04538f1cdd, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1.06
+      objectReference: {fileID: 0}
+    - target: {fileID: 1581566398056570396, guid: 9debf96784759d64ea4f6a04538f1cdd, type: 3}
       propertyPath: m_LocalPosition.x
       value: 77
       objectReference: {fileID: 0}
@@ -6259,11 +6265,6 @@ PrefabInstance:
 Transform:
   m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: 8cac6fce2a177ab4eba3dfbfeb42b886, type: 3}
   m_PrefabInstance: {fileID: 914687443}
-  m_PrefabAsset: {fileID: 0}
---- !u!4 &916391923 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: 315bc3d49e1cb0948a89aea9fdee1e5c, type: 3}
-  m_PrefabInstance: {fileID: 2057369069}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &918900240
 PrefabInstance:
@@ -39563,11 +39564,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3086483477089436676, guid: e1c63970810f83842815a18438855f12, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 15.94
+      value: 55.63
       objectReference: {fileID: 0}
     - target: {fileID: 3086483477089436676, guid: e1c63970810f83842815a18438855f12, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.27
+      value: 10.13
       objectReference: {fileID: 0}
     - target: {fileID: 3086483477089436676, guid: e1c63970810f83842815a18438855f12, type: 3}
       propertyPath: m_LocalPosition.z
@@ -39897,75 +39898,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: 079daf16bc138d9499e851f25ffd9d2e, type: 3}
   m_PrefabInstance: {fileID: 1184813159}
   m_PrefabAsset: {fileID: 0}
---- !u!1001 &1191050752
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 53985794}
-    m_Modifications:
-    - target: {fileID: 50769861341521030, guid: f259b89509694c84ebfc9033eae19ac3, type: 3}
-      propertyPath: m_SortingOrder
-      value: -144
-      objectReference: {fileID: 0}
-    - target: {fileID: 390456860282783827, guid: f259b89509694c84ebfc9033eae19ac3, type: 3}
-      propertyPath: m_Name
-      value: PF Dungeon Props - Statue 01 B
-      objectReference: {fileID: 0}
-    - target: {fileID: 531305525758137699, guid: f259b89509694c84ebfc9033eae19ac3, type: 3}
-      propertyPath: m_SortingOrder
-      value: -144
-      objectReference: {fileID: 0}
-    - target: {fileID: 6265670936862214329, guid: f259b89509694c84ebfc9033eae19ac3, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 77
-      objectReference: {fileID: 0}
-    - target: {fileID: 6265670936862214329, guid: f259b89509694c84ebfc9033eae19ac3, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 9.96875
-      objectReference: {fileID: 0}
-    - target: {fileID: 6265670936862214329, guid: f259b89509694c84ebfc9033eae19ac3, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0.85
-      objectReference: {fileID: 0}
-    - target: {fileID: 6265670936862214329, guid: f259b89509694c84ebfc9033eae19ac3, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6265670936862214329, guid: f259b89509694c84ebfc9033eae19ac3, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6265670936862214329, guid: f259b89509694c84ebfc9033eae19ac3, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6265670936862214329, guid: f259b89509694c84ebfc9033eae19ac3, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6265670936862214329, guid: f259b89509694c84ebfc9033eae19ac3, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6265670936862214329, guid: f259b89509694c84ebfc9033eae19ac3, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6265670936862214329, guid: f259b89509694c84ebfc9033eae19ac3, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8930051543745126958, guid: f259b89509694c84ebfc9033eae19ac3, type: 3}
-      propertyPath: m_SortingOrder
-      value: -144
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: f259b89509694c84ebfc9033eae19ac3, type: 3}
 --- !u!1001 &1193330188
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -40517,7 +40449,7 @@ Transform:
   m_GameObject: {fileID: 1267239124}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 15.939995, y: 4.7499948, z: -10}
+  m_LocalPosition: {x: 55.63, y: 13.235001, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -95046,6 +94978,14 @@ PrefabInstance:
       value: Statue_Knight_L
       objectReference: {fileID: 0}
     - target: {fileID: 1581566398056570396, guid: 9debf96784759d64ea4f6a04538f1cdd, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1.3751
+      objectReference: {fileID: 0}
+    - target: {fileID: 1581566398056570396, guid: 9debf96784759d64ea4f6a04538f1cdd, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1.1799
+      objectReference: {fileID: 0}
+    - target: {fileID: 1581566398056570396, guid: 9debf96784759d64ea4f6a04538f1cdd, type: 3}
       propertyPath: m_LocalPosition.x
       value: 67.5
       objectReference: {fileID: 0}
@@ -96656,11 +96596,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 9072807208709021889, guid: 4245afde638cf0e4bb716f20e40e2ef2, type: 3}
   m_PrefabInstance: {fileID: 1598884257}
   m_PrefabAsset: {fileID: 0}
---- !u!4 &1608427418 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: f259b89509694c84ebfc9033eae19ac3, type: 3}
-  m_PrefabInstance: {fileID: 1191050752}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &1620672803 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: 7ff2328aa391d9a488a48d82eff415e8, type: 3}
@@ -96901,7 +96836,7 @@ Transform:
   m_GameObject: {fileID: 1625624060}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 15.94, y: 3.375, z: -10}
+  m_LocalPosition: {x: 55.63, y: 13.235001, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -98914,67 +98849,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: fae4ab04a1ed46b468399c7bc8bdd35f, type: 3}
   m_PrefabInstance: {fileID: 187323903}
   m_PrefabAsset: {fileID: 0}
---- !u!1001 &2057369069
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 53985794}
-    m_Modifications:
-    - target: {fileID: 390456860282783827, guid: 315bc3d49e1cb0948a89aea9fdee1e5c, type: 3}
-      propertyPath: m_Name
-      value: PF Dungeon Props - Statue 01 A
-      objectReference: {fileID: 0}
-    - target: {fileID: 6265670936862214329, guid: 315bc3d49e1cb0948a89aea9fdee1e5c, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 66.96875
-      objectReference: {fileID: 0}
-    - target: {fileID: 6265670936862214329, guid: 315bc3d49e1cb0948a89aea9fdee1e5c, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 9.96875
-      objectReference: {fileID: 0}
-    - target: {fileID: 6265670936862214329, guid: 315bc3d49e1cb0948a89aea9fdee1e5c, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0.85
-      objectReference: {fileID: 0}
-    - target: {fileID: 6265670936862214329, guid: 315bc3d49e1cb0948a89aea9fdee1e5c, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6265670936862214329, guid: 315bc3d49e1cb0948a89aea9fdee1e5c, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6265670936862214329, guid: 315bc3d49e1cb0948a89aea9fdee1e5c, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6265670936862214329, guid: 315bc3d49e1cb0948a89aea9fdee1e5c, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6265670936862214329, guid: 315bc3d49e1cb0948a89aea9fdee1e5c, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6265670936862214329, guid: 315bc3d49e1cb0948a89aea9fdee1e5c, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6265670936862214329, guid: 315bc3d49e1cb0948a89aea9fdee1e5c, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8930051543745126958, guid: 315bc3d49e1cb0948a89aea9fdee1e5c, type: 3}
-      propertyPath: m_SortingOrder
-      value: -142
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 315bc3d49e1cb0948a89aea9fdee1e5c, type: 3}
 --- !u!1001 &2066405020
 PrefabInstance:
   m_ObjectHideFlags: 0

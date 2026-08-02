@@ -68,7 +68,18 @@ namespace NAN2026
             if (state >= StatueLogic.Idle && state != StatueLogic.Attack)
                 sr.flipX = StatueLogic.FaceLeft(dx);
             if (state == StatueLogic.Chase)
-                rb.linearVelocity = new Vector2(Mathf.Sign(dx) * config.moveSpeed, rb.linearVelocity.y);
+            {
+                float dir = Mathf.Sign(dx);
+                // 낭떠러지 가드: 전방 발끝 아래에 지형 없으면 정지 (2층에서 걸어 떨어짐 방지)
+                Vector2 probe = (Vector2)transform.position + new Vector2(dir * config.edgeProbeAhead, 0.1f);
+                bool groundAhead = false;
+                foreach (var hit in Physics2D.RaycastAll(probe, Vector2.down, config.edgeProbeDepth))
+                {
+                    if (hit.collider == null || hit.collider.isTrigger) continue;
+                    if (hit.collider is UnityEngine.Tilemaps.TilemapCollider2D || hit.collider is CompositeCollider2D) { groundAhead = true; break; }
+                }
+                rb.linearVelocity = new Vector2(groundAhead ? dir * config.moveSpeed : 0f, rb.linearVelocity.y);
+            }
             else if (state != StatueLogic.Dormant)
                 rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
             if (state == StatueLogic.Attack)

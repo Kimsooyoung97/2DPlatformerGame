@@ -18,5 +18,7 @@ namespace NAN2026
         public float attackCooldown;
         public float hitBlinkInterval;
         public int hitBlinkCount;
+        public float edgeProbeAhead;
+        public float edgeProbeDepth;
     }
 }
