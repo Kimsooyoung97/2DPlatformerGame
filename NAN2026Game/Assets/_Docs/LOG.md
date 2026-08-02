@@ -1428,3 +1428,16 @@ A로 가자
 - 컴파일 에러 0, forest TileBase 27개 검색 확인, 창 재열기 정상
 ### 실패와 수정
 없음
+
+
+## [구현] ThirdScene 신설 — 숲 데모 이식 — 2026-08-03 00:09
+### 프롬프트
+일단 ThirdScene을 Scenes에 하나 만들어서 숲 데모를 활용해서 우리 게임에 맞게 배치해주라
+### 조작 내역
+- 데모 수확(타일 GUID·소품/배경 스프라이트 참조 223줄) → 신규 ThirdScene에 표준 구조로 재건: Stage_Grid(Ground=Composite 솔리드 202셀 중 176, Wall=잔디 장식 26), Stage_Props 15, Stage_Background 5(정렬 -100대), 오프셋 x+15·y+8(맵 시작 x0·바닥 y-2 정렬)
+- Player_Knight 프리팹 (2,4) 배치, Stage_CameraBounds (0,-2)~(30,12), SecondScene에서 카메라 리그(Main+CM+Confiner) 가산 로드 복사·재타깃
+- SPEC '맵 1개' 초과 3씬째 — 사용자 결정, SPEC 갱신 제안 잔여에 추가
+### 검증
+- 재건 수치 실측(202/15/5), 두 차례 저장 True. 플레이 감·배경 배치는 사용자 재생 판정
+### 실패와 수정
+없음
