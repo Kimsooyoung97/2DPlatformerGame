@@ -80,9 +80,18 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
         progression = GetComponent<PlayerProgression>();
         rb.gravityScale = config.gravityScale;
         rb.freezeRotation = true;
+        // 상승 시 충돌 무시는 원웨이 발판(Platform_ 접두)에만 적용한다.
+        // 벽·바닥·천장(솔리드 지형)은 항상 충돌 유지 — 전체 무시는 벽 관통·중간 착지 사고의 원인이었다.
+        // Stage_Platform(타일맵 원웨이)은 PlatformEffector2D가 전담하므로 여기서도 제외한다.
         var found = new System.Collections.Generic.List<Collider2D>();
-        foreach (var tc in FindObjectsByType<UnityEngine.Tilemaps.TilemapCollider2D>(FindObjectsSortMode.None)) found.Add(tc);
-        foreach (var cc in FindObjectsByType<CompositeCollider2D>(FindObjectsSortMode.None)) found.Add(cc);
+        foreach (var tc in FindObjectsByType<UnityEngine.Tilemaps.TilemapCollider2D>(FindObjectsSortMode.None))
+        {
+            if (tc.gameObject.name.StartsWith("Platform_")) found.Add(tc);
+        }
+        foreach (var cc in FindObjectsByType<CompositeCollider2D>(FindObjectsSortMode.None))
+        {
+            if (cc.gameObject.name.StartsWith("Platform_")) found.Add(cc);
+        }
         foreach (var bc in FindObjectsByType<BoxCollider2D>(FindObjectsSortMode.None))
         {
             if (bc.gameObject.name.StartsWith("Platform_")) found.Add(bc);
