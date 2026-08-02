@@ -769,3 +769,27 @@ FirstScene에서 2D Pixel Art Platformer Biome - American Forest 폴더와 2D Pi
 해당 없음 ([복구]는 진단만 수행)
 ### 실패와 수정
 해당 없음
+
+## [구현] 적 유닛 AI(순찰/추적/공격/점프) + 월드스페이스 HP바 — 2026-08-02 17:40
+### 프롬프트
+내가 직접 에디터에서 확인해서 수정했어 현재 씬에 존재하는 MiddleBoss(중간보스), DeathDog1,2,3(쫄몹) 인데 쫄몹과 보스는 모두 내가 직접 씬에 미리 생성해놓을거야(동적으로 생성하지 않을 것임) 각 적 유닛은 aggroRange가 존재하고 공격 사거리, 플레이어를 쫓다 멈추는 거리들을 gizmos로 그려주는 OnDrawGizmosSelected를 포함하여라. 쫄몹들은 aggrorange에 player가 들어올 때 까지 지정해놓은 지점을 patrol한다. player가 aggrorange에 들어오게 되면 추적하며 player를 공격한다 만약 플레이어가 위 타일(맵의 층계에 따른 차이)에 존재할 경우 점프를 하여 따라온다 각 몬스터들은 머리위에 hpbar(UI canvas 사용하지 말 것)가 존재하여야 하고 데미지를 입을 때 마다 즉각적으로 동기화 되어야한다. 이 때 필요한 코드들을 작성하고 필요한 오브젝트에 컴포넌트로 넣어줘
+### 조작 내역
+- Assets/Scripts/Core/EnemyAILogic.cs 신규(순수 로직, NAN2026.Core): DetermineState(Patrol/Chase/Attack), NeedsJumpToFollow, PatrolDirection, HealthRatio
+- Assets/Tests/EditMode/EnemyAILogicTests.cs 신규: 16개 테스트
+- Assets/Scripts/Config/EnemyAIConfig.cs 신규(SO): aggroRange/attackRange/chaseStopDistance/이동속도/patrolRadius/jumpYThreshold/공격쿨다운·데미지/체력바 크기·색상 — MonoBehaviour 숫자 리터럴 금지 규칙 준수
+- Assets/Configs/DeathDogAIConfig.asset, MiddleBossAIConfig.asset 생성
+- Assets/Player/Scripts/MonsterHealth.cs 수정: CurrentHealth/MaxHealth public getter, OnHealthChanged(int,int) 이벤트 추가 (기존 데미지·넉백·플래시·사망 로직은 변경 없음). SlashProjectile이 이미 이 클래스로 검기 데미지를 주고 있어 기존 데미지 경로에 그대로 연결
+- Assets/Scripts/WorldHealthBar.cs 신규: UI Canvas 미사용, SpriteRenderer 2장(배경+채움, 1x1 흰 텍스처를 런타임 생성)으로 그리는 월드스페이스 체력바. MonsterHealth.OnHealthChanged 구독으로 즉시 동기화
+- Assets/Scripts/EnemyAI.cs 신규: 순찰→추적→공격 상태머신. 기존 PixelFantasy MonsterController2D(이동/점프 물리, IsGrounded)·MonsterAnimation(애니메이션 트리거)을 그대로 재사용. 데모용 MonsterControls(키보드 입력) 컴포넌트는 Input 충돌 방지를 위해 Awake에서 enabled=false 처리(삭제하지 않음). OnDrawGizmosSelected로 aggroRange(노랑)/attackRange(빨강)/chaseStopDistance(청록)/순찰 라인(초록) 표시
+- MiddleBoss/DeathDog1/DeathDog2/DeathDog3에 MonsterHealth+EnemyAI+WorldHealthBar 컴포넌트 부착, Config 연결 (보스=MiddleBossAIConfig·usePatrol=false, 쫄몹 3종=DeathDogAIConfig·usePatrol=true)
+- Player 오브젝트 태그가 Untagged로 방치되어 있던 것을 발견해 "Player"로 설정 (AI의 FindGameObjectWithTag 및 기존 Mine.cs 트랩도 이 태그에 의존)
+### 검증
+- 1차 시도: create_file 도구로 5개 스크립트를 작성했으나 실제로는 로컬 샌드박스에만 생성되고 원격 Unity 프로젝트에는 전혀 반영되지 않음 (Application.dataPath 기준 파일 존재 확인 결과 File.Exists=False). execute_code(File.WriteAllText)로 전량 재작성해 해결
+- refresh_unity(compile=force) 후 AppDomain 리플렉션으로 EnemyAIConfig/EnemyAI/WorldHealthBar/EnemyAILogic 타입이 실제 로드됐는지 확인 (문자열 컴파일 성공 메시지만으론 부족하다고 판단해 추가 검증)
+- 저장 → manage_scene(load) 강제 재로드 → 4개 오브젝트 전부 EnemyAI/WorldHealthBar/MonsterHealth 부착 및 config 연결 재확인 (FAIL.md #14 절차)
+- run_tests(EditMode) → 41/41 통과 (기존 25 + 신규 16, job 58a3d20ad4644d5ea1545903e79d897f)
+- 테스트 후 재확인: 컴포넌트 유지, isDirty=False
+### 실패와 수정
+- create_file 도구가 로컬 샌드박스에만 파일을 생성하고 원격 Unity 프로젝트 파일시스템에는 반영되지 않는 문제 발견. 이후 모든 .cs 파일 작성은 execute_code(File.WriteAllText)로 전환
+### 알려진 한계 (이번 작업 범위 밖)
+- Player 오브젝트에 PlayerHealth 컴포넌트가 아예 없고, PlayerHealth.TakeDamage() 자체도 빈 스텁이라 적의 공격이 실제 플레이어 체력에 영향을 주지 않음. EnemyAI는 PlayerHealth가 있으면 정확히 호출하도록 연결해뒀으나 활성화하려면 별도 작업 필요

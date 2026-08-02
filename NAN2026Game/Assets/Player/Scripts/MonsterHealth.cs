@@ -13,6 +13,13 @@ namespace NHNDemo
         private SpriteRenderer[] renderers;
         private Color[] originalColors;
 
+        /// <summary>머리 위 체력바(WorldHealthBar 등)가 즉시 동기화할 수 있도록
+        /// 체력이 바뀌는 때마다 (현재, 최대)를 통지한다.</summary>
+        public event System.Action<int, int> OnHealthChanged;
+
+        public int CurrentHealth => currentHealth;
+        public int MaxHealth => maxHealth;
+
         private void Awake()
         {
             currentHealth = maxHealth;
@@ -31,6 +38,8 @@ namespace NHNDemo
             transform.position += (Vector3)(attackDirection.normalized * knockbackDistance);
             StopAllCoroutines();
             StartCoroutine(FlashDamage());
+
+            OnHealthChanged?.Invoke(currentHealth, maxHealth);
 
             if (currentHealth <= 0)
                 Die();

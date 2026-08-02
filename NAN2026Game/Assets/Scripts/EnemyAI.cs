@@ -1,0 +1,187 @@
+using UnityEngine;
+using NAN2026.Core;
+using NAN2026.Showroom;
+using Assets.PixelFantasy.PixelMonsters.Common.Scripts.ExampleScripts;
+
+/// <summary>
+/// 씬에 미리 배치된(동적 생성 아님) 적 유닛 공용 AI.
+/// 순찰(usePatrol=true인 경우) → aggroRange 진입 시 추적 → attackRange 진입 시 공격.
+/// 플레이어가 위 층에 있으면(jumpYThreshold 이상) 점프해서 따라간다.
+/// 이동/점프 물리는 기존 MonsterController2D를, 애니메이션 트리거는 MonsterAnimation을 그대로 재사용한다.
+/// 모든 수치는 EnemyAIConfig가 소유하며 이 클래스에 숫자 리터럴은 없다.
+/// </summary>
+[DisallowMultipleComponent]
+[RequireComponent(typeof(MonsterController2D))]
+[RequireComponent(typeof(MonsterAnimation))]
+public sealed class EnemyAI : MonoBehaviour
+{
+    [Header("설정 (필수)")]
+    [SerializeField] private EnemyAIConfig config;
+
+    [Header("순찰 지점 (비우면 스폰 위치 기준 config.patrolRadius로 자동 생성)")]
+    [SerializeField] private Transform patrolPointA;
+    [SerializeField] private Transform patrolPointB;
+
+    [Header("순찰 사용 여부 (보스류는 끄고 제자리 대기만 하게 둘 수 있다)")]
+    [SerializeField] private bool usePatrol = true;
+
+    [Header("플레이어 태그")]
+    [SerializeField] private string playerTag = "Player";
+
+    private MonsterController2D controller;
+    private MonsterAnimation animation;
+    private Transform player;
+
+    private EnemyAIState state = EnemyAIState.Patrol;
+    private bool engaged;
+    private float patrolDir = 1f;
+    private float attackTimer;
+    private float leftBoundX;
+    private float rightBoundX;
+
+    public EnemyAIState CurrentState => state;
+
+    private void Awake()
+    {
+        controller = GetComponent<MonsterController2D>();
+        animation = GetComponent<MonsterAnimation>();
+
+        // 씬 편집용 데모 컨트롤(키보드 입력) 스크립트가 같이 있으면 Input을 서로 덮어써서
+        // 충돌하므로, AI가 대신 조종함을 명시적으로 끈다. (컴포넌트 자체는 지우지 않는다)
+        MonsterControls demoControls = GetComponent<MonsterControls>();
+        if (demoControls != null) demoControls.enabled = false;
+
+        RecomputePatrolBounds();
+
+        GameObject playerGO = GameObject.FindGameObjectWithTag(playerTag);
+        if (playerGO != null) player = playerGO.transform;
+    }
+
+    private void RecomputePatrolBounds()
+    {
+        if (patrolPointA != null && patrolPointB != null)
+        {
+            leftBoundX = Mathf.Min(patrolPointA.position.x, patrolPointB.position.x);
+            rightBoundX = Mathf.Max(patrolPointA.position.x, patrolPointB.position.x);
+        }
+        else
+        {
+            float radius = config != null ? config.patrolRadius : 0f;
+            leftBoundX = transform.position.x - radius;
+            rightBoundX = transform.position.x + radius;
+        }
+    }
+
+    private void Update()
+    {
+        if (config == null || controller == null || animation == null)
+            return;
+
+        if (attackTimer > 0f)
+            attackTimer -= Time.deltaTime;
+
+        if (player == null)
+        {
+            GameObject playerGO = GameObject.FindGameObjectWithTag(playerTag);
+            if (playerGO != null) player = playerGO.transform;
+        }
+
+        if (player == null)
+        {
+            Patrol();
+            return;
+        }
+
+        float distance = Mathf.Abs(player.position.x - transform.position.x);
+        state = EnemyAILogic.DetermineState(distance, engaged, config.aggroRange, config.attackRange, config.chaseStopDistance);
+        engaged = state != EnemyAIState.Patrol;
+
+        switch (state)
+        {
+            case EnemyAIState.Chase:
+                Chase();
+                break;
+            case EnemyAIState.Attack:
+                AttackPlayer();
+                break;
+            default:
+                Patrol();
+                break;
+        }
+    }
+
+    private void Patrol()
+    {
+        if (!usePatrol)
+        {
+            controller.Input = Vector2.zero;
+            return;
+        }
+
+        patrolDir = EnemyAILogic.PatrolDirection(transform.position.x, leftBoundX, rightBoundX, patrolDir);
+        controller.Input = new Vector2(patrolDir, 0f);
+    }
+
+    private void Chase()
+    {
+        float dir = player.position.x > transform.position.x ? 1f : -1f;
+        bool needsJump = EnemyAILogic.NeedsJumpToFollow(
+            transform.position.y, player.position.y, config.jumpYThreshold, controller.IsGrounded);
+
+        controller.Input = new Vector2(dir, needsJump ? 1f : 0f);
+    }
+
+    private void AttackPlayer()
+    {
+        controller.Input = Vector2.zero;
+
+        if (attackTimer > 0f)
+            return;
+
+        attackTimer = config.attackCooldown;
+        animation.Attack();
+
+        if (player == null) return;
+        PlayerHealth playerHealth = player.GetComponentInParent<PlayerHealth>();
+        if (playerHealth != null)
+            playerHealth.TakeDamage(config.attackDamage, transform.position);
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        if (config == null) return;
+
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, config.aggroRange);
+
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, config.attackRange);
+
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawWireSphere(transform.position, config.chaseStopDistance);
+
+        if (!usePatrol) return;
+
+        float lx = leftBoundX, rx = rightBoundX;
+        if (!Application.isPlaying)
+        {
+            if (patrolPointA != null && patrolPointB != null)
+            {
+                lx = Mathf.Min(patrolPointA.position.x, patrolPointB.position.x);
+                rx = Mathf.Max(patrolPointA.position.x, patrolPointB.position.x);
+            }
+            else
+            {
+                lx = transform.position.x - config.patrolRadius;
+                rx = transform.position.x + config.patrolRadius;
+            }
+        }
+
+        Gizmos.color = Color.green;
+        Vector3 a = new Vector3(lx, transform.position.y, 0f);
+        Vector3 b = new Vector3(rx, transform.position.y, 0f);
+        Gizmos.DrawLine(a, b);
+        Gizmos.DrawSphere(a, 0.15f);
+        Gizmos.DrawSphere(b, 0.15f);
+    }
+}
