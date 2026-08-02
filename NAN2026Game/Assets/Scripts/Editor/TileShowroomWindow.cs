@@ -9,7 +9,7 @@ using UnityEditor.Tilemaps;
 namespace NAN2026.EditorTools
 {
     // 에셋 쇼룸 v4: 타일·소품 격자 진열 + 씬 클릭 검사(클릭한 타일 즉시 미리보기·격자 자동 점프)
-    public class TileShowroomWindow : EditorWindow
+    public partial class TileShowroomWindow : EditorWindow
     {
         private static readonly string[] SearchRoots = { "Assets/Cainos", "Assets/sanctum_pixel" };
         private static readonly Vector2 CellSize = new Vector2(84f, 104f);
@@ -592,6 +592,7 @@ namespace NAN2026.EditorTools
 
         private void OnGUI()
         {
+            DrawLayerTool();
             EnsureInit();
             if (familyNames[0].Length == 0 && familyNames[1].Length == 0) RefreshAll();
             DrawSceneSwitcher();
