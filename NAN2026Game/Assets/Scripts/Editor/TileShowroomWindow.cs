@@ -191,6 +191,7 @@ namespace NAN2026.EditorTools
             armedProp = null;
             armedTarget = targetName;
             regionMode = false;
+            layerMoveMode = false;
             SceneView.RepaintAll();
             try
             {
@@ -225,6 +226,7 @@ namespace NAN2026.EditorTools
             armedProp = prefab;
             armedTile = null;
             regionMode = false;
+            layerMoveMode = false;
             SceneView.RepaintAll();
             return prefab.name + " 배치 모드 — 씬 클릭=놓기 (Ctrl=0.5스냅, Esc=해제)";
         }
@@ -639,6 +641,7 @@ namespace NAN2026.EditorTools
                 }
                 bool prevR = regionMode;
                 regionMode = GUILayout.Toggle(regionMode, "구간 복사", EditorStyles.toolbarButton, GUILayout.Width(66f));
+                if (regionMode) layerMoveMode = false;
                 if (regionMode != prevR)
                 {
                     if (regionMode) { inspectMode = false; armedTile = null; armedProp = null; }
