@@ -1135,3 +1135,16 @@ x좌표 50 y좌표 9~-1 / x 좌표 82 y좌표 9~-1의 범위를 x좌표 50 y좌�
 - 컴파일 에러 0, 스모크: regionMode=true 상태에서 PlaceWith 호출 → regionMode=False·armedProp=True 확인
 ### 실패와 수정
 - 1차 치환 문자열 불일치 → 실물 확인 후 재패치
+
+
+## [수정] 카메라 경계 — SecondScene 원복, SecondScene_1에 제한 적용 — 2026-08-02 19:07
+### 프롬프트
+(-1,-1) , (-1,13) (35,1) (35,13)이 이 씬의 카메라 범위니깐 그 밖에 구역은 화면에 안보이게 만들어줘. → [수정] SecondScene은 기존 그대로 SecondScene_1의 카메라 범위 제한을 해줘
+### 조작 내역
+- SecondScene: Stage_CameraBounds (0,-2)~(120,21) 원복, Confiner 캐시 무효화
+- SecondScene_1(신규 발견): Stage_CameraBounds 신설 (-1,-1)~(35,13), CinemachineConfiner2D 부착·연결
+- 검산: 렌즈 6.75 세로 시야 13.5u vs 경계 높이 14u — 수직 여유 0.5u로 딱 맞음
+### 검증
+- 두 씬 저장 True, 경계 좌표 실측 출력
+### 실패와 수정
+- 직전 명령이 SecondScene에 잘못 적용될 뻔 → 후속 지시로 정정
