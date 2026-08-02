@@ -2034,3 +2034,15 @@ BiomeActionMap 보이지. 그 구조를 최대한 참고해서 sanctum_pixel의 
 - 저장 True
 ### 실패와 수정
 없음
+
+
+## [수정] ForthScene 낙하 관통 — 컴포짓 0도형 수리 — 2026-08-03 04:40
+### 프롬프트
+shift 지우기 기능 없앴니? 수동으로 수정하려고 하는데 안되네. 그리고 발판이 없어서 바로 떨어지는데?
+### 조작 내역
+- 진단: 컴포짓 pathCount=0(생성 순서 문제) → ProcessTilemapChanges 후 GenerateGeometry 재실행. 검증 OverlapPoint=Stage_CameraBounds
+- Shift 지우개는 존치 — 붓 모드(타일 장전 시)에만 활성임을 안내
+### 검증
+- 지형 내부 충돌 Stage_CameraBounds, 저장 True
+### 실패와 수정
+- FAIL 후보: 컴포짓 생성은 콜라이더 갱신(ProcessTilemapChanges) 후에
