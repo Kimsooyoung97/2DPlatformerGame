@@ -43,6 +43,7 @@ namespace NAN2026.Showroom
         private int currentHealth;
         private float damageInvulnerableUntil;
         private float rollInvulnerableUntil;
+        private int maxHealthBonus;
 
         public int Deaths { get { return deaths; } }
         public bool IsDying { get { return dying; } }
@@ -53,7 +54,7 @@ namespace NAN2026.Showroom
         }
 
         public int CurrentHealth { get { return currentHealth; } }
-        public int MaxHealth { get { return combatConfig != null ? combatConfig.maxHealth : 0; } }
+        public int MaxHealth { get { return (combatConfig != null ? combatConfig.maxHealth : 0) + maxHealthBonus; } }
         public int ParryCounterDamage { get { return combatConfig != null ? combatConfig.parryCounterDamage : 0; } }
 
         /// <summary>체력이 바뀔 때마다 (현재, 최대)를 통지한다. 월드스페이스 HP바 등이 구독할 수 있다.</summary>
@@ -76,7 +77,7 @@ namespace NAN2026.Showroom
             checkpoint = transform.position;
             graceUntil = Time.time + spawnGrace;
 
-            currentHealth = combatConfig != null ? combatConfig.maxHealth : 0;
+            currentHealth = MaxHealth;
             OnHealthChanged?.Invoke(currentHealth, MaxHealth);
         }
 
@@ -112,6 +113,23 @@ namespace NAN2026.Showroom
         {
             if (combatConfig == null) return;
             rollInvulnerableUntil = Time.time + combatConfig.rollInvincibilityDuration;
+        }
+
+        /// <summary>즉시 체력을 회복한다(레벨업 증강 등). 최대 체력을 넘지 않는다.</summary>
+        public void Heal(int amount)
+        {
+            if (amount <= 0) return;
+            currentHealth = Mathf.Min(MaxHealth, currentHealth + amount);
+            OnHealthChanged?.Invoke(currentHealth, MaxHealth);
+        }
+
+        /// <summary>최대 체력을 영구적으로 늘리고, 늘어난 만큼 즉시 회복한다(레벨업 증강 등).</summary>
+        public void AddMaxHealthBonus(int amount)
+        {
+            if (amount <= 0) return;
+            maxHealthBonus += amount;
+            currentHealth += amount;
+            OnHealthChanged?.Invoke(currentHealth, MaxHealth);
         }
 
         private void Update()
@@ -191,7 +209,7 @@ namespace NAN2026.Showroom
             SetVisible(true);
             SetControllerEnabled(true);
 
-            currentHealth = combatConfig != null ? combatConfig.maxHealth : 0;
+            currentHealth = MaxHealth;
             OnHealthChanged?.Invoke(currentHealth, MaxHealth);
 
             graceUntil = Time.time + spawnGrace;

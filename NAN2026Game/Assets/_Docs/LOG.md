@@ -892,3 +892,34 @@ FirstScene에서 2D Pixel Art Platformer Biome - American Forest 폴더와 2D Pi
 - 없음
 ### 별도 확인 요청 (SPEC.md 충돌)
 - 경험치/레벨업/브론즈·실버·골드 증강 시스템은 SPEC.md '범위 밖' 목록에 '레벨업'이 명시되어 있어 구현하지 않고 사용자에게 확인 요청함(대화 중 응답으로 처리, 이 LOG 항목에는 코드 변경 없음)
+
+## [구현] 경험치/레벨업/증강(브론즈·실버·골드) 시스템 — 2026-08-02 22:40
+### 프롬프트
+플레이어에게 경험치 데이터와 레벨을 만들어 적 몬스터가 죽을 때마다 경험치를 얻고 그것을 통해 레벨업을 하면 뱀서라이크류 게임처럼 3가지 증강(패링 쿨타임 감소, 패링 지속시간 증가, 데미지 증가, 체력 회복, 최대 체력 증가) *브론즈 증강, 실버 증강, 골드 증강으로 나누고 수치 조절한다* 또한 증강으로 현재 존재하는 공격의 범위(사거리)를 늘릴 수도 있게 해주고 싶음
+(다음 대화 턴에서 SPEC.md 미수정 조건으로 명시 승인받음: "Spec.md를 수정하지는 말고 그냥 직접적으로 승인할게 구현해줘")
+### SPEC.md 충돌 처리
+SPEC.md '범위 밖'에 '레벨업'이 명시되어 있어 구현 전 사용자에게 확인 요청(이전 LOG 항목 참조). 사용자가 SPEC.md는 수정하지 않되 예외로 구현을 명시 승인함 — SPEC.md 문서는 그대로 두고 STATE.md에 이 예외 사실을 기록함
+### 조작 내역
+- NAN2026.Core.LevelProgressionLogic 신규(순수): RequiredXpForLevel, TryLevelUp(다중 레벨업 처리), GoldChanceForLevel/SilverChanceForLevel(레벨에 따른 등급 확률 상승, 상한 존재), TierForRoll. 테스트 10개
+- LevelProgressionConfig(SO): XP 곡선(baseXpToLevel2/xpIncrementPerLevel), 등급 확률 곡선, 레벨업당 선택지 수(3)
+- AugmentConfig(SO) + AugmentType enum(6종: ParryCooldownDown/ParryDurationUp/DamageUp/Heal/MaxHealthUp/AttackRangeUp): 등급별([0]브론즈/[1]실버/[2]골드) 수치 배열, GetMagnitude(type,tier)
+- EnemyAIConfig에 xpReward 추가 (DeathDog=5, MiddleBoss=30)
+- NHNDemo.MonsterHealth에 OnDied 이벤트 추가(Die() 시점에 1회 발생)
+- PlayerHealth에 Heal(int)/AddMaxHealthBonus(int) 추가, MaxHealth가 combatConfig.maxHealth + maxHealthBonus를 반환하도록 변경. Awake/Respawn 시 currentHealth를 MaxHealth 기준으로 채워 최대체력 증강이 리스폰 후에도 유지되게 함
+- MovementConfig에 parryCooldown(1.5초)/parryCooldownMinimum(0.3초, 증강으로 무한히 줄어들지 않도록 하한선) 추가
+- PlayerController2D: 미들마우스 패링 입력에 실제 쿨타임 게이팅 추가(기존엔 쿨타임 개념 자체가 없었음), EffectiveParryWindow()/EffectiveParryCooldown() 헬퍼로 PlayerProgression의 누적 증강치를 반영. SpawnAttackEffect에서 데미지에 DamageBonus 가산, lifetime에 AttackRangeMultiplier 곱해 사거리 증가 반영
+- EnemyAI: MonsterHealth.OnDied 구독 → 사망 시 player의 PlayerProgression.AddXp(config.xpReward) 호출
+- PlayerProgression 신규(MonoBehaviour): 레벨/XP 추적, 레벨업 시 증강 3택 산출(등급 랜덤 롤 + 6종 중 중복없이 3개 랜덤 선택), 선택 시 즉시 효과 적용(패링/데미지/사거리는 내부 배율로 누적, 체력 관련은 PlayerHealth 직접 호출). 여러 레벨을 한번에 올랐을 때 선택지를 순차로 제공(pendingAugmentChoices 큐). OnGUI로 3장 카드 UI 표시(Canvas 미사용, 기존 PlayerHealth.OnGUI 관례와 동일한 방식), 선택 중 Time.timeScale=0으로 게임 일시정지
+- Player에 PlayerProgression 부착, LevelProgressionConfig.asset/AugmentConfig.asset 생성·연결
+### 검증
+- refresh_unity(compile=force) 3회(단계별) 후 read_console(types=error) → 매번 0건
+- AppDomain 리플렉션으로 PlayerProgression/LevelProgressionConfig/AugmentConfig/AugmentType 타입 실제 로드 확인
+- 저장 → manage_scene(load) 강제 재로드 → PlayerProgression 부착·config 2종 연결·Level=1 초기화 확인
+- run_tests(EditMode) → 61/61 통과 (기존 51 + 신규 10, job b8f33a9f046f4e8198d301c51761d44c)
+- 테스트 후 재확인: PlayerProgression 유지, isDirty=False
+### 실패와 수정
+- PlayerController2D.cs 편집 2건에서 execute_code가 'Timeout receiving Unity response'를 반환했으나, 파일을 다시 읽어 실제로는 정상 반영되어 있음을 확인 후 재시도 없이 진행 (FAIL.md #4/이전 세션과 동일 패턴, 새 항목 추가 안 함)
+### 눈으로 확인 필요
+- 레벨업 시 OnGUI 카드 3장이 실제로 겹치거나 화면 밖으로 나가지 않는지(해상도별)
+- 증강 등급 확률(브론즈/실버/골드)이 초반~후반 체감상 적절한지
+- 사거리 증강이 시각 이펙트 스케일과 별개로 판정만 늘어나는 구조라 위화감이 없는지

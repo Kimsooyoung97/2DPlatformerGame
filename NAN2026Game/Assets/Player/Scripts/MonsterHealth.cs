@@ -17,6 +17,9 @@ namespace NHNDemo
         /// 체력이 바뀌는 때마다 (현재, 최대)를 통지한다.</summary>
         public event System.Action<int, int> OnHealthChanged;
 
+        /// <summary>이 몬스터가 죽는 순간(페이드 시작 전) 한 번 호출된다. 경험치 지급 등에 사용.</summary>
+        public event System.Action OnDied;
+
         public int CurrentHealth => currentHealth;
         public int MaxHealth => maxHealth;
 
@@ -59,6 +62,7 @@ namespace NHNDemo
         private void Die()
         {
             dead = true;
+            OnDied?.Invoke();
             SurfaceMonsterPatrol patrol = GetComponent<SurfaceMonsterPatrol>();
             if (patrol != null)
                 patrol.enabled = false;

@@ -21,6 +21,8 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
     private SpriteRenderer sr;
     private Collider2D col;
     private NAN2026.Showroom.PlayerHealth health;
+    private PlayerProgression progression;
+    private float parryReadyTime = -999f;
     private readonly RaycastHit2D[] castHits = new RaycastHit2D[4];
 
     private float inputX;
@@ -44,9 +46,20 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
     public bool IsGrounded { get { return grounded; } }
 
     /// <summary>지금 이 순간 패링 판정 창 안인지. EnemyAI 등 몬스터 공격 판정이 참조한다.</summary>
+    private float EffectiveParryWindow()
+    {
+        return config.parryWindow + (progression != null ? progression.ParryDurationBonus : 0f);
+    }
+
+    private float EffectiveParryCooldown()
+    {
+        float reduced = config.parryCooldown - (progression != null ? progression.ParryCooldownReduction : 0f);
+        return Mathf.Max(config.parryCooldownMinimum, reduced);
+    }
+
     public bool IsParryWindowActive()
     {
-        return parryHeld && PlayerLocomotionLogic.ParrySuccessWindow(Time.time - parryPressTime, config.parryWindow);
+        return parryHeld && PlayerLocomotionLogic.ParrySuccessWindow(Time.time - parryPressTime, EffectiveParryWindow());
     }
 
     /// <summary>IParryReflector 구현 — SpikeProjectile 등 투사체가 자동으로 패링 여부를 물어본다.</summary>
@@ -64,6 +77,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
         sr = GetComponent<SpriteRenderer>();
         col = GetComponent<Collider2D>();
         health = GetComponent<NAN2026.Showroom.PlayerHealth>();
+        progression = GetComponent<PlayerProgression>();
         rb.gravityScale = config.gravityScale;
         rb.freezeRotation = true;
         var found = new System.Collections.Generic.List<Collider2D>();
@@ -115,10 +129,11 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
         if (mouse != null && mouse.leftButton.wasPressedThisFrame) QueueAttack("Slash", config.slashDuration, config.slashLungeSpeed);
         if (mouse != null)
         {
-            if (mouse.middleButton.wasPressedThisFrame && attackTimer <= 0f)
+            if (mouse.middleButton.wasPressedThisFrame && attackTimer <= 0f && Time.time >= parryReadyTime)
             {
                 parryHeld = true;
                 parryPressTime = Time.time;
+                parryReadyTime = Time.time + EffectiveParryCooldown();
             }
             if (mouse.middleButton.wasReleasedThisFrame && parryHeld)
             {
@@ -156,8 +171,11 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
         var ep = go.GetComponent<EffectProjectile>();
         if (ep != null)
         {
-            int hitDamage = AttackDamageLogic.DamageForAttack(attackName, effectConfig.basicDamage, effectConfig.poweredDamage);
-            ep.Launch(dir, speed, effectConfig.lifetime, frames, effectConfig.frameRate, hitDamage, effectConfig.hitboxSize);
+            int baseDamage = AttackDamageLogic.DamageForAttack(attackName, effectConfig.basicDamage, effectConfig.poweredDamage);
+            int damageBonus = progression != null ? Mathf.RoundToInt(progression.DamageBonus) : 0;
+            float rangeMultiplier = progression != null ? progression.AttackRangeMultiplier : 1f;
+            ep.Launch(dir, speed, effectConfig.lifetime * rangeMultiplier, frames, effectConfig.frameRate,
+                baseDamage + damageBonus, effectConfig.hitboxSize);
         }
     }
 
@@ -182,7 +200,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
 
         if (parryEndTimer > 0f) parryEndTimer -= Time.fixedDeltaTime;
         // 패링 판정: 홀드 중 + 판정 창 이내 + 전방 박스에 BossOrb
-        if (parryHeld && PlayerLocomotionLogic.ParrySuccessWindow(Time.time - parryPressTime, config.parryWindow))
+        if (parryHeld && PlayerLocomotionLogic.ParrySuccessWindow(Time.time - parryPressTime, EffectiveParryWindow()))
         {
             float pdir = PlayerLocomotionLogic.EffectDirection(sr.flipX);
             Vector2 center = (Vector2)transform.position + new Vector2(config.parryBoxOffsetX * pdir, config.parryBoxSize.y * 0.5f);

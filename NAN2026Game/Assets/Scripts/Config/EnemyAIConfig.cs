@@ -29,6 +29,10 @@ public sealed class EnemyAIConfig : ScriptableObject
     public float attackCooldown = 1.2f;
     public float attackDamage = 1f;
 
+    [Header("보상")]
+    [Tooltip("이 몬스터가 죽었을 때 플레이어에게 주는 경험치")]
+    public int xpReward = 5;
+
     [Header("체력바 (UI Canvas 미사용, SpriteRenderer 기반)")]
     public Vector2 healthBarSize = new Vector2(1.2f, 0.16f);
     public Vector3 healthBarOffset = new Vector3(0f, 1.6f, 0f);

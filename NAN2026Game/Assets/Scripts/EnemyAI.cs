@@ -32,6 +32,7 @@ public sealed class EnemyAI : MonoBehaviour
     private MonsterAnimation animation;
     private Transform player;
     private IEnemyAttackOverride attackOverride;
+    private NHNDemo.MonsterHealth selfHealthForXp;
 
     private EnemyAIState state = EnemyAIState.Patrol;
     private bool engaged;
@@ -62,6 +63,21 @@ public sealed class EnemyAI : MonoBehaviour
             player = playerGO.transform;
             IgnorePlayerPhysicalCollision(playerGO);
         }
+
+        selfHealthForXp = GetComponent<NHNDemo.MonsterHealth>();
+        if (selfHealthForXp != null) selfHealthForXp.OnDied += HandleDied;
+    }
+
+    private void OnDestroy()
+    {
+        if (selfHealthForXp != null) selfHealthForXp.OnDied -= HandleDied;
+    }
+
+    private void HandleDied()
+    {
+        if (player == null || config == null) return;
+        PlayerProgression progression = player.GetComponentInParent<PlayerProgression>();
+        if (progression != null) progression.AddXp(config.xpReward);
     }
 
     // 몬스터와 플레이어가 서로 몸으로 밀거나 막지 않고 통과하도록 물리 충돌만 무시한다.
