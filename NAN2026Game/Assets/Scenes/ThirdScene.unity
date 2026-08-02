@@ -2391,8 +2391,9 @@ GameObject:
   - component: {fileID: 281607020}
   - component: {fileID: 281607022}
   - component: {fileID: 281607021}
+  - component: {fileID: 281607023}
   m_Layer: 0
-  m_Name: Solid_WallAuto_6
+  m_Name: Platform_WallAuto_6
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2456,7 +2457,7 @@ BoxCollider2D:
     serializedVersion: 2
     m_Bits: 4294967295
   m_IsTrigger: 0
-  m_UsedByEffector: 0
+  m_UsedByEffector: 1
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
@@ -2471,6 +2472,25 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 4, y: 1}
   m_EdgeRadius: 0
+--- !u!251 &281607023
+PlatformEffector2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 281607019}
+  m_Enabled: 1
+  m_UseColliderMask: 1
+  m_ColliderMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RotationalOffset: 0
+  m_UseOneWay: 1
+  m_UseOneWayGrouping: 0
+  m_SurfaceArc: 130
+  m_UseSideFriction: 0
+  m_UseSideBounce: 0
+  m_SideArc: 1
 --- !u!1 &339655688
 GameObject:
   m_ObjectHideFlags: 0
@@ -2482,8 +2502,9 @@ GameObject:
   - component: {fileID: 339655689}
   - component: {fileID: 339655691}
   - component: {fileID: 339655690}
+  - component: {fileID: 339655692}
   m_Layer: 0
-  m_Name: Solid_WallAuto_16
+  m_Name: Platform_WallAuto_16
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2547,7 +2568,7 @@ BoxCollider2D:
     serializedVersion: 2
     m_Bits: 4294967295
   m_IsTrigger: 0
-  m_UsedByEffector: 0
+  m_UsedByEffector: 1
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
@@ -2562,6 +2583,25 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 2, y: 1}
   m_EdgeRadius: 0
+--- !u!251 &339655692
+PlatformEffector2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 339655688}
+  m_Enabled: 1
+  m_UseColliderMask: 1
+  m_ColliderMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RotationalOffset: 0
+  m_UseOneWay: 1
+  m_UseOneWayGrouping: 0
+  m_SurfaceArc: 130
+  m_UseSideFriction: 0
+  m_UseSideBounce: 0
+  m_SideArc: 1
 --- !u!1 &345480577
 GameObject:
   m_ObjectHideFlags: 0
@@ -12104,8 +12144,9 @@ GameObject:
   - component: {fileID: 637516232}
   - component: {fileID: 637516234}
   - component: {fileID: 637516233}
+  - component: {fileID: 637516235}
   m_Layer: 0
-  m_Name: Solid_WallAuto_4
+  m_Name: Platform_WallAuto_4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -12169,7 +12210,7 @@ BoxCollider2D:
     serializedVersion: 2
     m_Bits: 4294967295
   m_IsTrigger: 0
-  m_UsedByEffector: 0
+  m_UsedByEffector: 1
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
@@ -12184,6 +12225,25 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 32, y: 1}
   m_EdgeRadius: 0
+--- !u!251 &637516235
+PlatformEffector2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 637516231}
+  m_Enabled: 1
+  m_UseColliderMask: 1
+  m_ColliderMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RotationalOffset: 0
+  m_UseOneWay: 1
+  m_UseOneWayGrouping: 0
+  m_SurfaceArc: 130
+  m_UseSideFriction: 0
+  m_UseSideBounce: 0
+  m_SideArc: 1
 --- !u!1 &643325873
 GameObject:
   m_ObjectHideFlags: 0
@@ -12287,8 +12347,9 @@ GameObject:
   - component: {fileID: 664243364}
   - component: {fileID: 664243366}
   - component: {fileID: 664243365}
+  - component: {fileID: 664243367}
   m_Layer: 0
-  m_Name: Solid_WallAuto_18
+  m_Name: Platform_WallAuto_18
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -12352,7 +12413,7 @@ BoxCollider2D:
     serializedVersion: 2
     m_Bits: 4294967295
   m_IsTrigger: 0
-  m_UsedByEffector: 0
+  m_UsedByEffector: 1
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
@@ -12367,6 +12428,25 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 6, y: 1}
   m_EdgeRadius: 0
+--- !u!251 &664243367
+PlatformEffector2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 664243363}
+  m_Enabled: 1
+  m_UseColliderMask: 1
+  m_ColliderMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RotationalOffset: 0
+  m_UseOneWay: 1
+  m_UseOneWayGrouping: 0
+  m_SurfaceArc: 130
+  m_UseSideFriction: 0
+  m_UseSideBounce: 0
+  m_SideArc: 1
 --- !u!1 &671030696
 GameObject:
   m_ObjectHideFlags: 0
@@ -12378,8 +12458,9 @@ GameObject:
   - component: {fileID: 671030697}
   - component: {fileID: 671030699}
   - component: {fileID: 671030698}
+  - component: {fileID: 671030700}
   m_Layer: 0
-  m_Name: Solid_WallAuto_12
+  m_Name: Platform_WallAuto_12
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -12443,7 +12524,7 @@ BoxCollider2D:
     serializedVersion: 2
     m_Bits: 4294967295
   m_IsTrigger: 0
-  m_UsedByEffector: 0
+  m_UsedByEffector: 1
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
@@ -12458,6 +12539,25 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 15, y: 1}
   m_EdgeRadius: 0
+--- !u!251 &671030700
+PlatformEffector2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 671030696}
+  m_Enabled: 1
+  m_UseColliderMask: 1
+  m_ColliderMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RotationalOffset: 0
+  m_UseOneWay: 1
+  m_UseOneWayGrouping: 0
+  m_SurfaceArc: 130
+  m_UseSideFriction: 0
+  m_UseSideBounce: 0
+  m_SideArc: 1
 --- !u!1 &697974891
 GameObject:
   m_ObjectHideFlags: 0
@@ -12653,8 +12753,9 @@ GameObject:
   - component: {fileID: 770974820}
   - component: {fileID: 770974822}
   - component: {fileID: 770974821}
+  - component: {fileID: 770974823}
   m_Layer: 0
-  m_Name: Solid_WallAuto_1
+  m_Name: Platform_WallAuto_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -12718,7 +12819,7 @@ BoxCollider2D:
     serializedVersion: 2
     m_Bits: 4294967295
   m_IsTrigger: 0
-  m_UsedByEffector: 0
+  m_UsedByEffector: 1
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
@@ -12733,6 +12834,25 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 4}
   m_EdgeRadius: 0
+--- !u!251 &770974823
+PlatformEffector2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 770974819}
+  m_Enabled: 1
+  m_UseColliderMask: 1
+  m_ColliderMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RotationalOffset: 0
+  m_UseOneWay: 1
+  m_UseOneWayGrouping: 0
+  m_SurfaceArc: 130
+  m_UseSideFriction: 0
+  m_UseSideBounce: 0
+  m_SideArc: 1
 --- !u!1 &800629491
 GameObject:
   m_ObjectHideFlags: 0
@@ -13655,8 +13775,9 @@ GameObject:
   - component: {fileID: 808425739}
   - component: {fileID: 808425741}
   - component: {fileID: 808425740}
+  - component: {fileID: 808425742}
   m_Layer: 0
-  m_Name: Solid_WallAuto_9
+  m_Name: Platform_WallAuto_9
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -13720,7 +13841,7 @@ BoxCollider2D:
     serializedVersion: 2
     m_Bits: 4294967295
   m_IsTrigger: 0
-  m_UsedByEffector: 0
+  m_UsedByEffector: 1
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
@@ -13735,6 +13856,25 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 10, y: 1}
   m_EdgeRadius: 0
+--- !u!251 &808425742
+PlatformEffector2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 808425738}
+  m_Enabled: 1
+  m_UseColliderMask: 1
+  m_ColliderMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RotationalOffset: 0
+  m_UseOneWay: 1
+  m_UseOneWayGrouping: 0
+  m_SurfaceArc: 130
+  m_UseSideFriction: 0
+  m_UseSideBounce: 0
+  m_SideArc: 1
 --- !u!1 &812999717
 GameObject:
   m_ObjectHideFlags: 0
@@ -20680,8 +20820,9 @@ GameObject:
   - component: {fileID: 950837166}
   - component: {fileID: 950837168}
   - component: {fileID: 950837167}
+  - component: {fileID: 950837169}
   m_Layer: 0
-  m_Name: Solid_WallAuto_3
+  m_Name: Platform_WallAuto_3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -20745,7 +20886,7 @@ BoxCollider2D:
     serializedVersion: 2
     m_Bits: 4294967295
   m_IsTrigger: 0
-  m_UsedByEffector: 0
+  m_UsedByEffector: 1
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
@@ -20760,6 +20901,25 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
+--- !u!251 &950837169
+PlatformEffector2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 950837165}
+  m_Enabled: 1
+  m_UseColliderMask: 1
+  m_ColliderMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RotationalOffset: 0
+  m_UseOneWay: 1
+  m_UseOneWayGrouping: 0
+  m_SurfaceArc: 130
+  m_UseSideFriction: 0
+  m_UseSideBounce: 0
+  m_SideArc: 1
 --- !u!1 &959435038
 GameObject:
   m_ObjectHideFlags: 0
@@ -21239,8 +21399,9 @@ GameObject:
   - component: {fileID: 1080796346}
   - component: {fileID: 1080796348}
   - component: {fileID: 1080796347}
+  - component: {fileID: 1080796349}
   m_Layer: 0
-  m_Name: Solid_WallAuto_7
+  m_Name: Platform_WallAuto_7
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -21304,7 +21465,7 @@ BoxCollider2D:
     serializedVersion: 2
     m_Bits: 4294967295
   m_IsTrigger: 0
-  m_UsedByEffector: 0
+  m_UsedByEffector: 1
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
@@ -21319,6 +21480,25 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 5, y: 1}
   m_EdgeRadius: 0
+--- !u!251 &1080796349
+PlatformEffector2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1080796345}
+  m_Enabled: 1
+  m_UseColliderMask: 1
+  m_ColliderMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RotationalOffset: 0
+  m_UseOneWay: 1
+  m_UseOneWayGrouping: 0
+  m_SurfaceArc: 130
+  m_UseSideFriction: 0
+  m_UseSideBounce: 0
+  m_SideArc: 1
 --- !u!1 &1107557386
 GameObject:
   m_ObjectHideFlags: 0
@@ -21667,8 +21847,9 @@ GameObject:
   - component: {fileID: 1178613653}
   - component: {fileID: 1178613655}
   - component: {fileID: 1178613654}
+  - component: {fileID: 1178613656}
   m_Layer: 0
-  m_Name: Solid_WallAuto_13
+  m_Name: Platform_WallAuto_13
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -21732,7 +21913,7 @@ BoxCollider2D:
     serializedVersion: 2
     m_Bits: 4294967295
   m_IsTrigger: 0
-  m_UsedByEffector: 0
+  m_UsedByEffector: 1
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
@@ -21747,6 +21928,25 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 15, y: 1}
   m_EdgeRadius: 0
+--- !u!251 &1178613656
+PlatformEffector2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1178613652}
+  m_Enabled: 1
+  m_UseColliderMask: 1
+  m_ColliderMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RotationalOffset: 0
+  m_UseOneWay: 1
+  m_UseOneWayGrouping: 0
+  m_SurfaceArc: 130
+  m_UseSideFriction: 0
+  m_UseSideBounce: 0
+  m_SideArc: 1
 --- !u!1 &1181274080
 GameObject:
   m_ObjectHideFlags: 0
@@ -22373,8 +22573,9 @@ GameObject:
   - component: {fileID: 1233055649}
   - component: {fileID: 1233055651}
   - component: {fileID: 1233055650}
+  - component: {fileID: 1233055652}
   m_Layer: 0
-  m_Name: Solid_WallAuto_17
+  m_Name: Platform_WallAuto_17
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -22438,7 +22639,7 @@ BoxCollider2D:
     serializedVersion: 2
     m_Bits: 4294967295
   m_IsTrigger: 0
-  m_UsedByEffector: 0
+  m_UsedByEffector: 1
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
@@ -22453,6 +22654,25 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 3, y: 1}
   m_EdgeRadius: 0
+--- !u!251 &1233055652
+PlatformEffector2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1233055648}
+  m_Enabled: 1
+  m_UseColliderMask: 1
+  m_ColliderMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RotationalOffset: 0
+  m_UseOneWay: 1
+  m_UseOneWayGrouping: 0
+  m_SurfaceArc: 130
+  m_UseSideFriction: 0
+  m_UseSideBounce: 0
+  m_SideArc: 1
 --- !u!1 &1240978771
 GameObject:
   m_ObjectHideFlags: 0
@@ -22464,8 +22684,9 @@ GameObject:
   - component: {fileID: 1240978772}
   - component: {fileID: 1240978774}
   - component: {fileID: 1240978773}
+  - component: {fileID: 1240978775}
   m_Layer: 0
-  m_Name: Solid_WallAuto_19
+  m_Name: Platform_WallAuto_19
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -22529,7 +22750,7 @@ BoxCollider2D:
     serializedVersion: 2
     m_Bits: 4294967295
   m_IsTrigger: 0
-  m_UsedByEffector: 0
+  m_UsedByEffector: 1
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
@@ -22544,6 +22765,25 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 8, y: 1}
   m_EdgeRadius: 0
+--- !u!251 &1240978775
+PlatformEffector2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1240978771}
+  m_Enabled: 1
+  m_UseColliderMask: 1
+  m_ColliderMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RotationalOffset: 0
+  m_UseOneWay: 1
+  m_UseOneWayGrouping: 0
+  m_SurfaceArc: 130
+  m_UseSideFriction: 0
+  m_UseSideBounce: 0
+  m_SideArc: 1
 --- !u!1 &1275986466
 GameObject:
   m_ObjectHideFlags: 0
@@ -23107,8 +23347,9 @@ GameObject:
   - component: {fileID: 1550043058}
   - component: {fileID: 1550043060}
   - component: {fileID: 1550043059}
+  - component: {fileID: 1550043061}
   m_Layer: 0
-  m_Name: Solid_WallAuto_5
+  m_Name: Platform_WallAuto_5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -23172,7 +23413,7 @@ BoxCollider2D:
     serializedVersion: 2
     m_Bits: 4294967295
   m_IsTrigger: 0
-  m_UsedByEffector: 0
+  m_UsedByEffector: 1
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
@@ -23187,6 +23428,25 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 4, y: 1}
   m_EdgeRadius: 0
+--- !u!251 &1550043061
+PlatformEffector2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1550043057}
+  m_Enabled: 1
+  m_UseColliderMask: 1
+  m_ColliderMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RotationalOffset: 0
+  m_UseOneWay: 1
+  m_UseOneWayGrouping: 0
+  m_SurfaceArc: 130
+  m_UseSideFriction: 0
+  m_UseSideBounce: 0
+  m_SideArc: 1
 --- !u!1 &1551756973
 GameObject:
   m_ObjectHideFlags: 0
@@ -23566,8 +23826,9 @@ GameObject:
   - component: {fileID: 1633275889}
   - component: {fileID: 1633275891}
   - component: {fileID: 1633275890}
+  - component: {fileID: 1633275892}
   m_Layer: 0
-  m_Name: Solid_WallAuto_11
+  m_Name: Platform_WallAuto_11
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -23631,7 +23892,7 @@ BoxCollider2D:
     serializedVersion: 2
     m_Bits: 4294967295
   m_IsTrigger: 0
-  m_UsedByEffector: 0
+  m_UsedByEffector: 1
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
@@ -23646,6 +23907,25 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
+--- !u!251 &1633275892
+PlatformEffector2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1633275888}
+  m_Enabled: 1
+  m_UseColliderMask: 1
+  m_ColliderMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RotationalOffset: 0
+  m_UseOneWay: 1
+  m_UseOneWayGrouping: 0
+  m_SurfaceArc: 130
+  m_UseSideFriction: 0
+  m_UseSideBounce: 0
+  m_SideArc: 1
 --- !u!1 &1655771055
 GameObject:
   m_ObjectHideFlags: 0
@@ -23749,8 +24029,9 @@ GameObject:
   - component: {fileID: 1662303890}
   - component: {fileID: 1662303892}
   - component: {fileID: 1662303891}
+  - component: {fileID: 1662303893}
   m_Layer: 0
-  m_Name: Solid_WallAuto_15
+  m_Name: Platform_WallAuto_15
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -23814,7 +24095,7 @@ BoxCollider2D:
     serializedVersion: 2
     m_Bits: 4294967295
   m_IsTrigger: 0
-  m_UsedByEffector: 0
+  m_UsedByEffector: 1
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
@@ -23829,6 +24110,25 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 6, y: 2}
   m_EdgeRadius: 0
+--- !u!251 &1662303893
+PlatformEffector2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1662303889}
+  m_Enabled: 1
+  m_UseColliderMask: 1
+  m_ColliderMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RotationalOffset: 0
+  m_UseOneWay: 1
+  m_UseOneWayGrouping: 0
+  m_SurfaceArc: 130
+  m_UseSideFriction: 0
+  m_UseSideBounce: 0
+  m_SideArc: 1
 --- !u!1 &1670361419
 GameObject:
   m_ObjectHideFlags: 0
@@ -26217,8 +26517,9 @@ GameObject:
   - component: {fileID: 1869097073}
   - component: {fileID: 1869097075}
   - component: {fileID: 1869097074}
+  - component: {fileID: 1869097076}
   m_Layer: 0
-  m_Name: Solid_WallAuto_2
+  m_Name: Platform_WallAuto_2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -26282,7 +26583,7 @@ BoxCollider2D:
     serializedVersion: 2
     m_Bits: 4294967295
   m_IsTrigger: 0
-  m_UsedByEffector: 0
+  m_UsedByEffector: 1
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
@@ -26297,6 +26598,25 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
+--- !u!251 &1869097076
+PlatformEffector2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1869097072}
+  m_Enabled: 1
+  m_UseColliderMask: 1
+  m_ColliderMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RotationalOffset: 0
+  m_UseOneWay: 1
+  m_UseOneWayGrouping: 0
+  m_SurfaceArc: 130
+  m_UseSideFriction: 0
+  m_UseSideBounce: 0
+  m_SideArc: 1
 --- !u!1 &1877135610
 GameObject:
   m_ObjectHideFlags: 0
@@ -26308,8 +26628,9 @@ GameObject:
   - component: {fileID: 1877135611}
   - component: {fileID: 1877135613}
   - component: {fileID: 1877135612}
+  - component: {fileID: 1877135614}
   m_Layer: 0
-  m_Name: Solid_WallAuto_8
+  m_Name: Platform_WallAuto_8
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -26373,7 +26694,7 @@ BoxCollider2D:
     serializedVersion: 2
     m_Bits: 4294967295
   m_IsTrigger: 0
-  m_UsedByEffector: 0
+  m_UsedByEffector: 1
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
@@ -26388,6 +26709,25 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 18, y: 1}
   m_EdgeRadius: 0
+--- !u!251 &1877135614
+PlatformEffector2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1877135610}
+  m_Enabled: 1
+  m_UseColliderMask: 1
+  m_ColliderMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RotationalOffset: 0
+  m_UseOneWay: 1
+  m_UseOneWayGrouping: 0
+  m_SurfaceArc: 130
+  m_UseSideFriction: 0
+  m_UseSideBounce: 0
+  m_SideArc: 1
 --- !u!1 &1927029807
 GameObject:
   m_ObjectHideFlags: 0
@@ -28266,8 +28606,9 @@ GameObject:
   - component: {fileID: 2006252796}
   - component: {fileID: 2006252798}
   - component: {fileID: 2006252797}
+  - component: {fileID: 2006252799}
   m_Layer: 0
-  m_Name: Solid_WallAuto_10
+  m_Name: Platform_WallAuto_10
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -28331,7 +28672,7 @@ BoxCollider2D:
     serializedVersion: 2
     m_Bits: 4294967295
   m_IsTrigger: 0
-  m_UsedByEffector: 0
+  m_UsedByEffector: 1
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
@@ -28346,6 +28687,25 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 11, y: 1}
   m_EdgeRadius: 0
+--- !u!251 &2006252799
+PlatformEffector2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2006252795}
+  m_Enabled: 1
+  m_UseColliderMask: 1
+  m_ColliderMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RotationalOffset: 0
+  m_UseOneWay: 1
+  m_UseOneWayGrouping: 0
+  m_SurfaceArc: 130
+  m_UseSideFriction: 0
+  m_UseSideBounce: 0
+  m_SideArc: 1
 --- !u!1 &2029896900
 GameObject:
   m_ObjectHideFlags: 0
@@ -28357,8 +28717,9 @@ GameObject:
   - component: {fileID: 2029896901}
   - component: {fileID: 2029896903}
   - component: {fileID: 2029896902}
+  - component: {fileID: 2029896904}
   m_Layer: 0
-  m_Name: Solid_WallAuto_14
+  m_Name: Platform_WallAuto_14
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -28422,7 +28783,7 @@ BoxCollider2D:
     serializedVersion: 2
     m_Bits: 4294967295
   m_IsTrigger: 0
-  m_UsedByEffector: 0
+  m_UsedByEffector: 1
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
@@ -28437,6 +28798,25 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 3, y: 1}
   m_EdgeRadius: 0
+--- !u!251 &2029896904
+PlatformEffector2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2029896900}
+  m_Enabled: 1
+  m_UseColliderMask: 1
+  m_ColliderMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RotationalOffset: 0
+  m_UseOneWay: 1
+  m_UseOneWayGrouping: 0
+  m_SurfaceArc: 130
+  m_UseSideFriction: 0
+  m_UseSideBounce: 0
+  m_SideArc: 1
 --- !u!1 &2104230924
 GameObject:
   m_ObjectHideFlags: 0

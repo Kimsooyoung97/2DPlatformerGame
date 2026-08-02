@@ -234,6 +234,13 @@ namespace NAN2026.EditorTools
             var go = new GameObject(prefix + n);
             var box = go.AddComponent<BoxCollider2D>();
             box.size = new Vector2(3f, 0.5f);
+            if (oneway)
+            {
+                box.usedByEffector = true;
+                var eff = go.AddComponent<PlatformEffector2D>();
+                eff.useOneWay = true;
+                eff.surfaceArc = 130f;
+            }
             var t = System.Type.GetType("NAN2026.InvisiblePlatform, Assembly-CSharp");
             if (t != null) go.AddComponent(t);
             var sv = SceneView.lastActiveSceneView;
