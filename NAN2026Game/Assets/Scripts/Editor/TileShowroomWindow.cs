@@ -707,6 +707,7 @@ namespace NAN2026.EditorTools
                                     if (curFam.Contains("Stage_Wall")) targetTm = "Stage_Wall";
                                     else if (curFam.Contains("Stage_Ground")) targetTm = "Stage_Ground";
                                 }
+                                if (!string.IsNullOrEmpty(customBrushTarget)) targetTm = customBrushTarget;
                                 ShowNotification(new GUIContent(PaintWith((TileBase)o, targetTm)), 1.2d);
                             }
                             catch (System.Exception ex)
@@ -804,6 +805,7 @@ namespace NAN2026.EditorTools
                         {
                             inspectMode = false;
                             string tgt = (t.name.Contains("Tileable") || t.name.Contains("Wall")) ? "Stage_Wall" : "Stage_Ground";
+                            if (!string.IsNullOrEmpty(customBrushTarget)) tgt = customBrushTarget;
                             ShowNotification(new GUIContent(PaintWith(t, tgt)));
                         }
                     }
