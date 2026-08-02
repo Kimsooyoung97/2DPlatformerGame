@@ -321,14 +321,22 @@ namespace NAN2026.EditorTools
             foreach (var tm in Object.FindObjectsByType<Tilemap>(FindObjectsSortMode.None))
             {
                 bool isWall = tm.GetComponent<TilemapCollider2D>() == null;
-                for (int x = cellMin.x; x <= cellMax.x; x++)
-                    for (int y = cellMin.y; y <= cellMax.y; y++)
+                // 이동·오프셋 층 대응: 맵별 좌표 환산 + 월드 위치로 범위 판정
+                var a = tm.WorldToCell(mn);
+                var b = tm.WorldToCell(mx);
+                int x0 = Mathf.Min(a.x, b.x) - 1, x1 = Mathf.Max(a.x, b.x) + 1;
+                int y0 = Mathf.Min(a.y, b.y) - 1, y1 = Mathf.Max(a.y, b.y) + 1;
+                for (int x = x0; x <= x1; x++)
+                    for (int y = y0; y <= y1; y++)
                     {
                         var p = new Vector3Int(x, y, 0);
                         var t = tm.GetTile(p);
                         if (t == null) continue;
-                        if (isWall) { clipWallOff.Add(p - cellMin); clipWallTile.Add(t); }
-                        else { clipGroundOff.Add(p - cellMin); clipGroundTile.Add(t); }
+                        Vector3 wc = tm.CellToWorld(p) + tm.cellSize * 0.5f;
+                        if (wc.x < mn.x || wc.x > mx.x || wc.y < mn.y || wc.y > mx.y) continue;
+                        var off = new Vector3Int(Mathf.FloorToInt(wc.x), Mathf.FloorToInt(wc.y), 0) - cellMin;
+                        if (isWall) { clipWallOff.Add(off); clipWallTile.Add(t); }
+                        else { clipGroundOff.Add(off); clipGroundTile.Add(t); }
                     }
             }
             Vector3 anchorW = new Vector3(cellMin.x, cellMin.y, 0f);
