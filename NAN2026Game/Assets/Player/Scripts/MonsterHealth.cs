@@ -1,3 +1,4 @@
+using Assets.PixelFantasy.PixelMonsters.Common.Scripts.ExampleScripts;
 using System.Collections;
 using UnityEngine;
 
@@ -12,6 +13,7 @@ namespace NHNDemo
         private bool dead;
         private SpriteRenderer[] renderers;
         private Color[] originalColors;
+        private MonsterAnimation animation;
 
         /// <summary>머리 위 체력바(WorldHealthBar 등)가 즉시 동기화할 수 있도록
         /// 체력이 바뀌는 때마다 (현재, 최대)를 통지한다.</summary>
@@ -34,6 +36,7 @@ namespace NHNDemo
 
         private void Awake()
         {
+            animation = GetComponent<MonsterAnimation>();
             currentHealth = maxHealth;
             renderers = GetComponentsInChildren<SpriteRenderer>();
             originalColors = new Color[renderers.Length];
@@ -76,8 +79,10 @@ namespace NHNDemo
             if (patrol != null)
                 patrol.enabled = false;
 
-            foreach (Collider2D item in GetComponentsInChildren<Collider2D>())
-                item.enabled = false;
+            animation.Die();
+
+            //foreach (Collider2D item in GetComponentsInChildren<Collider2D>())
+            //    item.enabled = false;
 
             StartCoroutine(FadeAndDestroy());
         }
