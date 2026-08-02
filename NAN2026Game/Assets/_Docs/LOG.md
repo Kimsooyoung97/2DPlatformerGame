@@ -835,3 +835,30 @@ FirstScene에서 2D Pixel Art Platformer Biome - American Forest 폴더와 2D Pi
 - 이번 턴은 씬 오브젝트 변경이 없어(스크립트/Config 에셋만 변경) manage_scene(save/load) 절차는 생략, isDirty=False 확인
 ### 실패와 수정
 - 없음
+
+## [수정] 검기 사거리 절반 + 패링 무피해/반격 + MiddleBoss 돌진·투사체 공격 — 2026-08-02 20:30
+### 프롬프트
+[수정] 검기가 너무 멀리까지 날아가서 지금의 절반만 날아가게 해주고 몬스터의 공격을 패링했을 때 플레이어는 데미지를 입지 않고 적에게 데미지를 돌려주게끔 만들어줘 또한 OrkanBoss의 기능 중 돌진 공격, 투사체 공격을 MiddleBoss에게도 추가해줘
+### 조작 내역
+**검기 사거리 절반**
+- Assets/Configs/AttackEffectConfig.asset의 실제 lifetime 값(4초, 클래스 기본값 0.8과 달리 이미 커스텀되어 있었음)을 확인 후 정확히 2초로 절반 축소. 이동거리 = speed×lifetime 구조라 basic 28→14, powered 36→18로 비례 축소
+**패링 무피해 + 반격**
+- PlayerController2D가 IParryReflector를 구현하도록 수정, IsParryWindowActive() 공개 메서드 추가 (기존 parryHeld/parryPressTime/ParrySuccessWindow 로직 그대로 재사용, 새 판정 로직 추가 없음)
+- PlayerCombatConfig에 parryCounterDamage(기본 2) 추가, PlayerHealth에 getter 노출
+- EnemyAI.AttackPlayer()에 패링 체크 삽입: player의 IParryReflector.TryParry()가 true면 플레이어 데미지 대신 공격한 몬스터 자신이 parryCounterDamage만큼 MonsterHealth.TakeDamage를 받음
+**MiddleBoss 돌진/투사체 공격**
+- IEnemyAttackOverride 인터페이스 신규: 같은 오브젝트에 구현체가 있으면 EnemyAI가 이동/공격을 위임(IsBusy 동안 개입 안 함, TryStartAttack으로 패턴 시작 요청)
+- EnemyAI.Update/Chase/AttackPlayer에 훅 연결: 근접 사거리에선 항상 시도(짧으면 컴포넌트가 false 반환→기본 근접), 추적 중에도 매 프레임 시도해 원거리 패턴이 끼어들 수 있게 함
+- Boss/SpikeProjectile.cs를 OrkanBoss 전용 타입에서 NHNDemo.MonsterHealth 기반으로 일반화(재사용 가능하게). 기존 OrkanBoss.cs 호출부도 새 시그니처에 맞춰 수정(컴파일 유지 목적, 이 스크립트는 씬에서 미사용)
+- MiddleBossAttackConfig(SO) 신규: 패턴 선택 거리·쿨다운, 돌진(속도/최대거리/명중거리/데미지/벽감지레이캐스트+자기몸 오프셋), 투사체(선딜/개수/간격/속도/데미지) 수치
+- MiddleBossAttackPatterns 신규(IEnemyAttackOverride 구현): 코루틴으로 돌진(Rigidbody2D 직접 제어, 벽 Raycast 감지 시 정지)과 투사체 3연속 발사(SpikeProjectile 재사용, 패링 시 반사되어 보스 자신에게 데미지) 구현. 돌진 명중 시에도 동일한 패링 체크 적용
+- MiddleBoss에 MiddleBossAttackPatterns 부착, MiddleBossAttackConfig 연결, wallLayerMask=Default 레이어 설정
+- 셸/그로기 데미지 배율 시스템(OrkanBoss의 다른 기능)은 이번 요청 범위(돌진·투사체만)에 해당하지 않아 가져오지 않음
+### 검증
+- refresh_unity(compile=force) 3회(단계별) 후 read_console(types=error) → 매번 0건
+- AppDomain 리플렉션으로 MiddleBossAttackConfig/MiddleBossAttackPatterns/IEnemyAttackOverride 타입 실제 로드 확인
+- 저장 → manage_scene(load) 강제 재로드 → MiddleBossAttackPatterns 부착·config 연결, PlayerController2D의 IParryReflector 구현 여부, ParryCounterDamage=2, AttackEffectConfig.lifetime=2 전부 재확인
+- run_tests(EditMode) → 51/51 통과 (job 5e7aa76bdf6f486687c1136ace557179, 이번 턴은 신규 순수 로직 없어 테스트 수 변동 없음)
+- 테스트 후 재확인: MiddleBossAttackPatterns 유지, isDirty=False
+### 실패와 수정
+- 돌진 공격 벽 감지 Raycast를 보스 위치에서 그대로 쏘면 Physics2D.queriesStartInColliders 기본값(true) 때문에 보스 자기 자신의 non-trigger 콜라이더를 즉시 벽으로 오인해 돌진이 시작하자마자 멈추는 문제를 구현 중 미리 인지하고, wallCheckOriginOffset으로 레이 시작점을 진행 방향으로 미리 밀어내 예방함 (실제 발생 전에 설계 단계에서 방지, 별도 FAIL.md 항목 없음)

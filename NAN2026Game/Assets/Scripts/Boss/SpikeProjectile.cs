@@ -4,7 +4,9 @@ using NAN2026.Showroom;
 /// "3연속 가시 투사체 발사" 패턴에서 사용하는 조준 탄환.
 /// 발사 시점 플레이어 위치를 향해 직선으로 날아가고,
 /// 플레이어가 IParryReflector를 구현한 상태에서 TryParry()가 true를 반환하면
-/// 방향을 반전해 보스에게 되돌아가 껍질을 일시적으로 파괴합니다.
+/// 방향을 반전해 쏜 주인(ownerHealth)에게 되돌아가 데미지를 입힌다.
+/// 특정 보스 타입에 묶이지 않도록 owner는 NHNDemo.MonsterHealth로 일반화되어 있어
+/// 어떤 몬스터든 이 투사체를 재사용할 수 있다.
 /// </summary>
 public class SpikeProjectile : MonoBehaviour
 {
@@ -12,13 +14,13 @@ public class SpikeProjectile : MonoBehaviour
     private float damage;
     private float lifeTime = 5f;
     private bool isReflected = false;
-    private OrkanBoss owner;
+    private NHNDemo.MonsterHealth ownerHealth;
 
-    public void Init(Vector2 dir, float speed, float dmg, OrkanBoss bossOwner)
+    public void Init(Vector2 dir, float speed, float dmg, NHNDemo.MonsterHealth owner)
     {
         velocity = dir.normalized * speed;
         damage = dmg;
-        owner = bossOwner;
+        ownerHealth = owner;
 
         if (GetComponent<Rigidbody2D>() == null)
         {
@@ -45,13 +47,13 @@ public class SpikeProjectile : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        // 반사된 투사체가 보스 본체에 맞았을 때 -> 껍질 일시 파괴
+        // 반사된 투사체가 쏜 주인에게 맞았을 때 -> 주인이 대신 데미지를 입는다.
         if (isReflected)
         {
-            var boss = other.GetComponent<OrkanBoss>();
-            if (boss != null)
+            NHNDemo.MonsterHealth hitHealth = other.GetComponentInParent<NHNDemo.MonsterHealth>();
+            if (hitHealth != null && hitHealth == ownerHealth)
             {
-                boss.OnProjectileReflectedHit();
+                hitHealth.TakeDamage(Mathf.Max(1, Mathf.RoundToInt(damage)), (Vector2)velocity.normalized);
                 Destroy(gameObject);
                 return;
             }
@@ -59,14 +61,14 @@ public class SpikeProjectile : MonoBehaviour
 
         if (!isReflected && other.CompareTag("Player"))
         {
-            var reflector = other.GetComponent<IParryReflector>();
-            if (reflector != null && reflector.TryParry(owner != null ? owner.gameObject : null))
+            var reflector = other.GetComponentInParent<IParryReflector>();
+            if (reflector != null && reflector.TryParry(ownerHealth != null ? ownerHealth.gameObject : null))
             {
                 Reflect();
                 return;
             }
 
-            var hp = other.GetComponent<PlayerHealth>();
+            var hp = other.GetComponentInParent<PlayerHealth>();
             if (hp != null)
                 hp.TakeDamage(damage, transform.position);
 

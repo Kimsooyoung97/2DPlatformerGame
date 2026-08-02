@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d88571fb518b5e45af1e868832f7aa6, type: 3}
+  m_Name: MiddleBossAttackConfig
+  m_EditorClassIdentifier: Assembly-CSharp::MiddleBossAttackConfig
+  rangedMinDistance: 2.5
+  minPatternCooldown: 2.5
+  maxPatternCooldown: 4.5
+  chargeWindup: 0.5
+  chargeSpeed: 9
+  chargeMaxDistance: 8
+  chargeHitDistance: 1
+  chargeDamage: 2
+  wallCheckDistance: 0.6
+  wallLayerMask:
+    serializedVersion: 2
+    m_Bits: 1
+  throwWindup: 0.6
+  throwCount: 3
+  throwInterval: 0.25
+  throwSpawnHeight: 1.2
+  rockSpikeSpeed: 8
+  rockSpikeDamage: 1

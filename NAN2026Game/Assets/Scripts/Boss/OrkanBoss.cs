@@ -434,7 +434,7 @@ public class OrkanBoss : MonoBehaviour
 
         var proj = go.GetComponent<SpikeProjectile>();
         if (proj == null) proj = go.AddComponent<SpikeProjectile>();
-        proj.Init(dir, rockSpikeSpeed, rockSpikeDamage, this);
+        proj.Init(dir, rockSpikeSpeed, rockSpikeDamage, GetComponent<NHNDemo.MonsterHealth>());
     }
 
     // ------------------------------------------------------------------

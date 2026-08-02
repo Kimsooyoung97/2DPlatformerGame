@@ -31,6 +31,7 @@ public sealed class EnemyAI : MonoBehaviour
     private MonsterController2D controller;
     private MonsterAnimation animation;
     private Transform player;
+    private IEnemyAttackOverride attackOverride;
 
     private EnemyAIState state = EnemyAIState.Patrol;
     private bool engaged;
@@ -46,6 +47,7 @@ public sealed class EnemyAI : MonoBehaviour
     {
         controller = GetComponent<MonsterController2D>();
         animation = GetComponent<MonsterAnimation>();
+        attackOverride = GetComponent<IEnemyAttackOverride>();
 
         // 씬 편집용 데모 컨트롤(키보드 입력) 스크립트가 같이 있으면 Input을 서로 덮어써서
         // 충돌하므로, AI가 대신 조종함을 명시적으로 끈다. (컴포넌트 자체는 지우지 않는다)
@@ -77,6 +79,12 @@ public sealed class EnemyAI : MonoBehaviour
     {
         if (config == null || controller == null || animation == null)
             return;
+
+        if (attackOverride != null && attackOverride.IsBusy)
+        {
+            controller.Input = Vector2.zero;
+            return;
+        }
 
         if (attackTimer > 0f)
             attackTimer -= Time.deltaTime;
@@ -127,6 +135,10 @@ public sealed class EnemyAI : MonoBehaviour
 
     private void Chase()
     {
+        // 보스류는 추적 중에도 돌진/투사체 같은 원거리성 패턴을 끼워 넣을 수 있다.
+        if (attackOverride != null && attackOverride.TryStartAttack(player))
+            return;
+
         float dir = player.position.x > transform.position.x ? 1f : -1f;
 
         // 높이차를 매 프레임 즉시 점프 판정에 쓰면, 플레이어가 같은 층에서 제자리
@@ -148,9 +160,26 @@ public sealed class EnemyAI : MonoBehaviour
             return;
 
         attackTimer = config.attackCooldown;
+
+        if (attackOverride != null && attackOverride.TryStartAttack(player))
+            return;
+
         animation.Attack();
 
         if (player == null) return;
+
+        // 패링 성공 시: 플레이어는 무피해, 공격한 이 몬스터가 대신 반격 데미지를 받는다.
+        IParryReflector reflector = player.GetComponentInParent<IParryReflector>();
+        if (reflector != null && reflector.TryParry(gameObject))
+        {
+            NHNDemo.MonsterHealth selfHealth = GetComponent<NHNDemo.MonsterHealth>();
+            PlayerHealth parriedPh = player.GetComponentInParent<PlayerHealth>();
+            int counterDamage = parriedPh != null ? parriedPh.ParryCounterDamage : 0;
+            if (selfHealth != null && counterDamage > 0)
+                selfHealth.TakeDamage(counterDamage, (Vector2)(transform.position - player.position));
+            return;
+        }
+
         PlayerHealth playerHealth = player.GetComponentInParent<PlayerHealth>();
         if (playerHealth != null)
             playerHealth.TakeDamage(config.attackDamage, transform.position);

@@ -8,7 +8,7 @@ namespace NAN2026
         [Header("발사")]
         public float basicSpeed = 7f;
         public float poweredSpeed = 9f;
-        public float lifetime = 0.8f;
+        public float lifetime = 0.4f;
         public Vector2 spawnOffset = new Vector2(0.45f, 0.95f);
 
         [Header("크기 (캐릭터 대비)")]

@@ -3,7 +3,7 @@ using UnityEngine.InputSystem;
 using NAN2026;
 using NAN2026.Core;
 
-public class PlayerController2D : MonoBehaviour
+public class PlayerController2D : MonoBehaviour, IParryReflector
 {
     [SerializeField] private MovementConfig config;
     [SerializeField] private AttackEffectConfig effectConfig;
@@ -41,6 +41,18 @@ public class PlayerController2D : MonoBehaviour
     private float landTimer;
     private string currentState;
     public bool IsGrounded { get { return grounded; } }
+
+    /// <summary>지금 이 순간 패링 판정 창 안인지. EnemyAI 등 몬스터 공격 판정이 참조한다.</summary>
+    public bool IsParryWindowActive()
+    {
+        return parryHeld && PlayerLocomotionLogic.ParrySuccessWindow(Time.time - parryPressTime, config.parryWindow);
+    }
+
+    /// <summary>IParryReflector 구현 — SpikeProjectile 등 투사체가 자동으로 패링 여부를 물어본다.</summary>
+    public bool TryParry(GameObject attacker)
+    {
+        return IsParryWindowActive();
+    }
     private UnityEngine.Collider2D[] groundColliders;
     private bool ignoringGround;
 

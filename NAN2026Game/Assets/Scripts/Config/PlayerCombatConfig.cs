@@ -15,4 +15,8 @@ public sealed class PlayerCombatConfig : ScriptableObject
     public float hitInvulnerabilityDuration = 0.6f;
     [Tooltip("피격 시 공격자 반대 방향으로 밀려나는 거리")]
     public float knockbackDistance = 0.25f;
+
+    [Header("패링")]
+    [Tooltip("패링에 성공했을 때 공격한 적에게 돌려주는 데미지")]
+    public int parryCounterDamage = 2;
 }
