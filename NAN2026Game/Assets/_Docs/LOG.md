@@ -1405,3 +1405,14 @@ A로 가자
 - 값 주입 확인. 연사감은 사용자 재생 판정 (0=무제한 연사 가능)
 ### 실패와 수정
 - 초기 [조사]가 '첫 시전 페이싱'에 집중해 쿨다운 요인 누락 — 재보고로 정정
+
+
+## [조사] Forest Platformer Pixel Art Tileset 확인 — 2026-08-02 23:55
+### 프롬프트
+[조사] Forest Platformer Pixel Art Tileset 보이니?
+### 조사 결과
+- 위치: Assets/sanctum_pixel/forest_side_pack (제작자명 폴더). 구성: 타일 에셋 27개, Tileset/Props/Background(하늘·산·소나무 패럴랙스), demo_scene 포함
+### 검증
+해당 없음
+### 커밋
+해당 없음(무수정)
