@@ -21,3 +21,9 @@ MonoBehaviour:
   sortingOrder: 40
   boundsMin: {x: 0, y: -2}
   boundsMax: {x: 120, y: 21}
+  occlusionMask:
+    serializedVersion: 2
+    m_Bits: 1
+  rayCount: 360
+  eyeHeight: 0.8
+  occlusionTolerance: 0.6
