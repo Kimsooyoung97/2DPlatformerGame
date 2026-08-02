@@ -34,6 +34,7 @@ namespace NAN2026
             state = StatueLogic.Dormant;
             body.enabled = false;
             hitbox.enabled = false;
+            rb.bodyType = RigidbodyType2D.Kinematic; // 잠듦: 콜라이더 없음 + 중력 무시 (추락 방지)
             anim.Play("Awaken", 0, 0f);
             anim.speed = 0f; // 석상 정지 (각성 1프레임)
         }
@@ -93,6 +94,7 @@ namespace NAN2026
                     anim.Play("Awaken", 0, 0f);
                     timer = config.awakenDuration;
                     body.enabled = true;
+                    rb.bodyType = RigidbodyType2D.Dynamic;
                     break;
                 case StatueLogic.Idle:
                     if (dust != null) dust.Play();
@@ -141,6 +143,7 @@ namespace NAN2026
         {
             state = StatueLogic.Dead;
             rb.linearVelocity = Vector2.zero;
+            rb.bodyType = RigidbodyType2D.Kinematic;
             body.enabled = false;
             hitbox.enabled = false;
             anim.Play("Death", 0, 0f);
