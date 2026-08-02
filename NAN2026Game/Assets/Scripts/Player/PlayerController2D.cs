@@ -130,7 +130,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
             if (kb.leftArrowKey.isPressed || kb.aKey.isPressed) inputX -= 1f;
             if (kb.rightArrowKey.isPressed || kb.dKey.isPressed) inputX += 1f;
             runHeld = kb.leftShiftKey.isPressed || kb.rightShiftKey.isPressed;
-            if (kb.spaceKey.wasPressedThisFrame || kb.upArrowKey.wasPressedThisFrame) jumpQueued = true;
+            if ( kb.spaceKey.wasPressedThisFrame || kb.upArrowKey.wasPressedThisFrame) jumpQueued = true;
             if (kb.kKey.wasPressedThisFrame) QueueAttack("Combo2", config.combo2Duration, config.combo2LungeSpeed);
             if (kb.lKey.wasPressedThisFrame) QueueAttack("Combo3", config.combo3Duration, config.combo3LungeSpeed);
             if (kb.gKey.wasPressedThisFrame) QueueAttack("Roll", rollDuration, rollSpeed);
