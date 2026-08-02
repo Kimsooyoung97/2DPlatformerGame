@@ -582,9 +582,33 @@ namespace NAN2026.EditorTools
             if (e.type == EventType.MouseMove) sv.Repaint();
             if ((e.type == EventType.MouseDown || e.type == EventType.MouseDrag) && e.button == 0)
             {
-                Undo.RegisterCompleteObjectUndo(tm, "쇼룸 붓");
-                tm.SetTile(cell, e.shift ? null : armedTile);
-                UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(tm.gameObject.scene);
+                if (e.shift)
+                {
+                    // 층 무관 지우개: 그 지점에 타일이 있는 타일맵 중 가장 앞(정렬 최상위)부터 지운다
+                    Tilemap best = null;
+                    Vector3Int bestCell = default(Vector3Int);
+                    int bestOrder = int.MinValue;
+                    foreach (var m in FindObjectsByType<Tilemap>(FindObjectsSortMode.None))
+                    {
+                        var mc = m.WorldToCell(world);
+                        if (m.GetTile(mc) == null) continue;
+                        var r = m.GetComponent<TilemapRenderer>();
+                        int ord = r != null ? r.sortingOrder : 0;
+                        if (ord > bestOrder) { bestOrder = ord; best = m; bestCell = mc; }
+                    }
+                    if (best != null)
+                    {
+                        Undo.RegisterCompleteObjectUndo(best, "쇼룸 지우개");
+                        best.SetTile(bestCell, null);
+                        UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(best.gameObject.scene);
+                    }
+                }
+                else
+                {
+                    Undo.RegisterCompleteObjectUndo(tm, "쇼룸 붓");
+                    tm.SetTile(cell, armedTile);
+                    UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(tm.gameObject.scene);
+                }
                 e.Use();
                 sv.Repaint();
             }
