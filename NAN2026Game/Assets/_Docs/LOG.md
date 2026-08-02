@@ -1996,3 +1996,18 @@ FirstScene 크기 만큼 맵을 늘리고 ThirdScene의 스타일을 참고해�
 - 저장 True. 일직선 주행감은 사용자 판정
 ### 실패와 수정
 - v2 파도 구조가 '쭉 달리기' 핵심 요건 위배 — 러닝 스테이지는 평지 기본+토핑 원칙 기록
+
+
+## [조사] FirstScene Ground 그리기 불능 원인 — 2026-08-03 04:06
+### 프롬프트
+FirstSecene에 Ground 발판을 그릴수가 없는데 원인이 뭐야?
+### 조사 결과
+- FirstScene 구조가 우리 규약과 다름: Grid/Tilemap_Platforms(127셀·충돌O) 단일 — Stage_Ground/Stage_Wall/Stage_Grid 전무
+- 붓은 GameObject.Find("Stage_Ground") 실패 시 조용히 무반응(알림 없음) → '안 그려짐'으로 체감
+- 타일 출처는 sanctum_pixel(127셀)로 쇼룸 검색 루트에 이미 포함 — 팔레트는 정상
+- 해법: 겹층 도구에서 Tilemap_Platforms 행의 [붓→] 클릭(코드 수정 불필요). 미존재 대상 알림은 개선 후보
+- 부수: 활성 씬을 ForthScene→FirstScene으로 전환함(직전 씬 저장 완료)
+### 검증
+해당 없음
+### 커밋
+해당 없음(무수정)
