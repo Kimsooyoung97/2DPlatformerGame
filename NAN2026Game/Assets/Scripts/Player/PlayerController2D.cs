@@ -20,6 +20,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
     private Animator anim;
     private SpriteRenderer sr;
     private Collider2D col;
+    private NAN2026.Showroom.PlayerHealth health;
     private readonly RaycastHit2D[] castHits = new RaycastHit2D[4];
 
     private float inputX;
@@ -62,6 +63,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
         anim = GetComponent<Animator>();
         sr = GetComponent<SpriteRenderer>();
         col = GetComponent<Collider2D>();
+        health = GetComponent<NAN2026.Showroom.PlayerHealth>();
         rb.gravityScale = config.gravityScale;
         rb.freezeRotation = true;
         var found = new System.Collections.Generic.List<Collider2D>();
@@ -216,6 +218,8 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
                 attackTimer = queuedAttackDuration;
                 attacking = true;
                 SpawnAttackEffect(queuedAttack);
+                if (queuedAttack == "Roll" && health != null)
+                    health.BeginRollInvincibility();
             }
             queuedAttack = null;
         }

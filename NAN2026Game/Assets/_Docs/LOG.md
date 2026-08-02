@@ -876,3 +876,19 @@ FirstScene에서 2D Pixel Art Platformer Biome - American Forest 폴더와 2D Pi
 - run_tests(EditMode) → 51/51 통과 (job 228a3d0ec9564c1ea6740a62ba42e670, 신규 순수 로직 없어 테스트 수 변동 없음)
 ### 실패와 수정
 - 없음
+
+## [구현] 구르기 무적 프레임(0.25초) — 2026-08-02 21:55
+### 프롬프트
+플레이어 캐릭터가 구르기 할 때 0.25초동안 무적이 되게 한다. (경험치/레벨업/증강 부분은 SPEC.md 충돌로 별도 확인 요청 — 아래 답변 참조)
+### 조작 내역
+- PlayerCombatConfig에 rollInvincibilityDuration(기본 0.25초) 추가
+- PlayerHealth에 rollInvulnerableUntil 타이머 + BeginRollInvincibility() 공개 메서드 추가, TakeDamage의 무적 판정 조건에 합류(기존 invincible/graceUntil/damageInvulnerableUntil과 동일한 방식)
+- PlayerController2D가 PlayerHealth를 참조하도록 하고, 대시(Roll, G키)가 실제로 시작되는 시점(FixedUpdate에서 queuedAttack=="Roll"이 활성화될 때)에 BeginRollInvincibility() 호출
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- PlayerCombatConfig 실제 에셋에서 rollInvincibilityDuration=0.25 반영 확인
+- run_tests(EditMode) → 51/51 통과 (job 47e6fcc58bf44193aebede71f906485e, 신규 순수 로직 없어 테스트 수 변동 없음)
+### 실패와 수정
+- 없음
+### 별도 확인 요청 (SPEC.md 충돌)
+- 경험치/레벨업/브론즈·실버·골드 증강 시스템은 SPEC.md '범위 밖' 목록에 '레벨업'이 명시되어 있어 구현하지 않고 사용자에게 확인 요청함(대화 중 응답으로 처리, 이 LOG 항목에는 코드 변경 없음)

@@ -19,4 +19,8 @@ public sealed class PlayerCombatConfig : ScriptableObject
     [Header("패링")]
     [Tooltip("패링에 성공했을 때 공격한 적에게 돌려주는 데미지")]
     public int parryCounterDamage = 2;
+
+    [Header("구르기")]
+    [Tooltip("구르기 시작 시 이 시간(초) 동안 무적")]
+    public float rollInvincibilityDuration = 0.25f;
 }

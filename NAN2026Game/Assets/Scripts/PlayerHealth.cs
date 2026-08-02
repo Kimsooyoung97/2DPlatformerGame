@@ -42,6 +42,7 @@ namespace NAN2026.Showroom
 
         private int currentHealth;
         private float damageInvulnerableUntil;
+        private float rollInvulnerableUntil;
 
         public int Deaths { get { return deaths; } }
         public bool IsDying { get { return dying; } }
@@ -83,7 +84,7 @@ namespace NAN2026.Showroom
         /// 체력이 0 이하가 되면 기존 Kill()/Respawn() 경로를 그대로 탄다 (죽으면 체크포인트에서 재시작).</summary>
         public void TakeDamage(float damage, Vector3 attackerPosition)
         {
-            if (dying || invincible || Time.time < graceUntil || Time.time < damageInvulnerableUntil)
+            if (dying || invincible || Time.time < graceUntil || Time.time < damageInvulnerableUntil || Time.time < rollInvulnerableUntil)
                 return;
 
             if (combatConfig == null)
@@ -104,6 +105,13 @@ namespace NAN2026.Showroom
         public void SetCheckpoint(Vector3 position)
         {
             checkpoint = position;
+        }
+
+        /// <summary>구르기가 시작되는 순간 PlayerController2D가 호출한다. combatConfig.rollInvincibilityDuration 동안 무적.</summary>
+        public void BeginRollInvincibility()
+        {
+            if (combatConfig == null) return;
+            rollInvulnerableUntil = Time.time + combatConfig.rollInvincibilityDuration;
         }
 
         private void Update()
