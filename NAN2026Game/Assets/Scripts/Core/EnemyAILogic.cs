@@ -52,5 +52,19 @@ namespace NAN2026.Core
             if (r > 1f) return 1f;
             return r;
         }
+
+        /// 높이차가 매 프레임 즉시 점프로 이어지면 플레이어가 제자리 점프만 해도
+        /// 따라 뛰게 된다. 높이차가 requiredSustainDuration 이상 '유지'된 경우에만
+        /// 점프를 확정하기 위한 누적 타이머. 높이차가 사라지면 즉시 0으로 리셋된다.
+        public static float UpdateHeightGapTimer(bool aboveThresholdNow, float currentTimer, float deltaTime)
+        {
+            if (!aboveThresholdNow) return 0f;
+            return currentTimer + deltaTime;
+        }
+
+        public static bool ShouldJumpNow(float sustainedTimer, float requiredSustainDuration)
+        {
+            return sustainedTimer >= requiredSustainDuration;
+        }
     }
 }

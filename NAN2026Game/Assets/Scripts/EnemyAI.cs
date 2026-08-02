@@ -38,6 +38,7 @@ public sealed class EnemyAI : MonoBehaviour
     private float attackTimer;
     private float leftBoundX;
     private float rightBoundX;
+    private float heightGapTimer;
 
     public EnemyAIState CurrentState => state;
 
@@ -112,6 +113,8 @@ public sealed class EnemyAI : MonoBehaviour
 
     private void Patrol()
     {
+        heightGapTimer = 0f;
+
         if (!usePatrol)
         {
             controller.Input = Vector2.zero;
@@ -125,14 +128,20 @@ public sealed class EnemyAI : MonoBehaviour
     private void Chase()
     {
         float dir = player.position.x > transform.position.x ? 1f : -1f;
-        bool needsJump = EnemyAILogic.NeedsJumpToFollow(
-            transform.position.y, player.position.y, config.jumpYThreshold, controller.IsGrounded);
+
+        // 높이차를 매 프레임 즉시 점프 판정에 쓰면, 플레이어가 같은 층에서 제자리
+        // 점프만 해도 그 순간의 높이차 때문에 따라 뛰게 된다. jumpConfirmDuration만큼
+        // 높이차가 '유지'된 경우에만 실제로 위층에 있다고 보고 점프한다.
+        bool aboveThresholdNow = (player.position.y - transform.position.y) >= config.jumpYThreshold;
+        heightGapTimer = EnemyAILogic.UpdateHeightGapTimer(aboveThresholdNow, heightGapTimer, Time.deltaTime);
+        bool needsJump = controller.IsGrounded && EnemyAILogic.ShouldJumpNow(heightGapTimer, config.jumpConfirmDuration);
 
         controller.Input = new Vector2(dir, needsJump ? 1f : 0f);
     }
 
     private void AttackPlayer()
     {
+        heightGapTimer = 0f;
         controller.Input = Vector2.zero;
 
         if (attackTimer > 0f)

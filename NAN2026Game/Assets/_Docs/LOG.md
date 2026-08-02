@@ -793,3 +793,27 @@ FirstScene에서 2D Pixel Art Platformer Biome - American Forest 폴더와 2D Pi
 - create_file 도구가 로컬 샌드박스에만 파일을 생성하고 원격 Unity 프로젝트 파일시스템에는 반영되지 않는 문제 발견. 이후 모든 .cs 파일 작성은 execute_code(File.WriteAllText)로 전환
 ### 알려진 한계 (이번 작업 범위 밖)
 - Player 오브젝트에 PlayerHealth 컴포넌트가 아예 없고, PlayerHealth.TakeDamage() 자체도 빈 스텁이라 적의 공격이 실제 플레이어 체력에 영향을 주지 않음. EnemyAI는 PlayerHealth가 있으면 정확히 호출하도록 연결해뒀으나 활성화하려면 별도 작업 필요
+
+## [수정][구현] 점프 추적 디바운스 수정 + PlayerHealth 구현(상호 데미지) — 2026-08-02 18:35
+### 프롬프트
+[수정] 현재 NeedsJumpToFollow 함수로 플레이어가 위층에 있는지를 판단하고 점프하게 하는데 이 판단하는 프레임이 너무 빨라서 원래 의도한 (플레이어가 위층에 존재하는지)에 반응하는 것이 아니라 플레이어가 점프를 하면 따라 점프하게 되는 것을 수정해줘
+[구현] PlayerHealth 구현해주고 몬스터와 플레이어간의 공격시에 각자 데미지를 입도록 해줘
+### 조작 내역
+**[수정] 점프 디바운스**
+- NAN2026.Core.EnemyAILogic에 UpdateHeightGapTimer/ShouldJumpNow 순수 함수 추가. 높이차가 매 프레임 즉시 점프로 이어지던 것을, jumpConfirmDuration(기본 0.35초)만큼 '유지'된 경우에만 점프하도록 변경. 높이차가 사라지면 타이머 즉시 0으로 리셋
+- EnemyAIConfig에 jumpConfirmDuration 필드 추가
+- EnemyAI.Chase()가 매 프레임 즉시 판정 대신 heightGapTimer 누적 방식 사용. Patrol/Attack 진입 시 타이머 리셋(상태 전환 후 잔류 타이머로 인한 오탐 방지)
+- EditMode 테스트 5개 추가 (디바운스 누적/리셋, 플레이어 제자리 점프 시뮬레이션 케이스 포함)
+**[구현] PlayerHealth**
+- Assets/Scripts/Config/PlayerCombatConfig.cs 신규(SO): maxHealth/hitInvulnerabilityDuration/knockbackDistance
+- Assets/Scripts/PlayerHealth.cs 수정: 기존 해저드/리스폰 로직은 유지한 채 TakeDamage(빈 스텁)를 실제 구현 — 무적/스폰그레이스/피격직후무적 중엔 무시, 데미지 적용·넉백·OnHealthChanged 통지, 체력 0 이하 시 기존 Kill()/Respawn() 경로 재사용(죽으면 체크포인트에서 재시작). 리스폰 시 체력 풀피 회복. OnGUI에 HP 표시 추가
+- invincible 기본값을 true→false로 변경 (기존엔 테스트용으로 항상 무적이라 데미지 스텁이 비어있어도 티가 안 났는데, 이제 실제 데미지가 들어가므로 기본은 켜져 있어야 눈에 보임. F2로 여전히 토글 가능)
+- Player 오브젝트에 PlayerHealth 컴포넌트+PlayerCombatConfig(Assets/Configs/PlayerCombatConfig.asset, maxHealth=5) 연결 (기존엔 컴포넌트 자체가 없었음)
+- 몬스터→플레이어 데미지는 이미 지난 턴 EnemyAI.AttackPlayer()가 PlayerHealth.TakeDamage 호출로 연결해뒀던 것이 이제 실제로 동작. 플레이어→몬스터 데미지는 기존 SlashProjectile→MonsterHealth 경로 그대로(변경 없음) — 이번 작업으로 양방향 모두 실제 체력에 반영됨
+### 검증
+- refresh_unity 컴파일 요청 후 read_console(types=error) → 0건 (PlayerHealth.cs 편집 1건에서 execute_code 응답 타임아웃 발생 → 파일 내용 재확인으로 실제 반영 확인 후 재시도 없이 진행, FAIL.md #4 유사 패턴)
+- 저장 → manage_scene(load) 강제 재로드 → PlayerHealth 존재/Invincible=False/MaxHealth=5 재확인
+- run_tests(EditMode) → 46/46 통과 (기존 41 + 신규 5, job d572d1f162624b9c8568a16def25b443)
+- 테스트 후 재확인: PlayerHealth 유지, isDirty=False
+### 실패와 수정
+- PlayerHealth.cs OnGUI 수정 중 execute_code가 'Timeout receiving Unity response'를 반환했으나, 파일을 다시 읽어보니 실제로는 정상 반영되어 있었음. FAIL.md #4의 git 사례와 같은 패턴(Unity 메인 스레드 처리 중 응답 시한 초과로 추정)이라 재시도 없이 상태 확인 후 진행함

@@ -18,7 +18,7 @@ namespace NAN2026.Showroom
     {
         [Header("Testing")]
         [Tooltip("While on, hazards cannot kill. Toggle in play mode with F2.")]
-        [SerializeField] private bool invincible = true;
+        [SerializeField] private bool invincible = false;
 
         [Header("Death")]
         [SerializeField] private float respawnDelay = 0.2f;
@@ -28,6 +28,10 @@ namespace NAN2026.Showroom
         [Header("Hazards")]
         [SerializeField] private string hazardNameContains = "Spikes";
 
+        [Header("Combat")]
+        [Tooltip("체력·피격 수치의 단일 기준. MonoBehaviour에 숫자 리터럴을 두지 않는다")]
+        [SerializeField] private PlayerCombatConfig combatConfig;
+
         private Rigidbody2D body;
         private MonoBehaviour movementController;
         private SpriteRenderer[] visuals;
@@ -36,6 +40,9 @@ namespace NAN2026.Showroom
         private bool dying;
         private int deaths;
 
+        private int currentHealth;
+        private float damageInvulnerableUntil;
+
         public int Deaths { get { return deaths; } }
         public bool IsDying { get { return dying; } }
         public bool Invincible
@@ -43,6 +50,12 @@ namespace NAN2026.Showroom
             get { return invincible; }
             set { invincible = value; }
         }
+
+        public int CurrentHealth { get { return currentHealth; } }
+        public int MaxHealth { get { return combatConfig != null ? combatConfig.maxHealth : 0; } }
+
+        /// <summary>체력이 바뀔 때마다 (현재, 최대)를 통지한다. 월드스페이스 HP바 등이 구독할 수 있다.</summary>
+        public event System.Action<int, int> OnHealthChanged;
 
         private void Awake()
         {
@@ -60,10 +73,32 @@ namespace NAN2026.Showroom
 
             checkpoint = transform.position;
             graceUntil = Time.time + spawnGrace;
-        }
-        public void TakeDamage(float damage, Vector3 pos)
-        {
 
+            currentHealth = combatConfig != null ? combatConfig.maxHealth : 0;
+            OnHealthChanged?.Invoke(currentHealth, MaxHealth);
+        }
+
+        /// <summary>몬스터의 공격 등으로 데미지를 받는다. 무적/스폰 그레이스/피격 직후 무적 중에는 무시된다.
+        /// 체력이 0 이하가 되면 기존 Kill()/Respawn() 경로를 그대로 탄다 (죽으면 체크포인트에서 재시작).</summary>
+        public void TakeDamage(float damage, Vector3 attackerPosition)
+        {
+            if (dying || invincible || Time.time < graceUntil || Time.time < damageInvulnerableUntil)
+                return;
+
+            if (combatConfig == null)
+                return;
+
+            currentHealth -= Mathf.Max(1, Mathf.RoundToInt(damage));
+            damageInvulnerableUntil = Time.time + combatConfig.hitInvulnerabilityDuration;
+
+            Vector2 knockDirection = ((Vector2)transform.position - (Vector2)attackerPosition).normalized;
+            if (knockDirection.sqrMagnitude < 0.0001f) knockDirection = Vector2.up;
+            body.position += knockDirection * combatConfig.knockbackDistance;
+
+            OnHealthChanged?.Invoke(currentHealth, MaxHealth);
+
+            if (currentHealth <= 0)
+                Kill();
         }
         public void SetCheckpoint(Vector3 position)
         {
@@ -147,6 +182,9 @@ namespace NAN2026.Showroom
             SetVisible(true);
             SetControllerEnabled(true);
 
+            currentHealth = combatConfig != null ? combatConfig.maxHealth : 0;
+            OnHealthChanged?.Invoke(currentHealth, MaxHealth);
+
             graceUntil = Time.time + spawnGrace;
             dying = false;
         }
@@ -196,18 +234,20 @@ namespace NAN2026.Showroom
 
             const float width = 170f;
             GUI.Box(new Rect(Screen.width - width - 16f, 14f, width, 32f),
+                "HP   " + currentHealth + "/" + MaxHealth, style);
+            GUI.Box(new Rect(Screen.width - width - 16f, 50f, width, 28f),
                 "DEATHS   " + deaths, style);
 
             if (invincible)
             {
                 Color previous = GUI.color;
                 GUI.color = new Color(0.45f, 1f, 0.6f);
-                GUI.Box(new Rect(Screen.width - width - 16f, 50f, width, 28f),
+                GUI.Box(new Rect(Screen.width - width - 16f, 86f, width, 28f),
                     "INVINCIBLE  (F2)", style);
                 GUI.color = previous;
             }
 
-            GUI.Label(new Rect(Screen.width - width - 16f, 82f, width, 22f),
+            GUI.Label(new Rect(Screen.width - width - 16f, 118f, width, 22f),
                 "   F2 invincible · F3 reset traps");
         }
     }

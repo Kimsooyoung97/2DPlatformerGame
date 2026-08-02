@@ -22,6 +22,8 @@ public sealed class EnemyAIConfig : ScriptableObject
     public float patrolRadius = 3f;
     [Tooltip("플레이어가 이 높이 이상 위에 있으면 점프해서 따라간다")]
     public float jumpYThreshold = 1.2f;
+    [Tooltip("점프를 확정하기 전에 높이차가 유지돼야 하는 시간(초). 짧으면 플레이어의 제자리 점프에도 따라 뛴다")]
+    public float jumpConfirmDuration = 0.35f;
 
     [Header("공격")]
     public float attackCooldown = 1.2f;

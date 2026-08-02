@@ -19,9 +19,10 @@ MonoBehaviour:
   chaseSpeed: 2.2
   patrolRadius: 0
   jumpYThreshold: 1.2
+  jumpConfirmDuration: 0.35
   attackCooldown: 1.6
   attackDamage: 2
   healthBarSize: {x: 2, y: 0.22}
-  healthBarOffset: {x: 0, y: 2.2, z: 0}
+  healthBarOffset: {x: 0, y: 4, z: 0}
   healthBarBackground: {r: 0, g: 0, b: 0, a: 0.75}
   healthBarFill: {r: 0.85, g: 0.15, b: 0.15, a: 1}
