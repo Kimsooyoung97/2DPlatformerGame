@@ -1658,3 +1658,19 @@ A로 가자
 - 엑셀로 GameDataTable.csv를 열어 Value 칸만 수정 후 CSV 형식 그대로 저장(파일 형식을 xlsx로 바꾸지 말 것)
 - Unity로 돌아와 'NAN2026 > 데이터 테이블 > CSV 적용하기' 실행 → 모든 Config 에셋에 즉시 반영
 - 새 float/int/bool/string 필드를 Config에 추가하면 다음 '내보내기' 실행 시 자동으로 CSV에 포함됨(코드 수정 불필요)
+
+## [구현] KeyMonster 처치 시 Locked 게이트 개방 — 2026-08-03 01:35
+### 프롬프트
+KeyMonster 저 몬스터가 죽으면 Stage_Grid의 Locked의 SetActive를 False로 되게끔 해줘
+### 조작 내역
+- KeyMonster는 이미 MonsterHealth(OnDied 이벤트 보유)+EnemyAI+WorldHealthBar가 붙어있는 상태였음
+- Assets/Scripts/KeyMonsterGate.cs 신규: MonsterHealth.OnDied를 구독해 지정한 gateObject를 SetActive(false)하는 단순 배선 컴포넌트. 튜닝 수치가 없어 Config 불필요
+- KeyMonster에 부착, health=자기 자신의 MonsterHealth, gateObject=Stage_Grid/Locked로 연결
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- 저장 → manage_scene(load) 강제 재로드 → KeyMonsterGate 부착·health/gateObject(Locked) 연결 재확인
+- run_tests(EditMode) → 91/91 통과 (job 18d8708ae7c64e9d99068196f687f87e, 순수 로직 변경 없어 테스트 수 그대로)
+### 실패와 수정
+- 없음
+### 눈으로 확인 필요
+- 재생 모드에서 KeyMonster를 실제로 처치했을 때 Locked 타일맵이 사라지고 통과 가능해지는지 확인 부탁드립니다
