@@ -14,8 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NAN2026.AttackEffectConfig
   basicSpeed: 7
   poweredSpeed: 9
-  lifetime: 4
+  lifetime: 2
   spawnOffset: {x: 0.225, y: 0.475}
   basicScale: 2.95
   poweredScale: 3.3
   frameRate: 16
+  basicDamage: 1
+  poweredDamage: 3
+  hitboxSize: {x: 0.9, y: 0.9}
