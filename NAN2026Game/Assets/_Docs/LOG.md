@@ -1236,3 +1236,18 @@ A로 가자
 - 중복 재검 0, 저장 True. 시각·통과 체감은 사용자 재생 판정
 ### 실패와 수정
 없음
+
+
+## [구현] 기사석상 적 (보스 부하) — 2026-08-02 20:49
+### 프롬프트
+[구현] 맵 폴더에 기사석상 시트 5개 넣어놨어. 보스 부하로 구현해줘: (시트 5종 임포트/슬라이싱/클립, Castle_Biome 2마리, 각성→추적→내려찍기 AI, HP3 Slash 피격, 죽음 잔해) → 배치는 'SecondScene 공주 주변' 후속 지시
+### 조작 내역
+- 시트 6종 실측 검증(클러스터·콘텐츠 높이) → 사용자 확인 반영: 각성6·대기4·걷기6·내려찍기7·죽음8. 정수 경계 균등 분할, PPU 실측 기반(114~198, 목표 2.4u), 하단 피벗. 죽음 이중 확장자 정정
+- 클립 5종(8/6루프/8루프/10/10fps)+Animator. StatueLogic(Core 순수 상태기계)+테스트 9건. StatueConfig(SO, 수치 전량: 각성 5u·사거리 1.6·속도 1.5·HP3·히트박스 0.4~0.6s·쿨 1.5s)
+- StatueEnemy: 석상 정지(각성 0프레임·anim.speed=0·콜라이더 off) → 각성(끝에 먼지·흰 플래시·임펄스 쉐이크) → flipX 추적 → 내려찍기(창 구간만 전방 히트박스) → 쿨다운. Slash 이름 감지 피격·점멸, 사망 시 죽음 재생 후 잔해 정지·콜라이더 제거
+- PlayerHealth 신설 중 팀 계약 충돌 발견(OrkanBoss·Spike·Checkpoint2D·OrbProjectile이 전역 PlayerHealth의 TakeDamage(float,Vector3)·Kill·SetCheckpoint 요구) → 전역 재작성으로 팀 스크립트 컴파일 동시 해소. 체크포인트 부활/무체크포인트 씬 재시작(SPEC)
+- 프리팹 Statue_Knight + SecondScene 공주(72.3,10.2) 양옆 67.5·77 배치, Player에 PlayerHealth(HP5), CM 카메라 임펄스 리스너
+### 검증
+- 컴파일 에러 0, EditMode 46/46(석상 9 신규), 씬 저장 True. 각성 연출·추적·타격감은 사용자 재생 판정
+### 실패와 수정
+- 소수점 rect로 7분할이 6개 생성 → 정수 경계 재분할. PlayerHealth 네임스페이스 그림자→전역 전환, int→float 시그니처 2회 수정
