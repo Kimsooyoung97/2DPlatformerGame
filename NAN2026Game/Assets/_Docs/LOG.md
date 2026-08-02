@@ -754,3 +754,18 @@ FirstScene에서 2D Pixel Art Platformer Biome - American Forest 폴더와 2D Pi
 - run_tests(EditMode) → 25/25 통과 (job 7d2c3632f714462ebc11677965c92da4)
 ### 실패와 수정
 - 없음
+
+## [복구] Player/몬스터가 Ground를 그대로 통과해 추락하는 원인 진단 — 2026-08-02 16:05
+### 프롬프트
+지금 씬에서 run을 누르면 왜 몬스터랑 플레이어가 Ground에 안걸리고 쭊 떨어지지?
+### 조작 내역 (진단, 수정 없음)
+- Tilemap_Ground/Tilemap_Platforms의 TilemapCollider2D/CompositeCollider2D/Rigidbody2D 설정 확인 (isTrigger=false, usedByComposite=true, bodyType=Static — 정상)
+- Player/MiddleBoss/DeathDog1의 Rigidbody2D(Dynamic)/BoxCollider2D(isTrigger=false) 확인 — 정상
+- Physics2D 레이어 충돌 매트릭스 확인 (Ground-Player 무시 안 됨) — 정상
+- 타일 스프라이트의 Physics Shape 직접 확인 (forest_tileset_0/12/22 모두 유효한 폴리곤 보유) — 정상
+- **TilemapCollider2D.shapeCount=0, bounds가 사실상 0** (Ground/Platforms 둘 다 동일) 확인 — 비정상
+- 재생모드 진입해 직접 관찰: CompositeCollider2D.pathCount가 재생 중에도 0 유지, Player가 y=-637까지, MiddleBoss가 y=-260까지 추락 — 재생 종료, 변경사항 저장 안 함
+### 검증
+해당 없음 ([복구]는 진단만 수행)
+### 실패와 수정
+해당 없음
