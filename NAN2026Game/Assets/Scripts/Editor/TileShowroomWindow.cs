@@ -25,6 +25,17 @@ namespace NAN2026.EditorTools
         private bool inspectMode;
         private static TileBase armedTile;
         private static GameObject armedProp;
+        // 구간 복사 모드 상태
+        private static bool regionMode;
+        private static UnityEngine.Vector3? regionDragStart;
+        private static bool hasClip;
+        private static UnityEngine.Vector3Int clipSize;
+        private static readonly List<Vector3Int> clipGroundOff = new List<Vector3Int>();
+        private static readonly List<TileBase> clipGroundTile = new List<TileBase>();
+        private static readonly List<Vector3Int> clipWallOff = new List<Vector3Int>();
+        private static readonly List<TileBase> clipWallTile = new List<TileBase>();
+        private static readonly List<GameObject> clipPropSrc = new List<GameObject>();
+        private static readonly List<Vector3> clipPropOff = new List<Vector3>();
         private readonly List<GameObject> hitProps = new List<GameObject>();
         private readonly List<string> hitPropMeta = new List<string>();
         private static string armedTarget = "Stage_Ground";
@@ -212,6 +223,160 @@ namespace NAN2026.EditorTools
             return prefab.name + " 배치 모드 — 씬 클릭=놓기 (Ctrl=0.5스냅, Esc=해제)";
         }
 
+        // 마우스 위치 → 월드 좌표 (z=0 평면)
+        private static Vector3 MouseWorld(Event e)
+        {
+            Ray mray = HandleUtility.GUIPointToWorldRay(e.mousePosition);
+            float mdz = Mathf.Approximately(mray.direction.z, 0f) ? 1f : mray.direction.z;
+            return mray.origin + mray.direction * Mathf.Max(0f, -mray.origin.z / mdz);
+        }
+
+        // 구간 복사: 드래그로 범위 지정 → 클릭으로 붙여넣기 (바닥·벽 타일 + 소품 통째)
+        private void HandleRegionCopy(SceneView sv)
+        {
+            var e = Event.current;
+            if (e.type == EventType.KeyDown && e.keyCode == KeyCode.Escape)
+            {
+                if (hasClip) ClearClip();
+                else regionMode = false;
+                regionDragStart = null;
+                sv.Repaint();
+                Repaint();
+                return;
+            }
+            var gGo = GameObject.Find("Stage_Ground");
+            if (gGo == null) return;
+            var gtm = gGo.GetComponent<Tilemap>();
+            var wGo = GameObject.Find("Stage_Wall");
+            var wtm = wGo != null ? wGo.GetComponent<Tilemap>() : null;
+            int id = GUIUtility.GetControlID(FocusType.Passive);
+            HandleUtility.AddDefaultControl(id);
+            Vector3 world = MouseWorld(e);
+            if (!hasClip)
+            {
+                if (e.type == EventType.MouseDown && e.button == 0)
+                {
+                    regionDragStart = world;
+                    e.Use();
+                }
+                if (regionDragStart.HasValue)
+                {
+                    Vector3 a = regionDragStart.Value, b = world;
+                    Vector3 mn = Vector3.Min(a, b), mx = Vector3.Max(a, b);
+                    Handles.color = new Color(1f, 0.85f, 0.2f, 0.95f);
+                    Handles.DrawSolidRectangleWithOutline(new[] {
+                        new Vector3(mn.x, mn.y), new Vector3(mx.x, mn.y), new Vector3(mx.x, mx.y), new Vector3(mn.x, mx.y) },
+                        new Color(1f, 0.9f, 0.3f, 0.08f), Handles.color);
+                    if (e.type == EventType.MouseDrag && e.button == 0) { e.Use(); sv.Repaint(); }
+                    if (e.type == EventType.MouseUp && e.button == 0)
+                    {
+                        CaptureRegion(gtm, wtm, mn, mx);
+                        regionDragStart = null;
+                        e.Use();
+                        sv.Repaint();
+                        Repaint();
+                    }
+                }
+            }
+            else
+            {
+                var anchorCell = gtm.WorldToCell(world);
+                Vector3 aw = gtm.CellToWorld(anchorCell);
+                Vector3 sz = new Vector3(clipSize.x, clipSize.y, 0f);
+                Handles.color = new Color(0.3f, 0.9f, 1f, 0.95f);
+                Handles.DrawSolidRectangleWithOutline(new[] {
+                    aw, aw + new Vector3(sz.x, 0f), aw + sz, aw + new Vector3(0f, sz.y) },
+                    new Color(0.3f, 0.9f, 1f, 0.07f), Handles.color);
+                Handles.Label(aw + new Vector3(0f, sz.y + 0.3f, 0f), "붙여넣기 위치 (클릭)");
+                if (e.type == EventType.MouseMove) sv.Repaint();
+                if (e.type == EventType.MouseDown && e.button == 0)
+                {
+                    PasteRegion(gtm, wtm, anchorCell);
+                    e.Use();
+                    sv.Repaint();
+                }
+            }
+        }
+
+        private static void ClearClip()
+        {
+            hasClip = false;
+            clipGroundOff.Clear(); clipGroundTile.Clear();
+            clipWallOff.Clear(); clipWallTile.Clear();
+            clipPropSrc.Clear(); clipPropOff.Clear();
+        }
+
+        private void CaptureRegion(Tilemap gtm, Tilemap wtm, Vector3 mn, Vector3 mx)
+        {
+            ClearClip();
+            var cellMin = gtm.WorldToCell(mn);
+            var cellMax = gtm.WorldToCell(mx);
+            for (int x = cellMin.x; x <= cellMax.x; x++)
+                for (int y = cellMin.y; y <= cellMax.y; y++)
+                {
+                    var p = new Vector3Int(x, y, 0);
+                    var gt = gtm.GetTile(p);
+                    if (gt != null) { clipGroundOff.Add(p - cellMin); clipGroundTile.Add(gt); }
+                    if (wtm != null)
+                    {
+                        var wt = wtm.GetTile(p);
+                        if (wt != null) { clipWallOff.Add(p - cellMin); clipWallTile.Add(wt); }
+                    }
+                }
+            Vector3 anchorW = gtm.CellToWorld(cellMin);
+            var parentGo = GameObject.Find("Stage_Props");
+            if (parentGo != null)
+                foreach (Transform c in parentGo.transform)
+                {
+                    var pp = c.position;
+                    if (pp.x < mn.x || pp.x > mx.x || pp.y < mn.y || pp.y > mx.y) continue;
+                    clipPropSrc.Add(c.gameObject);
+                    clipPropOff.Add(pp - anchorW);
+                }
+            clipSize = cellMax - cellMin + new Vector3Int(1, 1, 0);
+            hasClip = clipGroundOff.Count + clipWallOff.Count + clipPropSrc.Count > 0;
+            ShowNotification(new GUIContent(hasClip
+                ? "복사됨: 바닥 " + clipGroundOff.Count + "·벽 " + clipWallOff.Count + "·소품 " + clipPropSrc.Count + " — 클릭=붙여넣기, Esc=비우기"
+                : "빈 범위"), 1.6d);
+        }
+
+        private void PasteRegion(Tilemap gtm, Tilemap wtm, Vector3Int anchorCell)
+        {
+            Undo.RegisterCompleteObjectUndo(gtm, "구간 붙여넣기");
+            for (int i = 0; i < clipGroundOff.Count; i++)
+                gtm.SetTile(anchorCell + clipGroundOff[i], clipGroundTile[i]);
+            if (wtm != null && clipWallOff.Count > 0)
+            {
+                Undo.RegisterCompleteObjectUndo(wtm, "구간 붙여넣기");
+                for (int i = 0; i < clipWallOff.Count; i++)
+                    wtm.SetTile(anchorCell + clipWallOff[i], clipWallTile[i]);
+            }
+            Vector3 anchorW = gtm.CellToWorld(anchorCell);
+            var parentGo = GameObject.Find("Stage_Props");
+            for (int i = 0; i < clipPropSrc.Count; i++)
+            {
+                var srcGo = clipPropSrc[i];
+                if (srcGo == null) continue;
+                var pf = PrefabUtility.GetCorrespondingObjectFromSource(srcGo) as GameObject;
+                GameObject inst;
+                if (pf != null)
+                {
+                    inst = (GameObject)PrefabUtility.InstantiatePrefab(pf);
+                    inst.transform.localScale = srcGo.transform.localScale;
+                }
+                else inst = Object.Instantiate(srcGo);
+                inst.transform.position = anchorW + clipPropOff[i];
+                if (parentGo != null) inst.transform.SetParent(parentGo.transform);
+                var srcSrs = srcGo.GetComponentsInChildren<SpriteRenderer>();
+                var dstSrs = inst.GetComponentsInChildren<SpriteRenderer>();
+                for (int k = 0; k < dstSrs.Length && k < srcSrs.Length; k++)
+                    dstSrs[k].sortingOrder = srcSrs[k].sortingOrder;
+                foreach (var col in inst.GetComponentsInChildren<Collider2D>()) Object.DestroyImmediate(col);
+                Undo.RegisterCreatedObjectUndo(inst, "구간 붙여넣기");
+            }
+            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(gtm.gameObject.scene);
+        }
+
         // 소품 배치 모드: 클릭 지점에 프리팹 생성
         private void HandlePropPlace(SceneView sv)
         {
@@ -264,6 +429,7 @@ namespace NAN2026.EditorTools
 
         private void OnSceneGUI(SceneView sv)
         {
+            if (regionMode) { HandleRegionCopy(sv); return; }
             if (!inspectMode && armedProp != null) { HandlePropPlace(sv); return; }
             if (!inspectMode && armedTile != null) { HandleBrush(sv); return; }
             if (!inspectMode) return;
@@ -369,7 +535,19 @@ namespace NAN2026.EditorTools
                 if (GUILayout.Button("새로고침", EditorStyles.toolbarButton, GUILayout.Width(64f))) RefreshAll();
                 bool prev = inspectMode;
                 inspectMode = GUILayout.Toggle(inspectMode, "씬 클릭 검사", EditorStyles.toolbarButton, GUILayout.Width(88f));
-                if (inspectMode != prev) SceneView.RepaintAll();
+                if (inspectMode != prev)
+                {
+                    if (inspectMode) { regionMode = false; }
+                    SceneView.RepaintAll();
+                }
+                bool prevR = regionMode;
+                regionMode = GUILayout.Toggle(regionMode, "구간 복사", EditorStyles.toolbarButton, GUILayout.Width(66f));
+                if (regionMode != prevR)
+                {
+                    if (regionMode) { inspectMode = false; armedTile = null; armedProp = null; }
+                    else { ClearClip(); regionDragStart = null; }
+                    SceneView.RepaintAll();
+                }
                 using (new EditorGUI.DisabledScope(!(highlight is TileBase)))
                     if (GUILayout.Button("선택 타일로 칠하기", EditorStyles.toolbarButton, GUILayout.Width(110f)))
                     {
@@ -392,6 +570,10 @@ namespace NAN2026.EditorTools
                     GUILayout.Label(families[tab][familyNames[tab][familyIndex[tab]]].Count + "개");
             }
 
+            if (regionMode)
+                EditorGUILayout.HelpBox(hasClip
+                    ? "구간 복사: 클립 준비됨 (" + clipSize.x + "x" + clipSize.y + ") — 씬 클릭=붙여넣기(반복 가능), Esc=클립 비우기"
+                    : "구간 복사: 씬에서 왼쪽 드래그로 범위를 지정하세요 (바닥+벽+소품 통째 복사)", MessageType.Info);
             if (inspectMode) DrawInspectPanel();
             if (tab == 1)
                 EditorGUILayout.HelpBox("클릭=프로젝트에서 선택 / 셀을 잡고 씬 뷰로 드래그=바로 배치", MessageType.None);
