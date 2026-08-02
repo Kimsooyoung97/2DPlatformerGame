@@ -105,5 +105,13 @@ namespace NAN2026.Core
             if (inputX > 0f) return false;
             return currentFlip;
         }
+
+        /// 아래로 스윕한 콜라이더 캐스트가 벽(옆면)까지 '지면'으로 오판하는 것을 막기 위한 필터.
+        /// 접촉면의 법선이 충분히 위쪽을 향할 때만(normalY가 minNormalY 이상) 진짜 지면으로 인정한다.
+        /// 예: 바닥은 normalY≈1, 수직 벽은 normalY≈0이라 걸러진다.
+        public static bool IsGroundNormal(float normalY, float minNormalY)
+        {
+            return normalY >= minNormalY;
+        }
     }
 }

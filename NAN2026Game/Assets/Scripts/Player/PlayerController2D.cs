@@ -80,6 +80,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
         progression = GetComponent<PlayerProgression>();
         rb.gravityScale = config.gravityScale;
         rb.freezeRotation = true;
+        rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
         // 상승 시 충돌 무시는 원웨이 발판(Platform_ 접두)에만 적용한다.
         // 벽·바닥·천장(솔리드 지형)은 항상 충돌 유지 — 전체 무시는 벽 관통·중간 착지 사고의 원인이었다.
         // Stage_Platform(타일맵 원웨이)은 PlatformEffector2D가 전담하므로 여기서도 제외한다.
@@ -202,7 +203,22 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
         else if (ignoringGround && !OverlappingGround()) SetGroundIgnored(false);
 
         wasGrounded = grounded;
-        grounded = !ignoringGround && col.Cast(Vector2.down, castHits, config.groundCheckDistance) > 0;
+        grounded = false;
+        if (!ignoringGround)
+        {
+            // 옆 벽에 붙어있을 때(콜라이더가 겹친 상태)도 아래로 스윕한 Cast에 그 벽이
+            // 잡힐 수 있다. 접촉면 법선이 충분히 위쪽을 향하는 경우만 '지면'으로 인정해
+            // 벽을 지면으로 오판하지 않게 한다 (무한 점프·공중 정지 버그의 원인이었음).
+            int hitCount = col.Cast(Vector2.down, castHits, config.groundCheckDistance);
+            for (int i = 0; i < hitCount; i++)
+            {
+                if (PlayerLocomotionLogic.IsGroundNormal(castHits[i].normal.y, config.groundNormalMinY))
+                {
+                    grounded = true;
+                    break;
+                }
+            }
+        }
         if (grounded && !wasGrounded) landTimer = config.landDuration;
         if (landTimer > 0f) landTimer -= Time.fixedDeltaTime;
         if (grounded && rb.linearVelocity.y <= 0.01f) jumpsUsed = 0;

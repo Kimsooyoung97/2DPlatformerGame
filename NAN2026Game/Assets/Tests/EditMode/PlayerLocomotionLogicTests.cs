@@ -105,5 +105,25 @@ namespace NAN2026.Tests
             Assert.IsFalse(PlayerLocomotionLogic.ShouldFlipLeft(1f, true));
             Assert.IsTrue(PlayerLocomotionLogic.ShouldFlipLeft(0f, true));
         }
+
+        [Test] public void GroundNormal_FloorCountsAsGround()
+        {
+            Assert.IsTrue(PlayerLocomotionLogic.IsGroundNormal(1f, 0.5f));
+        }
+
+        [Test] public void GroundNormal_VerticalWallIsNotGround()
+        {
+            Assert.IsFalse(PlayerLocomotionLogic.IsGroundNormal(0f, 0.5f));
+        }
+
+        [Test] public void GroundNormal_SteepSlopeStillCountsAsGround()
+        {
+            Assert.IsTrue(PlayerLocomotionLogic.IsGroundNormal(0.6f, 0.5f));
+        }
+
+        [Test] public void GroundNormal_ShallowAngleWallDoesNotCount()
+        {
+            Assert.IsFalse(PlayerLocomotionLogic.IsGroundNormal(0.4f, 0.5f));
+        }
     }
 }

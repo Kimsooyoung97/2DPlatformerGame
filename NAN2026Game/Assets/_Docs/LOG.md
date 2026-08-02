@@ -1571,3 +1571,27 @@ A로 가자
 - 프리팹 실측: PlayerHealth(maxHp=5, blink 0.08x4) 포함, scale=1.5, 컴포넌트 7종. 씬 저장 True
 ### 실패와 수정
 없음
+
+## [수정] 무한 2단 점프 + 공중에서 벽에 붙으면 안 떨어지는 버그 수정 (SecondScene) — 2026-08-02 23:25
+### 프롬프트
+자 이제 새로운 씬 작업이야 SecondScene만을 수정할거야 지금 player의 캐릭터가 2단점프까지 가능하게 되어있는데 2단 점프 후에는 점프가 불가능해야하는데 그 상태에서 점프가 더 돼서 무한으로 점프가 돼 이 부분을 고쳐주고 player가 점프를 하고 A또는 D키로 이동을 할 때 다른 오브젝트의 collider를 만나면 그 자리에서 앞으로 가는 판정이 되어 떨어지지 않는데 이 부분도 고쳐주도록 해
+### 조사
+두 증상의 공통 원인을 PlayerController2D.FixedUpdate에서 발견: 지면 판정이 `col.Cast(Vector2.down, castHits, groundCheckDistance) > 0` 로만 되어 있어, 레이어·노멀 필터가 전혀 없었음. 플레이어가 벽에 옆으로 붙어(콜라이더가 겹친 상태) 있을 때도 이 다운캐스트가 그 벽을 '아래쪽에서 감지된 콜라이더'로 잡아 grounded=true로 오판:
+- 오판된 grounded=true → `jumpsUsed=0`으로 리셋 → 벽에 닿을 때마다 점프 횟수가 초기화되어 무한 점프 가능
+- 오판된 grounded=true → SelectAnimState가 공중 상태(JumpRise/Fall/Apex) 대신 Walk/Run/Idle을 선택 → 공중에서 벽을 밀며 이동 입력을 주면 '제자리에서 걷는' 것처럼 보여 떨어지지 않는 것처럼 보임
+두 버그 모두 PlayerController2D는 씬 공용(FirstScene/SecondScene 동일 컴포넌트)이라 이번 수정은 두 씬 모두에 적용됨. SecondScene 자체의 GameObject/씬 데이터는 변경하지 않음(사용자 지시: SecondScene '만' 작업 대상이었으나 실제 원인은 공용 스크립트에 있어 스크립트만 수정, 씬 오브젝트 변경 없음)
+### 조작 내역
+- NAN2026.Core.PlayerLocomotionLogic에 IsGroundNormal(normalY, minNormalY) 순수 함수 추가: 접촉면 법선이 충분히 위쪽을 향할 때만(바닥 normalY≈1, 수직벽 normalY≈0) 지면으로 인정. 테스트 4개
+- MovementConfig에 groundNormalMinY(기본 0.5) 추가
+- PlayerController2D.FixedUpdate의 grounded 판정을 단순 hitCount>0에서, castHits를 순회하며 IsGroundNormal을 통과하는 히트가 있을 때만 true로 바꿈 (벽을 지면으로 오판하지 않음)
+- 추가 안전장치로 Rigidbody2D.collisionDetectionMode를 Continuous로 설정 (코너 겹침으로 인한 물리 걸림 완화)
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- SecondScene의 실제 Player가 참조하는 MovementConfig 에셋에서 groundNormalMinY=0.5, maxJumps=2 확인
+- 저장 → manage_scene(load) 강제 재로드 → Player/PlayerController2D 생존 확인
+- run_tests(EditMode) → 86/86 통과 (job 887493392bbe4a37bc8871a90be241a5 — 신규 4개 포함. 팀원이 추가한 다른 테스트들도 함께 포함된 전체 스위트 수치)
+### 실패와 수정
+- 없음
+### 눈으로 확인 필요
+- 실제로 공중에서 벽을 밀며 이동해도 이제 정상적으로 낙하하는지, 2단 점프 이후 벽 접촉으로 점프가 안 풀리는지 재생 모드에서 확인 부탁드립니다
+- groundNormalMinY=0.5(약 60도 이내만 지면 인정)가 실제 경사 있는 지형에서 너무 엄격하지 않은지도 함께 확인해주세요
