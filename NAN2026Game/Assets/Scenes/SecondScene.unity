@@ -8356,6 +8356,10 @@ PrefabInstance:
       value: Player
       objectReference: {fileID: 0}
     - target: {fileID: 7771655860647579471, guid: e1c63970810f83842815a18438855f12, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 7771655860647579471, guid: e1c63970810f83842815a18438855f12, type: 3}
       propertyPath: m_TagString
       value: Player
       objectReference: {fileID: 0}
@@ -9335,6 +9339,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2667472681049239685, guid: bfc5166b0562cf54aad6ee34295ab421, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4091053138885214116, guid: bfc5166b0562cf54aad6ee34295ab421, type: 3}
       propertyPath: m_LocalPosition.x
       value: 60.062866
@@ -9378,6 +9386,14 @@ PrefabInstance:
     - target: {fileID: 4091053138885214117, guid: bfc5166b0562cf54aad6ee34295ab421, type: 3}
       propertyPath: m_Name
       value: KeyMonster
+      objectReference: {fileID: 0}
+    - target: {fileID: 4091053138885214117, guid: bfc5166b0562cf54aad6ee34295ab421, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 4091053140403337725, guid: bfc5166b0562cf54aad6ee34295ab421, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -30817,9 +30833,21 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2823350663950447250, guid: abead250eaf98bc47822ad54a6800165, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 6253847685986351643, guid: abead250eaf98bc47822ad54a6800165, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7955019670437265543, guid: abead250eaf98bc47822ad54a6800165, type: 3}
       propertyPath: m_Name
       value: MiddleBoss Variant
+      objectReference: {fileID: 0}
+    - target: {fileID: 7955019670437265543, guid: abead250eaf98bc47822ad54a6800165, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 8087654746124769343, guid: abead250eaf98bc47822ad54a6800165, type: 3}
       propertyPath: m_LocalPosition.x
