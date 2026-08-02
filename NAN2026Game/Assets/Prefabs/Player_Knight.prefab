@@ -14,8 +14,9 @@ GameObject:
   - component: {fileID: 7907285671883231433}
   - component: {fileID: 6906123316970133613}
   - component: {fileID: 300620027912272006}
+  - component: {fileID: 3808806000288232274}
   m_Layer: 0
-  m_Name: Player
+  m_Name: Player_Knight
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -31,7 +32,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 2.5, y: 1.15, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.5, y: 1.5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -221,3 +222,20 @@ MonoBehaviour:
   - {fileID: 6275229790398187772, guid: 4876c5a6ed4140140b9feb96019ac9c5, type: 3}
   - {fileID: 7067128601961725696, guid: 4876c5a6ed4140140b9feb96019ac9c5, type: 3}
   - {fileID: 8271886749305157008, guid: 4876c5a6ed4140140b9feb96019ac9c5, type: 3}
+  rollDuration: 0.75
+  rollSpeed: 4
+--- !u!114 &3808806000288232274
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7771655860647579471}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70dc81c5dcf02c547bf6157b1a734021, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
+  maxHp: 5
+  blinkInterval: 0.08
+  blinkCount: 4
