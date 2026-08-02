@@ -2011,3 +2011,15 @@ FirstSecene에 Ground 발판을 그릴수가 없는데 원인이 뭐야?
 해당 없음
 ### 커밋
 해당 없음(무수정)
+
+
+## [구현] ForthScene v4 — BiomeActionMap 구조 × 숲 스킨 — 2026-08-03 04:24
+### 프롬프트
+BiomeActionMap 보이지. 그 구조를 최대한 참고해서 sanctum_pixel의 에셋을 활용해서 맵을 만들어줘. 필요하면 다른 에셋을 사용해도 문제 없다. 배경은 Sky_cloud, pine, mountain을 활용해서 ForthScene에 만들어줘.
+### 조작 내역
+- BiomeActionMap 솔리드 2,205셀(x0~175)·원웨이 5개 수확 → 숲 타일 어휘 자동 도출(ThirdScene 실사용 통계: 표면=forest_tileset_13/속=18) → 셀 역할별 리스킨 재현(dy+10), 원웨이 박스 5 재현, 배경 41개(sky_cloud3·mountain4·pine34), 경계 (-4,-32)~(180,20)
+- 사건: ForthScene Stage_Grid 자식 전멸 발견(원인 미상 — v3 활주로 소실). 표준 Ground 재건으로 전진 복구. Temp 수확 파일 휘발 1회로 어휘 소스를 씬 실측으로 전환
+### 검증
+- 2,205셀 재현·저장 True. 지형 정합·플레이는 사용자 판정
+### 실패와 수정
+- FAIL 후보: 다중 씬 전환·additive 연쇄 중 콘텐츠 소실 — 재발 시 즉시 중단·git 복원 요청. Temp 산출물은 휘발성 — 재도출 경로 확보 원칙
