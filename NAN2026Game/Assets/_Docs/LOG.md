@@ -862,3 +862,17 @@ FirstScene에서 2D Pixel Art Platformer Biome - American Forest 폴더와 2D Pi
 - 테스트 후 재확인: MiddleBossAttackPatterns 유지, isDirty=False
 ### 실패와 수정
 - 돌진 공격 벽 감지 Raycast를 보스 위치에서 그대로 쏘면 Physics2D.queriesStartInColliders 기본값(true) 때문에 보스 자기 자신의 non-trigger 콜라이더를 즉시 벽으로 오인해 돌진이 시작하자마자 멈추는 문제를 구현 중 미리 인지하고, wallCheckOriginOffset으로 레이 시작점을 진행 방향으로 미리 밀어내 예방함 (실제 발생 전에 설계 단계에서 방지, 별도 FAIL.md 항목 없음)
+
+## [수정] 몬스터-플레이어 물리 충돌 무시 — 2026-08-02 21:15
+### 프롬프트
+몬스터와 플레이어 오브젝트가 서로 통과할 수 있게 해야할 것 같아
+### 조작 내역
+- EnemyAI.Awake()에서 플레이어를 찾은 직후 Physics2D.IgnoreCollision(자신의 Collider2D, 플레이어의 Collider2D, true) 호출 (OrkanBoss.cs의 기존 IgnorePlayerCollision 패턴과 동일)
+- 바닥/벽/공격 판정용 트리거 콜라이더에는 영향 없음 — 몸통 콜라이더끼리의 물리 밀림만 무시됨
+- MiddleBoss/DeathDog1/DeathDog2/DeathDog3 전부 EnemyAI를 통해 동일하게 적용됨 (개별 설정 불필요)
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- 저장 → manage_scene(load) 강제 재로드 → 컴파일 정상 유지 확인
+- run_tests(EditMode) → 51/51 통과 (job 228a3d0ec9564c1ea6740a62ba42e670, 신규 순수 로직 없어 테스트 수 변동 없음)
+### 실패와 수정
+- 없음

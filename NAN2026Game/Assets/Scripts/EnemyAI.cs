@@ -57,7 +57,21 @@ public sealed class EnemyAI : MonoBehaviour
         RecomputePatrolBounds();
 
         GameObject playerGO = GameObject.FindGameObjectWithTag(playerTag);
-        if (playerGO != null) player = playerGO.transform;
+        if (playerGO != null)
+        {
+            player = playerGO.transform;
+            IgnorePlayerPhysicalCollision(playerGO);
+        }
+    }
+
+    // 몬스터와 플레이어가 서로 몸으로 밀거나 막지 않고 통과하도록 물리 충돌만 무시한다.
+    // (바닥/벽/공격 판정용 트리거 콜라이더에는 영향 없음)
+    private void IgnorePlayerPhysicalCollision(GameObject playerGO)
+    {
+        Collider2D selfCollider = GetComponent<Collider2D>();
+        Collider2D playerCollider = playerGO.GetComponent<Collider2D>();
+        if (selfCollider != null && playerCollider != null)
+            Physics2D.IgnoreCollision(selfCollider, playerCollider, true);
     }
 
     private void RecomputePatrolBounds()
