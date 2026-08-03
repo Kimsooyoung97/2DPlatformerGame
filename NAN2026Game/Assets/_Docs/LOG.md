@@ -1674,3 +1674,22 @@ KeyMonster 저 몬스터가 죽으면 Stage_Grid의 Locked의 SetActive를 False
 - 없음
 ### 눈으로 확인 필요
 - 재생 모드에서 KeyMonster를 실제로 처치했을 때 Locked 타일맵이 사라지고 통과 가능해지는지 확인 부탁드립니다
+
+## [수정] MiddleBossAttackPatterns.DoCharge가 돌진하지 않던 문제 수정 — 2026-08-03 03:15
+### 프롬프트
+현재 MiddleBossAttackPatterns 스크립트의 DoCharge는 플레이어에게 돌진하는 스킬이어야 하는데 현재는 잘못돼있다
+### 조사
+PixelFantasy의 MonsterController2D.FixedUpdate()를 확인한 결과, Input.x==0이고 접지 상태면 매 물리 스텝마다 rb.linearVelocity.x를 0쪽으로 감속시키고 무조건 rb.linearVelocity에 재대입함을 확인. EnemyAI는 attackOverride가 busy인 동안 controller.Input=Vector2.zero로 두는데, DoCharge 코루틴은 같은 물리 스텝에서 body.linearVelocity를 직접 돌진 속도로 설정 — 두 스크립트가 매 FixedUpdate마다 rb.linearVelocity를 놓고 충돌해 돌진이 사실상 상쇄되고 있었음
+(부수적으로 확인: PlayerHealth.TakeDamage가 팀원에 의해 2인자→1인자로 리팩터되어 있었고 EnemyAI.cs 호출부도 이미 맞춰져 있어 컴파일 정상 — 이번 수정과 무관, 건드리지 않음. wallLayerMask/Stage_Ground 레이어도 이미 일치 상태 확인, 문제 없음)
+### 조작 내역
+- MiddleBossAttackPatterns에 MonsterController2D 참조 추가(Awake에서 GetComponent)
+- TryStartAttack에서 패턴(돌진/투사체) 시작 직전 controller.enabled=false로 꺼서 두 스크립트의 속도 제어 충돌을 원천 차단
+- EndPattern에서 controller.enabled=true로 복원
+- Rigidbody2D.gravityScale=1로 확인되어(자체 중력 활성) 컨트롤러를 꺼도 중력은 정상 작동함을 사전 확인
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- **재생 모드 실측**(FAIL.md #15 교훈 반영): MiddleBoss Variant를 x=50, Player를 x=56에 배치 후 TryStartAttack 직접 호출 → 패턴 종료 후 보스 위치가 x=50→57.42로 실제 이동(플레이어 방향으로 돌진 확인). controller.enabled가 패턴 실행 중 False로 정확히 꺼짐도 확인
+- run_tests(EditMode) → 91/91 통과 (job d263a5f87b1f48bda4d701594cba24db, 순수 로직 변경 없어 테스트 수 그대로)
+- 씬 오브젝트 변경 없음(스크립트만 수정, 재생 중 테스트는 위치만 임시 조작 후 재생 종료로 원복됨) — isDirty=False 확인
+### 실패와 수정
+- 없음

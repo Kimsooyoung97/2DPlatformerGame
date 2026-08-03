@@ -17,6 +17,7 @@ public sealed class MiddleBossAttackPatterns : MonoBehaviour, IEnemyAttackOverri
 
     private Rigidbody2D body;
     private NHNDemo.MonsterHealth health;
+    private Assets.PixelFantasy.PixelMonsters.Common.Scripts.ExampleScripts.MonsterController2D controller;
     private bool busy;
     private float nextAllowedPatternTime;
 
@@ -26,6 +27,7 @@ public sealed class MiddleBossAttackPatterns : MonoBehaviour, IEnemyAttackOverri
     {
         body = GetComponent<Rigidbody2D>();
         health = GetComponent<NHNDemo.MonsterHealth>();
+        controller = GetComponent<Assets.PixelFantasy.PixelMonsters.Common.Scripts.ExampleScripts.MonsterController2D>();
     }
 
     public bool TryStartAttack(Transform player)
@@ -41,6 +43,13 @@ public sealed class MiddleBossAttackPatterns : MonoBehaviour, IEnemyAttackOverri
             return false; // 근접이면 EnemyAI 기본 공격에 맡긴다
 
         bool useCharge = Random.value < 0.9f;
+
+        // MonsterController2D.FixedUpdate가 Input.x==0일 때 매 물리 스텝마다
+        // rb.linearVelocity를 자체적으로 감속시켜, 이 컴포넌트가 코루틴에서
+        // 직접 넣는 돌진 속도와 매 프레임 충돌했다(돌진이 제대로 안 나가던 원인).
+        // 패턴이 몸을 직접 제어하는 동안은 그 컨트롤러를 꺼서 충돌을 없앤다.
+        if (controller != null) controller.enabled = false;
+
         StartCoroutine(useCharge ? DoCharge(player) : DoProjectileThrow(player));
         return true;
     }
@@ -131,6 +140,7 @@ public sealed class MiddleBossAttackPatterns : MonoBehaviour, IEnemyAttackOverri
     private void EndPattern()
     {
         busy = false;
+        if (controller != null) controller.enabled = true;
         nextAllowedPatternTime = Time.time + Random.Range(config.minPatternCooldown, config.maxPatternCooldown);
     }
 }
