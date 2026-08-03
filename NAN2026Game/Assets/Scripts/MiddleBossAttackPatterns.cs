@@ -74,9 +74,16 @@ public sealed class MiddleBossAttackPatterns : MonoBehaviour, IEnemyAttackOverri
 
         while (Vector3.Distance(startPos, transform.position) < config.chargeMaxDistance)
         {
+            // 일반 Physics2D.Raycast는 트리거 콜라이더도 기본적으로 맞힌다. 카메라 경계처럼
+            // 레벨 전체를 덮는 트리거(Stage_CameraBounds 등)가 거리 0으로 항상 잡혀서
+            // 돌진이 시작하자마자 멈추던 원인이었다(FAIL.md #15와 동일 패턴). 트리거를 제외한다.
             Vector2 rayOrigin = (Vector2)transform.position + new Vector2(dir * config.wallCheckOriginOffset, 0f);
-            RaycastHit2D hit = Physics2D.Raycast(rayOrigin, new Vector2(dir, 0f), config.wallCheckDistance, config.wallLayerMask);
-            if (hit.collider != null)
+            ContactFilter2D wallFilter = new ContactFilter2D();
+            wallFilter.SetLayerMask(config.wallLayerMask);
+            wallFilter.useTriggers = false;
+            RaycastHit2D[] wallHits = new RaycastHit2D[4];
+            int wallHitCount = Physics2D.Raycast(rayOrigin, new Vector2(dir, 0f), wallFilter, wallHits, config.wallCheckDistance);
+            if (wallHitCount > 0)
                 break;
 
             body.linearVelocity = new Vector2(dir * config.chargeSpeed, body.linearVelocity.y);

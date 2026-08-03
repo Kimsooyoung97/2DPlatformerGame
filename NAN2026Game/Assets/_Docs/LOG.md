@@ -1726,3 +1726,22 @@ PixelFantasy의 MonsterController2D.FixedUpdate()를 확인한 결과, Input.x==
 - 재생 종료 후 isDirty=True(재생모드 토글 부수효과로 추정, 실제 씬 변경 없음) → 저장 후 재로드로 정리
 ### 실패와 수정
 - 없음
+
+## [수정] 돌진 수치 대폭 상향 + 벽 감지 트리거 오염 버그 수정 — 2026-08-03 05:10
+### 프롬프트
+돌진하는 정도가 너무 약한데 극단적으로 크게 늘려줘
+### 조작 내역
+**1) 수치 상향** (MiddleBossAttackConfig.asset)
+- chargeSpeed: 9 → 28
+- chargeMaxDistance: 8 → 24
+- chargeHitDistance: 1 → 1.8 (빨라진 속도에 맞춰 판정 범위도 소폭 확대)
+**2) 진짜 원인 발견·수정**: 수치를 올린 뒤 재생 모드로 검증하다가, 거리에 상관없이 항상 시작 지점에서 정확히 +3.87유닛 지점에서 멈추는 걸 발견 — 벽 감지용 Physics2D.Raycast가 레벨 전체를 덮는 트리거 콜라이더(Stage_CameraBounds, 카메라 경계용, layer=Default)를 거리 0으로 항상 맞혀서 돌진이 거의 시작하자마자 끊기고 있었음. FAIL.md #15(플레이어 지면 판정)와 동일한 트리거 오염 패턴
+- MiddleBossAttackPatterns.DoCharge의 벽 감지를 ContactFilter2D(useTriggers=false) 기반 Physics2D.Raycast로 교체해 트리거를 원천 제외
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → NullReferenceException 1건 발견, 스택트레이스 없음. 재확인 결과 컴파일 자체는 정상(타입 로드 성공, isCompiling=False), 콘솔 clear 후 아무 동작 없이 재확인하면 재발 안 함 → refresh 시점에만 뜨는, 이번 수정과 무관한 에디터 잔여 이슈로 판단하고 진행
+- 재생 모드 실측: 수치만 올렸을 때는 여전히 다른 두 위치(x=30, x=95)에서 모두 정확히 +3.87에서 멈춤을 확인해 트리거 문제를 특정. 벽 감지 수정 후 같은 위치에서 재측정 → x=30→35.79까지 이동(속도 유지된 채 IsBusy=True, velocity=(28,0)) 확인, 이전보다 확실히 더 멀리 나감을 검증. 이후 에디터 창 포커스 상실로 물리 시뮬레이션이 정지되어 완주까지는 못 지켜봤으나(환경적 한계), 트리거 오염 제거로 실제 이동 거리가 늘어난 것은 명확히 확인됨
+- run_tests(EditMode) → 91/91 통과 (job 46a90a5729364b169f1ca9333dd0fb2c)
+### 실패와 수정
+- 없음 (이번 건은 수치 조정 요청이 실제로는 트리거 오염 버그를 드러낸 케이스)
+### 참고
+- MiddleBossAttackPatterns.cs에 팀원이 추가한 것으로 보이는 Debug.Log("씀") 라인 발견 — 이번 작업과 무관해 손대지 않음

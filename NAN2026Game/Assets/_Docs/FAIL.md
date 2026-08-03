@@ -78,3 +78,4 @@
 - **증상**: 지면 판정에 법선(normal) 필터까지 추가했는데도 벽/경계 접촉 시 점프 카운트 리셋이 간헐적으로 실패
 - **원인**: `Collider2D.Cast(dir, results, distance)` 기본 오버로드는 ContactFilter2D 없이 호출하면 Physics2D 기본 설정상 트리거 콜라이더도 결과에 포함시킨다. 카메라 경계(PolygonCollider2D, isTrigger=true) 같은 비물리 콜라이더가 결과 배열에 섞여 들어와 (1) 고정 크기 배열을 오염시켜 진짜 지면 히트를 밀어내거나 (2) 트리거의 옆방향 법선이 오판을 유발할 수 있다
 - **방지 규칙**: 지면/충돌 판정용 캐스트는 항상 `ContactFilter2D`를 명시하고 `useTriggers=false`로 트리거를 제외한다. 물리 판정 버그는 가설(코드 리딩)만으로 고치지 말고, 재생 모드에서 실제 캐스트 결과(히트 콜라이더 이름·법선·거리)를 직접 찍어 확정한 뒤 수정한다
+- **재발 사례 (2026-08-03)**: MiddleBossAttackPatterns.DoCharge의 벽 감지 Physics2D.Raycast도 동일한 이유로 Stage_CameraBounds 트리거에 거리 0으로 항상 걸려 돌진이 즉시 끊기는 버그 발생. 몬스터의 이동/충돌 판정 코드를 새로 짤 때마다 이 체크리스트를 먼저 적용할 것
