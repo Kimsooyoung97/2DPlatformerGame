@@ -260,6 +260,10 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
                 }
             }
         }
+        // 접지 캐스트는 트리거(카메라 경계 등) 무시 — 실지형만 인정
+        var groundFilter = new ContactFilter2D();
+        groundFilter.useTriggers = false;
+        grounded = !ignoringGround && CastGroundNoTriggers() > 0; // 트리거(카메라 경계) 제외
         if (grounded && !wasGrounded) landTimer = config.landDuration;
         if (landTimer > 0f) landTimer -= Time.fixedDeltaTime;
         if (grounded && rb.linearVelocity.y <= 0.01f) { jumpsUsed = 0; airDashesUsed = 0; }
@@ -350,5 +354,15 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
             }
         }
         rb.linearVelocity = new Vector2(vx, vy);
+    
     }
+
+    // 접지 캐스트: 트리거 무시 — 실지형만 인정
+    private int CastGroundNoTriggers()
+    {
+        var f = new ContactFilter2D();
+        f.useTriggers = false;
+        return col.Cast(Vector2.down, f, castHits, config.groundCheckDistance);
+    }
+
 }
