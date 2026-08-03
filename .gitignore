@@ -90,3 +90,9 @@ NAN2026Game/[Aa]ssets/[Ss]ceneDependencyCache*
 # 구매 에셋 (재배포 금지)
 NAN2026Game/Assets/sanctum_pixel/
 NAN2026Game/Assets/sanctum_pixel.meta
+
+# 개인 작업 도구 (에디터 전용 — 팀 공유 불필요)
+NAN2026Game/Assets/Scripts/Editor/TileShowroomWindow.cs
+NAN2026Game/Assets/Scripts/Editor/TileShowroomWindow.cs.meta
+NAN2026Game/Assets/Scripts/Editor/ShowroomLayerTool.cs
+NAN2026Game/Assets/Scripts/Editor/ShowroomLayerTool.cs.meta

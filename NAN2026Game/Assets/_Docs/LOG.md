@@ -2419,3 +2419,16 @@ Forest Wall은 Ground 윗에 사라지지 않고 위에 붙이게 할수는없�
 - 저장 True, 꽃 9/10. 밀도·구도는 사용자 판정
 ### 실패와 수정
 - 실측 경로 확인 원칙 (Props/Flower/{색}/flower_{색}_{n}.png)
+
+
+## [수정] 소품 카탈로그 No cameras rendering 수리 + 쇼룸 도구 추적 해제 — 2026-08-04 00:23
+### 프롬프트
+우리 에셋 쇼룸에 소품 카탈로그 누르니깐 No cameras rendering 된거 같은데 이거 만들어줄래? 이거 바꾼거는 .gitignore에 넣자. 다른 팀원들은 필요없는거니깐
+### 조작 내역
+- 원인: SC All Props 씬의 카메라가 비활성 상태(존재하나 렌더링 0)
+- EnsurePreviewCamera() 추가 — 씬 전환 후 활성 카메라 부재 시 콘텐츠 바운즈에 맞춘 임시 직교 카메라 생성(HideFlags.DontSave, 팩 원본 무저장). 1차 가드가 비활성 카메라를 '있음'으로 오판 → isActiveAndEnabled 기준으로 교정
+- .gitignore에 쇼룸 도구 2종(+meta) 추가, git rm --cached로 추적 해제(로컬 파일 보존)
+### 검증
+- 컴파일 에러 0. 실측: 활성 카메라 0→1대, 임시카메라 hideFlags=DontSave, 씬 dirty=False(팩 원본 무손상), 로컬 파일 생존=True
+### 실패와 수정
+- 카메라 존재 판별 오류 1회(비활성 포함 집계) → isActiveAndEnabled로 수정
