@@ -2839,3 +2839,15 @@ C:\...\hit소리에 검기발사1, CharacterMove에 발소리1,2,3 넣음
 - 컴파일 0, EditMode 113/113. 음감은 사용자 재생
 ### 실패와 수정
 없음
+
+
+## [구현] NHNDemo 의존 검증(이미 해소 확인) + 검기 사운드 Z키 전환 — 2026-08-04 03:20
+### 프롬프트
+[구현]NHNDemo 의존송 해소 + 검기 사운드 z를 눌렀을때로 변경
+### 조작 내역
+- 의존 실측: MonsterHealth.cs=Assets/Player/Scripts/ 소재, git ls-files 등재·ignore 규칙 무해당·커밋 3b940a27 포함 — fresh clone 컴파일 정상. 과거 우려(gitignore 폴더)는 낡은 정보로 판명, 추가 조치 불필요. NHNDemo 참조 8개 스크립트 전부 안전
+- PlayerSoundPlayer: 검기발사 트리거 좌클릭→Z키(전용 소스·피치 0.85 유지). 좌클릭은 현재 무음
+### 검증
+- 컴파일 0, EditMode 113/113
+### 실패와 수정
+없음

@@ -38,8 +38,7 @@ namespace NAN2026
             if (kb != null && (kb.spaceKey.wasPressedThisFrame || kb.upArrowKey.wasPressedThisFrame) && config.jumpClip != null)
                 source.PlayOneShot(config.jumpClip, config.jumpVolume);
 
-            var ms = Mouse.current;
-            if (ms != null && ms.leftButton.wasPressedThisFrame && config.attackClip != null)
+            if (kb != null && kb.zKey.wasPressedThisFrame && config.attackClip != null)
             {
                 var asrc = attackSource != null ? attackSource : source;
                 asrc.pitch = config.attackPitch;
