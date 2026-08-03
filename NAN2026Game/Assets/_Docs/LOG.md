@@ -2447,3 +2447,17 @@ Forest Wall은 Ground 윗에 사라지지 않고 위에 붙이게 할수는없�
 해당 없음
 ### 커밋
 해당 없음(무수정)
+
+
+## [구현] 인트로 연출(암전→촛불 점화→전역 확장) + 게임시작BGM — 2026-08-04 00:50
+### 프롬프트
+[구현] 너가 권장하는 대로 해보자. 그리고 플레이어 범위까지 밝아지면 게임시작BGM음악을 틀어줘.
+### 조작 내역
+- IntroSequenceLogic(NAN2026.Core, 순수·엡실론 경계 보호) + 테스트 6종
+- IntroConfig(SO — 페이즈 길이·촛불 조명·BGM 수치 소유) / IntroSequencer(아무 키 스킵, 완료 시 self-disable)
+- SecondScene 배선: 시작 촛불 4기에 Light2D(Point, 반경 1.7) 부착·Lit(파티클) 점화 전 소등(발견: Flame/Glow는 SR 아닌 파티클 — 암전 위해 노드 게이트로 전환, CandleLight2D는 루트로 분리), Global Light 2D 구동, IntroDirector+AudioSource(게임시작BGM, 루프), mp3 WebGL 임포트(Vorbis 0.6·CompressedInMemory·백그라운드 로드)
+### 검증
+- 컴파일 에러 0, EditMode 108/108 통과(신규 6). 연출 체감·타이밍은 사용자 재생 판정
+### 실패와 수정
+- 부동소수 경계로 테스트 2건 실패 → 로직에 EPS 보정(테스트 불변)
+- Glow SR 가정 오류 → 파티클 확인 후 설계 전환
