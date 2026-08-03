@@ -24,6 +24,8 @@ namespace NAN2026
         public ParticleSystem sparkTemplate;
         public AudioSource sfx;
         public AudioClip collapseClip;
+        public AudioSource rumbleSource;
+        public AudioClip rumbleClip;
 
         float t;
         float lockedBaseAlpha = 1f;
@@ -46,6 +48,13 @@ namespace NAN2026
                 vcam.Target.TrackingTarget = panAnchor;
                 baseOrtho = vcam.Lens.OrthographicSize;
             }
+            if (rumbleSource != null && rumbleClip != null)
+            {
+                rumbleSource.clip = rumbleClip;
+                rumbleSource.loop = true;
+                rumbleSource.volume = 0f;
+                rumbleSource.Play();
+            }
             enabled = true;
         }
 
@@ -63,6 +72,11 @@ namespace NAN2026
             float d = config.delaySeconds, c = config.collapseSeconds, h = config.holdSeconds;
 
             int ph0 = GateCollapseLogic.GetPhase(t, d, c, h);
+            if (rumbleSource != null)
+            {
+                if (ph0 == 0) rumbleSource.volume = config.rumbleVolume * GateCollapseLogic.Clamp01(t / (d < 0.0001f ? 0.0001f : d));
+                else if (rumbleSource.isPlaying) rumbleSource.Stop(); // 붕괴 컷아웃 — 붕괴음이 이어받는다
+            }
             if (noise != null)
                 noise.AmplitudeGain = ph0 == 0 ? config.shakeAmplitude * GateCollapseLogic.Clamp01(t / (d < 0.0001f ? 0.0001f : d))
                     : ph0 == 1 ? config.shakeAmplitude : 0f;

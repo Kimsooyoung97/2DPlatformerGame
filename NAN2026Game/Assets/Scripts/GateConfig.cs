@@ -27,6 +27,7 @@ namespace NAN2026
         [Header("사운드")]
         public float sfxVolume = 1f;
         public float sfxPitch = 0.85f;
+        public float rumbleVolume = 1f;
         public float debrisImpulse = 2.5f;
         public float debrisLifetime = 2.5f;
         public float dustLifetime = 3f;
