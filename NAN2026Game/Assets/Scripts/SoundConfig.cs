@@ -16,6 +16,7 @@ namespace NAN2026
         public AudioClip attackClip;
         public float jumpVolume = 0.8f;
         public float attackVolume = 0.8f;
+        public float attackPitch = 0.85f;
 
         [Header("씬 BGM")]
         public float bgmVolume = 0.55f;

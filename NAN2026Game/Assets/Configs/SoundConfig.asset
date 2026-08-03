@@ -13,15 +13,16 @@ MonoBehaviour:
   m_Name: SoundConfig
   m_EditorClassIdentifier: Assembly-CSharp::NAN2026.SoundConfig
   walkClips:
-  - {fileID: 8300000, guid: 6eb995d7ff26ab945af66a7b2ba3d1f4, type: 3}
-  - {fileID: 8300000, guid: 5998f000ef53e96448140e89391b01c0, type: 3}
-  - {fileID: 8300000, guid: ce7a131fb7073f94d99efa521d297ecb, type: 3}
+  - {fileID: 8300000, guid: 36e1b0e17881c3c4aa23d3f427f24624, type: 3}
+  - {fileID: 8300000, guid: c954422e01c8d8144865cffdf6fe6cfd, type: 3}
+  - {fileID: 8300000, guid: 422e512a62d40d74dbccfed7cc8ae155, type: 3}
   stepInterval: 0.32
   walkVelThreshold: 0.5
   stepVolume: 0.7
   jumpClip: {fileID: 8300000, guid: 8f9ee2d6b292c4247a80ab1cecd2756e, type: 3}
-  attackClip: {fileID: 8300000, guid: 418ff710cf982dc40856b63cfa4001db, type: 3}
+  attackClip: {fileID: 8300000, guid: 4d17a878428ca5947aa3a30aaddc3e6d, type: 3}
   jumpVolume: 0.35
   attackVolume: 0.8
+  attackPitch: 0.85
   bgmVolume: 0.55
   bgmFadeSeconds: 1.2

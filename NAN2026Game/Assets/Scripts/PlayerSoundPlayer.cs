@@ -8,6 +8,7 @@ namespace NAN2026
     {
         public SoundConfig config;
         public AudioSource source;
+        public AudioSource attackSource; // 검기 전용 (피치 독립)
         Rigidbody2D rb;
         float stepT;
         int stepIdx;
@@ -39,7 +40,11 @@ namespace NAN2026
 
             var ms = Mouse.current;
             if (ms != null && ms.leftButton.wasPressedThisFrame && config.attackClip != null)
-                source.PlayOneShot(config.attackClip, config.attackVolume);
+            {
+                var asrc = attackSource != null ? attackSource : source;
+                asrc.pitch = config.attackPitch;
+                asrc.PlayOneShot(config.attackClip, config.attackVolume);
+            }
         }
     }
 }

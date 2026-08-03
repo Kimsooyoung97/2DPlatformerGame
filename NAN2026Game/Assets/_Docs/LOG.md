@@ -2827,3 +2827,15 @@ C:\...\Assets\Audio\Effect\UI에 돌무더기 붕괴로 넣었어. 카메라가 
 - 값 적용
 ### 실패와 수정
 없음
+
+
+## [수정] 발소리 3종 교체 + 검기발사 배선(전용 피치) — 2026-08-04 03:16
+### 프롬프트
+C:\...\hit소리에 검기발사1, CharacterMove에 발소리1,2,3 넣음
+### 조작 내역
+- walkClips=발소리1~3(Walk1~3 대체), attackClip=검기발사1(일반공격1 대체)
+- 공격 전용 AudioSource 분리 + attackPitch 0.85(발소리 피치 오염 방지). 이중 확장자 .wav.wav → .wav 개명(GUID 유지). 임포트 4종 DecompressOnLoad
+### 검증
+- 컴파일 0, EditMode 113/113. 음감은 사용자 재생
+### 실패와 수정
+없음
