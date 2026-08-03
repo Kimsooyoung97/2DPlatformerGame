@@ -2554,3 +2554,16 @@ Forest Wall은 Ground 윗에 사라지지 않고 위에 붙이게 할수는없�
 해당 없음
 ### 커밋
 해당 없음(무수정)
+
+
+## [구현] 게이트 붕괴 연출 — 2026-08-04 01:23
+### 프롬프트
+[구현]게이트 붕괴 연출
+### 조작 내역
+- GateCollapseLogic(Core, EPS 경계) + 테스트 5종 / GateConfig(SO 수치 소유) / GateCollapseSequencer(틴트 디졸브·충돌 해제·Dust 4점·Debris Brick 4종 물리 낙하·개방부 Light2D 점화·vcam 타깃 스왑 팬)
+- KeyMonsterGate: 시퀀서 배선 시 Play() 호출(미배선 시 기존 즉시 소멸 유지)
+- 배선: Locked 11셀 실측 중심 (40.5,5.5), GateDirector(GateAnchor·OpenLight·DustTemplate), CinemachineCamera 연결
+### 검증
+- 컴파일 에러 0, EditMode 113/113(신규 5). 연출 체감은 사용자 재생 판정
+### 실패와 수정
+- LightFactor 경계 부동소수 1건 → EPS 보정(테스트 불변)
