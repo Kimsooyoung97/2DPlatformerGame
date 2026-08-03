@@ -3215,11 +3215,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 18.712976
+      value: 47.382595
       objectReference: {fileID: 0}
     - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 2.469412
+      value: 7.5980444
       objectReference: {fileID: 0}
     - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
       propertyPath: m_LocalPosition.z
@@ -3926,7 +3926,7 @@ Transform:
   m_GameObject: {fileID: 470605787}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 62.5, y: 3.5, z: 0}
+  m_LocalPosition: {x: 47.5, y: 7.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4187,12 +4187,20 @@ PrefabInstance:
       value: PF Dungeon Props - Debris Brick 02
       objectReference: {fileID: 0}
     - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1.0265
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1.0314
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 18.605701
+      value: 46.023422
       objectReference: {fileID: 0}
     - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 2.2254543
+      value: 6.185616
       objectReference: {fileID: 0}
     - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
       propertyPath: m_LocalPosition.z
@@ -8630,7 +8638,7 @@ Transform:
   m_GameObject: {fileID: 906751715}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 62.5, y: 3.5, z: 0}
+  m_LocalPosition: {x: 47.5, y: 7.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -21413,12 +21421,20 @@ PrefabInstance:
       value: PF Dungeon Props - Debris Brick 02
       objectReference: {fileID: 0}
     - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1.0265
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1.0314
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 18.722754
+      value: 46.67752
       objectReference: {fileID: 0}
     - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 2.596563
+      value: 6.4641166
       objectReference: {fileID: 0}
     - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
       propertyPath: m_LocalPosition.z
@@ -42714,11 +42730,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 62.401207
+      value: 48.114944
       objectReference: {fileID: 0}
     - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 3.7200043
+      value: 8.502098
       objectReference: {fileID: 0}
     - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
       propertyPath: m_LocalPosition.z
@@ -78002,11 +78018,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 62.26678
+      value: 49.46117
       objectReference: {fileID: 0}
     - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 3.7291727
+      value: 9.11153
       objectReference: {fileID: 0}
     - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
       propertyPath: m_LocalPosition.z

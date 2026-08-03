@@ -31,6 +31,7 @@ namespace NAN2026
         bool collapseFired;
         Transform origTarget;
         float baseOrtho = -1f;
+        int released;
 
         public void Play()
         {
@@ -38,6 +39,7 @@ namespace NAN2026
             playing = true;
             t = 0f;
             collapseFired = false;
+            released = 0;
             if (vcam != null && panAnchor != null)
             {
                 origTarget = vcam.Target.TrackingTarget;
@@ -62,7 +64,8 @@ namespace NAN2026
 
             int ph0 = GateCollapseLogic.GetPhase(t, d, c, h);
             if (noise != null)
-                noise.AmplitudeGain = ph0 <= 1 ? config.shakeAmplitude : 0f;
+                noise.AmplitudeGain = ph0 == 0 ? config.shakeAmplitude * GateCollapseLogic.Clamp01(t / (d < 0.0001f ? 0.0001f : d))
+                    : ph0 == 1 ? config.shakeAmplitude : 0f;
             if (vcam != null && baseOrtho > 0f)
             {
                 float zt = GateCollapseLogic.Clamp01(t / (d < 0.0001f ? 0.0001f : d));
@@ -70,14 +73,6 @@ namespace NAN2026
                 var lens = vcam.Lens;
                 lens.OrthographicSize = baseOrtho * target;
                 vcam.Lens = lens;
-            }
-
-            if (wallSprites != null)
-            {
-                float wa = GateCollapseLogic.TintAlpha(t, d, c);
-                for (int i = 0; i < wallSprites.Length; i++)
-                    if (wallSprites[i] != null)
-                    { var wc = wallSprites[i].color; wc.a = wa; wallSprites[i].color = wc; }
             }
 
             if (lockedTilemap != null)
@@ -96,6 +91,12 @@ namespace NAN2026
 
             int phase = GateCollapseLogic.GetPhase(t, d, c, h);
             if (phase >= 1 && !collapseFired) { collapseFired = true; FireCollapse(); }
+            if (phase >= 1 && wallSprites != null)
+            {
+                int want = phase >= 2 ? wallSprites.Length
+                    : UnityEngine.Mathf.CeilToInt(GateCollapseLogic.Clamp01((t - d) / (c < 0.0001f ? 0.0001f : c)) * wallSprites.Length);
+                while (released < want) { ReleaseBrick(released); released++; }
+            }
             if (phase >= 2 && lockedRoot != null && lockedRoot.activeSelf) lockedRoot.SetActive(false);
 
             if (openLight != null)
@@ -111,6 +112,18 @@ namespace NAN2026
             if (t > d + c + h + 1.5f) { playing = false; enabled = false; }
         }
 
+        void ReleaseBrick(int i)
+        {
+            if (wallSprites == null || i >= wallSprites.Length || wallSprites[i] == null) return;
+            var bgo = wallSprites[i].gameObject;
+            var brb = bgo.GetComponent<Rigidbody2D>();
+            if (brb == null) brb = bgo.AddComponent<Rigidbody2D>();
+            brb.gravityScale = 1.6f;
+            brb.AddForce(new Vector2(Random.Range(-1f, 1f), Random.Range(0.2f, 0.8f)) * config.debrisImpulse, ForceMode2D.Impulse);
+            brb.AddTorque(Random.Range(-3f, 3f), ForceMode2D.Impulse);
+            Destroy(bgo, config.debrisLifetime);
+        }
+
         void FireCollapse()
         {
             if (sfx != null && collapseClip != null)
@@ -123,20 +136,6 @@ namespace NAN2026
             if (lockedRoot != null)
                 foreach (var cl in lockedRoot.GetComponentsInChildren<Collider2D>())
                     cl.enabled = false;
-
-            // 돌무더기 실물 낙하: 각 벽돌에 물리 부여 + 수명 후 정리
-            if (wallSprites != null)
-                for (int i = 0; i < wallSprites.Length; i++)
-                {
-                    if (wallSprites[i] == null) continue;
-                    var bgo = wallSprites[i].gameObject;
-                    var brb = bgo.GetComponent<Rigidbody2D>();
-                    if (brb == null) brb = bgo.AddComponent<Rigidbody2D>();
-                    brb.gravityScale = 1.6f;
-                    brb.AddForce(new Vector2(Random.Range(-1f, 1f), Random.Range(0.3f, 1f)) * config.debrisImpulse, ForceMode2D.Impulse);
-                    brb.AddTorque(Random.Range(-3f, 3f), ForceMode2D.Impulse);
-                    Destroy(bgo, config.debrisLifetime);
-                }
 
             if (dustTemplate != null && dustPoints != null)
                 foreach (var p in dustPoints)
