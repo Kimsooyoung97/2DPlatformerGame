@@ -22,6 +22,8 @@ namespace NAN2026
         public CinemachineBasicMultiChannelPerlin noise;
         public Light2D[] barrierLights;
         public ParticleSystem sparkTemplate;
+        public AudioSource sfx;
+        public AudioClip collapseClip;
 
         float t;
         float lockedBaseAlpha = 1f;
@@ -99,6 +101,12 @@ namespace NAN2026
 
         void FireCollapse()
         {
+            if (sfx != null && collapseClip != null)
+            {
+                sfx.pitch = config.sfxPitch;
+                sfx.PlayOneShot(collapseClip, config.sfxVolume);
+            }
+
             // 충돌 즉시 해제 (시각 소거보다 먼저 길이 열려도 무방)
             if (lockedRoot != null)
                 foreach (var cl in lockedRoot.GetComponentsInChildren<Collider2D>())

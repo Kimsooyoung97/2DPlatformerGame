@@ -14,12 +14,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NAN2026.GateConfig
   delaySeconds: 0.4
   collapseSeconds: 0.8
-  holdSeconds: 0.6
+  holdSeconds: 0.9
   lightIntensity: 1.2
   lightRadius: 2.2
   lightColor: {r: 1, g: 0.72, b: 0.35, a: 1}
   debrisCount: 14
-  shakeAmplitude: 1.7
+  shakeAmplitude: 3.2
+  barrierColor: {r: 0.55, g: 0.9, b: 1, a: 0.75}
+  barrierLightIntensity: 0.7
+  sfxVolume: 1
+  sfxPitch: 0.85
   debrisImpulse: 2.5
   debrisLifetime: 2.5
   dustLifetime: 3

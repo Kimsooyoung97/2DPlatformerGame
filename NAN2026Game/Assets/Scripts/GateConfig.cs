@@ -22,6 +22,10 @@ namespace NAN2026
         [Header("결계")]
         public Color barrierColor = new Color(0.55f, 0.9f, 1f, 0.75f);
         public float barrierLightIntensity = 0.7f;
+
+        [Header("사운드")]
+        public float sfxVolume = 1f;
+        public float sfxPitch = 0.85f;
         public float debrisImpulse = 2.5f;
         public float debrisLifetime = 2.5f;
         public float dustLifetime = 3f;
