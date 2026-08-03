@@ -104,6 +104,20 @@ namespace NAN2026
                 foreach (var cl in lockedRoot.GetComponentsInChildren<Collider2D>())
                     cl.enabled = false;
 
+            // 돌무더기 실물 낙하: 각 벽돌에 물리 부여 + 수명 후 정리
+            if (wallSprites != null)
+                for (int i = 0; i < wallSprites.Length; i++)
+                {
+                    if (wallSprites[i] == null) continue;
+                    var bgo = wallSprites[i].gameObject;
+                    var brb = bgo.GetComponent<Rigidbody2D>();
+                    if (brb == null) brb = bgo.AddComponent<Rigidbody2D>();
+                    brb.gravityScale = 1.6f;
+                    brb.AddForce(new Vector2(Random.Range(-1f, 1f), Random.Range(0.3f, 1f)) * config.debrisImpulse, ForceMode2D.Impulse);
+                    brb.AddTorque(Random.Range(-3f, 3f), ForceMode2D.Impulse);
+                    Destroy(bgo, config.debrisLifetime);
+                }
+
             if (dustTemplate != null && dustPoints != null)
                 foreach (var p in dustPoints)
                 {
