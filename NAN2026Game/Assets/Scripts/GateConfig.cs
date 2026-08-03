@@ -19,6 +19,7 @@ namespace NAN2026
         public int debrisCount = 14;
         public float shakeAmplitude = 1.7f;
         public float zoomFactor = 0.7f;
+        public float shakeFrequency = 0.5f;
 
         [Header("결계")]
         public Color barrierColor = new Color(0.55f, 0.9f, 1f, 0.75f);

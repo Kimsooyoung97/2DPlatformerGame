@@ -83,8 +83,11 @@ namespace NAN2026
                 else if (rumbleSource.isPlaying) rumbleSource.Stop(); // 붕괴 컷아웃 — 붕괴음이 이어받는다
             }
             if (noise != null)
+            {
+                noise.FrequencyGain = config.shakeFrequency;
                 noise.AmplitudeGain = ph0 == 0 ? config.shakeAmplitude * GateCollapseLogic.Clamp01(t / (d < 0.0001f ? 0.0001f : d))
                     : ph0 == 1 ? config.shakeAmplitude : 0f;
+            }
             if (vcam != null && baseOrtho > 0f)
             {
                 float zt = GateCollapseLogic.Clamp01(t / (d < 0.0001f ? 0.0001f : d));
