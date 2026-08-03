@@ -2769,3 +2769,14 @@ C:\...\Assets\Audio\Effect\UI에 돌무더기 붕괴로 넣었어. 카메라가 
 없음
 
 - 추기: 인트로 게이트가 확장 시 2층을 재점등하는 충돌 자체 발견 → 인트로 목록에서 y≥11 제외(103개로 재배선), 2층은 게이트 시퀀서 전담
+
+
+## [조사] 흔들림 잔상 원인 — 2026-08-04 02:45
+### 프롬프트
+[조사]돌무더기 흔들리는 표현으로 한건가 싶긴한데 약간 잔상같은게 남는데 이건 못 수정하지? 약간 2d 에셋의 한계인가?
+### 조사 결과
+- [Stage_Volume 프로파일: Post Processing Profile] / - Bloom active=True / - Vignette active=True / - Tonemapping active=True / - ColorAdjustments active=True /  / [MainCamera] 포스트프로세싱=False AA=0
+### 검증
+해당 없음
+### 커밋
+해당 없음(무수정)
