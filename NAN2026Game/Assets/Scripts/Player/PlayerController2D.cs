@@ -146,29 +146,30 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
     private void Update()
     {
         var kb = Keyboard.current;
-        var mouse = Mouse.current;
         inputX = 0f;
         runHeld = false;
         if (kb != null)
         {
-            if (kb.leftArrowKey.isPressed || kb.aKey.isPressed) inputX -= 1f;
-            if (kb.rightArrowKey.isPressed || kb.dKey.isPressed) inputX += 1f;
+            // 이동은 방향키만 사용한다 (WASD 제거)
+            if (kb.leftArrowKey.isPressed) inputX -= 1f;
+            if (kb.rightArrowKey.isPressed) inputX += 1f;
             runHeld = kb.leftShiftKey.isPressed || kb.rightShiftKey.isPressed;
-            if ( kb.spaceKey.wasPressedThisFrame || kb.upArrowKey.wasPressedThisFrame) jumpQueued = true;
-            if (kb.kKey.wasPressedThisFrame) QueueAttack("Combo2", config.combo2Duration, config.combo2LungeSpeed);
+            // 점프는 방향키 위쪽만 (Space 제거)
+            if (kb.upArrowKey.wasPressedThisFrame) jumpQueued = true;
+            // 기본 공격: 좌클릭 → Z
+            if (kb.zKey.wasPressedThisFrame) QueueAttack("Slash", config.slashDuration, config.slashLungeSpeed);
+            // 스킬 공격(구 K) → X
+            if (kb.xKey.wasPressedThisFrame) QueueAttack("Combo2", config.combo2Duration, config.combo2LungeSpeed);
             if (kb.lKey.wasPressedThisFrame) QueueAttack("Combo3", config.combo3Duration, config.combo3LungeSpeed);
             if (kb.gKey.wasPressedThisFrame) QueueAttack("Roll", rollDuration, rollSpeed);
-        }
-        if (mouse != null && mouse.leftButton.wasPressedThisFrame) QueueAttack("Slash", config.slashDuration, config.slashLungeSpeed);
-        if (mouse != null)
-        {
-            if (mouse.middleButton.wasPressedThisFrame && attackTimer <= 0f && Time.time >= parryReadyTime)
+            // 패링: 마우스 휠클릭 → C
+            if (kb.cKey.wasPressedThisFrame && attackTimer <= 0f && Time.time >= parryReadyTime)
             {
                 parryHeld = true;
                 parryPressTime = Time.time;
                 parryReadyTime = Time.time + EffectiveParryCooldown();
             }
-            if (mouse.middleButton.wasReleasedThisFrame && parryHeld)
+            if (kb.cKey.wasReleasedThisFrame && parryHeld)
             {
                 parryHeld = false;
                 parryEndTimer = config.parryEndDuration;

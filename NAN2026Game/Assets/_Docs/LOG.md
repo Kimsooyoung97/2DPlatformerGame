@@ -1745,3 +1745,23 @@ PixelFantasy의 MonsterController2D.FixedUpdate()를 확인한 결과, Input.x==
 - 없음 (이번 건은 수치 조정 요청이 실제로는 트리거 오염 버그를 드러낸 케이스)
 ### 참고
 - MiddleBossAttackPatterns.cs에 팀원이 추가한 것으로 보이는 Debug.Log("씀") 라인 발견 — 이번 작업과 무관해 손대지 않음
+
+## [수정] 조작키 재매핑 (방향키 전용 이동/점프, Z/X/C 액션) — 2026-08-03 06:15
+### 프롬프트
+지금 현재 플레이어 이동키가 wasd와 방향키 둘 다 되는데 방향키만 되게 해줘 그리고 방향키 윗키가 점프가 되게끔 수정해 그리고 기본 공격이 현재는 좌클릭인데 Z로 바꿔주고 기존의 K키에 적용된 스킬 공격을 X 키로 바꾸고 기존의 마우스 휠클릭이었던 패링을 C키로 바꿔줘
+### 조작 내역 (PlayerController2D.Update)
+- 이동: A/D 제거, leftArrowKey/rightArrowKey만 사용
+- 점프: Space 제거, upArrowKey.wasPressedThisFrame만 사용
+- 기본 공격(Slash): 마우스 좌클릭 → Z키
+- 스킬 공격(Combo2, 구 K키) → X키
+- 패링: 마우스 휠클릭(middleButton) → C키(press/release 로직 동일하게 이전)
+- 변경 없음: L키(Combo3), G키(Roll), Shift(달리기)
+- 더 이상 쓰이지 않는 Mouse.current 지역변수 제거
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → NullReferenceException 1건(스택트레이스 없음, 직전 턴과 동일 패턴) → 타입 로드/isCompiling=False로 컴파일 정상 확인, 콘솔 clear 후 무동작 재확인 시 재발 안 함 → 이번 수정과 무관한 것으로 판단하고 진행
+- 저장 → manage_scene(load) 강제 재로드
+- run_tests(EditMode) → 91/91 통과 (job 8ecc19c7a38c41c49d160594dbbf0bd5, 입력 매핑만 변경돼 순수 로직 테스트는 영향 없음)
+### 실패와 수정
+- 없음
+### 눈으로 확인 필요
+- 실제 재생에서 방향키 이동/점프, Z 기본공격, X 스킬, C 패링이 의도대로 작동하는지, WASD·Space·마우스가 더 이상 반응하지 않는지 확인 부탁드립니다
