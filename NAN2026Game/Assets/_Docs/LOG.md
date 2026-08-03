@@ -1693,3 +1693,20 @@ PixelFantasy의 MonsterController2D.FixedUpdate()를 확인한 결과, Input.x==
 - 씬 오브젝트 변경 없음(스크립트만 수정, 재생 중 테스트는 위치만 임시 조작 후 재생 종료로 원복됨) — isDirty=False 확인
 ### 실패와 수정
 - 없음
+
+## [수정] DoCharge 시각적 애니메이션(Run) 누락 수정 — 2026-08-03 03:50
+### 프롬프트
+답변 대기중 요청 모두 삭제하고 아직도 DoCharge가 불리긴하는데 시각적으로 돌진을 하지 않는다 애니메이션은 Run을 사용해서 돌진 공격을 만들어줘
+(경험치 시스템 SecondScene 부착 / FogOfWar occlusionMask 수정 / IgnorePlayerCollision 부착 요청은 사용자 지시로 취소)
+### 조사
+직전 수정(MonsterController2D.enabled=false로 속도 충돌 방지)이 이동 자체는 고쳤지만, MonsterController2D가 매 프레임 담당하던 애니메이션 전환(Run/Ready 호출)과 좌우 스프라이트 방향 전환(Turn)도 같이 꺼져버려, 실제로는 이동하는데 화면상 Attack/Idle 포즈로 정지된 것처럼 보이는 부작용이 있었음
+### 조작 내역
+- MiddleBossAttackPatterns에 MonsterAnimation 참조 추가(Awake에서 GetComponent)
+- DoCharge의 이동 루프 시작 직전에 animation.Run() 호출 + transform.localScale.x를 돌진 방향(dir)에 맞게 직접 설정(MonsterController2D.Turn()과 동일한 방식)
+- EndPattern()에 animation.Ready() 추가해 패턴(돌진/투사체 공통) 종료 시 대기 포즈로 복귀
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- 재생 모드 실측: 보스 x=50→57.60 이동 확인, localScale.x=1.20(플레이어가 오른쪽에 있었으므로 방향 일치), 패턴 종료 후 animState=Ready·controller.enabled=True 정상 복귀 확인. 코루틴 전체 소요시간이 도구 왕복시간보다 짧아 Run 상태의 정확한 중간 프레임 스냅샷은 못 잡았으나, 전후 상태 변화로 정상 동작 간접 확인
+- run_tests(EditMode) → 91/91 통과 (job 2a2fc7caef9d4f82b7bdc01655f3e242)
+### 실패와 수정
+- 없음 (직전 턴의 controller.enabled=false 수정이 새로운 부작용을 만든 것으로, MonsterController2D가 이동뿐 아니라 애니메이션·방향전환까지 담당한다는 걸 간과했던 것 — 이 컨트롤러를 끌 때는 그게 대신하던 역할(이동+애니메이션+방향전환)을 전부 대체해야 함을 기억할 것

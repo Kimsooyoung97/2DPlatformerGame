@@ -18,6 +18,7 @@ public sealed class MiddleBossAttackPatterns : MonoBehaviour, IEnemyAttackOverri
     private Rigidbody2D body;
     private NHNDemo.MonsterHealth health;
     private Assets.PixelFantasy.PixelMonsters.Common.Scripts.ExampleScripts.MonsterController2D controller;
+    private Assets.PixelFantasy.PixelMonsters.Common.Scripts.ExampleScripts.MonsterAnimation animation;
     private bool busy;
     private float nextAllowedPatternTime;
 
@@ -28,6 +29,7 @@ public sealed class MiddleBossAttackPatterns : MonoBehaviour, IEnemyAttackOverri
         body = GetComponent<Rigidbody2D>();
         health = GetComponent<NHNDemo.MonsterHealth>();
         controller = GetComponent<Assets.PixelFantasy.PixelMonsters.Common.Scripts.ExampleScripts.MonsterController2D>();
+        animation = GetComponent<Assets.PixelFantasy.PixelMonsters.Common.Scripts.ExampleScripts.MonsterAnimation>();
     }
 
     public bool TryStartAttack(Transform player)
@@ -65,6 +67,13 @@ public sealed class MiddleBossAttackPatterns : MonoBehaviour, IEnemyAttackOverri
         float dir = Mathf.Sign(player.position.x - transform.position.x);
         Vector3 startPos = transform.position;
         bool hitPlayerOnce = false;
+
+        // MonsterController2D를 꺼두는 동안은 그쪽이 담당하던 Run 애니메이션 전환·
+        // 좌우 방향 전환(Turn)도 멈추므로 여기서 직접 처리한다.
+        if (animation != null) animation.Run();
+        Vector3 facingScale = transform.localScale;
+        facingScale.x = dir * Mathf.Abs(facingScale.x);
+        transform.localScale = facingScale;
 
         while (Vector3.Distance(startPos, transform.position) < config.chargeMaxDistance)
         {
@@ -142,6 +151,7 @@ public sealed class MiddleBossAttackPatterns : MonoBehaviour, IEnemyAttackOverri
     {
         busy = false;
         if (controller != null) controller.enabled = true;
+        if (animation != null) animation.Ready();
         nextAllowedPatternTime = Time.time + Random.Range(config.minPatternCooldown, config.maxPatternCooldown);
     }
 }
