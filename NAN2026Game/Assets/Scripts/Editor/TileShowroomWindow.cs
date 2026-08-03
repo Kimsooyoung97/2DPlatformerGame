@@ -9,9 +9,9 @@ using UnityEditor.Tilemaps;
 namespace NAN2026.EditorTools
 {
     // 에셋 쇼룸 v4: 타일·소품 격자 진열 + 씬 클릭 검사(클릭한 타일 즉시 미리보기·격자 자동 점프)
-    public class TileShowroomWindow : EditorWindow
+    public partial class TileShowroomWindow : EditorWindow
     {
-        private const string SearchRoot = "Assets/Cainos";
+        private static readonly string[] SearchRoots = { "Assets/Cainos", "Assets/sanctum_pixel" };
         private static readonly Vector2 CellSize = new Vector2(84f, 104f);
         private static readonly string[] Tabs = { "타일", "소품" };
 
@@ -106,14 +106,14 @@ namespace NAN2026.EditorTools
         {
             EnsureInit();
             families[0].Clear();
-            foreach (string guid in AssetDatabase.FindAssets("t:TileBase", new[] { SearchRoot }))
+            foreach (string guid in AssetDatabase.FindAssets("t:TileBase", SearchRoots))
             {
                 var tile = AssetDatabase.LoadAssetAtPath<TileBase>(AssetDatabase.GUIDToAssetPath(guid));
                 if (tile == null) continue;
                 Add(0, TileFamilyOf(tile.name), tile);
             }
             families[1].Clear();
-            foreach (string guid in AssetDatabase.FindAssets("t:Prefab", new[] { SearchRoot }))
+            foreach (string guid in AssetDatabase.FindAssets("t:Prefab", SearchRoots))
             {
                 string p = AssetDatabase.GUIDToAssetPath(guid);
                 var go = AssetDatabase.LoadAssetAtPath<GameObject>(p);
@@ -123,6 +123,24 @@ namespace NAN2026.EditorTools
             // 현재 씬 사용중 분류 (바닥/벽 겹별 실사용 타일)
             AddUsageFamily("★ 바닥(Stage_Ground) 사용중", "Stage_Ground");
             AddUsageFamily("★ 벽(Stage_Wall) 사용중", "Stage_Wall");
+            // forest 팩 역할 분할 (데모 실측: 지형/잔디 장식)
+            if (families[0].ContainsKey("forest_tileset"))
+            {
+                var all = families[0]["forest_tileset"];
+                var gI = new HashSet<int> { 9,10,11,12,13,14,15,17,18,19,20,21,22,24 };
+                var wI = new HashSet<int> { 0,1,2,3,4,5,6 };
+                var fg = new List<Object>(); var fw = new List<Object>();
+                foreach (var o in all)
+                {
+                    var m = System.Text.RegularExpressions.Regex.Match(o.name, @"forest_tileset_(\d+)");
+                    if (!m.Success) continue;
+                    int n = int.Parse(m.Groups[1].Value);
+                    if (gI.Contains(n)) fg.Add(o);
+                    else if (wI.Contains(n)) fw.Add(o);
+                }
+                if (fg.Count > 0) families[0]["forest — Ground"] = fg;
+                if (fw.Count > 0) families[0]["forest — Wall(잔디)"] = fw;
+            }
             for (int t = 0; t < 2; t++)
             {
                 foreach (var list in families[t].Values)
@@ -132,6 +150,12 @@ namespace NAN2026.EditorTools
                 familyNames[t] = families[t].Keys.OrderBy(k => k.StartsWith("★") ? "0" + k : "1" + k).ToArray();
                 familyIndex[t] = Mathf.Clamp(familyIndex[t], 0, Mathf.Max(0, familyNames[t].Length - 1));
             }
+        }
+
+        private static bool IsForestDeco(string n)
+        {
+            var m = System.Text.RegularExpressions.Regex.Match(n, @"forest_tileset_(\d+)$");
+            return m.Success && int.Parse(m.Groups[1].Value) <= 6;
         }
 
         private void AddUsageFamily(string familyName, string tilemapGoName)
@@ -146,7 +170,15 @@ namespace NAN2026.EditorTools
                 var t = tm.GetTile(pos);
                 if (t != null) set.Add(t);
             }
-            if (set.Count == 0) return;
+            if (set.Count == 0)
+            {
+                // 씬 겹이 비어도 메뉴 유지: 이름에 대응 키워드가 든 팩 패밀리로 대체
+                string want = tilemapGoName == "Stage_Wall" ? "Wall" : "Ground";
+                foreach (var kv in families[0])
+                    if (!kv.Key.StartsWith("★") && kv.Key.Contains(want))
+                    { families[0][familyName] = new List<Object>(kv.Value); return; }
+                return;
+            }
             families[0][familyName] = set.Cast<Object>().ToList();
         }
 
@@ -191,6 +223,7 @@ namespace NAN2026.EditorTools
             armedProp = null;
             armedTarget = targetName;
             regionMode = false;
+            layerMoveMode = false;
             SceneView.RepaintAll();
             try
             {
@@ -225,6 +258,7 @@ namespace NAN2026.EditorTools
             armedProp = prefab;
             armedTile = null;
             regionMode = false;
+            layerMoveMode = false;
             SceneView.RepaintAll();
             return prefab.name + " 배치 모드 — 씬 클릭=놓기 (Ctrl=0.5스냅, Esc=해제)";
         }
@@ -319,14 +353,22 @@ namespace NAN2026.EditorTools
             foreach (var tm in Object.FindObjectsByType<Tilemap>(FindObjectsSortMode.None))
             {
                 bool isWall = tm.GetComponent<TilemapCollider2D>() == null;
-                for (int x = cellMin.x; x <= cellMax.x; x++)
-                    for (int y = cellMin.y; y <= cellMax.y; y++)
+                // 이동·오프셋 층 대응: 맵별 좌표 환산 + 월드 위치로 범위 판정
+                var a = tm.WorldToCell(mn);
+                var b = tm.WorldToCell(mx);
+                int x0 = Mathf.Min(a.x, b.x) - 1, x1 = Mathf.Max(a.x, b.x) + 1;
+                int y0 = Mathf.Min(a.y, b.y) - 1, y1 = Mathf.Max(a.y, b.y) + 1;
+                for (int x = x0; x <= x1; x++)
+                    for (int y = y0; y <= y1; y++)
                     {
                         var p = new Vector3Int(x, y, 0);
                         var t = tm.GetTile(p);
                         if (t == null) continue;
-                        if (isWall) { clipWallOff.Add(p - cellMin); clipWallTile.Add(t); }
-                        else { clipGroundOff.Add(p - cellMin); clipGroundTile.Add(t); }
+                        Vector3 wc = tm.CellToWorld(p) + tm.cellSize * 0.5f;
+                        if (wc.x < mn.x || wc.x > mx.x || wc.y < mn.y || wc.y > mx.y) continue;
+                        var off = new Vector3Int(Mathf.FloorToInt(wc.x), Mathf.FloorToInt(wc.y), 0) - cellMin;
+                        if (isWall) { clipWallOff.Add(off); clipWallTile.Add(t); }
+                        else { clipGroundOff.Add(off); clipGroundTile.Add(t); }
                     }
             }
             Vector3 anchorW = new Vector3(cellMin.x, cellMin.y, 0f);
@@ -500,6 +542,7 @@ namespace NAN2026.EditorTools
 
         private void OnSceneGUI(SceneView sv)
         {
+            if (layerMoveMode) { HandleLayerMove(sv); return; }
             if (regionMode) { HandleRegionCopy(sv); return; }
             if (!inspectMode && armedProp != null) { HandlePropPlace(sv); return; }
             if (!inspectMode && armedTile != null) { HandleBrush(sv); return; }
@@ -582,9 +625,33 @@ namespace NAN2026.EditorTools
             if (e.type == EventType.MouseMove) sv.Repaint();
             if ((e.type == EventType.MouseDown || e.type == EventType.MouseDrag) && e.button == 0)
             {
-                Undo.RegisterCompleteObjectUndo(tm, "쇼룸 붓");
-                tm.SetTile(cell, e.shift ? null : armedTile);
-                UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(tm.gameObject.scene);
+                if (e.shift)
+                {
+                    // 층 무관 지우개: 그 지점에 타일이 있는 타일맵 중 가장 앞(정렬 최상위)부터 지운다
+                    Tilemap best = null;
+                    Vector3Int bestCell = default(Vector3Int);
+                    int bestOrder = int.MinValue;
+                    foreach (var m in FindObjectsByType<Tilemap>(FindObjectsSortMode.None))
+                    {
+                        var mc = m.WorldToCell(world);
+                        if (m.GetTile(mc) == null) continue;
+                        var r = m.GetComponent<TilemapRenderer>();
+                        int ord = r != null ? r.sortingOrder : 0;
+                        if (ord > bestOrder) { bestOrder = ord; best = m; bestCell = mc; }
+                    }
+                    if (best != null)
+                    {
+                        Undo.RegisterCompleteObjectUndo(best, "쇼룸 지우개");
+                        best.SetTile(bestCell, null);
+                        UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(best.gameObject.scene);
+                    }
+                }
+                else
+                {
+                    Undo.RegisterCompleteObjectUndo(tm, "쇼룸 붓");
+                    tm.SetTile(cell, armedTile);
+                    UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(tm.gameObject.scene);
+                }
                 e.Use();
                 sv.Repaint();
             }
@@ -592,6 +659,7 @@ namespace NAN2026.EditorTools
 
         private void OnGUI()
         {
+            DrawLayerTool();
             EnsureInit();
             if (familyNames[0].Length == 0 && familyNames[1].Length == 0) RefreshAll();
             DrawSceneSwitcher();
@@ -612,7 +680,15 @@ namespace NAN2026.EditorTools
                     SceneView.RepaintAll();
                 }
                 bool prevR = regionMode;
+                GUILayout.Label("붓 대상:", EditorStyles.miniLabel, GUILayout.Width(50f));
+                bool selA = string.IsNullOrEmpty(customBrushTarget);
+                if (GUILayout.Toggle(selA, "자동", EditorStyles.toolbarButton, GUILayout.Width(40f)) && !selA) customBrushTarget = null;
+                bool selG = customBrushTarget == "Stage_Ground";
+                if (GUILayout.Toggle(selG, "Ground", EditorStyles.toolbarButton, GUILayout.Width(56f)) && !selG) customBrushTarget = "Stage_Ground";
+                bool selW = customBrushTarget == "Stage_Wall";
+                if (GUILayout.Toggle(selW, "Wall", EditorStyles.toolbarButton, GUILayout.Width(44f)) && !selW) customBrushTarget = "Stage_Wall";
                 regionMode = GUILayout.Toggle(regionMode, "구간 복사", EditorStyles.toolbarButton, GUILayout.Width(66f));
+                if (regionMode) layerMoveMode = false;
                 if (regionMode != prevR)
                 {
                     if (regionMode) { inspectMode = false; armedTile = null; armedProp = null; }
@@ -698,7 +774,7 @@ namespace NAN2026.EditorTools
                             {
                                 // 타일 성격으로 대상 결정: 벽 타일은 항상 벽 겹으로 (사용자 팔레트 설정 존중)
                                 string targetTm = "Stage_Ground";
-                                if (o.name.Contains("Tileable") || o.name.Contains("Wall"))
+                                if (o.name.Contains("Tileable") || o.name.Contains("Wall") || IsForestDeco(o.name))
                                     targetTm = "Stage_Wall";
                                 if (familyNames[0].Length > 0)
                                 {
@@ -706,6 +782,7 @@ namespace NAN2026.EditorTools
                                     if (curFam.Contains("Stage_Wall")) targetTm = "Stage_Wall";
                                     else if (curFam.Contains("Stage_Ground")) targetTm = "Stage_Ground";
                                 }
+                                if (!string.IsNullOrEmpty(customBrushTarget)) targetTm = customBrushTarget;
                                 ShowNotification(new GUIContent(PaintWith((TileBase)o, targetTm)), 1.2d);
                             }
                             catch (System.Exception ex)
@@ -748,6 +825,7 @@ namespace NAN2026.EditorTools
                 SceneButton("우리 맵", "Assets/Scenes/SecondScene.unity");
                 SceneButton("데모(정답지)", "Assets/Cainos/Pixel Art Platformer - Dungeon/Scene/SC Demo Scene.unity");
                 SceneButton("소품 카탈로그", "Assets/Cainos/Pixel Art Platformer - Dungeon/Scene/SC All Props.unity");
+                SceneButton("숲 데모", "Assets/sanctum_pixel/forest_side_pack/demo_scene.unity");
                 GUILayout.FlexibleSpace();
                 GUILayout.Label(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name, EditorStyles.miniLabel);
             }
@@ -801,7 +879,8 @@ namespace NAN2026.EditorTools
                         if (GUILayout.Button("🖌 이 타일로 칠하기", GUILayout.Width(124f), GUILayout.Height(24f)))
                         {
                             inspectMode = false;
-                            string tgt = (t.name.Contains("Tileable") || t.name.Contains("Wall")) ? "Stage_Wall" : "Stage_Ground";
+                            string tgt = (t.name.Contains("Tileable") || t.name.Contains("Wall") || IsForestDeco(t.name)) ? "Stage_Wall" : "Stage_Ground";
+                            if (!string.IsNullOrEmpty(customBrushTarget)) tgt = customBrushTarget;
                             ShowNotification(new GUIContent(PaintWith(t, tgt)));
                         }
                     }
