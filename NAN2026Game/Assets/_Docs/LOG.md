@@ -2139,3 +2139,14 @@ Forest Wall은 Ground 윗에 사라지지 않고 위에 붙이게 할수는없�
 - 스프라이트 13개, 채움율: [분할별 채움율] LAND_0:49% LAND_1:51% LAND_2:56% LAND_3:49% LAND_4:63% JUMP_0:48% JUMP_1:49% JUMP_2:45% JUMP_3:43% WALK_0:58% WALK_1:53% WALK_2:58% WALK_3:55% (저조 0칸)
 ### 실패와 수정
 없음
+
+
+## [조사] ThirdScene Stage_Props 종류 — 2026-08-03 22:20
+### 프롬프트
+[조사]ThirdScene에 보면 나Stage_Props가 배치되어 있지? 어떤 종류의 props가 있니?
+### 조사 결과
+- 총 27개, 7계열 20종: 침엽수 pine 1~3(8그루), 활엽수 tree 1~3(4), 고사목 tree_dead 1~3(3), 덤불 bush 5종(6), 바위 rock 4종(4), 윗풀 upper_grass 2종(2) — 레퍼런스 재현 때 3.6~6.4u 리듬 배치분
+### 검증
+해당 없음
+### 커밋
+해당 없음(무수정)
