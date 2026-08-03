@@ -1765,3 +1765,18 @@ PixelFantasy의 MonsterController2D.FixedUpdate()를 확인한 결과, Input.x==
 - 없음
 ### 눈으로 확인 필요
 - 실제 재생에서 방향키 이동/점프, Z 기본공격, X 스킬, C 패링이 의도대로 작동하는지, WASD·Space·마우스가 더 이상 반응하지 않는지 확인 부탁드립니다
+
+## [구현] 대쉬(이동기, Left Shift) + 달리기 기본화 — 2026-08-03 07:00
+### 프롬프트
+이제 left shift 키로 플레이어가 대쉬(공격이 아니고 이동기) 가 가능하게 maxdistance는 8정도로 구현해줘 기존에 left shift키에 존재했던 달리기 기능을 default로 해서 걷는게 아니라 방향키를 누르면 자동으로 달리게 해줘
+### 조작 내역
+- NAN2026.Core.PlayerLocomotionLogic에 DashActive(distanceTraveled, maxDistance) 순수 함수 추가. 테스트 3개
+- MovementConfig에 dashSpeed(20)/dashMaxDistance(8) 추가
+- PlayerController2D: runHeld을 상시 true로 고정(Shift 홀드 필요 없이 방향키만으로 항상 달림). Left Shift를 attacking/queuedAttack 시스템과 완전히 분리된 별도 dashing 상태로 바인딩 — wasPressedThisFrame 시점의 캐릭터 정면(EffectDirection)으로 dashSpeed 고정 속도 발사, 매 FixedUpdate마다 시작점부터의 이동거리(DashActive)와 벽 충돌(WallInDirection, 기존 벽 판정 재사용)을 체크해 최대거리 도달 또는 벽 충돌 시 자동 종료. 대쉬 중엔 평소 이동/공격 속도를 덮어쓰고, 이후 동일한 벽 클램프 단계를 그대로 통과시켜 이중 안전장치
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → NullReferenceException 1건(스택트레이스 없음, 최근 턴들과 동일한 무관 패턴) → 타입 로드 확인으로 컴파일 정상 재확인
+- MovementConfig 실제 에셋에서 dashSpeed=20/dashMaxDistance=8 반영 확인
+- 재생 모드 실측: 리플렉션으로 dashing 상태를 직접 발동시켜 x=1.39→9.71로 이동(약 8.32유닛, 의도한 8과 거의 일치) 후 자동 종료(dashing=False) 확인
+- run_tests(EditMode) → 94/94 통과 (job d873d8ffd7e443bd8586a45bdce6ca97, 기존 91 + 신규 3)
+### 실패와 수정
+- 재생 모드 테스트 중 첫 텔레포트 위치(20, -0.07)가 안전하지 않았는지 즉시 리스폰되어 위치가 (1.39, 0.05)로 되돌아감 → 현재 안전한 위치에서 재시도해 정상 검증 완료 (실제 버그 아님, 테스트 방법 이슈)

@@ -150,5 +150,20 @@ namespace NAN2026.Tests
         {
             Assert.AreEqual(0f, PlayerLocomotionLogic.ClampHorizontalVelocityAgainstWalls(0f, true, true));
         }
+
+        [Test] public void DashActive_TrueBeforeMaxDistance()
+        {
+            Assert.IsTrue(PlayerLocomotionLogic.DashActive(5f, 8f));
+        }
+
+        [Test] public void DashActive_FalseAtMaxDistance()
+        {
+            Assert.IsFalse(PlayerLocomotionLogic.DashActive(8f, 8f));
+        }
+
+        [Test] public void DashActive_FalseBeyondMaxDistance()
+        {
+            Assert.IsFalse(PlayerLocomotionLogic.DashActive(9f, 8f));
+        }
     }
 }

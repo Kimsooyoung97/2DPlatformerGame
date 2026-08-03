@@ -124,5 +124,11 @@ namespace NAN2026.Core
             if (vx < 0f && blockedLeft) return 0f;
             return vx;
         }
+
+        /// 대쉬(이동기)가 아직 최대거리를 안 채웠으면 계속 진행한다.
+        public static bool DashActive(float distanceTraveled, float maxDistance)
+        {
+            return distanceTraveled < maxDistance;
+        }
     }
 }

@@ -42,6 +42,9 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
     private bool grounded;
     private bool wasGrounded;
     private int jumpsUsed;
+    private bool dashing;
+    private Vector3 dashStartPos;
+    private float dashDir;
     private float landTimer;
     private string currentState;
     public bool IsGrounded { get { return grounded; } }
@@ -153,9 +156,17 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
             // 이동은 방향키만 사용한다 (WASD 제거)
             if (kb.leftArrowKey.isPressed) inputX -= 1f;
             if (kb.rightArrowKey.isPressed) inputX += 1f;
-            runHeld = kb.leftShiftKey.isPressed || kb.rightShiftKey.isPressed;
+            // 기존에 Shift로 홀드해야 하던 달리기를 기본 동작으로 변경 — 방향키만 눌러도 항상 달린다.
+            runHeld = true;
             // 점프는 방향키 위쪽만 (Space 제거)
             if (kb.upArrowKey.wasPressedThisFrame) jumpQueued = true;
+            // 대쉬(이동기, 공격 아님): Left Shift. 이미 대쉬 중이면 재시작하지 않는다.
+            if (kb.leftShiftKey.wasPressedThisFrame && !dashing)
+            {
+                dashing = true;
+                dashStartPos = transform.position;
+                dashDir = PlayerLocomotionLogic.EffectDirection(sr.flipX);
+            }
             // 기본 공격: 좌클릭 → Z
             if (kb.zKey.wasPressedThisFrame) QueueAttack("Slash", config.slashDuration, config.slashLungeSpeed);
             // 스킬 공격(구 K) → X
@@ -297,7 +308,23 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
             ? PlayerLocomotionLogic.AttackVelocity(sr.flipX, activeAttackLunge)
             : PlayerLocomotionLogic.HorizontalVelocity(inputX, runHeld, config.walkSpeed, config.runSpeed);
 
-        // 벽 쪽으로 velocity를 계속 밀어넣으면(매 프레임 덮어쓰기 방식) 물리 충돌 반응이
+        // 대쉬(이동기, 공격 시스템과 별개): 최대거리(dashMaxDistance)를 채우거나 벽에
+        // 막히면 종료한다. 활성 중에는 평소 이동/공격 속도를 덮어쓴다.
+        if (dashing)
+        {
+            float traveled = Vector3.Distance(dashStartPos, transform.position);
+            bool dashWallBlocked = (dashDir > 0f && WallInDirection(Vector2.right)) || (dashDir < 0f && WallInDirection(Vector2.left));
+            if (dashWallBlocked || !PlayerLocomotionLogic.DashActive(traveled, config.dashMaxDistance))
+            {
+                dashing = false;
+            }
+            else
+            {
+                vx = dashDir * config.dashSpeed;
+            }
+        }
+
+        // 벽 쪽으로 velocity를 계속 밀어넣으면(매 프레임 덮어쓰기 방식) 물리 반응이
         // 코너에서 수직 이동까지 간섭하는 경우가 있었다(공중에서 벽을 밀면 안 떨어지는 버그).
         // 그래서 물리 반응에 맡기지 않고, 이동 방향에 벽이 있는지 미리 확인해 그쪽 속도를 0으로 자른다.
         bool blockedRight = !parrying && vx > 0f && WallInDirection(Vector2.right);
