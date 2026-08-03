@@ -119,6 +119,77 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1001 &12485716
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 578790080}
+    m_Modifications:
+    - target: {fileID: 390456860282783827, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_Name
+      value: PF Dungeon Props - Debris Brick 02
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 46.21714
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 6.7714243
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.9969478
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.07807074
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8930051543745126958, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_SortingOrder
+      value: 3
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+--- !u!4 &12485717 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+  m_PrefabInstance: {fileID: 12485716}
+  m_PrefabAsset: {fileID: 0}
+--- !u!212 &12485718 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 8930051543745126958, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+  m_PrefabInstance: {fileID: 12485716}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &14767478
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -404,6 +475,77 @@ Transform:
 GameObject:
   m_CorrespondingSourceObject: {fileID: 390456860282783827, guid: 1b8ac58098173034d9b23d9d1d077d3d, type: 3}
   m_PrefabInstance: {fileID: 1298824975}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &46640467
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 578790080}
+    m_Modifications:
+    - target: {fileID: 390456860282783827, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_Name
+      value: PF Dungeon Props - Debris Brick 01 A
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 46.462757
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 8.525512
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.9988815
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.04728343
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8930051543745126958, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_SortingOrder
+      value: 3
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+--- !u!4 &46640468 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+  m_PrefabInstance: {fileID: 46640467}
+  m_PrefabAsset: {fileID: 0}
+--- !u!212 &46640469 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 8930051543745126958, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+  m_PrefabInstance: {fileID: 46640467}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &53985793
 GameObject:
@@ -1083,6 +1225,77 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: 8f86cf1e6af0b124abdbb6ccc79bdf7d, type: 3}
   m_PrefabInstance: {fileID: 100529156}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &112118497
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 578790080}
+    m_Modifications:
+    - target: {fileID: 390456860282783827, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_Name
+      value: PF Dungeon Props - Debris Brick 02
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 47.343727
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 8.216807
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.486447
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.8737101
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8930051543745126958, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_SortingOrder
+      value: 3
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+--- !u!4 &112118498 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+  m_PrefabInstance: {fileID: 112118497}
+  m_PrefabAsset: {fileID: 0}
+--- !u!212 &112118499 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 8930051543745126958, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+  m_PrefabInstance: {fileID: 112118497}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &117568110
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1556,6 +1769,77 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 7935089473269195797, guid: 018bb4400029ba54f920ea7f6dfc3e77, type: 3}
   m_PrefabInstance: {fileID: 193766685}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &200983497
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 578790080}
+    m_Modifications:
+    - target: {fileID: 390456860282783827, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_Name
+      value: PF Dungeon Props - Debris Brick 03
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 48.573376
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 8.627956
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: -0.71859586
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.6954279
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8930051543745126958, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_SortingOrder
+      value: 3
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+--- !u!4 &200983498 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+  m_PrefabInstance: {fileID: 200983497}
+  m_PrefabAsset: {fileID: 0}
+--- !u!212 &200983499 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 8930051543745126958, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+  m_PrefabInstance: {fileID: 200983497}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &223096730
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1643,107 +1927,6 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 390456860282783827, guid: fb5e42a253a52ec4195821f64ca3fae5, type: 3}
   m_PrefabInstance: {fileID: 1367012582}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &235100501
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 235100502}
-  - component: {fileID: 235100503}
-  m_Layer: 0
-  m_Name: BarrierLight
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &235100502
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 235100501}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 47.5, y: 7.5, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 905265404}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &235100503
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 235100501}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 073797afb82c5a1438f328866b10b3f0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.2D.Runtime::UnityEngine.Rendering.Universal.Light2D
-  m_ComponentVersion: 4
-  m_LightType: 3
-  m_BlendStyleIndex: 0
-  m_Light2DProvider:
-    rid: -2
-  m_SelectionSources:
-    rid: 725009253704663137
-  m_FalloffIntensity: 0.5
-  m_Color: {r: 0.55, g: 0.9, b: 1, a: 1}
-  m_Intensity: 0.7
-  m_LightVolumeIntensity: 1
-  m_LightVolumeEnabled: 0
-  m_ApplyToSortingLayers: 00000000
-  m_LightCookieSprite: {fileID: 0}
-  m_DeprecatedPointLightCookieSprite: {fileID: 0}
-  m_LightOrder: 0
-  m_AlphaBlendOnOverlap: 0
-  m_OverlapOperation: 0
-  m_NormalMapDistance: 3
-  m_NormalMapQuality: 2
-  m_UseNormalMap: 0
-  m_ShadowsEnabled: 1
-  m_ShadowIntensity: 0.75
-  m_ShadowSoftness: 0.3
-  m_ShadowSoftnessFalloffIntensity: 0.5
-  m_ShadowVolumeIntensityEnabled: 0
-  m_ShadowVolumeIntensity: 0.75
-  m_LocalBounds:
-    m_Center: {x: 0, y: -0.00000011920929, z: 0}
-    m_Extent: {x: 0.9985302, y: 0.99853027, z: 0}
-  m_PointLightInnerAngle: 360
-  m_PointLightOuterAngle: 360
-  m_PointLightInnerRadius: 0
-  m_PointLightOuterRadius: 3.3
-  m_ShapeLightParametricSides: 5
-  m_ShapeLightParametricAngleOffset: 0
-  m_ShapeLightParametricRadius: 1
-  m_ShapeLightFalloffSize: 0.5
-  m_ShapeLightFalloffOffset: {x: 0, y: 0}
-  m_ShapePath:
-  - {x: -0.5, y: -0.5, z: 0}
-  - {x: 0.5, y: -0.5, z: 0}
-  - {x: 0.5, y: 0.5, z: 0}
-  - {x: -0.5, y: 0.5, z: 0}
-  references:
-    version: 2
-    RefIds:
-    - rid: -2
-      type: {class: , ns: , asm: }
-    - rid: 725009253704663137
-      type: {class: Light2DProviderSources, ns: UnityEngine.Rendering.Universal, asm: Unity.RenderPipelines.Universal.2D.Runtime}
-      data:
-        m_SelectedHashCode: 0
-        m_SelectedSource:
-          rid: -2
-        m_Provider2DCache:
-          rid: -2
 --- !u!1 &241898153 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 390456860282783827, guid: 1df495940352cbb42a15891fc7e5e2d6, type: 3}
@@ -2749,7 +2932,7 @@ Tilemap:
     m_Data: {r: 1, g: 1, b: 1, a: 1}
   m_TileObjectToInstantiateArray: []
   m_AnimationFrameRate: 1
-  m_Color: {r: 0.55, g: 0.9, b: 1, a: 0.75}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Origin: {x: 0, y: 0, z: 0}
   m_Size: {x: 120, y: 9, z: 1}
   m_TileAnchor: {x: 0.5, y: 0.5, z: 0}
@@ -3018,6 +3201,77 @@ PrefabInstance:
 Transform:
   m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
   m_PrefabInstance: {fileID: 353307303}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &383418791
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 578790080}
+    m_Modifications:
+    - target: {fileID: 390456860282783827, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_Name
+      value: PF Dungeon Props - Debris Brick 05
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 18.712976
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 2.469412
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: -0.977478
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.21103741
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8930051543745126958, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_SortingOrder
+      value: 3
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+--- !u!4 &383418792 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+  m_PrefabInstance: {fileID: 383418791}
+  m_PrefabAsset: {fileID: 0}
+--- !u!212 &383418793 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 8930051543745126958, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+  m_PrefabInstance: {fileID: 383418791}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &392940903
 PrefabInstance:
@@ -3328,107 +3582,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: 1df9f1f13ecca1d4d83ed5998fcfc773, type: 3}
   m_PrefabInstance: {fileID: 443007531}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &443447990
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 443447991}
-  - component: {fileID: 443447992}
-  m_Layer: 0
-  m_Name: BarrierLight
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &443447991
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 443447990}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 18.5, y: 2.5, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 905265404}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &443447992
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 443447990}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 073797afb82c5a1438f328866b10b3f0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.2D.Runtime::UnityEngine.Rendering.Universal.Light2D
-  m_ComponentVersion: 4
-  m_LightType: 3
-  m_BlendStyleIndex: 0
-  m_Light2DProvider:
-    rid: -2
-  m_SelectionSources:
-    rid: 725009253704663136
-  m_FalloffIntensity: 0.5
-  m_Color: {r: 0.55, g: 0.9, b: 1, a: 1}
-  m_Intensity: 0.7
-  m_LightVolumeIntensity: 1
-  m_LightVolumeEnabled: 0
-  m_ApplyToSortingLayers: 00000000
-  m_LightCookieSprite: {fileID: 0}
-  m_DeprecatedPointLightCookieSprite: {fileID: 0}
-  m_LightOrder: 0
-  m_AlphaBlendOnOverlap: 0
-  m_OverlapOperation: 0
-  m_NormalMapDistance: 3
-  m_NormalMapQuality: 2
-  m_UseNormalMap: 0
-  m_ShadowsEnabled: 1
-  m_ShadowIntensity: 0.75
-  m_ShadowSoftness: 0.3
-  m_ShadowSoftnessFalloffIntensity: 0.5
-  m_ShadowVolumeIntensityEnabled: 0
-  m_ShadowVolumeIntensity: 0.75
-  m_LocalBounds:
-    m_Center: {x: 0, y: -0.00000011920929, z: 0}
-    m_Extent: {x: 0.9985302, y: 0.99853027, z: 0}
-  m_PointLightInnerAngle: 360
-  m_PointLightOuterAngle: 360
-  m_PointLightInnerRadius: 0
-  m_PointLightOuterRadius: 1.5
-  m_ShapeLightParametricSides: 5
-  m_ShapeLightParametricAngleOffset: 0
-  m_ShapeLightParametricRadius: 1
-  m_ShapeLightFalloffSize: 0.5
-  m_ShapeLightFalloffOffset: {x: 0, y: 0}
-  m_ShapePath:
-  - {x: -0.5, y: -0.5, z: 0}
-  - {x: 0.5, y: -0.5, z: 0}
-  - {x: 0.5, y: 0.5, z: 0}
-  - {x: -0.5, y: 0.5, z: 0}
-  references:
-    version: 2
-    RefIds:
-    - rid: -2
-      type: {class: , ns: , asm: }
-    - rid: 725009253704663136
-      type: {class: Light2DProviderSources, ns: UnityEngine.Rendering.Universal, asm: Unity.RenderPipelines.Universal.2D.Runtime}
-      data:
-        m_SelectedHashCode: 0
-        m_SelectedSource:
-          rid: -2
-        m_Provider2DCache:
-          rid: -2
 --- !u!4 &448757400 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: 3fe20ddee9feded4a80df524496f97b9, type: 3}
@@ -3672,6 +3825,77 @@ GameObject:
 GameObject:
   m_CorrespondingSourceObject: {fileID: 390456860282783827, guid: f71e07369e24409458b97b33ee10519d, type: 3}
   m_PrefabInstance: {fileID: 117568110}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &467758135
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 578790080}
+    m_Modifications:
+    - target: {fileID: 390456860282783827, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_Name
+      value: PF Dungeon Props - Debris Brick 02
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 47.265602
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 7.728178
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.22813629
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.97362924
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8930051543745126958, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_SortingOrder
+      value: 3
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+--- !u!4 &467758136 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+  m_PrefabInstance: {fileID: 467758135}
+  m_PrefabAsset: {fileID: 0}
+--- !u!212 &467758137 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 8930051543745126958, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+  m_PrefabInstance: {fileID: 467758135}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &467976998 stripped
 GameObject:
@@ -3950,6 +4174,77 @@ Transform:
 GameObject:
   m_CorrespondingSourceObject: {fileID: 390456860282783827, guid: 179fbb5164275a14bacf02455e3382f6, type: 3}
   m_PrefabInstance: {fileID: 1891368265}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &516031086
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 578790080}
+    m_Modifications:
+    - target: {fileID: 390456860282783827, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_Name
+      value: PF Dungeon Props - Debris Brick 02
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 18.605701
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 2.2254543
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: -0.989562
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.14410801
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8930051543745126958, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_SortingOrder
+      value: 3
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+--- !u!4 &516031087 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+  m_PrefabInstance: {fileID: 516031086}
+  m_PrefabAsset: {fileID: 0}
+--- !u!212 &516031088 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 8930051543745126958, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+  m_PrefabInstance: {fileID: 516031086}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &518797206
 PrefabInstance:
@@ -4879,6 +5174,70 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 390456860282783827, guid: 49968100c5c3b3a44bb5ffb0e94a6d27, type: 3}
   m_PrefabInstance: {fileID: 1473087729}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &578790079
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 578790080}
+  m_Layer: 0
+  m_Name: GateRubble
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &578790080
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 578790079}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1360141218}
+  - {fileID: 516031087}
+  - {fileID: 383418792}
+  - {fileID: 1647453586}
+  - {fileID: 1462965651}
+  - {fileID: 1280874772}
+  - {fileID: 12485717}
+  - {fileID: 721667836}
+  - {fileID: 1201376640}
+  - {fileID: 1087479672}
+  - {fileID: 2115674527}
+  - {fileID: 961198017}
+  - {fileID: 1018658630}
+  - {fileID: 726840559}
+  - {fileID: 1667534450}
+  - {fileID: 759498677}
+  - {fileID: 1037386990}
+  - {fileID: 813633596}
+  - {fileID: 1928823583}
+  - {fileID: 467758136}
+  - {fileID: 1569330605}
+  - {fileID: 1534277421}
+  - {fileID: 1684120519}
+  - {fileID: 1368582118}
+  - {fileID: 1926137385}
+  - {fileID: 46640468}
+  - {fileID: 667041946}
+  - {fileID: 2063282309}
+  - {fileID: 112118498}
+  - {fileID: 2032898428}
+  - {fileID: 200983498}
+  - {fileID: 1861376884}
+  - {fileID: 709539330}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &580848039 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7935089473269195797, guid: 18a0db5b0d194884298ef87fda402464, type: 3}
@@ -5521,6 +5880,77 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: 9fff27e35a7206845afd0960a6b4fae7, type: 3}
   m_PrefabInstance: {fileID: 661930516}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &667041945
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 578790080}
+    m_Modifications:
+    - target: {fileID: 390456860282783827, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_Name
+      value: PF Dungeon Props - Debris Brick 03
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 46.541965
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 8.248116
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: -0.7553556
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.65531516
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8930051543745126958, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_SortingOrder
+      value: 3
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+--- !u!4 &667041946 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+  m_PrefabInstance: {fileID: 667041945}
+  m_PrefabAsset: {fileID: 0}
+--- !u!212 &667041947 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 8930051543745126958, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+  m_PrefabInstance: {fileID: 667041945}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &667612028
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5909,6 +6339,77 @@ MonoBehaviour:
           rid: -2
         m_Provider2DCache:
           rid: -2
+--- !u!1001 &709539329
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 578790080}
+    m_Modifications:
+    - target: {fileID: 390456860282783827, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_Name
+      value: PF Dungeon Props - Debris Brick 03
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 48.370743
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 8.7395115
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.18003474
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.9836603
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8930051543745126958, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_SortingOrder
+      value: 3
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+--- !u!4 &709539330 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+  m_PrefabInstance: {fileID: 709539329}
+  m_PrefabAsset: {fileID: 0}
+--- !u!212 &709539331 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 8930051543745126958, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+  m_PrefabInstance: {fileID: 709539329}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &714278538
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6049,10 +6550,152 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 390456860282783827, guid: 315bc3d49e1cb0948a89aea9fdee1e5c, type: 3}
   m_PrefabInstance: {fileID: 286477378}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &721667835
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 578790080}
+    m_Modifications:
+    - target: {fileID: 390456860282783827, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_Name
+      value: PF Dungeon Props - Debris Brick 02
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 46.631176
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 6.6628213
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.59494215
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.8037685
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8930051543745126958, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_SortingOrder
+      value: 3
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+--- !u!4 &721667836 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+  m_PrefabInstance: {fileID: 721667835}
+  m_PrefabAsset: {fileID: 0}
+--- !u!212 &721667837 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 8930051543745126958, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+  m_PrefabInstance: {fileID: 721667835}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &723908231 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: fae4ab04a1ed46b468399c7bc8bdd35f, type: 3}
   m_PrefabInstance: {fileID: 539357221}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &726840558
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 578790080}
+    m_Modifications:
+    - target: {fileID: 390456860282783827, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_Name
+      value: PF Dungeon Props - Debris Brick 03
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 48.748432
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 6.557913
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: -0.84062463
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.54161817
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8930051543745126958, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_SortingOrder
+      value: 3
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+--- !u!4 &726840559 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+  m_PrefabInstance: {fileID: 726840558}
+  m_PrefabAsset: {fileID: 0}
+--- !u!212 &726840560 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 8930051543745126958, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+  m_PrefabInstance: {fileID: 726840558}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &733467979 stripped
 GameObject:
@@ -6331,6 +6974,77 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 390456860282783827, guid: 179fbb5164275a14bacf02455e3382f6, type: 3}
   m_PrefabInstance: {fileID: 1645995984}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &759498676
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 578790080}
+    m_Modifications:
+    - target: {fileID: 390456860282783827, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_Name
+      value: PF Dungeon Props - Debris Brick 03
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 46.21053
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 7.484197
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.9239522
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.38250804
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8930051543745126958, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_SortingOrder
+      value: 3
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+--- !u!4 &759498677 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+  m_PrefabInstance: {fileID: 759498676}
+  m_PrefabAsset: {fileID: 0}
+--- !u!212 &759498678 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 8930051543745126958, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+  m_PrefabInstance: {fileID: 759498676}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &764570792
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6564,107 +7278,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: 45f562af968c6304a970b66bcaf19902, type: 3}
   m_PrefabInstance: {fileID: 793327686}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &794693797
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 794693799}
-  - component: {fileID: 794693798}
-  m_Layer: 0
-  m_Name: BarrierLight
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &794693798
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 794693797}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 073797afb82c5a1438f328866b10b3f0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.2D.Runtime::UnityEngine.Rendering.Universal.Light2D
-  m_ComponentVersion: 4
-  m_LightType: 3
-  m_BlendStyleIndex: 0
-  m_Light2DProvider:
-    rid: -2
-  m_SelectionSources:
-    rid: 725009253704663138
-  m_FalloffIntensity: 0.5
-  m_Color: {r: 0.55, g: 0.9, b: 1, a: 1}
-  m_Intensity: 0.7
-  m_LightVolumeIntensity: 1
-  m_LightVolumeEnabled: 0
-  m_ApplyToSortingLayers: 00000000
-  m_LightCookieSprite: {fileID: 0}
-  m_DeprecatedPointLightCookieSprite: {fileID: 0}
-  m_LightOrder: 0
-  m_AlphaBlendOnOverlap: 0
-  m_OverlapOperation: 0
-  m_NormalMapDistance: 3
-  m_NormalMapQuality: 2
-  m_UseNormalMap: 0
-  m_ShadowsEnabled: 1
-  m_ShadowIntensity: 0.75
-  m_ShadowSoftness: 0.3
-  m_ShadowSoftnessFalloffIntensity: 0.5
-  m_ShadowVolumeIntensityEnabled: 0
-  m_ShadowVolumeIntensity: 0.75
-  m_LocalBounds:
-    m_Center: {x: 0, y: -0.00000011920929, z: 0}
-    m_Extent: {x: 0.9985302, y: 0.99853027, z: 0}
-  m_PointLightInnerAngle: 360
-  m_PointLightOuterAngle: 360
-  m_PointLightInnerRadius: 0
-  m_PointLightOuterRadius: 1.5
-  m_ShapeLightParametricSides: 5
-  m_ShapeLightParametricAngleOffset: 0
-  m_ShapeLightParametricRadius: 1
-  m_ShapeLightFalloffSize: 0.5
-  m_ShapeLightFalloffOffset: {x: 0, y: 0}
-  m_ShapePath:
-  - {x: -0.5, y: -0.5, z: 0}
-  - {x: 0.5, y: -0.5, z: 0}
-  - {x: 0.5, y: 0.5, z: 0}
-  - {x: -0.5, y: 0.5, z: 0}
-  references:
-    version: 2
-    RefIds:
-    - rid: -2
-      type: {class: , ns: , asm: }
-    - rid: 725009253704663138
-      type: {class: Light2DProviderSources, ns: UnityEngine.Rendering.Universal, asm: Unity.RenderPipelines.Universal.2D.Runtime}
-      data:
-        m_SelectedHashCode: 0
-        m_SelectedSource:
-          rid: -2
-        m_Provider2DCache:
-          rid: -2
---- !u!4 &794693799
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 794693797}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 62.5, y: 3.5, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 905265404}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &795790981
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6797,6 +7410,77 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 315bc3d49e1cb0948a89aea9fdee1e5c, type: 3}
+--- !u!1001 &813633595
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 578790080}
+    m_Modifications:
+    - target: {fileID: 390456860282783827, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_Name
+      value: PF Dungeon Props - Debris Brick 01 A
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 46.689373
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 7.5439043
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: -0.46344665
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.88612485
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8930051543745126958, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_SortingOrder
+      value: 3
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+--- !u!4 &813633596 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+  m_PrefabInstance: {fileID: 813633595}
+  m_PrefabAsset: {fileID: 0}
+--- !u!212 &813633597 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 8930051543745126958, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+  m_PrefabInstance: {fileID: 813633595}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &814512882
 GameObject:
   m_ObjectHideFlags: 0
@@ -7589,13 +8273,43 @@ MonoBehaviour:
   - {x: 46.5, y: 8.5, z: 0.5}
   - {x: 47.5, y: 8.5, z: 0.5}
   - {x: 48.5, y: 8.5, z: 0.5}
-  wallSprites: []
+  wallSprites:
+  - {fileID: 1360141219}
+  - {fileID: 516031088}
+  - {fileID: 383418793}
+  - {fileID: 1647453587}
+  - {fileID: 1462965652}
+  - {fileID: 1280874773}
+  - {fileID: 12485718}
+  - {fileID: 721667837}
+  - {fileID: 1201376641}
+  - {fileID: 1087479673}
+  - {fileID: 2115674528}
+  - {fileID: 961198018}
+  - {fileID: 1018658631}
+  - {fileID: 726840560}
+  - {fileID: 1667534451}
+  - {fileID: 759498678}
+  - {fileID: 1037386991}
+  - {fileID: 813633597}
+  - {fileID: 1928823584}
+  - {fileID: 467758137}
+  - {fileID: 1569330606}
+  - {fileID: 1534277422}
+  - {fileID: 1684120520}
+  - {fileID: 1368582119}
+  - {fileID: 1926137386}
+  - {fileID: 46640469}
+  - {fileID: 667041947}
+  - {fileID: 2063282310}
+  - {fileID: 112118499}
+  - {fileID: 2032898429}
+  - {fileID: 200983499}
+  - {fileID: 1861376885}
+  - {fileID: 709539331}
   noise: {fileID: 1625624066}
-  barrierLights:
-  - {fileID: 443447992}
-  - {fileID: 235100503}
-  - {fileID: 794693798}
-  sparkTemplate: {fileID: 1218245918}
+  barrierLights: []
+  sparkTemplate: {fileID: 0}
 --- !u!4 &895420529
 Transform:
   m_ObjectHideFlags: 0
@@ -7612,7 +8326,6 @@ Transform:
   - {fileID: 470605788}
   - {fileID: 906751717}
   - {fileID: 1253388216}
-  - {fileID: 905265404}
   - {fileID: 1218245920}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -7729,40 +8442,6 @@ Transform:
   - {fileID: 1560449082}
   - {fileID: 251803400}
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &905265403
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 905265404}
-  m_Layer: 0
-  m_Name: BarrierLights
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &905265404
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 905265403}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 443447991}
-  - {fileID: 235100502}
-  - {fileID: 794693799}
-  m_Father: {fileID: 895420529}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &906751715
 GameObject:
@@ -8270,6 +8949,77 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 7935089473269195797, guid: 3d296e20410bfc841abee061d2ebb695, type: 3}
   m_PrefabInstance: {fileID: 1337150882}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &961198016
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 578790080}
+    m_Modifications:
+    - target: {fileID: 390456860282783827, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_Name
+      value: PF Dungeon Props - Debris Brick 03
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 47.775547
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 6.6312256
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: -0.20853658
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.9780146
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8930051543745126958, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_SortingOrder
+      value: 3
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+--- !u!4 &961198017 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+  m_PrefabInstance: {fileID: 961198016}
+  m_PrefabAsset: {fileID: 0}
+--- !u!212 &961198018 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 8930051543745126958, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+  m_PrefabInstance: {fileID: 961198016}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &975659125 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7935089473269195797, guid: 469f936d9242cd347860e775f2a14173, type: 3}
@@ -8642,10 +9392,152 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 9072807208709021889, guid: a886758f11634694d939f1bd79f34ee5, type: 3}
   m_PrefabInstance: {fileID: 1129976072}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &1018658629
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 578790080}
+    m_Modifications:
+    - target: {fileID: 390456860282783827, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_Name
+      value: PF Dungeon Props - Debris Brick 05
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 48.2879
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 6.3339972
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: -0.9222239
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.38665625
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8930051543745126958, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_SortingOrder
+      value: 3
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+--- !u!4 &1018658630 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+  m_PrefabInstance: {fileID: 1018658629}
+  m_PrefabAsset: {fileID: 0}
+--- !u!212 &1018658631 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 8930051543745126958, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+  m_PrefabInstance: {fileID: 1018658629}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1022784730 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 390456860282783827, guid: 7711a8b69005c764ba4479e710094593, type: 3}
   m_PrefabInstance: {fileID: 785072752}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &1037386989
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 578790080}
+    m_Modifications:
+    - target: {fileID: 390456860282783827, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_Name
+      value: PF Dungeon Props - Debris Brick 01 A
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 46.291107
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 7.692166
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.635538
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.7720696
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8930051543745126958, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_SortingOrder
+      value: 3
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+--- !u!4 &1037386990 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+  m_PrefabInstance: {fileID: 1037386989}
+  m_PrefabAsset: {fileID: 0}
+--- !u!212 &1037386991 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 8930051543745126958, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+  m_PrefabInstance: {fileID: 1037386989}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &1042524477 stripped
 GameObject:
@@ -9067,6 +9959,77 @@ PrefabInstance:
       addedObject: {fileID: 409595622}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0eab102a84f26d649876c6762bdc6aed, type: 3}
+--- !u!1001 &1087479671
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 578790080}
+    m_Modifications:
+    - target: {fileID: 390456860282783827, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_Name
+      value: PF Dungeon Props - Debris Brick 05
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 47.290897
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 6.525143
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: -0.9773192
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.21177168
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8930051543745126958, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_SortingOrder
+      value: 3
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+--- !u!4 &1087479672 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+  m_PrefabInstance: {fileID: 1087479671}
+  m_PrefabAsset: {fileID: 0}
+--- !u!212 &1087479673 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 8930051543745126958, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+  m_PrefabInstance: {fileID: 1087479671}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1101267365
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -9581,6 +10544,77 @@ PrefabInstance:
 Transform:
   m_CorrespondingSourceObject: {fileID: 2999419454741437746, guid: 8460a8462faed5e42ad2997b6a44c43a, type: 3}
   m_PrefabInstance: {fileID: 1193330188}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &1201376639
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 578790080}
+    m_Modifications:
+    - target: {fileID: 390456860282783827, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_Name
+      value: PF Dungeon Props - Debris Brick 01 A
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 46.298424
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 6.2521687
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.97836715
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.20687611
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8930051543745126958, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_SortingOrder
+      value: 3
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+--- !u!4 &1201376640 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+  m_PrefabInstance: {fileID: 1201376639}
+  m_PrefabAsset: {fileID: 0}
+--- !u!212 &1201376641 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 8930051543745126958, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+  m_PrefabInstance: {fileID: 1201376639}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1214935336
 PrefabInstance:
@@ -19790,6 +20824,77 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: 4c330f7f1a865114e9eb8722d9b4f9c5, type: 3}
   m_PrefabInstance: {fileID: 2066405020}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &1280874771
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 578790080}
+    m_Modifications:
+    - target: {fileID: 390456860282783827, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_Name
+      value: PF Dungeon Props - Debris Brick 03
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 62.539246
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 3.3049624
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.06891466
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.99762255
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8930051543745126958, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_SortingOrder
+      value: 3
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+--- !u!4 &1280874772 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+  m_PrefabInstance: {fileID: 1280874771}
+  m_PrefabAsset: {fileID: 0}
+--- !u!212 &1280874773 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 8930051543745126958, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+  m_PrefabInstance: {fileID: 1280874771}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1287858224
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -20274,6 +21379,77 @@ MonoBehaviour:
           rid: -2
         m_Provider2DCache:
           rid: -2
+--- !u!1001 &1360141217
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 578790080}
+    m_Modifications:
+    - target: {fileID: 390456860282783827, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_Name
+      value: PF Dungeon Props - Debris Brick 02
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 18.722754
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 2.596563
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.98655194
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.16344836
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8930051543745126958, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_SortingOrder
+      value: 3
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+--- !u!4 &1360141218 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+  m_PrefabInstance: {fileID: 1360141217}
+  m_PrefabAsset: {fileID: 0}
+--- !u!212 &1360141219 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 8930051543745126958, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+  m_PrefabInstance: {fileID: 1360141217}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1367012582
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -20339,6 +21515,77 @@ PrefabInstance:
 Transform:
   m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: fb5e42a253a52ec4195821f64ca3fae5, type: 3}
   m_PrefabInstance: {fileID: 1367012582}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &1368582117
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 578790080}
+    m_Modifications:
+    - target: {fileID: 390456860282783827, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_Name
+      value: PF Dungeon Props - Debris Brick 02
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 48.322422
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 7.3249683
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: -0.90676105
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.42164484
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8930051543745126958, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_SortingOrder
+      value: 3
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+--- !u!4 &1368582118 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+  m_PrefabInstance: {fileID: 1368582117}
+  m_PrefabAsset: {fileID: 0}
+--- !u!212 &1368582119 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 8930051543745126958, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+  m_PrefabInstance: {fileID: 1368582117}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &1383084998 stripped
 GameObject:
@@ -41431,6 +42678,77 @@ PrefabInstance:
 GameObject:
   m_CorrespondingSourceObject: {fileID: 390456860282783827, guid: 7ff2328aa391d9a488a48d82eff415e8, type: 3}
   m_PrefabInstance: {fileID: 918900240}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &1462965650
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 578790080}
+    m_Modifications:
+    - target: {fileID: 390456860282783827, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_Name
+      value: PF Dungeon Props - Debris Brick 05
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 62.401207
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 3.7200043
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.9969109
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.07854043
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8930051543745126958, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_SortingOrder
+      value: 3
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+--- !u!4 &1462965651 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+  m_PrefabInstance: {fileID: 1462965650}
+  m_PrefabAsset: {fileID: 0}
+--- !u!212 &1462965652 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 8930051543745126958, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+  m_PrefabInstance: {fileID: 1462965650}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &1465561616 stripped
 GameObject:
@@ -74919,6 +76237,77 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 8407000672557572730, guid: 0eab102a84f26d649876c6762bdc6aed, type: 3}
   m_PrefabInstance: {fileID: 1526060594}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &1534277420
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 578790080}
+    m_Modifications:
+    - target: {fileID: 390456860282783827, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_Name
+      value: PF Dungeon Props - Debris Brick 02
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 48.738644
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 7.554025
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.81272495
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.58264756
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8930051543745126958, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_SortingOrder
+      value: 3
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+--- !u!4 &1534277421 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+  m_PrefabInstance: {fileID: 1534277420}
+  m_PrefabAsset: {fileID: 0}
+--- !u!212 &1534277422 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 8930051543745126958, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+  m_PrefabInstance: {fileID: 1534277420}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1543583602 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 390456860282783827, guid: 4c330f7f1a865114e9eb8722d9b4f9c5, type: 3}
@@ -75981,6 +77370,77 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 390456860282783827, guid: d98c713b10361324d9a6ac2b3fbbc828, type: 3}
   m_PrefabInstance: {fileID: 717929249}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &1569330604
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 578790080}
+    m_Modifications:
+    - target: {fileID: 390456860282783827, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_Name
+      value: PF Dungeon Props - Debris Brick 02
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 47.4313
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 7.316517
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.4987133
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.86676705
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8930051543745126958, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_SortingOrder
+      value: 3
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+--- !u!4 &1569330605 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+  m_PrefabInstance: {fileID: 1569330604}
+  m_PrefabAsset: {fileID: 0}
+--- !u!212 &1569330606 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 8930051543745126958, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+  m_PrefabInstance: {fileID: 1569330604}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1583556306 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7935089473269195797, guid: 57628a9b24936f2439db056ac329aea3, type: 3}
@@ -76512,10 +77972,152 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 179fbb5164275a14bacf02455e3382f6, type: 3}
+--- !u!1001 &1647453585
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 578790080}
+    m_Modifications:
+    - target: {fileID: 390456860282783827, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_Name
+      value: PF Dungeon Props - Debris Brick 02
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 62.26678
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 3.7291727
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.3029955
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.95299196
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8930051543745126958, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_SortingOrder
+      value: 3
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+--- !u!4 &1647453586 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+  m_PrefabInstance: {fileID: 1647453585}
+  m_PrefabAsset: {fileID: 0}
+--- !u!212 &1647453587 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 8930051543745126958, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+  m_PrefabInstance: {fileID: 1647453585}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1658729649 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 390456860282783827, guid: 25468e7645e30f84bbf09744c9fe7352, type: 3}
   m_PrefabInstance: {fileID: 1625020161}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &1667534449
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 578790080}
+    m_Modifications:
+    - target: {fileID: 390456860282783827, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_Name
+      value: PF Dungeon Props - Debris Brick 03
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 48.309734
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 6.5997677
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.48761186
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.8730605
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8930051543745126958, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_SortingOrder
+      value: 3
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+--- !u!4 &1667534450 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+  m_PrefabInstance: {fileID: 1667534449}
+  m_PrefabAsset: {fileID: 0}
+--- !u!212 &1667534451 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 8930051543745126958, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+  m_PrefabInstance: {fileID: 1667534449}
   m_PrefabAsset: {fileID: 0}
 --- !u!4 &1671021507 stripped
 Transform:
@@ -76649,6 +78251,77 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 867a9e2df8390d442b1da06371221ed2, type: 3}
+--- !u!1001 &1684120518
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 578790080}
+    m_Modifications:
+    - target: {fileID: 390456860282783827, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_Name
+      value: PF Dungeon Props - Debris Brick 03
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 48.36148
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 7.4220066
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: -0.44260937
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.8967145
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8930051543745126958, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+      propertyPath: m_SortingOrder
+      value: 3
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+--- !u!4 &1684120519 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+  m_PrefabInstance: {fileID: 1684120518}
+  m_PrefabAsset: {fileID: 0}
+--- !u!212 &1684120520 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 8930051543745126958, guid: af429afccbe99f743bf01f60834feedf, type: 3}
+  m_PrefabInstance: {fileID: 1684120518}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1689535154
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -77959,6 +79632,77 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &1861376883
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 578790080}
+    m_Modifications:
+    - target: {fileID: 390456860282783827, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_Name
+      value: PF Dungeon Props - Debris Brick 02
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 48.756336
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 8.300902
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: -0.27718067
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.9608178
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8930051543745126958, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+      propertyPath: m_SortingOrder
+      value: 3
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+--- !u!4 &1861376884 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+  m_PrefabInstance: {fileID: 1861376883}
+  m_PrefabAsset: {fileID: 0}
+--- !u!212 &1861376885 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 8930051543745126958, guid: 9aff37e1f1a73914a92b63b37ad3f085, type: 3}
+  m_PrefabInstance: {fileID: 1861376883}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1864019333 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7935089473269195797, guid: 1829e175e1365f646a704d1c54b8aa7a, type: 3}
@@ -78333,6 +80077,148 @@ GameObject:
 Transform:
   m_CorrespondingSourceObject: {fileID: 9072807208709021889, guid: 0eab102a84f26d649876c6762bdc6aed, type: 3}
   m_PrefabInstance: {fileID: 1783770572}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &1926137384
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 578790080}
+    m_Modifications:
+    - target: {fileID: 390456860282783827, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_Name
+      value: PF Dungeon Props - Debris Brick 01 A
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 46.799427
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 8.789204
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.16912833
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.98559403
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8930051543745126958, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+      propertyPath: m_SortingOrder
+      value: 3
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+--- !u!4 &1926137385 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+  m_PrefabInstance: {fileID: 1926137384}
+  m_PrefabAsset: {fileID: 0}
+--- !u!212 &1926137386 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 8930051543745126958, guid: a1cfce63a461c914dad5d5c9cbfd5c69, type: 3}
+  m_PrefabInstance: {fileID: 1926137384}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &1928823582
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 578790080}
+    m_Modifications:
+    - target: {fileID: 390456860282783827, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_Name
+      value: PF Dungeon Props - Debris Brick 05
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 47.760757
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 7.2876153
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.9635034
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.26769605
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8930051543745126958, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_SortingOrder
+      value: 3
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+--- !u!4 &1928823583 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+  m_PrefabInstance: {fileID: 1928823582}
+  m_PrefabAsset: {fileID: 0}
+--- !u!212 &1928823584 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 8930051543745126958, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+  m_PrefabInstance: {fileID: 1928823582}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &1929790083 stripped
 GameObject:
@@ -79119,6 +81005,77 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 390456860282783827, guid: af429afccbe99f743bf01f60834feedf, type: 3}
   m_PrefabInstance: {fileID: 1872919967}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &2032898427
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 578790080}
+    m_Modifications:
+    - target: {fileID: 390456860282783827, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_Name
+      value: PF Dungeon Props - Debris Brick 05
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 47.283913
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 8.577785
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.8343303
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.5512648
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8930051543745126958, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_SortingOrder
+      value: 3
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+--- !u!4 &2032898428 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+  m_PrefabInstance: {fileID: 2032898427}
+  m_PrefabAsset: {fileID: 0}
+--- !u!212 &2032898429 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 8930051543745126958, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+  m_PrefabInstance: {fileID: 2032898427}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &2037444480
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -79248,6 +81205,77 @@ PrefabInstance:
 Transform:
   m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: fae4ab04a1ed46b468399c7bc8bdd35f, type: 3}
   m_PrefabInstance: {fileID: 187323903}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &2063282308
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 578790080}
+    m_Modifications:
+    - target: {fileID: 390456860282783827, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_Name
+      value: PF Dungeon Props - Debris Brick 05
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 47.506157
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 8.425833
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: -0.2698699
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.9628968
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8930051543745126958, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_SortingOrder
+      value: 3
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+--- !u!4 &2063282309 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+  m_PrefabInstance: {fileID: 2063282308}
+  m_PrefabAsset: {fileID: 0}
+--- !u!212 &2063282310 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 8930051543745126958, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+  m_PrefabInstance: {fileID: 2063282308}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &2066405020
 PrefabInstance:
@@ -79724,6 +81752,77 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: 12c6798fb9dab5d4691cb5387640edc7, type: 3}
   m_PrefabInstance: {fileID: 2113172198}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &2115674526
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 578790080}
+    m_Modifications:
+    - target: {fileID: 390456860282783827, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_Name
+      value: PF Dungeon Props - Debris Brick 05
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 47.596443
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 6.2743907
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.97883916
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.20463115
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8930051543745126958, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+      propertyPath: m_SortingOrder
+      value: 3
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+--- !u!4 &2115674527 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+  m_PrefabInstance: {fileID: 2115674526}
+  m_PrefabAsset: {fileID: 0}
+--- !u!212 &2115674528 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 8930051543745126958, guid: 6ecc87a373424484bbf7c7c59dde7036, type: 3}
+  m_PrefabInstance: {fileID: 2115674526}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &2117772786
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -80039,3 +82138,4 @@ SceneRoots:
   - {fileID: 1421361315}
   - {fileID: 1997520082}
   - {fileID: 895420529}
+  - {fileID: 578790080}
