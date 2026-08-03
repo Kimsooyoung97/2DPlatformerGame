@@ -176,8 +176,8 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
             // 스킬 공격(구 K) → X
             if (kb.xKey.wasPressedThisFrame) QueueAttack("Combo2", config.combo2Duration, config.combo2LungeSpeed);
             if (kb.lKey.wasPressedThisFrame) QueueAttack("Combo3", config.combo3Duration, config.combo3LungeSpeed);
-            // 구르기: 기존 G키에 더해 Ctrl(좌/우)도 트리거로 추가
-            if (kb.gKey.wasPressedThisFrame || kb.leftCtrlKey.wasPressedThisFrame || kb.rightCtrlKey.wasPressedThisFrame)
+            // 구르기: G키 제거, Ctrl(좌/우)만 사용
+            if (kb.leftCtrlKey.wasPressedThisFrame || kb.rightCtrlKey.wasPressedThisFrame)
                 QueueAttack("Roll", rollDuration, rollSpeed);
             // 패링: 마우스 휠클릭 → C
             if (kb.cKey.wasPressedThisFrame && attackTimer <= 0f && Time.time >= parryReadyTime)

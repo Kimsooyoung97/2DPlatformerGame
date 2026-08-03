@@ -1794,3 +1794,15 @@ PixelFantasy의 MonsterController2D.FixedUpdate()를 확인한 결과, Input.x==
 - run_tests(EditMode) → 97/97 통과 (job 4429cc4eccf742f9a6dce4f7b7ce8320, 기존 94 + 신규 3)
 ### 실패와 수정
 - 없음
+
+## [수정] 구르기 키를 G→Ctrl로 변경(G 제거) — 2026-08-03 07:50
+### 프롬프트
+아 ctrl키를 누르면 구르기가 되어야해 G키는 빼줘
+### 조작 내역
+- PlayerController2D.Update: 팀원이 이미 Ctrl(좌/우)을 G키에 더해 추가해둔 상태였음. G키 트리거만 제거해 Ctrl(좌/우)만 남김
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → NullReferenceException 1건(스택트레이스 없음, 최근 턴들과 동일한 무관 패턴) → 타입 로드 확인으로 컴파일 정상 재확인
+- 파일 내 gKey 문자열 완전히 사라짐, leftCtrlKey는 남아있음을 직접 확인
+- run_tests(EditMode) → 97/97 통과 (job d1c0f674416e4de3958de68781851c70, 입력 매핑만 변경돼 순수 로직 테스트 영향 없음)
+### 실패와 수정
+- 없음
