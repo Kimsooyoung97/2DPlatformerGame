@@ -15,9 +15,10 @@ GameObject:
   - component: {fileID: 6906123316970133613}
   - component: {fileID: 300620027912272006}
   - component: {fileID: 3808806000288232274}
-  m_Layer: 0
-  m_Name: Player_Knight
-  m_TagString: Untagged
+  - component: {fileID: 2725574387042711585}
+  m_Layer: 7
+  m_Name: Player_Knight!!!!
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -180,7 +181,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0.26}
+  m_Offset: {x: -0.009058192, y: 0.5075914}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0}
@@ -190,7 +191,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.15, y: 0.515}
+  m_Size: {x: 0.5546006, y: 1.0101827}
   m_EdgeRadius: 0
 --- !u!114 &300620027912272006
 MonoBehaviour:
@@ -236,6 +237,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70dc81c5dcf02c547bf6157b1a734021, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
-  maxHp: 5
-  blinkInterval: 0.08
-  blinkCount: 4
+  invincible: 0
+  respawnDelay: 0.2
+  spawnGrace: 0.5
+  fallKillY: -18
+  hazardNameContains: Spikes
+  combatConfig: {fileID: 11400000, guid: 68ca4e28a24b6d247b3ffab08d653357, type: 2}
+--- !u!114 &2725574387042711585
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7771655860647579471}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6eb634c988deac4a97cd1794f5f573d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerProgression
+  levelConfig: {fileID: 11400000, guid: 6ee8e4a35d980c94b9c7d4e55e07cbfb, type: 2}
+  augmentConfig: {fileID: 11400000, guid: fdac61d070ce07e47a6e0c361e7904bd, type: 2}
