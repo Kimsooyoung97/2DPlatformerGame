@@ -2803,3 +2803,16 @@ C:\...\Assets\Audio\Effect\UI에 돌무더기 붕괴로 넣었어. 카메라가 
 해당 없음
 ### 커밋
 해당 없음(무수정)
+
+
+## [구현] 사운드 배선 1 — 플레이어 + SecondScene_1 공주만남 BGM — 2026-08-04 02:55
+### 프롬프트
+[구현] 사운드 배선 1번부터, 대신 SecondScene에서 포탈을 타고 SecondScene_1으로 이동했을때는 "공주만남"사운드로 재생시켜줘.
+### 조작 내역
+- SoundConfig(SO: 클립·간격·볼륨 소유) / PlayerSoundPlayer(무침습 관찰형: 발소리 Walk1~3 순환·점프 입력·공격 클릭) / SceneBgmPlayer(씬 진입 페이드인 루프)
+- SecondScene Player 배선, SecondScene_1에 SceneBgm(공주 만남, CompressedInMemory) 신설 — Portal(Portal·PortalUpKey) 무수정, 씬 자체 BGM 방식. SFX 5종 DecompressOnLoad. 두 씬 저장, 작업장 복귀
+- 사망 사운드는 사망 이벤트 소스 확인 후 별도 배선(보류 명시)
+### 검증
+- 컴파일 0, EditMode 113/113. 소리 체감·포탈 전환은 사용자 재생
+### 실패와 수정
+없음
