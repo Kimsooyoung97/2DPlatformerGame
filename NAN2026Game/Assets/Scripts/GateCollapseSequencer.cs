@@ -20,8 +20,11 @@ namespace NAN2026
         public Vector3[] dustPoints;
         public SpriteRenderer[] wallSprites;
         public CinemachineBasicMultiChannelPerlin noise;
+        public Light2D[] barrierLights;
+        public ParticleSystem sparkTemplate;
 
         float t;
+        float lockedBaseAlpha = 1f;
         bool playing;
         bool collapseFired;
         Transform origTarget;
@@ -40,7 +43,12 @@ namespace NAN2026
             enabled = true;
         }
 
-        void Awake() { enabled = false; if (openLight != null) openLight.intensity = 0f; }
+        void Awake()
+        {
+            enabled = false;
+            if (openLight != null) openLight.intensity = 0f;
+            if (lockedTilemap != null) lockedBaseAlpha = lockedTilemap.color.a;
+        }
 
         void Update()
         {
@@ -62,8 +70,15 @@ namespace NAN2026
             if (lockedTilemap != null)
             {
                 var col = lockedTilemap.color;
-                col.a = GateCollapseLogic.TintAlpha(t, d, c);
+                col.a = lockedBaseAlpha * GateCollapseLogic.TintAlpha(t, d, c);
                 lockedTilemap.color = col;
+            }
+
+            if (barrierLights != null)
+            {
+                float bf = GateCollapseLogic.TintAlpha(t, d, c);
+                for (int i = 0; i < barrierLights.Length; i++)
+                    if (barrierLights[i] != null) barrierLights[i].intensity = config.barrierLightIntensity * bf;
             }
 
             int phase = GateCollapseLogic.GetPhase(t, d, c, h);
@@ -97,6 +112,16 @@ namespace NAN2026
                     ps.Play();
                     Destroy(ps.gameObject, config.dustLifetime);
                 }
+
+            if (sparkTemplate != null && barrierLights != null)
+                foreach (var bl in barrierLights)
+                    if (bl != null)
+                    {
+                        var sk = Instantiate(sparkTemplate, bl.transform.position, Quaternion.identity);
+                        sk.gameObject.SetActive(true);
+                        sk.Play();
+                        Destroy(sk.gameObject, config.dustLifetime);
+                    }
 
             if (debrisPrefabs != null && debrisPrefabs.Length > 0 && panAnchor != null)
                 for (int i = 0; i < config.debrisCount; i++)
