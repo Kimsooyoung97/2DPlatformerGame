@@ -105,5 +105,80 @@ namespace NAN2026.Tests
             Assert.IsFalse(PlayerLocomotionLogic.ShouldFlipLeft(1f, true));
             Assert.IsTrue(PlayerLocomotionLogic.ShouldFlipLeft(0f, true));
         }
+
+        [Test] public void GroundNormal_FloorCountsAsGround()
+        {
+            Assert.IsTrue(PlayerLocomotionLogic.IsGroundNormal(1f, 0.5f));
+        }
+
+        [Test] public void GroundNormal_VerticalWallIsNotGround()
+        {
+            Assert.IsFalse(PlayerLocomotionLogic.IsGroundNormal(0f, 0.5f));
+        }
+
+        [Test] public void GroundNormal_SteepSlopeStillCountsAsGround()
+        {
+            Assert.IsTrue(PlayerLocomotionLogic.IsGroundNormal(0.6f, 0.5f));
+        }
+
+        [Test] public void GroundNormal_ShallowAngleWallDoesNotCount()
+        {
+            Assert.IsFalse(PlayerLocomotionLogic.IsGroundNormal(0.4f, 0.5f));
+        }
+
+        [Test] public void WallClamp_BlocksRightwardIntoRightWall()
+        {
+            Assert.AreEqual(0f, PlayerLocomotionLogic.ClampHorizontalVelocityAgainstWalls(3f, false, true));
+        }
+
+        [Test] public void WallClamp_BlocksLeftwardIntoLeftWall()
+        {
+            Assert.AreEqual(0f, PlayerLocomotionLogic.ClampHorizontalVelocityAgainstWalls(-3f, true, false));
+        }
+
+        [Test] public void WallClamp_AllowsMovementAwayFromWall()
+        {
+            Assert.AreEqual(-3f, PlayerLocomotionLogic.ClampHorizontalVelocityAgainstWalls(-3f, false, true));
+        }
+
+        [Test] public void WallClamp_NoWalls_Unaffected()
+        {
+            Assert.AreEqual(3f, PlayerLocomotionLogic.ClampHorizontalVelocityAgainstWalls(3f, false, false));
+        }
+
+        [Test] public void WallClamp_ZeroVelocity_Unaffected()
+        {
+            Assert.AreEqual(0f, PlayerLocomotionLogic.ClampHorizontalVelocityAgainstWalls(0f, true, true));
+        }
+
+        [Test] public void DashActive_TrueBeforeMaxDistance()
+        {
+            Assert.IsTrue(PlayerLocomotionLogic.DashActive(5f, 8f));
+        }
+
+        [Test] public void DashActive_FalseAtMaxDistance()
+        {
+            Assert.IsFalse(PlayerLocomotionLogic.DashActive(8f, 8f));
+        }
+
+        [Test] public void DashActive_FalseBeyondMaxDistance()
+        {
+            Assert.IsFalse(PlayerLocomotionLogic.DashActive(9f, 8f));
+        }
+
+        [Test] public void CanDash_AlwaysTrueWhenGrounded()
+        {
+            Assert.IsTrue(PlayerLocomotionLogic.CanDash(true, 5, 1));
+        }
+
+        [Test] public void CanDash_TrueInAir_WhenUnderLimit()
+        {
+            Assert.IsTrue(PlayerLocomotionLogic.CanDash(false, 0, 1));
+        }
+
+        [Test] public void CanDash_FalseInAir_WhenLimitReached()
+        {
+            Assert.IsFalse(PlayerLocomotionLogic.CanDash(false, 1, 1));
+        }
     }
 }

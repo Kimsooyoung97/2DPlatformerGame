@@ -12,9 +12,13 @@ PrefabInstance:
       propertyPath: m_Name
       value: MiddleBoss Variant
       objectReference: {fileID: 0}
+    - target: {fileID: 641594539143589342, guid: 356063fcc455a094cbd5dafff615a1ff, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     - target: {fileID: 1434224767324407884, guid: 356063fcc455a094cbd5dafff615a1ff, type: 3}
       propertyPath: MaxSpeed
-      value: 4
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 1639189110148543846, guid: 356063fcc455a094cbd5dafff615a1ff, type: 3}
       propertyPath: m_LocalScale.x
@@ -26,11 +30,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1639189110148543846, guid: 356063fcc455a094cbd5dafff615a1ff, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 107.43
+      value: 19.02974
       objectReference: {fileID: 0}
     - target: {fileID: 1639189110148543846, guid: 356063fcc455a094cbd5dafff615a1ff, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -6.87
+      value: 0.29436183
       objectReference: {fileID: 0}
     - target: {fileID: 1639189110148543846, guid: 356063fcc455a094cbd5dafff615a1ff, type: 3}
       propertyPath: m_LocalPosition.z
@@ -68,6 +72,14 @@ PrefabInstance:
       propertyPath: m_SpriteHash
       value: 288431053
       objectReference: {fileID: 0}
+    - target: {fileID: 3479223941318186818, guid: 356063fcc455a094cbd5dafff615a1ff, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4732157944113815499, guid: 356063fcc455a094cbd5dafff615a1ff, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -102,7 +114,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 632dc363094c40f43889a661d45dbedd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NHNDemo.MonsterHealth
-  maxHealth: 4
+  maxHealth: 10
   knockbackDistance: 0.12
 --- !u!114 &995174744184015421
 MonoBehaviour:

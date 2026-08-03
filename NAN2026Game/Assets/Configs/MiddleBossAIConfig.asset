@@ -16,12 +16,13 @@ MonoBehaviour:
   attackRange: 2.2
   chaseStopDistance: 14
   patrolSpeed: 0
-  chaseSpeed: 2.2
+  chaseSpeed: 0.8
   patrolRadius: 0
   jumpYThreshold: 1.2
   jumpConfirmDuration: 0.6
   attackCooldown: 1.6
   attackDamage: 2
+  maxHealth: 4
   xpReward: 30
   healthBarSize: {x: 2, y: 0.22}
   healthBarOffset: {x: 0, y: 4, z: 0}

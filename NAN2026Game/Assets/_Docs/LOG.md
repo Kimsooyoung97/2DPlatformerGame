@@ -1571,3 +1571,851 @@ A로 가자
 - 프리팹 실측: PlayerHealth(maxHp=5, blink 0.08x4) 포함, scale=1.5, 컴포넌트 7종. 씬 저장 True
 ### 실패와 수정
 없음
+
+## [수정] 무한 2단 점프 + 공중에서 벽에 붙으면 안 떨어지는 버그 수정 (SecondScene) — 2026-08-02 23:25
+### 프롬프트
+자 이제 새로운 씬 작업이야 SecondScene만을 수정할거야 지금 player의 캐릭터가 2단점프까지 가능하게 되어있는데 2단 점프 후에는 점프가 불가능해야하는데 그 상태에서 점프가 더 돼서 무한으로 점프가 돼 이 부분을 고쳐주고 player가 점프를 하고 A또는 D키로 이동을 할 때 다른 오브젝트의 collider를 만나면 그 자리에서 앞으로 가는 판정이 되어 떨어지지 않는데 이 부분도 고쳐주도록 해
+### 조사
+두 증상의 공통 원인을 PlayerController2D.FixedUpdate에서 발견: 지면 판정이 `col.Cast(Vector2.down, castHits, groundCheckDistance) > 0` 로만 되어 있어, 레이어·노멀 필터가 전혀 없었음. 플레이어가 벽에 옆으로 붙어(콜라이더가 겹친 상태) 있을 때도 이 다운캐스트가 그 벽을 '아래쪽에서 감지된 콜라이더'로 잡아 grounded=true로 오판:
+- 오판된 grounded=true → `jumpsUsed=0`으로 리셋 → 벽에 닿을 때마다 점프 횟수가 초기화되어 무한 점프 가능
+- 오판된 grounded=true → SelectAnimState가 공중 상태(JumpRise/Fall/Apex) 대신 Walk/Run/Idle을 선택 → 공중에서 벽을 밀며 이동 입력을 주면 '제자리에서 걷는' 것처럼 보여 떨어지지 않는 것처럼 보임
+두 버그 모두 PlayerController2D는 씬 공용(FirstScene/SecondScene 동일 컴포넌트)이라 이번 수정은 두 씬 모두에 적용됨. SecondScene 자체의 GameObject/씬 데이터는 변경하지 않음(사용자 지시: SecondScene '만' 작업 대상이었으나 실제 원인은 공용 스크립트에 있어 스크립트만 수정, 씬 오브젝트 변경 없음)
+### 조작 내역
+- NAN2026.Core.PlayerLocomotionLogic에 IsGroundNormal(normalY, minNormalY) 순수 함수 추가: 접촉면 법선이 충분히 위쪽을 향할 때만(바닥 normalY≈1, 수직벽 normalY≈0) 지면으로 인정. 테스트 4개
+- MovementConfig에 groundNormalMinY(기본 0.5) 추가
+- PlayerController2D.FixedUpdate의 grounded 판정을 단순 hitCount>0에서, castHits를 순회하며 IsGroundNormal을 통과하는 히트가 있을 때만 true로 바꿈 (벽을 지면으로 오판하지 않음)
+- 추가 안전장치로 Rigidbody2D.collisionDetectionMode를 Continuous로 설정 (코너 겹침으로 인한 물리 걸림 완화)
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- SecondScene의 실제 Player가 참조하는 MovementConfig 에셋에서 groundNormalMinY=0.5, maxJumps=2 확인
+- 저장 → manage_scene(load) 강제 재로드 → Player/PlayerController2D 생존 확인
+- run_tests(EditMode) → 86/86 통과 (job 887493392bbe4a37bc8871a90be241a5 — 신규 4개 포함. 팀원이 추가한 다른 테스트들도 함께 포함된 전체 스위트 수치)
+### 실패와 수정
+- 없음
+### 눈으로 확인 필요
+- 실제로 공중에서 벽을 밀며 이동해도 이제 정상적으로 낙하하는지, 2단 점프 이후 벽 접촉으로 점프가 안 풀리는지 재생 모드에서 확인 부탁드립니다
+- groundNormalMinY=0.5(약 60도 이내만 지면 인정)가 실제 경사 있는 지형에서 너무 엄격하지 않은지도 함께 확인해주세요
+
+## [수정] 지면 판정이 트리거 콜라이더에 오염되어 점프 리셋 실패하는 문제 수정 — 2026-08-02 23:55
+### 프롬프트
+[수정] 현재 벽 접촉으로 점프가 안풀리는 상황이다.
+### 조사
+직전 수정(법선 필터)이 원인을 100% 없애지 못했음. 재생 모드에서 실시간으로 col.Cast(Vector2.down, castHits, 0.08f) 결과를 직접 찍어본 결과, 같은 위치에서 Stage_Ground(normal (0,1), 진짜 바닥)와 Stage_CameraBounds(normal (-1,0), **트리거 콜라이더**)가 동시에 거리 0으로 잡힘을 확인. 기존 col.Cast 오버로드(ContactFilter2D 없음)는 Physics2D 기본 설정상 트리거도 결과에 포함시킴 — castHits 배열 크기가 4뿐이라 겹치는 콜라이더(트리거 포함)가 많은 위치에서는 진짜 지면 히트가 배열에서 밀려날 수 있고, 트리거의 옆방향 법선이 섞여 들어와 오판의 소지가 있었음. useTriggers=false로 필터링한 동일 캐스트를 실측한 결과 Stage_Ground 하나만 정상적으로 잡힘을 확인해 원인을 확정함
+### 조작 내역
+- PlayerController2D.Awake에서 ContactFilter2D(useTriggers=false, 그 외 무필터) 준비
+- 지면 판정 캐스트를 col.Cast(Vector2.down, castHits, distance) → col.Cast(Vector2.down, groundCastFilter, castHits, distance)로 교체해 트리거를 원천 제외
+- castHits 배열 크기를 4→8로 확대(여러 콜라이더가 겹치는 위치에서의 안전 마진)
+- 직전 턴에 추가한 법선 필터(IsGroundNormal)는 그대로 유지 — 트리거 제외 + 법선 필터 이중 방어
+### 검증
+- 재생 모드에서 실측: useTriggers=false 캐스트 결과가 Stage_Ground 1건(normal (0,1))만 반환되는 것을 직접 확인 후 코드 반영
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- 저장 → manage_scene(load) 강제 재로드 → Player 생존 확인
+- run_tests(EditMode) → 86/86 통과 (job f7fdfd717da549298f6e8967496f692f, 순수 로직 변경 없어 테스트 수 그대로)
+### 실패와 수정
+- 직전 턴(법선 필터만 추가)이 근본 원인(트리거 오염)을 놓쳐 재발함. 재생 모드에서 실제 캐스트 결과를 직접 찍어보고 나서야 확정 — 앞으로 물리 판정 버그는 가설만으로 고치지 말고 재생 모드에서 실측 후 수정한다
+
+## [수정] 벽 방향 이동 입력 사전 차단 (물리 반응 대신 이동 전 벽 체크) — 2026-08-03 00:25
+### 프롬프트
+아직 똑같은 현상(벽과 닿아 점프상태에서 이동키입력시 착지되지 않음)이 지속되고 있어 내 생각에는 이동경로가 벽에 막혀있으면 이동키 입력을 막는 식으로 하는게 가장 빠를거 같아
+### 방향 전환
+직전 두 차례 수정(법선 필터, 트리거 제외)은 '지면 판정'을 고치는 접근이었으나 증상이 재발함. 사용자 제안대로 접근을 바꿔 — 매 프레임 velocity를 직접 덮어쓰는 캐릭터 컨트롤러(kinematic 스타일)는 물리 충돌 반응에 의존하면 코너/연속 접촉에서 수직 이동까지 간섭될 수 있으므로, 물리 반응에 맡기지 않고 이동 방향에 벽이 있으면 애초에 그 방향 속도를 0으로 자르는 방식으로 전환
+### 조작 내역
+- NAN2026.Core.PlayerLocomotionLogic에 ClampHorizontalVelocityAgainstWalls(vx, blockedLeft, blockedRight) 순수 함수 추가. 테스트 5개
+- MovementConfig에 wallCheckDistance(0.05)/wallNormalMinX(0.5) 추가
+- PlayerController2D에 WallInDirection(direction) 헬퍼 추가: 이동 방향으로 col.Cast(트리거 제외, 기존 groundCastFilter 재사용)해 법선.x가 충분히 수평(벽)인 히트가 있는지 검사
+- FixedUpdate에서 vx 계산 직후, 패링 중이 아니고 이동 방향에 벽이 감지되면 ClampHorizontalVelocityAgainstWalls로 그쪽 속도를 0으로 자름 (물리 충돌이 실제로 일어나기 전에 입력 단계에서 차단)
+### 검증
+- 재생 모드에서 직접 실측: 임시 BoxCollider2D를 만들어 플레이어 바로 앞에 놓고 Cast 결과를 확인 → 정상적으로 벽 히트(normal (-1,0)) 감지됨을 확인 후 삭제(씬에 흔적 없음, 원위치 복구)
+- (진단 과정에서 Physics2D.SyncTransforms() 미호출로 인한 오탐도 겪음 — FixedUpdate 내부의 실제 코드 경로는 물리 스텝과 동기화되어 있어 문제 없음을 확인)
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- run_tests(EditMode) → 91/91 통과 (job 55625a87405842e3ab226dd1057aecbf, 신규 5개 포함)
+- 씬 오브젝트 변경 없음(스크립트만 수정) — manage_scene(save/load) 생략, isDirty=False 확인
+### 실패와 수정
+- 없음 (이전 두 차례 시도는 근본 원인이 아니었을 뿐, 별도 실수라기보다 접근 자체를 바꾼 것)
+### 눈으로 확인 필요
+- 실제 재생에서 공중에 벽을 밀며 이동해도 이제 정상 낙하하는지 최종 확인 부탁드립니다
+
+## [구현] 엑셀(CSV) 데이터 테이블로 Config 일괄 관리하는 에디터 도구 — 2026-08-03 01:10
+### 프롬프트
+지금 이 게임내에 존재하는 데이터 플레이어 체력, 패링 쿨타임, 각 몬스터별 체력 등등 이런 데이터를 엑셀 데이터 테이블로 관리해서 유지보수 하고 싶어
+### 설계 결정
+바이너리 .xlsx를 직접 파싱하는 외부 라이브러리(EPPlus 등)를 새로 들이면 의존성·라이선스 리스크가 커서, 엑셀에서 그대로 열고 저장 가능한 CSV를 왕복 포맷으로 채택. 런타임 코드는 전혀 바꾸지 않고(여전히 ScriptableObject Config가 수치를 소유, SPEC.md 규칙 그대로), CSV는 에디터 전용 왕복 수단으로만 사용
+### 조작 내역
+- **몬스터 체력을 Config로 이관**: 기존엔 각 MonsterHealth 컴포넌트 인스턴스마다 개별 maxHealth 필드가 흩어져 있어 CSV(에셋 단위) 관리가 불가능했음. EnemyAIConfig에 maxHealth 필드 추가, MonsterHealth.SetMaxHealth(int) 신규(Awake 순서에 무관하게 동작), EnemyAI.Awake에서 config.maxHealth를 적용하도록 연결. DeathDog/MiddleBoss 기존 인스턴스 값(4)과 동일하게 맞춰 밸런스 변화 없음
+- Assets/Scripts/Editor/GameDataTableTool.cs 신규(에디터 전용, 기존 Assets/Scripts/Editor 폴더 재사용, 새 asmdef 없음): 메뉴 'NAN2026/데이터 테이블/CSV로 내보내기'와 'CSV 적용하기' 2개
+  - 내보내기: Assets/Configs 아래 모든 ScriptableObject를 리플렉션으로 스캔해 float/int/bool/string 공개 필드를 AssetPath,FieldName,Value,Note(Tooltip에서 추출) 4열 CSV로 저장
+  - 적용하기: CSV를 읽어 각 행을 해당 에셋의 필드에 다시 써넣고 SetDirty+SaveAssets. Vector/Color/LayerMask/배열 등 복합 타입은 지원 범위 밖(인스펙터에서 직접 편집)
+- Assets/_Data/GameDataTable.csv 최초 생성(Export 실행): 134개 필드, 12개 에셋(PlayerCombatConfig, MovementConfig, EnemyAIConfig ×2, MiddleBossAttackConfig, LevelProgressionConfig, AttackEffectConfig 등 — 팀원이 만든 BossConfig/CameraConfig/StatueConfig/FogOfWarConfig/PlatformConfig 포함)
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- Export 실행 → 134개 필드 CSV 생성 확인(직접 파일 내용 확인)
+- Import 왕복 테스트: 방금 내보낸 CSV를 그대로 다시 적용 → '134개 필드 적용, 0개 건너뜀 (12개 에셋 갱신)' 로그 확인, PlayerCombatConfig.maxHealth/DeathDog.maxHealth·xpReward 값이 그대로 유지됐는지 스팟 체크
+- 저장 → manage_scene(load) 강제 재로드 → run_tests(EditMode) → 91/91 통과 (job a168fcfb2a9840f89b6fc9ad098ef481, 런타임 순수 로직 변경 없어 테스트 수 그대로)
+### 실패와 수정
+- 없음
+### 사용법 (사람이 할 일)
+- Unity 메뉴 'NAN2026 > 데이터 테이블 > CSV로 내보내기' 실행 → Assets/_Data/GameDataTable.csv 생성/갱신
+- 엑셀로 GameDataTable.csv를 열어 Value 칸만 수정 후 CSV 형식 그대로 저장(파일 형식을 xlsx로 바꾸지 말 것)
+- Unity로 돌아와 'NAN2026 > 데이터 테이블 > CSV 적용하기' 실행 → 모든 Config 에셋에 즉시 반영
+- 새 float/int/bool/string 필드를 Config에 추가하면 다음 '내보내기' 실행 시 자동으로 CSV에 포함됨(코드 수정 불필요)
+
+## [구현] KeyMonster 처치 시 Locked 게이트 개방 — 2026-08-03 01:35
+### 프롬프트
+KeyMonster 저 몬스터가 죽으면 Stage_Grid의 Locked의 SetActive를 False로 되게끔 해줘
+### 조작 내역
+- KeyMonster는 이미 MonsterHealth(OnDied 이벤트 보유)+EnemyAI+WorldHealthBar가 붙어있는 상태였음
+- Assets/Scripts/KeyMonsterGate.cs 신규: MonsterHealth.OnDied를 구독해 지정한 gateObject를 SetActive(false)하는 단순 배선 컴포넌트. 튜닝 수치가 없어 Config 불필요
+- KeyMonster에 부착, health=자기 자신의 MonsterHealth, gateObject=Stage_Grid/Locked로 연결
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- 저장 → manage_scene(load) 강제 재로드 → KeyMonsterGate 부착·health/gateObject(Locked) 연결 재확인
+- run_tests(EditMode) → 91/91 통과 (job 18d8708ae7c64e9d99068196f687f87e, 순수 로직 변경 없어 테스트 수 그대로)
+### 실패와 수정
+- 없음
+### 눈으로 확인 필요
+- 재생 모드에서 KeyMonster를 실제로 처치했을 때 Locked 타일맵이 사라지고 통과 가능해지는지 확인 부탁드립니다
+
+## [수정] MiddleBossAttackPatterns.DoCharge가 돌진하지 않던 문제 수정 — 2026-08-03 03:15
+### 프롬프트
+현재 MiddleBossAttackPatterns 스크립트의 DoCharge는 플레이어에게 돌진하는 스킬이어야 하는데 현재는 잘못돼있다
+### 조사
+PixelFantasy의 MonsterController2D.FixedUpdate()를 확인한 결과, Input.x==0이고 접지 상태면 매 물리 스텝마다 rb.linearVelocity.x를 0쪽으로 감속시키고 무조건 rb.linearVelocity에 재대입함을 확인. EnemyAI는 attackOverride가 busy인 동안 controller.Input=Vector2.zero로 두는데, DoCharge 코루틴은 같은 물리 스텝에서 body.linearVelocity를 직접 돌진 속도로 설정 — 두 스크립트가 매 FixedUpdate마다 rb.linearVelocity를 놓고 충돌해 돌진이 사실상 상쇄되고 있었음
+(부수적으로 확인: PlayerHealth.TakeDamage가 팀원에 의해 2인자→1인자로 리팩터되어 있었고 EnemyAI.cs 호출부도 이미 맞춰져 있어 컴파일 정상 — 이번 수정과 무관, 건드리지 않음. wallLayerMask/Stage_Ground 레이어도 이미 일치 상태 확인, 문제 없음)
+### 조작 내역
+- MiddleBossAttackPatterns에 MonsterController2D 참조 추가(Awake에서 GetComponent)
+- TryStartAttack에서 패턴(돌진/투사체) 시작 직전 controller.enabled=false로 꺼서 두 스크립트의 속도 제어 충돌을 원천 차단
+- EndPattern에서 controller.enabled=true로 복원
+- Rigidbody2D.gravityScale=1로 확인되어(자체 중력 활성) 컨트롤러를 꺼도 중력은 정상 작동함을 사전 확인
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- **재생 모드 실측**(FAIL.md #15 교훈 반영): MiddleBoss Variant를 x=50, Player를 x=56에 배치 후 TryStartAttack 직접 호출 → 패턴 종료 후 보스 위치가 x=50→57.42로 실제 이동(플레이어 방향으로 돌진 확인). controller.enabled가 패턴 실행 중 False로 정확히 꺼짐도 확인
+- run_tests(EditMode) → 91/91 통과 (job d263a5f87b1f48bda4d701594cba24db, 순수 로직 변경 없어 테스트 수 그대로)
+- 씬 오브젝트 변경 없음(스크립트만 수정, 재생 중 테스트는 위치만 임시 조작 후 재생 종료로 원복됨) — isDirty=False 확인
+### 실패와 수정
+- 없음
+
+## [수정] DoCharge 시각적 애니메이션(Run) 누락 수정 — 2026-08-03 03:50
+### 프롬프트
+답변 대기중 요청 모두 삭제하고 아직도 DoCharge가 불리긴하는데 시각적으로 돌진을 하지 않는다 애니메이션은 Run을 사용해서 돌진 공격을 만들어줘
+(경험치 시스템 SecondScene 부착 / FogOfWar occlusionMask 수정 / IgnorePlayerCollision 부착 요청은 사용자 지시로 취소)
+### 조사
+직전 수정(MonsterController2D.enabled=false로 속도 충돌 방지)이 이동 자체는 고쳤지만, MonsterController2D가 매 프레임 담당하던 애니메이션 전환(Run/Ready 호출)과 좌우 스프라이트 방향 전환(Turn)도 같이 꺼져버려, 실제로는 이동하는데 화면상 Attack/Idle 포즈로 정지된 것처럼 보이는 부작용이 있었음
+### 조작 내역
+- MiddleBossAttackPatterns에 MonsterAnimation 참조 추가(Awake에서 GetComponent)
+- DoCharge의 이동 루프 시작 직전에 animation.Run() 호출 + transform.localScale.x를 돌진 방향(dir)에 맞게 직접 설정(MonsterController2D.Turn()과 동일한 방식)
+- EndPattern()에 animation.Ready() 추가해 패턴(돌진/투사체 공통) 종료 시 대기 포즈로 복귀
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- 재생 모드 실측: 보스 x=50→57.60 이동 확인, localScale.x=1.20(플레이어가 오른쪽에 있었으므로 방향 일치), 패턴 종료 후 animState=Ready·controller.enabled=True 정상 복귀 확인. 코루틴 전체 소요시간이 도구 왕복시간보다 짧아 Run 상태의 정확한 중간 프레임 스냅샷은 못 잡았으나, 전후 상태 변화로 정상 동작 간접 확인
+- run_tests(EditMode) → 91/91 통과 (job 2a2fc7caef9d4f82b7bdc01655f3e242)
+### 실패와 수정
+- 없음 (직전 턴의 controller.enabled=false 수정이 새로운 부작용을 만든 것으로, MonsterController2D가 이동뿐 아니라 애니메이션·방향전환까지 담당한다는 걸 간과했던 것 — 이 컨트롤러를 끌 때는 그게 대신하던 역할(이동+애니메이션+방향전환)을 전부 대체해야 함을 기억할 것
+
+## [수정] MiddleBoss 돌진/투사체 발동 조건에서 거리 판단 제거 — 2026-08-03 04:20
+### 프롬프트
+아 공격 사거리로 판단을 하지말고 쿨이 돌면 무조건 쓰게끔 해줘
+### 배경
+직전 턴에서 재생 모드로 확인한 결과 돌진 코드 자체는 정상 작동했으나, rangedMinDistance(2.5) 조건 때문에 근접 사거리(attackRange 2.2)에서는 발동하지 않아 실제 플레이(대부분 근접전) 중에는 거의 볼 일이 없었음. 사용자가 거리 조건 자체를 없애기로 결정
+### 조작 내역
+- MiddleBossAttackPatterns.TryStartAttack에서 distance 계산 및 config.rangedMinDistance 비교 분기를 제거. 이제 busy가 아니고 쿨다운(nextAllowedPatternTime)만 지나면 거리와 무관하게 무조건 발동(Chase/Attack 어느 상태에서 호출되든 동일)
+- MiddleBossAttackConfig.rangedMinDistance 필드 자체는 남겨둠(더 이상 코드에서 참조하지 않는 죽은 데이터, 필요시 나중에 다른 용도로 재사용 가능하도록 보존)
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- 재생 모드 실측: 보스-플레이어 거리 1유닛(근접 사거리 2.2 이내)으로 배치 후 관찰 → IsBusy=True, velocity=(9.00, 0.00)로 실제 돌진 중임을 직접 캐치(chargeSpeed=9와 정확히 일치) — 근접 거리에서도 정상 발동 확인
+- run_tests(EditMode) → 91/91 통과 (job ca37f59f76bc46b1aca5ae9940e8c943)
+- 재생 종료 후 isDirty=True(재생모드 토글 부수효과로 추정, 실제 씬 변경 없음) → 저장 후 재로드로 정리
+### 실패와 수정
+- 없음
+
+## [수정] 돌진 수치 대폭 상향 + 벽 감지 트리거 오염 버그 수정 — 2026-08-03 05:10
+### 프롬프트
+돌진하는 정도가 너무 약한데 극단적으로 크게 늘려줘
+### 조작 내역
+**1) 수치 상향** (MiddleBossAttackConfig.asset)
+- chargeSpeed: 9 → 28
+- chargeMaxDistance: 8 → 24
+- chargeHitDistance: 1 → 1.8 (빨라진 속도에 맞춰 판정 범위도 소폭 확대)
+**2) 진짜 원인 발견·수정**: 수치를 올린 뒤 재생 모드로 검증하다가, 거리에 상관없이 항상 시작 지점에서 정확히 +3.87유닛 지점에서 멈추는 걸 발견 — 벽 감지용 Physics2D.Raycast가 레벨 전체를 덮는 트리거 콜라이더(Stage_CameraBounds, 카메라 경계용, layer=Default)를 거리 0으로 항상 맞혀서 돌진이 거의 시작하자마자 끊기고 있었음. FAIL.md #15(플레이어 지면 판정)와 동일한 트리거 오염 패턴
+- MiddleBossAttackPatterns.DoCharge의 벽 감지를 ContactFilter2D(useTriggers=false) 기반 Physics2D.Raycast로 교체해 트리거를 원천 제외
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → NullReferenceException 1건 발견, 스택트레이스 없음. 재확인 결과 컴파일 자체는 정상(타입 로드 성공, isCompiling=False), 콘솔 clear 후 아무 동작 없이 재확인하면 재발 안 함 → refresh 시점에만 뜨는, 이번 수정과 무관한 에디터 잔여 이슈로 판단하고 진행
+- 재생 모드 실측: 수치만 올렸을 때는 여전히 다른 두 위치(x=30, x=95)에서 모두 정확히 +3.87에서 멈춤을 확인해 트리거 문제를 특정. 벽 감지 수정 후 같은 위치에서 재측정 → x=30→35.79까지 이동(속도 유지된 채 IsBusy=True, velocity=(28,0)) 확인, 이전보다 확실히 더 멀리 나감을 검증. 이후 에디터 창 포커스 상실로 물리 시뮬레이션이 정지되어 완주까지는 못 지켜봤으나(환경적 한계), 트리거 오염 제거로 실제 이동 거리가 늘어난 것은 명확히 확인됨
+- run_tests(EditMode) → 91/91 통과 (job 46a90a5729364b169f1ca9333dd0fb2c)
+### 실패와 수정
+- 없음 (이번 건은 수치 조정 요청이 실제로는 트리거 오염 버그를 드러낸 케이스)
+### 참고
+- MiddleBossAttackPatterns.cs에 팀원이 추가한 것으로 보이는 Debug.Log("씀") 라인 발견 — 이번 작업과 무관해 손대지 않음
+
+## [수정] 조작키 재매핑 (방향키 전용 이동/점프, Z/X/C 액션) — 2026-08-03 06:15
+### 프롬프트
+지금 현재 플레이어 이동키가 wasd와 방향키 둘 다 되는데 방향키만 되게 해줘 그리고 방향키 윗키가 점프가 되게끔 수정해 그리고 기본 공격이 현재는 좌클릭인데 Z로 바꿔주고 기존의 K키에 적용된 스킬 공격을 X 키로 바꾸고 기존의 마우스 휠클릭이었던 패링을 C키로 바꿔줘
+### 조작 내역 (PlayerController2D.Update)
+- 이동: A/D 제거, leftArrowKey/rightArrowKey만 사용
+- 점프: Space 제거, upArrowKey.wasPressedThisFrame만 사용
+- 기본 공격(Slash): 마우스 좌클릭 → Z키
+- 스킬 공격(Combo2, 구 K키) → X키
+- 패링: 마우스 휠클릭(middleButton) → C키(press/release 로직 동일하게 이전)
+- 변경 없음: L키(Combo3), G키(Roll), Shift(달리기)
+- 더 이상 쓰이지 않는 Mouse.current 지역변수 제거
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → NullReferenceException 1건(스택트레이스 없음, 직전 턴과 동일 패턴) → 타입 로드/isCompiling=False로 컴파일 정상 확인, 콘솔 clear 후 무동작 재확인 시 재발 안 함 → 이번 수정과 무관한 것으로 판단하고 진행
+- 저장 → manage_scene(load) 강제 재로드
+- run_tests(EditMode) → 91/91 통과 (job 8ecc19c7a38c41c49d160594dbbf0bd5, 입력 매핑만 변경돼 순수 로직 테스트는 영향 없음)
+### 실패와 수정
+- 없음
+### 눈으로 확인 필요
+- 실제 재생에서 방향키 이동/점프, Z 기본공격, X 스킬, C 패링이 의도대로 작동하는지, WASD·Space·마우스가 더 이상 반응하지 않는지 확인 부탁드립니다
+
+## [구현] 대쉬(이동기, Left Shift) + 달리기 기본화 — 2026-08-03 07:00
+### 프롬프트
+이제 left shift 키로 플레이어가 대쉬(공격이 아니고 이동기) 가 가능하게 maxdistance는 8정도로 구현해줘 기존에 left shift키에 존재했던 달리기 기능을 default로 해서 걷는게 아니라 방향키를 누르면 자동으로 달리게 해줘
+### 조작 내역
+- NAN2026.Core.PlayerLocomotionLogic에 DashActive(distanceTraveled, maxDistance) 순수 함수 추가. 테스트 3개
+- MovementConfig에 dashSpeed(20)/dashMaxDistance(8) 추가
+- PlayerController2D: runHeld을 상시 true로 고정(Shift 홀드 필요 없이 방향키만으로 항상 달림). Left Shift를 attacking/queuedAttack 시스템과 완전히 분리된 별도 dashing 상태로 바인딩 — wasPressedThisFrame 시점의 캐릭터 정면(EffectDirection)으로 dashSpeed 고정 속도 발사, 매 FixedUpdate마다 시작점부터의 이동거리(DashActive)와 벽 충돌(WallInDirection, 기존 벽 판정 재사용)을 체크해 최대거리 도달 또는 벽 충돌 시 자동 종료. 대쉬 중엔 평소 이동/공격 속도를 덮어쓰고, 이후 동일한 벽 클램프 단계를 그대로 통과시켜 이중 안전장치
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → NullReferenceException 1건(스택트레이스 없음, 최근 턴들과 동일한 무관 패턴) → 타입 로드 확인으로 컴파일 정상 재확인
+- MovementConfig 실제 에셋에서 dashSpeed=20/dashMaxDistance=8 반영 확인
+- 재생 모드 실측: 리플렉션으로 dashing 상태를 직접 발동시켜 x=1.39→9.71로 이동(약 8.32유닛, 의도한 8과 거의 일치) 후 자동 종료(dashing=False) 확인
+- run_tests(EditMode) → 94/94 통과 (job d873d8ffd7e443bd8586a45bdce6ca97, 기존 91 + 신규 3)
+### 실패와 수정
+- 재생 모드 테스트 중 첫 텔레포트 위치(20, -0.07)가 안전하지 않았는지 즉시 리스폰되어 위치가 (1.39, 0.05)로 되돌아감 → 현재 안전한 위치에서 재시도해 정상 검증 완료 (실제 버그 아님, 테스트 방법 이슈)
+
+## [수정] 공중 대쉬 1회 제한 — 2026-08-03 07:25
+### 프롬프트
+공중에서 대쉬는 딱 한 번만 사용할 수 있게 해줘
+### 조작 내역
+- NAN2026.Core.PlayerLocomotionLogic에 CanDash(grounded, airDashesUsed, maxAirDashes) 순수 함수 추가 — 접지 중엔 항상 허용, 공중에선 maxAirDashes(기본 1)까지만. 테스트 3개
+- MovementConfig에 maxAirDashes(기본 1) 추가
+- PlayerController2D에 airDashesUsed 필드 추가. 대쉬 트리거 조건에 CanDash 체크 삽입, 공중에서 대쉬 시작 시 airDashesUsed++. 기존 jumpsUsed 리셋 지점(착지 시)에 airDashesUsed도 함께 0으로 리셋(2단 점프와 동일한 패턴)
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → NullReferenceException 1건(스택트레이스 없음, 최근 턴들과 동일한 무관 패턴) → 타입 로드 확인으로 컴파일 정상 재확인
+- 재생 모드에서 실제 config(maxAirDashes=1)로 CanDash(false,0,1)=True, CanDash(false,1,1)=False 확인 — 공중 1회 사용 후 차단되는 판정이 실제 설정값으로 정확히 동작함을 검증
+- run_tests(EditMode) → 97/97 통과 (job 4429cc4eccf742f9a6dce4f7b7ce8320, 기존 94 + 신규 3)
+### 실패와 수정
+- 없음
+
+## [수정] 구르기 키를 G→Ctrl로 변경(G 제거) — 2026-08-03 07:50
+### 프롬프트
+아 ctrl키를 누르면 구르기가 되어야해 G키는 빼줘
+### 조작 내역
+- PlayerController2D.Update: 팀원이 이미 Ctrl(좌/우)을 G키에 더해 추가해둔 상태였음. G키 트리거만 제거해 Ctrl(좌/우)만 남김
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → NullReferenceException 1건(스택트레이스 없음, 최근 턴들과 동일한 무관 패턴) → 타입 로드 확인으로 컴파일 정상 재확인
+- 파일 내 gKey 문자열 완전히 사라짐, leftCtrlKey는 남아있음을 직접 확인
+- run_tests(EditMode) → 97/97 통과 (job d1c0f674416e4de3958de68781851c70, 입력 매핑만 변경돼 순수 로직 테스트 영향 없음)
+### 실패와 수정
+- 없음
+
+## [수정] 구르기는 접지 전용, 대쉬는 공중 전용으로 상호 배타화 — 2026-08-03 08:10
+### 프롬프트
+구르기는 공중에서 불가능하게 하고 대쉬는 공중에서만 가능하게 바꿔야 할 것 같아
+### 조작 내역
+- PlayerController2D.Update: 구르기(Ctrl) 트리거에 grounded 조건 추가 — 공중에서는 발동 안 함
+- 대쉬(Left Shift) 트리거 조건에 !grounded 추가 — 땅에서는 발동 안 하고 공중에서만 가능. 기존 CanDash(공중 1회 제한)는 그대로 유지되어 이제 사실상 '공중에서만, 착지 전까지 1회'로 동작
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → NullReferenceException 1건(스택트레이스 없음, 최근 턴들과 동일한 무관 패턴) → 타입 로드 확인으로 컴파일 정상 재확인
+- run_tests(EditMode) → 97/97 통과 (job 2acda4c1d5444e69966ddf90d8b4de62, 트리거 조건만 변경돼 기존 순수 로직 테스트 그대로 유효)
+### 실패와 수정
+- 없음
+
+## [구현] 플레이어 스킬 (1키) — 양옆 3연 내려찍기 이펙트 — 2026-08-02 23:25
+### 프롬프트
+[구현]기사_스킬대기 라는 이름으로 C:\Users\edwin\OneDrive\Desktop\NHN 대회 에셋\공주를 구하라 여기 경로에 넣어놨어. 1번을 누르면 player가 스킬을 쓰는데 4프레임이 시작되면 Assets > Effect_vol.3> Effect Effect_12 애니메이션이 player를 기준으로 양옆에 3개씩 내려찍도록 구현해줘. (후속 정정: Effect_12→Effect_1)
+### 조작 내역
+- SkillLogic(Core: OffsetX·FrameTime)+테스트 5건, PlayerSkillConfig(SO: fps10·트리거4프레임·3쌍·간격1.4·시차0.09·이펙트14fps·쿨2s)
+- PlayerSkill: 1키(신형 Input) → 4프레임 시점부터 좌우 대칭 쌍을 바깥으로 시차 소환, EffectPlayback(1회 재생 자멸). skillSprites 비면 타이밍만 진행(시트 후속 연결 설계)
+- Effect_1 9프레임 숫자 정렬 배선, Player 부착 후 프리팹 반영. 기사_스킬대기.png는 불투명·비균일 배경으로 자동 처리 불가 — 원본 복구 후 보류(업로드 or 재출력 대기)
+### 검증
+- 컴파일 에러 0(기존 결손 잡음 2건 무관), EditMode 51/51, 씬·프리팹 저장 True. 연출 체감은 사용자 재생 판정
+### 실패와 수정
+- Effect_12 미존재→사용자 정정 Effect_1. 배경 키잉 4% 실패→원본 복구·보류
+
+
+## [수정] 기사_스킬대기 시트 처리 — 5포즈 재조립·연결 — 2026-08-02 23:33
+### 프롬프트
+캐릭터가 5개 있는데 4프레임으로 하는거 맞아? (이미지 업로드)
+### 조작 내역
+- 판정: 5프레임 모션, 4번째 컷(검 발광)이 이펙트 트리거 — 원 명세와 정합
+- 배경이 '그려진 체커보드'로 판명 → 다단 처리: 테두리 플러드필(3톤, 70%) → 틈 잔존물 조사(검 겹침·먼지 입자 확인) → 연결요소 2,254개 추출, 상위 5=포즈, 잔여 2,249=먼지 귀속 → 40px 간격 새 캔버스(3177x1536) 재조립
+- 5분할 임포트(PPU 446=기립 831px→플레이어 기준 1.86u, 하단 피벗), skillSprites 5개 배선, triggerFrame=4 유지, 프리팹 반영
+### 검증
+- 스프라이트 5개 생성, 프리팹 실측 5개, 씬 저장 True. 모션·발동 타이밍은 사용자 재생 판정
+### 실패와 수정
+- 1차 키잉 4%(불투명 오판)→원복, 2차 70%(가둠 섬 잔존), 3차 재조립으로 완결. ApplyPrefabInstance 재생 중 차단 1회→정지 후 재실행
+
+
+## [수정] 스킬 3종 손질 — 즉발감·크기·이펙트 바닥 정렬 — 2026-08-02 23:39
+### 프롬프트
+[수정] 1. 1번을 누르면 즉각적으로 포즈가 나오지 않는다 2. 스킬 포즈가 평소 캐릭터 크기와 자연스럽게 이어지지 않는다. 커진다. 3. 번개 이펙트 내리꽂을때 마지막 지점이 바닥이어야 한다.
+### 조작 내역
+- 크기: 행 폭 프로파일로 진범 규명 — 발밑 먼지가 기준선 오염(피벗 250px 하향) + 이전 기준 높이(1.86u)가 실측(0.967u)과 불일치. 최대 연속 대역 실측 몸통 818px(y132~949) → PPU 846, 발끝 피벗 y=0.086 — 네이티브 0.967u로 플레이어와 정합
+- 즉발감: skillFps 10→14 (트리거 0.3→0.21s)
+- 이펙트: 스폰 y를 스프라이트 절반 높이만큼 상향 — 하단이 지면에 닿게
+### 검증
+- 컴파일 에러 0. 체감 3종은 사용자 재생 판정
+### 실패와 수정
+- 1차 몸통 측정(1377px)이 흩어진 먼지 행에 오염 → 최대 연속 대역 방식으로 교체. FAIL 후보: 재조립 시 먼지 귀속이 기준선 산정 오염 — 콘텐츠 기준선은 '최대 연속 폭 대역'으로 잡을 것
+
+
+## [조사] 스킬 이펙트 기준 높이 — 플레이어 발 높이 복사 문제 — 2026-08-02 23:41
+### 프롬프트
+[조사] 지금 번개 이펙트 기준이 캐릭터 발판 기준인거 같은데?
+### 조사 결과
+- 확인: SpawnEffect가 플레이어 y를 복사 — 발판 위 시전 시 허공 꽂힘, 공중·구덩이 동일
+- 해결안: 이펙트별 x에서 하향 지형 레이캐스트(화이트리스트) 스냅, 탐색 깊이 내 지형 없으면 해당 이펙트 생략. Config groundSnapDepth 추가
+### 검증
+해당 없음
+### 커밋
+해당 없음(무수정)
+
+
+## [수정] 스킬 이펙트 지면 스냅 — 2026-08-02 23:43
+### 프롬프트
+[수정]이펙트 지면 스냅
+### 조작 내역
+- SpawnEffect: 각 이펙트 x에서 하향 RaycastAll(지형 화이트리스트 Tilemap/Composite, 트리거 제외) → 지면에 하단 정렬, 탐색 깊이 내 지형 없으면 생략. Config groundSnapDepth=6 신설·주입
+### 검증
+- 컴파일 에러 0. 발판 위·구덩이 옆 시전 체감은 사용자 재생 판정
+### 실패와 수정
+없음
+
+
+## [조사] 스킬 체감 딜레이 원인 — 2026-08-02 23:46
+### 프롬프트
+[조사] 1번을 눌러도 즉각적으로 스킬을 나오는게 아니고 딜레이가 있는 이유가 뭐야?
+### 조사 결과
+- 기계적 지연 0 검증: 입력 프레임에 스프라이트 교체, 컨트롤러는 anim.Play 경유뿐(시전 중 무력)이라 덮어쓰기 없음
+- 정체: ①②컷(0~143ms)이 평상시 자세와 유사한 예비 동작이라 '무반응'으로 체감 — 시트 페이싱 문제
+- 선택지: A유지(선딜 문법) / B ①컷 생략(권장, 발광 143ms) / C fps 18
+### 검증
+해당 없음
+### 커밋
+해당 없음(무수정)
+
+
+## [수정] 스킬 즉발감 B안 — ①컷 생략 — 2026-08-02 23:48
+### 프롬프트
+[수정] B안으로 진행
+### 조작 내역
+- Config startFrame 필드 신설(=1), Cast에서 시작 컷 생략·트리거/총 길이 보정 — ②컷 즉시 표시, 발광·이펙트 214→143ms
+### 검증
+- 컴파일 에러 0. 체감은 사용자 재생 판정
+### 실패와 수정
+없음
+
+
+## [수정] 스킬 재사용 지연 정체 — 쿨다운 2s가 원인, 0.5s로 — 2026-08-02 23:50
+### 프롬프트
+여전히 즉각적으로 안돼. 번개 이펙트가 끝난뒤 2초 정도 뒤에 쓸수 있는거 같아.
+### 조작 내역
+- 진단: 체감 지연의 정체는 시전 지연이 아니라 재사용 쿨다운(cooldown=2s, 시전 시작 기준) — Config 값 2.0→0.5 조정
+### 검증
+- 값 주입 확인. 연사감은 사용자 재생 판정 (0=무제한 연사 가능)
+### 실패와 수정
+- 초기 [조사]가 '첫 시전 페이싱'에 집중해 쿨다운 요인 누락 — 재보고로 정정
+
+
+## [조사] Forest Platformer Pixel Art Tileset 확인 — 2026-08-02 23:55
+### 프롬프트
+[조사] Forest Platformer Pixel Art Tileset 보이니?
+### 조사 결과
+- 위치: Assets/sanctum_pixel/forest_side_pack (제작자명 폴더). 구성: 타일 에셋 27개, Tileset/Props/Background(하늘·산·소나무 패럴랙스), demo_scene 포함
+### 검증
+해당 없음
+### 커밋
+해당 없음(무수정)
+
+
+## [수정] 쇼룸에 Forest 팩 추가 — 2026-08-02 23:59
+### 프롬프트
+에셋스토어에서 구매한거야. [수정] 쇼룸에 forest 팩 추가
+### 조작 내역
+- 쇼룸 검색 루트 배열화(Cainos+sanctum_pixel), 씬 전환 바에 [숲 데모] 추가
+- 구매 에셋 취급: .gitignore 등재(재배포 방지), ASSET_CREDITS 기록. 팀원은 개별 임포트 필요 고지
+### 검증
+- 컴파일 에러 0, forest TileBase 27개 검색 확인, 창 재열기 정상
+### 실패와 수정
+없음
+
+
+## [구현] ThirdScene 신설 — 숲 데모 이식 — 2026-08-03 00:09
+### 프롬프트
+일단 ThirdScene을 Scenes에 하나 만들어서 숲 데모를 활용해서 우리 게임에 맞게 배치해주라
+### 조작 내역
+- 데모 수확(타일 GUID·소품/배경 스프라이트 참조 223줄) → 신규 ThirdScene에 표준 구조로 재건: Stage_Grid(Ground=Composite 솔리드 202셀 중 176, Wall=잔디 장식 26), Stage_Props 15, Stage_Background 5(정렬 -100대), 오프셋 x+15·y+8(맵 시작 x0·바닥 y-2 정렬)
+- Player_Knight 프리팹 (2,4) 배치, Stage_CameraBounds (0,-2)~(30,12), SecondScene에서 카메라 리그(Main+CM+Confiner) 가산 로드 복사·재타깃
+- SPEC '맵 1개' 초과 3씬째 — 사용자 결정, SPEC 갱신 제안 잔여에 추가
+### 검증
+- 재건 수치 실측(202/15/5), 두 차례 저장 True. 플레이 감·배경 배치는 사용자 재생 판정
+### 실패와 수정
+없음
+
+
+## [수정] ThirdScene 쇼케이스 구성 1차 조성 — 2026-08-03 00:15
+### 프롬프트
+ThirdScene에 이 맵을 만들어야 해. (에셋스토어 쇼케이스 스크린샷 제시)
+### 조작 내역
+- 접근 고지: 픽셀 복제 불가 — 구조·재료 재현 후 스크린샷 피드백 루프
+- 지형: 본체 176셀 청크를 (+30,+2) 복제(2티어 단차), x4~9 상단 밴드로 부유 섬 2개(+20,+5 / +40,+7), 소품 15→30 복제, Composite 재생성, 경계 (0,-2)~(60,14)
+- 배경 3겹 재구성(18개): sky_cloud 전폭(정렬 -130), 구름 3, 산 2덩이(-125), 소나무 실루엣 12그루 교차 열(-115) — 쇼케이스 문법(하늘→산→침엽수 미드그라운드) 재현
+### 검증
+- 배치 수치 실측, 저장 True ×2. 구도 판정은 사용자 스크린샷 피드백
+### 실패와 수정
+없음
+
+
+## [수정] ThirdScene 잔디층 전면 배치 — 2026-08-03 00:28
+### 프롬프트
+stage_wall 풀을 ground 앞에 위치하도록 시각적 배치하고싶은데 어떻게 해야해?
+### 조작 내역
+- 원리 안내(동일 Sorting Layer 내 sortingOrder 우선) + Stage_Wall TilemapRenderer sortingOrder -1→1 적용 (Ground=0 앞)
+### 검증
+- 값 실측, 저장 True. 시각은 사용자 판정
+### 실패와 수정
+없음
+
+
+## [수정] ThirdScene 소품 배치 + 정렬 교정 — 2026-08-03 00:39
+### 프롬프트
+[수정] forest tile에 있는 나무, 꽃 등의 소품 에셋 좀 넣어줘.
+### 조작 내역
+- Props 재고 실측(하위 폴더 재귀 — 이전 비재귀 스캔 오판 정정): 나무·소나무·고사목·덤불·바위·윗풀·꽃 6색 총 65종
+- 지형 윗면 스냅 배치 22개(bounds 발끝 보정, 정렬 2), 기존 소품 30개 음수 정렬 → 2 교정(배경 뒤 실종 방지)
+### 검증
+- 배치·교정 수 실측, 저장 True. 꽃 일부 파일명 불일치로 미배치 추정 — 구도 스크린샷 후 보강
+### 실패와 수정
+- Props 폴더 '비어 있음' 오판(비재귀 스캔) 정정
+
+
+## [수정] 소품 분산 철회 + 뒤층 지형 신설 — 2026-08-03 00:42
+### 프롬프트
+분산을 하지말고 쇼룸에 넣어달라구. 그리고 똑같은 그라운드를 겹쳐서 배치해서 뒤쪽에 놓고 싶은데 그럴수가 있어?
+### 조작 내역
+- 분산 소품 22개 철회 (배치권 사용자 이관 — 쇼룸 소품 탭 편입은 차기)
+- Stage_GroundBack 신설: 본지형+잔디 511셀 복제, 무콜라이더, 틴트(0.45,0.52,0.55), 정렬 -110, 오프셋 (+5,+3)
+### 검증
+- 저장 True, 구도는 사용자 판정
+### 실패와 수정
+- 소품 '배치' 지시를 씬 분산으로 오독 — 쇼룸 편입 의도였음
+
+
+## [구현] 쇼룸 겹층 도구 — 2026-08-03 00:48
+### 프롬프트
+[구현]그걸 보기 쉽게 구현할 수 있는 tool 기능을 만들어 줄 수 있니? 내가 그라운드 지형을 만들면 그걸 클릭해서 order in layer으로 설정한다는 느낌으로?
+### 조작 내역
+- 쇼룸 최상단 '겹층 도구' 폴드아웃: 씬 타일맵 목록(order·충돌 표시, 클릭=선택·핑) + 선택 타일맵의 Order/틴트/오프셋 라이브 편집(Undo 지원) + [복제→뒤층 생성](콜라이더 제거·-110·어둡게·오프셋 원클릭) + [충돌 제거]
+- 구현 우여곡절: create_file이 샌드박스에 기록되는 함정 발견 → unityMCP 경유 백틱 치환 방식으로 실기기 작성, 클래스 partial 분할
+### 검증
+- 컴파일 에러 0, DrawLayerTool 리플렉션 확인 True, 창 재열기 정상
+### 실패와 수정
+- 1차 인라인 문자열 이스케이프 실패, 2차 create_file 경로 오판 → 3차 성공
+
+
+## [수정] 겹층 도구 — 새 층 생성·붓 조준 — 2026-08-03 01:11
+### 프롬프트
+내가 그라운드로 지형을 만들고 그걸 클릭하면 ground 모두가 클릭되는데 이거 어떻게 해야해?
+### 조작 내역
+- 원인: 한 타일맵의 셀은 한 몸 — 개별 덩어리는 별도 층 필요
+- customBrushTarget 도입: [＋ 새 층 생성+조준](Stage_Layer_N, 무콜라이더) / 목록 행별 [붓→] 조준 / [조준 해제]. 격자·검사 칠하기 2개 지점에 조준 우선 적용
+### 검증
+- 컴파일 에러 0, 창 재열기 정상. 흐름 체감은 사용자 판정
+### 실패와 수정
+없음
+
+
+## [수정] 쇼룸 지우개 층 무관화 — 2026-08-03 01:30
+### 프롬프트
+[수정]지금 레이어가 있잖아. 씬 클릭으로 타일을 선택해서 Shift 누르면 지울수도 있는 기능을 만들었는데 어느 타일을 선택하든 그 레이어에 맞게 지울 수 있게 해주면 좋겠어. 지금은 shift를 눌러도 지워지지 않네
+### 조작 내역
+- 원인: Shift 지우기가 조준 층에만 null — 다중 층에서 무반응. 수리: 전 타일맵 탐색(각 맵별 WorldToCell — 오프셋 층 대응), 해당 셀에 타일 있는 맵 중 정렬 최상위부터 삭제
+### 검증
+- 컴파일 에러 0. 체감은 사용자 판정
+### 실패와 수정
+없음
+
+
+## [구현] 구간→층 이동 (드래그 층 지정) — 2026-08-03 01:50
+### 프롬프트
+우리가 구간 복사 하는것처럼 범위만 지정해서 Layer를 지정할 수 있게는 못하니? Layer1이 가장 위에 올라오고 Layer2로 지정하면 Layer1보다 뒤쪽에 배치될 수 있게
+### 조작 내역
+- 층 규칙 확정: Stage_Layer_N = 정렬 -10×N (1이 앞, 클수록 뒤). EnsureLayer로 자동 생성·정렬 강제
+- [구간→층 이동] 토글: 씬 드래그 사각형 → 범위 내 전 타일맵의 타일을 대상 층으로 이동(원본 삭제, 맵별 좌표 환산, Undo, 원샷 자동 해제). 새 층 생성 버튼도 규칙 정렬 적용
+### 검증
+- 컴파일 에러 0, 창 재열기 정상. 조작감은 사용자 판정
+### 실패와 수정
+없음
+
+
+## [수정] 구간 복사·층 이동 모드 배타 완성 — 2026-08-03 02:00
+### 프롬프트
+stage_ground는 구간 복사가 안돼?
+### 조사·조작
+- 구간 복사는 Ground 지원 확인(전 타일맵 스캔). 불능 원인 = layerMoveMode 잔류 가로채기. 구간 복사 토글·붓/소품 장전 3지점에 layerMoveMode 해제 추가
+### 검증
+- 컴파일 에러 0
+### 실패와 수정
+- 모드 배타 규칙 신설 기능에 미적용 재발 — 이후 모드 추가 시 배타 목록 일괄 갱신 원칙
+
+
+## [수정] 구간 복사 '빈 범위' — 이동 층 캡처 불능 수리 — 2026-08-03 02:03
+### 프롬프트
+빈범위라고 뜨는데
+### 조작 내역
+- 원인: CaptureRegion이 월드=셀 가정 — 위치 이동된 층(뒤층·Stage_Layer_N)의 타일이 셀 주소 불일치로 투명 취급
+- 수리: 맵별 WorldToCell 범위 + CellToWorld 중심점 월드 판정 + 월드 기준 오프셋 저장 (붙여넣기 배치 시 시각 배열 보존)
+### 검증
+- 컴파일 에러 0. 캡처 체감은 사용자 판정
+### 실패와 수정
+- 이동 층 도입이 기존 도구 가정(원점 고정)을 깨뜨림 — 좌표는 항상 맵 경유 환산 원칙 재확인
+
+
+## [수정] ThirdScene 카메라·플레이어 위치 복구 — 2026-08-03 02:23
+### 프롬프트
+카메라 위치를 지금 지인공이 위치한 곳으로 이동할 수 있는 ThirdScene이야.
+### 조작 내역
+- 진단: 플레이어가 (2,-15.9) 맵 밖 저장 상태 + CM 리그 구좌표 잔존. 팔로우 연결은 정상(Player)
+- 지형 프로파일 실측(x0~10 표면 y3) → 스폰 (0.5,3.1) 복구, CM·Main 카메라·씬 뷰 동기, 속도 0
+### 검증
+- 저장 True. 재생 시작점 체감은 사용자 판정
+### 실패와 수정
+없음
+
+
+## [수정] ThirdScene 카메라→주인공 스냅 + 재이탈 복구 — 2026-08-03 02:37
+### 프롬프트
+Third Scene에서 카메라 위치를 지금 주인공이 있는 위치로 옮길 수 있니?
+### 조작 내역
+- 스냅 실행 중 주인공 재이탈 발견((-1.7,-16.2) — 맵 좌측 밖 낙하 좌표, 저장돼 있었음). (0.5,3.1) 재복구·속도 0·카메라 2대·씬 뷰 동기
+### 검증
+- 저장 True. 이탈 경위 미확정(편집 중 이동 추정) — 재발 시 경위 확인 요청
+### 실패와 수정
+없음
+
+
+## [수정] ThirdScene 카메라 경계 하부 확장 — 2026-08-03 02:39
+### 프롬프트
+Play 눌렀을때도 카메라가 이동해야하는데 (+ 직전: 캐릭터 기준 카메라 이동)
+### 조작 내역
+- 원인: Confiner 경계 (0,-2)~(60,14)가 캐릭터 지대(y-25) 차단. 경계 (-4,-32)~(60,14)로 확장, 캐시 무효화. 캐릭터 불가침 유지
+### 검증
+- 저장 True. 재생 추적은 사용자 판정
+### 실패와 수정
+없음
+
+
+## [수정] ThirdScene 층 오배치 자동 교정 — 2026-08-03 02:46
+### 프롬프트
+지금은 Wall, GROUND 다 막 넣어서 발판이 이상하게 형성되어 있어. 이거 어떻게 해결해야할까?
+### 조작 내역
+- 진단: 데모 기준 GUID 분류(지형14/장식7)로 실측 — Wall에 지형 타일 253, 중복 122
+- 교정: Wall의 지형 타일 → Ground 이관 238·중복분 삭제 15, 정상 장식 겹침 유지, Composite 재생성. 재검 잔여 0
+### 검증
+- 재검 0, 저장 True. 밟힘 체감은 사용자 재생 판정
+### 실패와 수정
+없음
+
+
+## [구현] 투명 발판 박스 도구 — 2026-08-03 02:49
+### 프롬프트
+자 투명 박스를 넣어서 발판을 만들수는 없니? 차라리
+### 조작 내역
+- InvisiblePlatform(게임 투명·씬 뷰 초록 기즈모) + 쇼룸 버튼 2종: 솔리드 / 원웨이(Platform_ 접두 → 컨트롤러 원웨이 자동 편승). 씬 뷰 중심 3x0.5 생성, Undo 지원
+### 검증
+- 컴파일 에러 0, 스모크: Platform_Invisible_1 | box=True | gizmo=True | 원웨이규칙=True
+### 실패와 수정
+없음
+
+
+## [구현] Stage_Wall 전면 투명 발판 자동 생성 — 2026-08-03 02:51
+### 프롬프트
+Stage_Wall이 적용되어 있는 모든 곳에 투명 발판을 만들어줘.
+### 조작 내역
+- Wall 점유 155셀(x-32~59·y-36~10, 하부 신구역 포함) 실측, 타일맵 오프셋(0.4,0.8) 좌표 환산
+- 그리디 직사각형 병합 → 투명 솔리드 박스 19개 생성(Stage_WallColliders 하위, 기즈모 포함)
+- 재생 중 1차 실행 휘발 → 정지 후 재실행(FAIL#5)
+### 검증
+- 155셀 전량 커버·저장 True. 밟힘 체감은 사용자 재생 판정
+### 실패와 수정
+- 재생 중 조작 차단 1회
+
+
+## [수정] Wall 투명 발판 원웨이 전환 — 2026-08-03 02:54
+### 프롬프트
+근데 지금 -1 ,24 위치에서 캐릭터가 지나가зок 못하고 있는데 막혀가지고 발판 역할만 하고 이동할때는 자유롭게 이동해야되거든
+### 조작 내역
+- 솔리드 박스 19개 → 원웨이 전환(usedByEffector+PlatformEffector2D oneWay·arc130, Platform_ 명명 — SecondScene 검증 구성). 쇼룸 원웨이 생성 버튼에도 이펙터 포함 보강
+### 검증
+- 컴파일 에러 0, 전환 19 실측, 저장 True. 통과·착지 체감은 사용자 재생 판정
+### 실패와 수정
+없음
+
+
+## [수정] 하부 구역 통행 불능 — Ground 솔리드 정정 — 2026-08-03 02:56
+### 프롬프트
+여전히 이동이 불가능해
+### 조작 내역
+- 진범: 층 교정이 하부 구역 지형 타일을 Ground(솔리드)로 이관한 것 — 사용자 의도(비주얼+원웨이)와 상충
+- 정정: 하부(y<-3) Ground 419셀 → Wall 이관(오프셋 환산), Composite 재생성, 원웨이 박스 46개 전면 재생성
+### 검증
+- Ground 하부 잔여 0셀, 물리 동기화 후 (-1,-24) 솔리드 없음 ✓, 저장 True
+### 실패와 수정
+- 자동 분류가 구역 의도를 못 읽음 — 상부(원본 맵)=Ground 규칙, 하부(신구역)=Wall+박스 규칙으로 구역별 이원화 확립
+
+
+## [수정] 플레이어 최전면 정렬 — 2026-08-03 02:59
+### 프롬프트
+캐릭터가 맵에 가려서 안보이는데 제일 앞으로 이동하게해줘.
+### 조작 내역
+- Player SpriteRenderer sortingOrder 0 → 30 (타일1·소품2·석상5·이펙트8 앞), 프리팹 반영
+### 검증
+- 실측·저장 True
+### 실패와 수정
+없음
+
+
+## [구현] ThirdScene 3배 확장 — 상승 산길 구성 — 2026-08-03 03:09
+### 프롬프트
+좀 그럴싸하게 맵을 지금 크기의 3배로 만들어봐
+### 조작 내역
+- 상부 지형 363셀·장식 65셀을 (+60,+2)/(+120,+4) 2블록 복제(상승 흐름), 소품 +58, 배경 +31(하늘2·구름3·산4·소나무22), Composite 재생성, 경계 (-4,-32)~(184,18). 하부 수제 구역 불가침
+### 검증
+- 배치 수치 실측·저장 True. 구도·플레이 감은 사용자 판정. 복제 블록의 잔디 원웨이 박스는 미생성 — 필요 시 'Wall 발판 다시'
+### 실패와 수정
+없음
+
+
+## [수정] 투명 박스 전체 삭제 — 2026-08-03 03:10
+### 프롬프트
+초록색 투명박스들 다 지워봐
+### 조작 내역
+- InvisiblePlatform 부착 오브젝트 46개 전수 삭제, Stage_WallColliders 부모 정리
+### 검증
+- 삭제 수 실측·저장 True. 하부 구역은 이제 충돌 없음(비주얼만) 참고
+### 실패와 수정
+없음
+
+
+## [수정] 이동 불능 근본 수리 — 접지 캐스트 트리거 오탐 — 2026-08-03 03:23
+### 프롬프트
+지금 캐릭터가 움직여 지지 않는 이유가 뭐야? / 가만히 갇혀서 움직임 모션만 있고 안움직여져
+### 조작 내역
+- 진단 사슬: 공중 grounded=True → 속도 주입 실험(수 프레임 내 0 소거) → 접지 캐스트가 트리거(Stage_CameraBounds, 맵 전체 덮음)에 거리 0 히트 확인
+- 수리: CastGroundNoTriggers 헬퍼(useTriggers=false) 도입. 파일에 사용자 수기 수정 흔적(groundFilter) 발견 — 동일 방향, 자기완결형으로 정리. 주입 위치 1회 오식(무네임스페이스 파일) 재이식
+### 검증
+- 컴파일 에러 0. 이동 복구는 사용자 재생 판정
+### 실패와 수정
+- 앵커 불일치 2회(외부 수정 개입) → 인덱스 절개 방식 전환
+
+
+## [구현] ForthScene 신설 — 장거리 러닝 맵 — 2026-08-03 03:23
+### 프롬프트
+FirstScene처럼 맵을 쭉 달리면서 몬스터를 잡아야 하는데 지금 팀원들 피드백으로는 ThirdScene는 볼륨이 작다는 피드백을 받았어. 그래서 지금 내 맵의 지형 배치도를 최대한 참고하면서 좌우 길이가 길어질 수 있도록 맵을 ForthScene에 만들어 줄 수 있니? 뒷 배경이랑 이런것들은 쭉 이어지도록 해줏면서
+### 조작 내역
+- ThirdScene 파일 복제(전 배치 보존: 상부 3블록·하부 수제 구역·카메라 리그·플레이어) → 기반 블록 363셀×2 추가 스탬프 D(+180,+2)·E(+240,0) — 등반 후 하산 구조, 총 x0~300
+- 소품 +58, 배경 +31(하늘2·구름3·산4·소나무24 — 후반 하강 배열), 경계 (-4,-32)~(304,18)
+### 검증
+- 배치 수치 실측·저장 True. 볼륨감·이음새는 사용자·팀 판정
+### 실패와 수정
+없음
+
+
+## [수정] ForthScene 재창조 — 복사 오독 정정 — 2026-08-03 03:30
+### 프롬프트
+FirstScene 크기 만큼 맵을 늘리고 ThirdScene의 스타일을 참고해서 FourthScene을 재창조해라고 했는데 왜 기존 맵이랑 그대로지?
+### 조작 내역
+- '참고'를 '보존'으로 오독 인정. FirstScene 실측 114u → 목표 120u
+- 상부 전면 철거(G1816/W325) 후 재창조: 기반 4청크(15폭)를 새 순서·높이 파도(0-2-4-1-3-6-2-0, 상승 단차 ≤3=점프 가능)로 8세그 재조립, 부유섬 5, 소품 청크 추종 재배치, 배경 31 재구성, 경계 x124. 구덩이 없음(낙사 제외 결정 준수). 하부 수제 구역·플레이어 불가침
+### 검증
+- 저장 True. 실루엣·플레이 감은 사용자·팀 판정
+### 실패와 수정
+- 지시 오독 1건 — '재창조/새로' 류 지시는 배치 복사 금지 원칙 기록
+
+
+## [수정] ForthScene v3 — 일직선 활주로 재설계 — 2026-08-03 03:44
+### 프롬프트
+너가 이렇게 구현하면 일직선으로 쭉 이동하지 못하잖니. FirstScene에 다시 만들어볼래? 일직선으로 쭉 이동할 수 있게 하는게 핵심이야. 거기에 중간중간 발판이나 다른 부가 지형을 만드는거고
+### 조작 내역
+- 파도 지형 철거 → 평지 청크(8폭, 표면 y3) 15반복 = 120u 완전 평탄 활주로 + 부유 발판 8(y+4~+9 선택 경로) + 소품 10 재살포. 배경·하부 구역·플레이어 유지
+- FirstScene 직접 이식은 팀원 작업물 확인 대기 (질문으로 회신)
+### 검증
+- 저장 True. 일직선 주행감은 사용자 판정
+### 실패와 수정
+- v2 파도 구조가 '쭉 달리기' 핵심 요건 위배 — 러닝 스테이지는 평지 기본+토핑 원칙 기록
+
+
+## [조사] FirstScene Ground 그리기 불능 원인 — 2026-08-03 04:06
+### 프롬프트
+FirstSecene에 Ground 발판을 그릴수가 없는데 원인이 뭐야?
+### 조사 결과
+- FirstScene 구조가 우리 규약과 다름: Grid/Tilemap_Platforms(127셀·충돌O) 단일 — Stage_Ground/Stage_Wall/Stage_Grid 전무
+- 붓은 GameObject.Find("Stage_Ground") 실패 시 조용히 무반응(알림 없음) → '안 그려짐'으로 체감
+- 타일 출처는 sanctum_pixel(127셀)로 쇼룸 검색 루트에 이미 포함 — 팔레트는 정상
+- 해법: 겹층 도구에서 Tilemap_Platforms 행의 [붓→] 클릭(코드 수정 불필요). 미존재 대상 알림은 개선 후보
+- 부수: 활성 씬을 ForthScene→FirstScene으로 전환함(직전 씬 저장 완료)
+### 검증
+해당 없음
+### 커밋
+해당 없음(무수정)
+
+
+## [구현] ForthScene v4 — BiomeActionMap 구조 × 숲 스킨 — 2026-08-03 04:24
+### 프롬프트
+BiomeActionMap 보이지. 그 구조를 최대한 참고해서 sanctum_pixel의 에셋을 활용해서 맵을 만들어줘. 필요하면 다른 에셋을 사용해도 문제 없다. 배경은 Sky_cloud, pine, mountain을 활용해서 ForthScene에 만들어줘.
+### 조작 내역
+- BiomeActionMap 솔리드 2,205셀(x0~175)·원웨이 5개 수확 → 숲 타일 어휘 자동 도출(ThirdScene 실사용 통계: 표면=forest_tileset_13/속=18) → 셀 역할별 리스킨 재현(dy+10), 원웨이 박스 5 재현, 배경 41개(sky_cloud3·mountain4·pine34), 경계 (-4,-32)~(180,20)
+- 사건: ForthScene Stage_Grid 자식 전멸 발견(원인 미상 — v3 활주로 소실). 표준 Ground 재건으로 전진 복구. Temp 수확 파일 휘발 1회로 어휘 소스를 씬 실측으로 전환
+### 검증
+- 2,205셀 재현·저장 True. 지형 정합·플레이는 사용자 판정
+### 실패와 수정
+- FAIL 후보: 다중 씬 전환·additive 연쇄 중 콘텐츠 소실 — 재발 시 즉시 중단·git 복원 요청. Temp 산출물은 휘발성 — 재도출 경로 확보 원칙
+
+
+## [수정] ForthScene 캐릭터 탑승·카메라 조정 — 2026-08-03 04:36
+### 프롬프트
+캐릭터도 우리가 만든 맵 위에 올리고 카메라도 조정해줘.
+### 조작 내역
+- 지표면 실측 스폰 (2.5,11.1), 속도 0, CM·Main·씬 뷰 동기 (명시 허가에 따른 캐릭터 이동)
+### 검증
+- 저장 True
+### 실패와 수정
+없음
+
+
+## [수정] ForthScene 낙하 관통 — 컴포짓 0도형 수리 — 2026-08-03 04:40
+### 프롬프트
+shift 지우기 기능 없앴니? 수동으로 수정하려고 하는데 안되네. 그리고 발판이 없어서 바로 떨어지는데?
+### 조작 내역
+- 진단: 컴포짓 pathCount=0(생성 순서 문제) → ProcessTilemapChanges 후 GenerateGeometry 재실행. 검증 OverlapPoint=Stage_CameraBounds
+- Shift 지우개는 존치 — 붓 모드(타일 장전 시)에만 활성임을 안내
+### 검증
+- 지형 내부 충돌 Stage_CameraBounds, 저장 True
+### 실패와 수정
+- FAIL 후보: 컴포짓 생성은 콜라이더 갱신(ProcessTilemapChanges) 후에
+
+
+## [구현] ThirdScene 신축 — 레퍼런스 캡처 재현 — 2026-08-03 04:46
+### 프롬프트
+맵 그냥 새로 만들어야겠다. ThirdScene 생성하고 동영상 보여주면 그대로 맵 가능하니? (+캡처 2장)
+### 조작 내역
+- 발견: 사용자가 Third·ForthScene 삭제 — 완전 신축으로 전환
+- 표준 구조 신설(Ground 충돌/컴포짓 — ProcessTilemapChanges 후 지오메트리, Wall, Props, Background, 경계, Player 프리팹, 리그는 SecondScene 복사·재타깃)
+- 캡처 재현: 평탄 활주로 141x6(표면 13/흙 18), 지상 소품 30 밀식(침엽·활엽·고사목·덤불·바위·윗풀), 배경 65(sky_cloud3·구름4·산4·소나무 실루엣 54 밀집 띠 스케일 2.2)
+### 검증
+- 충돌 경로 생성 확인, 저장 True. 구도 정합은 캡처 대조 — 사용자 판정
+### 실패와 수정
+- Third·Forth 부재로 열기 2회 실패 → 신축·리그 원본 교체로 우회
+
+
+## [수정] 바닥 표면 forest_tileset_5 전면 교체 — 2026-08-03 05:03
+### 프롬프트
+타일을 바닥면에 쫙 다 깔아줄래? 근데 용량이 너무 커질 위험은 없나?
+### 조작 내역
+- 표면 y3 x0~140 → tileset_5 141칸 교체(콜라이더타입 Sprite), 컴포짓 재생성(경로 2), 표본 스프라이트 6개 정리. 용량 영향 무시 수준 안내
+### 검증
+- 경로 2 저장 True
+### 실패와 수정
+없음
+
+
+## [구현] 쇼룸 붓 대상 명시 버튼 (자동/Ground/Wall) — 2026-08-03 05:07
+### 프롬프트
+쇼룸에 Ground, Wall 선택 버튼 넣어. 왜 건들이냐고 이런것들
+### 조작 내역
+- 툴바에 [자동][Ground][Wall] 토글 — 기존 customBrushTarget 기제 재사용, 명시 선택 시 이름 추정 무시. 숲 팩(이름에 Wall 없음)에서 Wall 그리기 경로 복원
+### 검증
+- 컴파일 통과(타입 확인), 창 재열기 정상
+### 실패와 수정
+- 표면 오독 교체 사건의 재발 방지 목적 — 대상 애매 시 선확인 원칙 재기록
+
+
+## [수정] 쇼룸 ★벽 패밀리 소실 수리 — 2026-08-03 05:15
+### 프롬프트
+토글 메뉴에 Ground, Wall 메뉴를 누르면 그에 맞는 타일들이 보였는데 왜 없어졌냐구 (스크린샷)
+### 조작 내역
+- 원인: 사용중 패밀리가 빈 겹이면 미등록(set.Count==0 return) — 신축 씬의 Wall 0칸으로 ★벽 소실
+- 수리: 비면 이름에 Wall/Ground 든 팩 패밀리로 대체 채움 → 메뉴 상시 유지
+### 검증
+- 컴파일 통과·창 재열기
+### 실패와 수정
+없음
+
+
+## [수정] 쇼룸 forest Ground/Wall 분할 패밀리 — 2026-08-03 05:18
+### 프롬프트
+아니 !! forest Wall, Ground
+### 조작 내역
+- 데모 실측 지수로 forest 팩을 역할 분할: forest — Ground(지형 14종: 9~15,17~22,24) / forest — Wall(잔디 7종: 0~6) 패밀리 상시 등록. 재생 중 열기 1회 차단→정지 후 진행
+### 검증
+- 컴파일 통과·창 재열기
+### 실패와 수정
+없음
+
+
+## [수정] 숲 잔디 자동 Wall 분류 — Ground 위 겹침 복원 — 2026-08-03 05:20
+### 프롬프트
+Forest Wall은 Ground 윗에 사라지지 않고 위에 붙이게 할수는없는거야? 그전에는 됐는데
+### 조작 내역
+- 원인: [자동]에서 숲 잔디가 Ground로 분류돼 표면 타일을 파괴적 교체 — '사라짐'의 정체
+- 수리: IsForestDeco(0~6번) 판별 → 격자·검사 칠하기 자동 분류에서 Stage_Wall로 — 별도 층이라 Ground 위 겹침(교체 아님) 복원. 명시 버튼([Ground]/[Wall])은 여전히 최우선
+### 검증
+- 컴파일 통과·창 재열기
+### 실패와 수정
+- noop 빈 문자열 Replace 1회 자폭 → 제거
+
+
+## [수정] 스킬대기·패링 시트 수정본 교체 — 2026-08-03 05:46
+### 프롬프트
+수정본 경로 제공 — 기사_스킬대기·기사_패링 배경 세심 제거본으로 이 부분만 교체 가능하니?
+### 조작 내역
+- 패링: 파일 교체·리임포트, 기존 5분할(PARRY_0~4) rect 채움율 43~60% 검증 — 포즈 위치 동일 확인, 참조 무손상
+- 스킬대기: 투명본 재조립(요소 6→포즈5, 먼지 소멸) → 2866x1288, 몸통 819px→PPU 847, 발끝 피벗 0.002, 동일 이름 5분할로 참조 승계 (skillSprites 5/5 유효)
+### 검증
+- 스프라이트 5+5, 프리팹 참조 5/5, 채움율 정상. 화질 체감은 사용자 재생 판정
+### 실패와 수정
+없음
+
+
+## [수정] 이동 시트(걷기·점프·착지) 투명 수정본 교체 — 2026-08-03 05:48
+### 프롬프트
+기사_걷기,점프,착지.png도 배경제거 다시했는데 혹시 이 파일 쓴적있어? → 교체해
+### 조작 내역
+- 정체 규명: Knight_MoveExtra.png(2752x1536, WALK4+JUMP4+LAND5)가 해당 원본의 처리본 — 파일 교체·리임포트, 기존 13분할 유지
+### 검증
+- 스프라이트 13개, 채움율: [분할별 채움율] LAND_0:49% LAND_1:51% LAND_2:56% LAND_3:49% LAND_4:63% JUMP_0:48% JUMP_1:49% JUMP_2:45% JUMP_3:43% WALK_0:58% WALK_1:53% WALK_2:58% WALK_3:55% (저조 0칸)
+### 실패와 수정
+없음
+
+
+## [조사] ThirdScene Stage_Props 종류 — 2026-08-03 22:20
+### 프롬프트
+[조사]ThirdScene에 보면 나Stage_Props가 배치되어 있지? 어떤 종류의 props가 있니?
+### 조사 결과
+- 총 27개, 7계열 20종: 침엽수 pine 1~3(8그루), 활엽수 tree 1~3(4), 고사목 tree_dead 1~3(3), 덤불 bush 5종(6), 바위 rock 4종(4), 윗풀 upper_grass 2종(2) — 레퍼런스 재현 때 3.6~6.4u 리듬 배치분
+### 검증
+해당 없음
+### 커밋
+해당 없음(무수정)
+
+
+## [수정] Props 크기 캐릭터 비율 보정 — 2026-08-03 22:21
+### 프롬프트
+지금 캐릭터에 비해서 props가 너무 작게 배치되어 있다고 생각안하니? 지금 캐릭터에 어울리게 props 크기를 조절해줘. 참고 이미지 붙여놓음
+### 조작 내역
+- 캐릭터 1.45u 기준 레퍼런스 비율로 27개 일괄: 수목류 4.4~6.2u(개체 변주)·덤불 1.0~1.25·바위 0.85~1.1·윗풀 0.45, 발끝 재스냅
+### 검증
+- 저장 True. 비율 체감은 사용자 판정
+### 실패와 수정
+없음
+
+
+## [수정] Props 겹폴더 정리 + 절제 데코 — 2026-08-03 22:29
+### 프롬프트
+래퍼런스 이미지 넣어줄게(영상). 나무는 나무 rock는 rock 처럼 겹폴더를 만들어서 정리해서 넣어주면 안되니? 그리고 props 최대한 활용해서 좀 꾸며줘. flowers도 있고 bush도 있고 그 대신 몬스터 나오는 맵이니깐 너무 많이 배치는 하지말고
+### 조작 내역
+- 영상 프레임 6장 추출·관찰(군집→여백 리듬, 꽃은 덤불 곁 소량) → 기존 27개를 8겹폴더로 재부모화 + 신규 14(꽃 10·윗풀 3·고사침엽 1)
+- 재생 중 실행 1회 휘발→정지 후 재실행, 꽃 경로 오인 1회(Flower/{색} 하위) 교정
+### 검증
+- 저장 True, 꽃 9/10. 밀도·구도는 사용자 판정
+### 실패와 수정
+- 실측 경로 확인 원칙 (Props/Flower/{색}/flower_{색}_{n}.png)

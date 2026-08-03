@@ -1,0 +1,135 @@
+﻿AssetPath,FieldName,Value,Note
+Assets/Configs/AttackEffectConfig.asset,basicSpeed,7,
+Assets/Configs/AttackEffectConfig.asset,poweredSpeed,9,
+Assets/Configs/AttackEffectConfig.asset,lifetime,2,
+Assets/Configs/AttackEffectConfig.asset,basicScale,2.95,
+Assets/Configs/AttackEffectConfig.asset,poweredScale,3.3,
+Assets/Configs/AttackEffectConfig.asset,frameRate,16,
+Assets/Configs/AttackEffectConfig.asset,basicDamage,1,
+Assets/Configs/AttackEffectConfig.asset,poweredDamage,3,
+Assets/Configs/BossConfig.asset,idle1Loops,2,
+Assets/Configs/BossConfig.asset,orbInterval,1.6,
+Assets/Configs/BossConfig.asset,orbSpeed,6,
+Assets/Configs/BossConfig.asset,orbLifetime,4,
+Assets/Configs/BossConfig.asset,orbSpawnHeight,1.3,
+Assets/Configs/BossConfig.asset,orbAimHeight,0.45,
+Assets/Configs/BossConfig.asset,orbsPerCycle,3,
+Assets/Configs/BossConfig.asset,beamNoteSpeed,7,
+Assets/Configs/BossConfig.asset,beamThickness,0.45,
+Assets/Configs/BossConfig.asset,beamHeightOffset,0.45,
+Assets/Configs/BossConfig.asset,beamOverreach,2,
+Assets/Configs/BossConfig.asset,beamLeadIn,0.6,
+Assets/Configs/BossConfig.asset,beamTailTime,1.2,
+Assets/Configs/BossConfig.asset,noteScale,0.75,
+Assets/Configs/BossConfig.asset,missBehindDistance,0.8,
+Assets/Configs/CameraConfig.asset,deadzoneWidth,1.2,
+Assets/Configs/CameraConfig.asset,horizontalSmoothTime,0.12,
+Assets/Configs/CameraConfig.asset,lookAheadX,1,
+Assets/Configs/CameraConfig.asset,lookAheadSmoothTime,0.4,
+Assets/Configs/CameraConfig.asset,verticalSmoothTime,0.3,
+Assets/Configs/CameraConfig.asset,fallCatchDistance,2.5,
+Assets/Configs/DeathDogAIConfig.asset,aggroRange,6,이 거리 안에 플레이어가 들어오면 추적을 시작한다
+Assets/Configs/DeathDogAIConfig.asset,attackRange,1.2,이 거리 안이면 공격을 시도한다
+Assets/Configs/DeathDogAIConfig.asset,chaseStopDistance,9,추적을 시작한 뒤 이 거리를 넘어서면 추적을 포기하고 순찰로 복귀한다
+Assets/Configs/DeathDogAIConfig.asset,patrolSpeed,1,
+Assets/Configs/DeathDogAIConfig.asset,chaseSpeed,3,
+Assets/Configs/DeathDogAIConfig.asset,patrolRadius,2.5,순찰 지점을 지정하지 않았을 때 스폰 위치 기준 좌우 순찰 반경
+Assets/Configs/DeathDogAIConfig.asset,jumpYThreshold,1.2,플레이어가 이 높이 이상 위에 있으면 점프해서 따라간다
+Assets/Configs/DeathDogAIConfig.asset,jumpConfirmDuration,0.6,점프를 확정하기 전에 높이차가 유지돼야 하는 시간(초). 짧으면 플레이어의 제자리 점프에도 따라 뛴다
+Assets/Configs/DeathDogAIConfig.asset,attackCooldown,1,
+Assets/Configs/DeathDogAIConfig.asset,attackDamage,1,
+Assets/Configs/DeathDogAIConfig.asset,maxHealth,4,이 몬스터 타입의 최대 체력 (MonsterHealth 컴포넌트에 적용됨)
+Assets/Configs/DeathDogAIConfig.asset,xpReward,5,이 몬스터가 죽었을 때 플레이어에게 주는 경험치
+Assets/Configs/FogOfWarConfig.asset,revealRadius,7,
+Assets/Configs/FogOfWarConfig.asset,softEdge,3.5,
+Assets/Configs/FogOfWarConfig.asset,fogAlpha,0.96,
+Assets/Configs/FogOfWarConfig.asset,texelsPerUnit,4,
+Assets/Configs/FogOfWarConfig.asset,moveThreshold,0.3,
+Assets/Configs/FogOfWarConfig.asset,sortingOrder,40,
+Assets/Configs/FogOfWarConfig.asset,rayCount,360,
+Assets/Configs/FogOfWarConfig.asset,eyeHeight,0.8,
+Assets/Configs/FogOfWarConfig.asset,occlusionTolerance,1.6,
+Assets/Configs/LevelProgressionConfig.asset,baseXpToLevel2,10,1레벨에서 2레벨로 가는 데 필요한 경험치
+Assets/Configs/LevelProgressionConfig.asset,xpIncrementPerLevel,5,레벨이 오를 때마다 다음 레벨에 필요한 경험치가 늘어나는 양
+Assets/Configs/LevelProgressionConfig.asset,goldBaseChance,0.1,
+Assets/Configs/LevelProgressionConfig.asset,goldChancePerLevel,0.02,
+Assets/Configs/LevelProgressionConfig.asset,goldMaxChance,0.4,
+Assets/Configs/LevelProgressionConfig.asset,silverBaseChance,0.25,
+Assets/Configs/LevelProgressionConfig.asset,silverChancePerLevel,0.02,
+Assets/Configs/LevelProgressionConfig.asset,silverMaxChance,0.45,
+Assets/Configs/LevelProgressionConfig.asset,choicesPerLevelUp,3,
+Assets/Configs/MiddleBossAIConfig.asset,aggroRange,9,이 거리 안에 플레이어가 들어오면 추적을 시작한다
+Assets/Configs/MiddleBossAIConfig.asset,attackRange,2.2,이 거리 안이면 공격을 시도한다
+Assets/Configs/MiddleBossAIConfig.asset,chaseStopDistance,14,추적을 시작한 뒤 이 거리를 넘어서면 추적을 포기하고 순찰로 복귀한다
+Assets/Configs/MiddleBossAIConfig.asset,patrolSpeed,0,
+Assets/Configs/MiddleBossAIConfig.asset,chaseSpeed,2.2,
+Assets/Configs/MiddleBossAIConfig.asset,patrolRadius,0,순찰 지점을 지정하지 않았을 때 스폰 위치 기준 좌우 순찰 반경
+Assets/Configs/MiddleBossAIConfig.asset,jumpYThreshold,1.2,플레이어가 이 높이 이상 위에 있으면 점프해서 따라간다
+Assets/Configs/MiddleBossAIConfig.asset,jumpConfirmDuration,0.6,점프를 확정하기 전에 높이차가 유지돼야 하는 시간(초). 짧으면 플레이어의 제자리 점프에도 따라 뛴다
+Assets/Configs/MiddleBossAIConfig.asset,attackCooldown,1.6,
+Assets/Configs/MiddleBossAIConfig.asset,attackDamage,2,
+Assets/Configs/MiddleBossAIConfig.asset,maxHealth,4,이 몬스터 타입의 최대 체력 (MonsterHealth 컴포넌트에 적용됨)
+Assets/Configs/MiddleBossAIConfig.asset,xpReward,30,이 몬스터가 죽었을 때 플레이어에게 주는 경험치
+Assets/Configs/MiddleBossAttackConfig.asset,rangedMinDistance,2.5,이 거리 이상일 때만 돌진/투사체를 쓴다. 더 가까우면 EnemyAI 기본 근접 공격에 맡긴다
+Assets/Configs/MiddleBossAttackConfig.asset,minPatternCooldown,2.5,패턴 실행 후 다음 패턴까지 최소 대기 시간
+Assets/Configs/MiddleBossAttackConfig.asset,maxPatternCooldown,4.5,패턴 실행 후 다음 패턴까지 최대 대기 시간
+Assets/Configs/MiddleBossAttackConfig.asset,chargeWindup,0.5,
+Assets/Configs/MiddleBossAttackConfig.asset,chargeSpeed,9,
+Assets/Configs/MiddleBossAttackConfig.asset,chargeMaxDistance,8,
+Assets/Configs/MiddleBossAttackConfig.asset,chargeHitDistance,1,이 거리 안으로 들어오면 돌진 중 플레이어에게 명중 처리
+Assets/Configs/MiddleBossAttackConfig.asset,chargeDamage,2,
+Assets/Configs/MiddleBossAttackConfig.asset,wallCheckDistance,0.6,벽 감지용 레이캐스트 거리
+Assets/Configs/MiddleBossAttackConfig.asset,wallCheckOriginOffset,0.5,레이캐스트 시작점을 자기 몸 밖으로 미리 밀어내는 거리 (자기 자신의 콜라이더를 벽으로 오인하는 것 방지)
+Assets/Configs/MiddleBossAttackConfig.asset,throwWindup,0.6,
+Assets/Configs/MiddleBossAttackConfig.asset,throwCount,3,
+Assets/Configs/MiddleBossAttackConfig.asset,throwInterval,0.25,
+Assets/Configs/MiddleBossAttackConfig.asset,throwSpawnHeight,1.2,
+Assets/Configs/MiddleBossAttackConfig.asset,rockSpikeSpeed,8,
+Assets/Configs/MiddleBossAttackConfig.asset,rockSpikeDamage,1,
+Assets/Configs/MovementConfig.asset,walkSpeed,2.2,
+Assets/Configs/MovementConfig.asset,runSpeed,4.2,
+Assets/Configs/MovementConfig.asset,jumpVelocity,10.5,
+Assets/Configs/MovementConfig.asset,gravityScale,2.5,
+Assets/Configs/MovementConfig.asset,groundCheckDistance,0.06,
+Assets/Configs/MovementConfig.asset,groundNormalMinY,0.5,
+Assets/Configs/MovementConfig.asset,wallCheckDistance,0.05,
+Assets/Configs/MovementConfig.asset,wallNormalMinX,0.5,
+Assets/Configs/MovementConfig.asset,maxJumps,2,
+Assets/Configs/MovementConfig.asset,onewayRiseThreshold,0.05,
+Assets/Configs/MovementConfig.asset,apexSpeedThreshold,1.2,
+Assets/Configs/MovementConfig.asset,landDuration,0.36,
+Assets/Configs/MovementConfig.asset,slashDuration,0.4,
+Assets/Configs/MovementConfig.asset,combo2Duration,0.4,
+Assets/Configs/MovementConfig.asset,combo3Duration,0.55,
+Assets/Configs/MovementConfig.asset,parryWindow,0.18,
+Assets/Configs/MovementConfig.asset,parryEndDuration,0.22,
+Assets/Configs/MovementConfig.asset,parryBoxOffsetX,0.3,
+Assets/Configs/MovementConfig.asset,parryPerfectDistance,0.15,
+Assets/Configs/MovementConfig.asset,parryCooldown,1.5,
+Assets/Configs/MovementConfig.asset,parryCooldownMinimum,0.3,
+Assets/Configs/MovementConfig.asset,slashLungeSpeed,1.5,
+Assets/Configs/MovementConfig.asset,combo2LungeSpeed,3.5,
+Assets/Configs/MovementConfig.asset,combo3LungeSpeed,0,
+Assets/Configs/PlatformConfig.asset,disappearDelay,0.8,
+Assets/Configs/PlatformConfig.asset,respawnDelay,2.5,
+Assets/Configs/PlatformConfig.asset,blinkHz,6,
+Assets/Configs/PlayerCombatConfig.asset,maxHealth,5,
+Assets/Configs/PlayerCombatConfig.asset,hitInvulnerabilityDuration,0.6,피격 후 이 시간(초) 동안은 다시 데미지를 받지 않는다 (연속 히트 방지)
+Assets/Configs/PlayerCombatConfig.asset,knockbackDistance,0.25,피격 시 공격자 반대 방향으로 밀려나는 거리
+Assets/Configs/PlayerCombatConfig.asset,parryCounterDamage,2,패링에 성공했을 때 공격한 적에게 돌려주는 데미지
+Assets/Configs/PlayerCombatConfig.asset,rollInvincibilityDuration,0.25,구르기 시작 시 이 시간(초) 동안 무적
+Assets/Configs/StatueConfig.asset,awakenRange,5,
+Assets/Configs/StatueConfig.asset,attackRange,1.6,
+Assets/Configs/StatueConfig.asset,moveSpeed,1.5,
+Assets/Configs/StatueConfig.asset,maxHp,3,
+Assets/Configs/StatueConfig.asset,damage,1,
+Assets/Configs/StatueConfig.asset,awakenDuration,0.75,
+Assets/Configs/StatueConfig.asset,idlePauseAfterAwaken,0.4,
+Assets/Configs/StatueConfig.asset,slamDuration,0.7,
+Assets/Configs/StatueConfig.asset,hitboxStart,0.4,
+Assets/Configs/StatueConfig.asset,hitboxEnd,0.6,
+Assets/Configs/StatueConfig.asset,attackCooldown,1.5,
+Assets/Configs/StatueConfig.asset,hitBlinkInterval,0.06,
+Assets/Configs/StatueConfig.asset,hitBlinkCount,3,
+Assets/Configs/StatueConfig.asset,edgeProbeAhead,0.6,
+Assets/Configs/StatueConfig.asset,edgeProbeDepth,1.5,

@@ -65,7 +65,11 @@ public sealed class EnemyAI : MonoBehaviour
         }
 
         selfHealthForXp = GetComponent<NHNDemo.MonsterHealth>();
-        if (selfHealthForXp != null) selfHealthForXp.OnDied += HandleDied;
+        if (selfHealthForXp != null)
+        {
+            selfHealthForXp.OnDied += HandleDied;
+            if (config != null) selfHealthForXp.SetMaxHealth(config.maxHealth);
+        }
     }
 
     private void OnDestroy()

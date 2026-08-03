@@ -22,6 +22,8 @@ MonoBehaviour:
   jumpConfirmDuration: 0.6
   attackCooldown: 1
   attackDamage: 1
+  maxHealth: 4
+  xpReward: 5
   healthBarSize: {x: 1.2, y: 0.16}
   healthBarOffset: {x: 0, y: 2.4, z: 0}
   healthBarBackground: {r: 0, g: 0, b: 0, a: 0.75}

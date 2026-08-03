@@ -12,5 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dcd489b0482298f4f9a5974ed12cf9fb, type: 3}
   m_Name: CameraConfig
   m_EditorClassIdentifier: Assembly-CSharp::NAN2026.CameraConfig
-  smoothTime: 0.15
+  deadzoneWidth: 1.2
+  horizontalSmoothTime: 0.12
+  lookAheadX: 1
+  lookAheadSmoothTime: 0.4
+  verticalSmoothTime: 0.3
+  fallCatchDistance: 2.5
   offset: {x: 0, y: 1}

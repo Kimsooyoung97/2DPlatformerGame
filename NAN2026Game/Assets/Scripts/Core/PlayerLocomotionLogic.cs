@@ -105,5 +105,37 @@ namespace NAN2026.Core
             if (inputX > 0f) return false;
             return currentFlip;
         }
+
+        /// 아래로 스윕한 콜라이더 캐스트가 벽(옆면)까지 '지면'으로 오판하는 것을 막기 위한 필터.
+        /// 접촉면의 법선이 충분히 위쪽을 향할 때만(normalY가 minNormalY 이상) 진짜 지면으로 인정한다.
+        /// 예: 바닥은 normalY≈1, 수직 벽은 normalY≈0이라 걸러진다.
+        public static bool IsGroundNormal(float normalY, float minNormalY)
+        {
+            return normalY >= minNormalY;
+        }
+
+        /// 진행 방향에 벽이 막혀있으면 그쪽으로의 속도를 0으로 자른다.
+        /// 매 프레임 velocity를 직접 덮어쓰는 캐릭터 컨트롤러는 물리 충돌 반응에
+        /// 의존하면 안 되고(코너 걸림·수직 이동 간섭의 원인), 이동 방향을 미리
+        /// 확인해 입력 자체를 막는 편이 안전하다.
+        public static float ClampHorizontalVelocityAgainstWalls(float vx, bool blockedLeft, bool blockedRight)
+        {
+            if (vx > 0f && blockedRight) return 0f;
+            if (vx < 0f && blockedLeft) return 0f;
+            return vx;
+        }
+
+        /// 대쉬(이동기)가 아직 최대거리를 안 채웠으면 계속 진행한다.
+        public static bool DashActive(float distanceTraveled, float maxDistance)
+        {
+            return distanceTraveled < maxDistance;
+        }
+
+        /// 접지 중에는 항상 대쉬 가능(착지하면 공중 사용 횟수가 리셋됨).
+        /// 공중에서는 maxAirDashes(기본 1회)까지만 허용한다.
+        public static bool CanDash(bool grounded, int airDashesUsed, int maxAirDashes)
+        {
+            return grounded || airDashesUsed < maxAirDashes;
+        }
     }
 }

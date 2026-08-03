@@ -16,11 +16,12 @@ MonoBehaviour:
   minPatternCooldown: 2.5
   maxPatternCooldown: 4.5
   chargeWindup: 0.5
-  chargeSpeed: 9
+  chargeSpeed: 28
   chargeMaxDistance: 8
-  chargeHitDistance: 1
+  chargeHitDistance: 1.8
   chargeDamage: 2
   wallCheckDistance: 0.6
+  wallCheckOriginOffset: 0.5
   wallLayerMask:
     serializedVersion: 2
     m_Bits: 1

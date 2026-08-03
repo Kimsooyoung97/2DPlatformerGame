@@ -17,6 +17,8 @@ public sealed class MiddleBossAttackPatterns : MonoBehaviour, IEnemyAttackOverri
 
     private Rigidbody2D body;
     private NHNDemo.MonsterHealth health;
+    private Assets.PixelFantasy.PixelMonsters.Common.Scripts.ExampleScripts.MonsterController2D controller;
+    private Assets.PixelFantasy.PixelMonsters.Common.Scripts.ExampleScripts.MonsterAnimation animation;
     private bool busy;
     private float nextAllowedPatternTime;
 
@@ -26,6 +28,8 @@ public sealed class MiddleBossAttackPatterns : MonoBehaviour, IEnemyAttackOverri
     {
         body = GetComponent<Rigidbody2D>();
         health = GetComponent<NHNDemo.MonsterHealth>();
+        controller = GetComponent<Assets.PixelFantasy.PixelMonsters.Common.Scripts.ExampleScripts.MonsterController2D>();
+        animation = GetComponent<Assets.PixelFantasy.PixelMonsters.Common.Scripts.ExampleScripts.MonsterAnimation>();
     }
 
     public bool TryStartAttack(Transform player)
@@ -36,11 +40,15 @@ public sealed class MiddleBossAttackPatterns : MonoBehaviour, IEnemyAttackOverri
         if (Time.time < nextAllowedPatternTime)
             return false;
 
-        float distance = Mathf.Abs(player.position.x - transform.position.x);
-        if (distance < config.rangedMinDistance)
-            return false; // 근접이면 EnemyAI 기본 공격에 맡긴다
+        // 거리로 판단하지 않는다 — 쿨다운만 다 돌면 근접/원거리 상관없이 무조건 사용한다.
+        bool useCharge = Random.value < 0.9f;
 
-        bool useCharge = Random.value < 0.5f;
+        // MonsterController2D.FixedUpdate가 Input.x==0일 때 매 물리 스텝마다
+        // rb.linearVelocity를 자체적으로 감속시켜, 이 컴포넌트가 코루틴에서
+        // 직접 넣는 돌진 속도와 매 프레임 충돌했다(돌진이 제대로 안 나가던 원인).
+        // 패턴이 몸을 직접 제어하는 동안은 그 컨트롤러를 꺼서 충돌을 없앤다.
+        if (controller != null) controller.enabled = false;
+
         StartCoroutine(useCharge ? DoCharge(player) : DoProjectileThrow(player));
         return true;
     }
@@ -56,11 +64,25 @@ public sealed class MiddleBossAttackPatterns : MonoBehaviour, IEnemyAttackOverri
         Vector3 startPos = transform.position;
         bool hitPlayerOnce = false;
 
+        // MonsterController2D를 꺼두는 동안은 그쪽이 담당하던 Run 애니메이션 전환·
+        // 좌우 방향 전환(Turn)도 멈추므로 여기서 직접 처리한다.
+        if (animation != null) animation.Run();
+        Vector3 facingScale = transform.localScale;
+        facingScale.x = dir * Mathf.Abs(facingScale.x);
+        transform.localScale = facingScale;
+
         while (Vector3.Distance(startPos, transform.position) < config.chargeMaxDistance)
         {
+            // 일반 Physics2D.Raycast는 트리거 콜라이더도 기본적으로 맞힌다. 카메라 경계처럼
+            // 레벨 전체를 덮는 트리거(Stage_CameraBounds 등)가 거리 0으로 항상 잡혀서
+            // 돌진이 시작하자마자 멈추던 원인이었다(FAIL.md #15와 동일 패턴). 트리거를 제외한다.
             Vector2 rayOrigin = (Vector2)transform.position + new Vector2(dir * config.wallCheckOriginOffset, 0f);
-            RaycastHit2D hit = Physics2D.Raycast(rayOrigin, new Vector2(dir, 0f), config.wallCheckDistance, config.wallLayerMask);
-            if (hit.collider != null)
+            ContactFilter2D wallFilter = new ContactFilter2D();
+            wallFilter.SetLayerMask(config.wallLayerMask);
+            wallFilter.useTriggers = false;
+            RaycastHit2D[] wallHits = new RaycastHit2D[4];
+            int wallHitCount = Physics2D.Raycast(rayOrigin, new Vector2(dir, 0f), wallFilter, wallHits, config.wallCheckDistance);
+            if (wallHitCount > 0)
                 break;
 
             body.linearVelocity = new Vector2(dir * config.chargeSpeed, body.linearVelocity.y);
@@ -131,6 +153,8 @@ public sealed class MiddleBossAttackPatterns : MonoBehaviour, IEnemyAttackOverri
     private void EndPattern()
     {
         busy = false;
+        if (controller != null) controller.enabled = true;
+        if (animation != null) animation.Ready();
         nextAllowedPatternTime = Time.time + Random.Range(config.minPatternCooldown, config.maxPatternCooldown);
     }
 }
