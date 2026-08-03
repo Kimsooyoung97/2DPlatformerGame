@@ -16,7 +16,8 @@ namespace NAN2026
         public Color lightColor = new Color(1f, 0.72f, 0.35f, 1f);
 
         [Header("파편·먼지")]
-        public int debrisCount = 4;
+        public int debrisCount = 14;
+        public float shakeAmplitude = 1.7f;
         public float debrisImpulse = 2.5f;
         public float debrisLifetime = 2.5f;
         public float dustLifetime = 3f;

@@ -18,6 +18,8 @@ namespace NAN2026
         public ParticleSystem dustTemplate;
         public GameObject[] debrisPrefabs;
         public Vector3[] dustPoints;
+        public SpriteRenderer[] wallSprites;
+        public CinemachineBasicMultiChannelPerlin noise;
 
         float t;
         bool playing;
@@ -45,6 +47,17 @@ namespace NAN2026
             if (!playing) return;
             t += Time.deltaTime;
             float d = config.delaySeconds, c = config.collapseSeconds, h = config.holdSeconds;
+
+            if (noise != null)
+                noise.AmplitudeGain = GateCollapseLogic.GetPhase(t, d, c, h) == 1 ? config.shakeAmplitude : 0f;
+
+            if (wallSprites != null)
+            {
+                float wa = GateCollapseLogic.TintAlpha(t, d, c);
+                for (int i = 0; i < wallSprites.Length; i++)
+                    if (wallSprites[i] != null)
+                    { var wc = wallSprites[i].color; wc.a = wa; wallSprites[i].color = wc; }
+            }
 
             if (lockedTilemap != null)
             {
@@ -90,8 +103,9 @@ namespace NAN2026
                 {
                     var pf = debrisPrefabs[i % debrisPrefabs.Length];
                     if (pf == null) continue;
-                    var off = new Vector3(Random.Range(-0.6f, 0.6f), Random.Range(0f, 0.8f), 0f);
-                    var go = Instantiate(pf, panAnchor.position + off, Quaternion.identity);
+                    var basePos = (dustPoints != null && dustPoints.Length > 0) ? dustPoints[i % dustPoints.Length] : panAnchor.position;
+                    var off = new Vector3(Random.Range(-0.5f, 0.5f), Random.Range(0f, 0.6f), 0f);
+                    var go = Instantiate(pf, basePos + off, Quaternion.identity);
                     var rb = go.GetComponent<Rigidbody2D>();
                     if (rb == null) rb = go.AddComponent<Rigidbody2D>();
                     rb.AddForce(new Vector2(Random.Range(-1f, 1f), 1f) * config.debrisImpulse, ForceMode2D.Impulse);

@@ -18,7 +18,8 @@ MonoBehaviour:
   lightIntensity: 1.2
   lightRadius: 2.2
   lightColor: {r: 1, g: 0.72, b: 0.35, a: 1}
-  debrisCount: 4
+  debrisCount: 14
+  shakeAmplitude: 1.7
   debrisImpulse: 2.5
   debrisLifetime: 2.5
   dustLifetime: 3
