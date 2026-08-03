@@ -40,7 +40,7 @@ public sealed class MiddleBossAttackPatterns : MonoBehaviour, IEnemyAttackOverri
         if (distance < config.rangedMinDistance)
             return false; // 근접이면 EnemyAI 기본 공격에 맡긴다
 
-        bool useCharge = Random.value < 0.5f;
+        bool useCharge = Random.value < 0.9f;
         StartCoroutine(useCharge ? DoCharge(player) : DoProjectileThrow(player));
         return true;
     }
