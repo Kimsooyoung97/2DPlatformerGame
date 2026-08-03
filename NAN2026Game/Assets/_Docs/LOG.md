@@ -2542,3 +2542,15 @@ Forest Wall은 Ground 윗에 사라지지 않고 위에 붙이게 할수는없�
 - 저장 True. 시각 판정은 사용자 재생
 ### 실패와 수정
 없음
+
+
+## [조사] 2층 차단물 실측 + 개방 연출 재자문 — 2026-08-04 01:14
+### 프롬프트
+[조사]몬스터를 잡으면 2층을 올라갈 수 있게 만드려고 임시로 막아놨다. 어떤 연출이 좋을까?
+### 조사 결과
+- gateObject = Locked / 위치 (0.0, 0.0, 0.0) active=True 부모=Stage_Grid / 컴포넌트: Transform Tilemap TilemapRenderer TilemapCollider2D PlatformEffector2D Rigidbody2D CompositeCollider2D  / Player (1.4, -0.1, 0.0) | KeyMonster (60.1, 2.2, 0.0)
+- 권고: 직전 조사의 2.5s 시퀀스(히트스톱→카메라 팬→벽 하강+먼지+SFX→개방부 토치 점화→복귀) 유지. 차단물은 독립 SR+콜라이더 형태가 하강 연출에 적합
+### 검증
+해당 없음
+### 커밋
+해당 없음(무수정)
