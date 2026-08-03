@@ -55,7 +55,6 @@ public sealed class MiddleBossAttackPatterns : MonoBehaviour, IEnemyAttackOverri
 
     private IEnumerator DoCharge(Transform player)
     {
-        Debug.Log("씀");
         busy = true;
         yield return new WaitForSeconds(config.chargeWindup);
 
