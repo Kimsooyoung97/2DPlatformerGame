@@ -161,23 +161,23 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
             runHeld = true;
             // 점프는 방향키 위쪽만 (Space 제거)
             if (kb.upArrowKey.wasPressedThisFrame) jumpQueued = true;
-            // 대쉬(이동기, 공격 아님): Left Shift. 이미 대쉬 중이면 재시작하지 않고,
-            // 공중에서는 착지 전까지 maxAirDashes(기본 1회)까지만 허용한다.
-            if (kb.leftShiftKey.wasPressedThisFrame && !dashing
+            // 대쉬(이동기, 공격 아님): Left Shift. 땅에서는 사용할 수 없고 공중에서만
+            // 가능하다. 이미 대쉬 중이면 재시작하지 않고, 착지 전까지 maxAirDashes(기본 1회)까지만 허용한다.
+            if (kb.leftShiftKey.wasPressedThisFrame && !dashing && !grounded
                 && PlayerLocomotionLogic.CanDash(grounded, airDashesUsed, config.maxAirDashes))
             {
                 dashing = true;
                 dashStartPos = transform.position;
                 dashDir = PlayerLocomotionLogic.EffectDirection(sr.flipX);
-                if (!grounded) airDashesUsed++;
+                airDashesUsed++;
             }
             // 기본 공격: 좌클릭 → Z
             if (kb.zKey.wasPressedThisFrame) QueueAttack("Slash", config.slashDuration, config.slashLungeSpeed);
             // 스킬 공격(구 K) → X
             if (kb.xKey.wasPressedThisFrame) QueueAttack("Combo2", config.combo2Duration, config.combo2LungeSpeed);
             if (kb.lKey.wasPressedThisFrame) QueueAttack("Combo3", config.combo3Duration, config.combo3LungeSpeed);
-            // 구르기: G키 제거, Ctrl(좌/우)만 사용
-            if (kb.leftCtrlKey.wasPressedThisFrame || kb.rightCtrlKey.wasPressedThisFrame)
+            // 구르기: G키 제거, Ctrl(좌/우)만 사용. 공중에서는 사용할 수 없다(접지 중에만).
+            if (grounded && (kb.leftCtrlKey.wasPressedThisFrame || kb.rightCtrlKey.wasPressedThisFrame))
                 QueueAttack("Roll", rollDuration, rollSpeed);
             // 패링: 마우스 휠클릭 → C
             if (kb.cKey.wasPressedThisFrame && attackTimer <= 0f && Time.time >= parryReadyTime)

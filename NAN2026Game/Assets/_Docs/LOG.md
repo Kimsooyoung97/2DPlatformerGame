@@ -1806,3 +1806,15 @@ PixelFantasy의 MonsterController2D.FixedUpdate()를 확인한 결과, Input.x==
 - run_tests(EditMode) → 97/97 통과 (job d1c0f674416e4de3958de68781851c70, 입력 매핑만 변경돼 순수 로직 테스트 영향 없음)
 ### 실패와 수정
 - 없음
+
+## [수정] 구르기는 접지 전용, 대쉬는 공중 전용으로 상호 배타화 — 2026-08-03 08:10
+### 프롬프트
+구르기는 공중에서 불가능하게 하고 대쉬는 공중에서만 가능하게 바꿔야 할 것 같아
+### 조작 내역
+- PlayerController2D.Update: 구르기(Ctrl) 트리거에 grounded 조건 추가 — 공중에서는 발동 안 함
+- 대쉬(Left Shift) 트리거 조건에 !grounded 추가 — 땅에서는 발동 안 하고 공중에서만 가능. 기존 CanDash(공중 1회 제한)는 그대로 유지되어 이제 사실상 '공중에서만, 착지 전까지 1회'로 동작
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → NullReferenceException 1건(스택트레이스 없음, 최근 턴들과 동일한 무관 패턴) → 타입 로드 확인으로 컴파일 정상 재확인
+- run_tests(EditMode) → 97/97 통과 (job 2acda4c1d5444e69966ddf90d8b4de62, 트리거 조건만 변경돼 기존 순수 로직 테스트 그대로 유효)
+### 실패와 수정
+- 없음
