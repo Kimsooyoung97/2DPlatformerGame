@@ -30,6 +30,7 @@ namespace NAN2026
         bool playing;
         bool collapseFired;
         Transform origTarget;
+        float baseOrtho = -1f;
 
         public void Play()
         {
@@ -41,6 +42,7 @@ namespace NAN2026
             {
                 origTarget = vcam.Target.TrackingTarget;
                 vcam.Target.TrackingTarget = panAnchor;
+                baseOrtho = vcam.Lens.OrthographicSize;
             }
             enabled = true;
         }
@@ -58,8 +60,17 @@ namespace NAN2026
             t += Time.deltaTime;
             float d = config.delaySeconds, c = config.collapseSeconds, h = config.holdSeconds;
 
+            int ph0 = GateCollapseLogic.GetPhase(t, d, c, h);
             if (noise != null)
-                noise.AmplitudeGain = GateCollapseLogic.GetPhase(t, d, c, h) == 1 ? config.shakeAmplitude : 0f;
+                noise.AmplitudeGain = ph0 <= 1 ? config.shakeAmplitude : 0f;
+            if (vcam != null && baseOrtho > 0f)
+            {
+                float zt = GateCollapseLogic.Clamp01(t / (d < 0.0001f ? 0.0001f : d));
+                float target = ph0 <= 2 ? Mathf.Lerp(1f, config.zoomFactor, zt) : 1f;
+                var lens = vcam.Lens;
+                lens.OrthographicSize = baseOrtho * target;
+                vcam.Lens = lens;
+            }
 
             if (wallSprites != null)
             {
@@ -94,6 +105,7 @@ namespace NAN2026
             {
                 vcam.Target.TrackingTarget = origTarget;
                 origTarget = null;
+                if (baseOrtho > 0f) { var lz = vcam.Lens; lz.OrthographicSize = baseOrtho; vcam.Lens = lz; baseOrtho = -1f; }
             }
 
             if (t > d + c + h + 1.5f) { playing = false; enabled = false; }

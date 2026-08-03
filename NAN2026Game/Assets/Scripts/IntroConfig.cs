@@ -9,6 +9,8 @@ namespace NAN2026
         public float blackSeconds = 0.5f;
         public float igniteSeconds = 0.9f;
         public float expandSeconds = 1.2f;
+        [Tooltip("토치 순차 점화 간격(초)")]
+        public float igniteStagger = 0.6f;
 
         [Header("촛불 조명")]
         public float candleIntensity = 1.1f;

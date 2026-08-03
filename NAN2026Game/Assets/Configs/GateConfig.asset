@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce33e145cb39c384784bd1ca0edcd0fe, type: 3}
   m_Name: GateConfig
   m_EditorClassIdentifier: Assembly-CSharp::NAN2026.GateConfig
-  delaySeconds: 0.4
+  delaySeconds: 0.9
   collapseSeconds: 0.8
   holdSeconds: 0.9
   lightIntensity: 1.2
@@ -20,6 +20,7 @@ MonoBehaviour:
   lightColor: {r: 1, g: 0.72, b: 0.35, a: 1}
   debrisCount: 14
   shakeAmplitude: 3.2
+  zoomFactor: 0.7
   barrierColor: {r: 0.55, g: 0.9, b: 1, a: 0.75}
   barrierLightIntensity: 0.7
   sfxVolume: 1
