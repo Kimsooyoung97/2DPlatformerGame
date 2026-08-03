@@ -12,7 +12,8 @@ namespace NAN2026
         public Light2D globalLight;
         public Light2D[] candleLights;
         public SpriteRenderer[] candleGlows;
-        public GameObject[] candleLitNodes; // 파티클(Flame/Glow) 묶음 — 점화 전 완전 소등용
+        public GameObject[] candleLitNodes;
+        public GameObject[] hiddenDuringIgnite; // 촛불 반경 내 이웃 소품 — 확장 전까지 숨김 // 파티클(Flame/Glow) 묶음 — 점화 전 완전 소등용
         public AudioSource bgm;
 
         float t;
@@ -60,6 +61,14 @@ namespace NAN2026
                 for (int i = 0; i < candleLitNodes.Length; i++)
                     if (candleLitNodes[i] != null && candleLitNodes[i].activeSelf != lit)
                         candleLitNodes[i].SetActive(lit);
+            }
+
+            if (hiddenDuringIgnite != null)
+            {
+                bool show = gf > 0f;
+                for (int i = 0; i < hiddenDuringIgnite.Length; i++)
+                    if (hiddenDuringIgnite[i] != null && hiddenDuringIgnite[i].activeSelf != show)
+                        hiddenDuringIgnite[i].SetActive(show);
             }
 
             if (candleGlows != null)
