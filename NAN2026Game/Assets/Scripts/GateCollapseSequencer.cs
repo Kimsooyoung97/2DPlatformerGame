@@ -18,6 +18,7 @@ namespace NAN2026
         public ParticleSystem dustTemplate;
         public GameObject[] debrisPrefabs;
         public Vector3[] dustPoints;
+        public GameObject[] secondFloorProps; // 붕괴 완료까지 상시 숨김
         public SpriteRenderer[] wallSprites;
         public CinemachineBasicMultiChannelPerlin noise;
         public Light2D[] barrierLights;
@@ -34,6 +35,7 @@ namespace NAN2026
         Transform origTarget;
         float baseOrtho = -1f;
         int released;
+        bool floorShown;
 
         public void Play()
         {
@@ -63,6 +65,9 @@ namespace NAN2026
             enabled = false;
             if (openLight != null) openLight.intensity = 0f;
             if (lockedTilemap != null) lockedBaseAlpha = lockedTilemap.color.a;
+            if (secondFloorProps != null)
+                foreach (var g in secondFloorProps)
+                    if (g != null) g.SetActive(false);
         }
 
         void Update()
@@ -112,6 +117,12 @@ namespace NAN2026
                 while (released < want) { ReleaseBrick(released); released++; }
             }
             if (phase >= 2 && lockedRoot != null && lockedRoot.activeSelf) lockedRoot.SetActive(false);
+            if (phase >= 2 && !floorShown && secondFloorProps != null)
+            {
+                floorShown = true;
+                foreach (var g in secondFloorProps)
+                    if (g != null) g.SetActive(true);
+            }
 
             if (openLight != null)
                 openLight.intensity = config.lightIntensity * GateCollapseLogic.LightFactor(t, d, c, h);
