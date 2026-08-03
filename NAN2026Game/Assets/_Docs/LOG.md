@@ -1710,3 +1710,19 @@ PixelFantasy의 MonsterController2D.FixedUpdate()를 확인한 결과, Input.x==
 - run_tests(EditMode) → 91/91 통과 (job 2a2fc7caef9d4f82b7bdc01655f3e242)
 ### 실패와 수정
 - 없음 (직전 턴의 controller.enabled=false 수정이 새로운 부작용을 만든 것으로, MonsterController2D가 이동뿐 아니라 애니메이션·방향전환까지 담당한다는 걸 간과했던 것 — 이 컨트롤러를 끌 때는 그게 대신하던 역할(이동+애니메이션+방향전환)을 전부 대체해야 함을 기억할 것
+
+## [수정] MiddleBoss 돌진/투사체 발동 조건에서 거리 판단 제거 — 2026-08-03 04:20
+### 프롬프트
+아 공격 사거리로 판단을 하지말고 쿨이 돌면 무조건 쓰게끔 해줘
+### 배경
+직전 턴에서 재생 모드로 확인한 결과 돌진 코드 자체는 정상 작동했으나, rangedMinDistance(2.5) 조건 때문에 근접 사거리(attackRange 2.2)에서는 발동하지 않아 실제 플레이(대부분 근접전) 중에는 거의 볼 일이 없었음. 사용자가 거리 조건 자체를 없애기로 결정
+### 조작 내역
+- MiddleBossAttackPatterns.TryStartAttack에서 distance 계산 및 config.rangedMinDistance 비교 분기를 제거. 이제 busy가 아니고 쿨다운(nextAllowedPatternTime)만 지나면 거리와 무관하게 무조건 발동(Chase/Attack 어느 상태에서 호출되든 동일)
+- MiddleBossAttackConfig.rangedMinDistance 필드 자체는 남겨둠(더 이상 코드에서 참조하지 않는 죽은 데이터, 필요시 나중에 다른 용도로 재사용 가능하도록 보존)
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- 재생 모드 실측: 보스-플레이어 거리 1유닛(근접 사거리 2.2 이내)으로 배치 후 관찰 → IsBusy=True, velocity=(9.00, 0.00)로 실제 돌진 중임을 직접 캐치(chargeSpeed=9와 정확히 일치) — 근접 거리에서도 정상 발동 확인
+- run_tests(EditMode) → 91/91 통과 (job ca37f59f76bc46b1aca5ae9940e8c943)
+- 재생 종료 후 isDirty=True(재생모드 토글 부수효과로 추정, 실제 씬 변경 없음) → 저장 후 재로드로 정리
+### 실패와 수정
+- 없음

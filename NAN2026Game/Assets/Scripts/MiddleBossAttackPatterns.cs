@@ -40,10 +40,7 @@ public sealed class MiddleBossAttackPatterns : MonoBehaviour, IEnemyAttackOverri
         if (Time.time < nextAllowedPatternTime)
             return false;
 
-        float distance = Mathf.Abs(player.position.x - transform.position.x);
-        if (distance < config.rangedMinDistance)
-            return false; // 근접이면 EnemyAI 기본 공격에 맡긴다
-
+        // 거리로 판단하지 않는다 — 쿨다운만 다 돌면 근접/원거리 상관없이 무조건 사용한다.
         bool useCharge = Random.value < 0.9f;
 
         // MonsterController2D.FixedUpdate가 Input.x==0일 때 매 물리 스텝마다
