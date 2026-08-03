@@ -45,6 +45,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
     private bool dashing;
     private Vector3 dashStartPos;
     private float dashDir;
+    private int airDashesUsed;
     private float landTimer;
     private string currentState;
     public bool IsGrounded { get { return grounded; } }
@@ -160,12 +161,15 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
             runHeld = true;
             // 점프는 방향키 위쪽만 (Space 제거)
             if (kb.upArrowKey.wasPressedThisFrame) jumpQueued = true;
-            // 대쉬(이동기, 공격 아님): Left Shift. 이미 대쉬 중이면 재시작하지 않는다.
-            if (kb.leftShiftKey.wasPressedThisFrame && !dashing)
+            // 대쉬(이동기, 공격 아님): Left Shift. 이미 대쉬 중이면 재시작하지 않고,
+            // 공중에서는 착지 전까지 maxAirDashes(기본 1회)까지만 허용한다.
+            if (kb.leftShiftKey.wasPressedThisFrame && !dashing
+                && PlayerLocomotionLogic.CanDash(grounded, airDashesUsed, config.maxAirDashes))
             {
                 dashing = true;
                 dashStartPos = transform.position;
                 dashDir = PlayerLocomotionLogic.EffectDirection(sr.flipX);
+                if (!grounded) airDashesUsed++;
             }
             // 기본 공격: 좌클릭 → Z
             if (kb.zKey.wasPressedThisFrame) QueueAttack("Slash", config.slashDuration, config.slashLungeSpeed);
@@ -256,7 +260,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
         }
         if (grounded && !wasGrounded) landTimer = config.landDuration;
         if (landTimer > 0f) landTimer -= Time.fixedDeltaTime;
-        if (grounded && rb.linearVelocity.y <= 0.01f) jumpsUsed = 0;
+        if (grounded && rb.linearVelocity.y <= 0.01f) { jumpsUsed = 0; airDashesUsed = 0; }
 
         if (parryEndTimer > 0f) parryEndTimer -= Time.fixedDeltaTime;
         // 패링 판정: 홀드 중 + 판정 창 이내 + 전방 박스에 BossOrb

@@ -165,5 +165,20 @@ namespace NAN2026.Tests
         {
             Assert.IsFalse(PlayerLocomotionLogic.DashActive(9f, 8f));
         }
+
+        [Test] public void CanDash_AlwaysTrueWhenGrounded()
+        {
+            Assert.IsTrue(PlayerLocomotionLogic.CanDash(true, 5, 1));
+        }
+
+        [Test] public void CanDash_TrueInAir_WhenUnderLimit()
+        {
+            Assert.IsTrue(PlayerLocomotionLogic.CanDash(false, 0, 1));
+        }
+
+        [Test] public void CanDash_FalseInAir_WhenLimitReached()
+        {
+            Assert.IsFalse(PlayerLocomotionLogic.CanDash(false, 1, 1));
+        }
     }
 }

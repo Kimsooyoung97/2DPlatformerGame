@@ -1780,3 +1780,17 @@ PixelFantasy의 MonsterController2D.FixedUpdate()를 확인한 결과, Input.x==
 - run_tests(EditMode) → 94/94 통과 (job d873d8ffd7e443bd8586a45bdce6ca97, 기존 91 + 신규 3)
 ### 실패와 수정
 - 재생 모드 테스트 중 첫 텔레포트 위치(20, -0.07)가 안전하지 않았는지 즉시 리스폰되어 위치가 (1.39, 0.05)로 되돌아감 → 현재 안전한 위치에서 재시도해 정상 검증 완료 (실제 버그 아님, 테스트 방법 이슈)
+
+## [수정] 공중 대쉬 1회 제한 — 2026-08-03 07:25
+### 프롬프트
+공중에서 대쉬는 딱 한 번만 사용할 수 있게 해줘
+### 조작 내역
+- NAN2026.Core.PlayerLocomotionLogic에 CanDash(grounded, airDashesUsed, maxAirDashes) 순수 함수 추가 — 접지 중엔 항상 허용, 공중에선 maxAirDashes(기본 1)까지만. 테스트 3개
+- MovementConfig에 maxAirDashes(기본 1) 추가
+- PlayerController2D에 airDashesUsed 필드 추가. 대쉬 트리거 조건에 CanDash 체크 삽입, 공중에서 대쉬 시작 시 airDashesUsed++. 기존 jumpsUsed 리셋 지점(착지 시)에 airDashesUsed도 함께 0으로 리셋(2단 점프와 동일한 패턴)
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → NullReferenceException 1건(스택트레이스 없음, 최근 턴들과 동일한 무관 패턴) → 타입 로드 확인으로 컴파일 정상 재확인
+- 재생 모드에서 실제 config(maxAirDashes=1)로 CanDash(false,0,1)=True, CanDash(false,1,1)=False 확인 — 공중 1회 사용 후 차단되는 판정이 실제 설정값으로 정확히 동작함을 검증
+- run_tests(EditMode) → 97/97 통과 (job 4429cc4eccf742f9a6dce4f7b7ce8320, 기존 94 + 신규 3)
+### 실패와 수정
+- 없음

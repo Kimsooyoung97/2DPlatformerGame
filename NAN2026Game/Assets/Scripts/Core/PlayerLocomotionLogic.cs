@@ -130,5 +130,12 @@ namespace NAN2026.Core
         {
             return distanceTraveled < maxDistance;
         }
+
+        /// 접지 중에는 항상 대쉬 가능(착지하면 공중 사용 횟수가 리셋됨).
+        /// 공중에서는 maxAirDashes(기본 1회)까지만 허용한다.
+        public static bool CanDash(bool grounded, int airDashesUsed, int maxAirDashes)
+        {
+            return grounded || airDashesUsed < maxAirDashes;
+        }
     }
 }
