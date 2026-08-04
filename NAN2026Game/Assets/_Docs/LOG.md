@@ -2419,3 +2419,34 @@ Forest Wall은 Ground 윗에 사라지지 않고 위에 붙이게 할수는없�
 - 저장 True, 꽃 9/10. 밀도·구도는 사용자 판정
 ### 실패와 수정
 - 실측 경로 확인 원칙 (Props/Flower/{색}/flower_{색}_{n}.png)
+
+## [구현] Princess_Boss_Knight 신규 3패턴 + EnemyAI/WorldHealthBar/MonsterHealth 부착 — 2026-08-03
+### 프롬프트
+기존의 스킬들은 사용하지 말고 Princess_Trans2 스프라이트를 사용해 플레이어에게 구체 투척(속도가 다른 5개의 구체 발사 패링 가능), Princess_Trans3 스프라이트를 사용해 중범위 공격(보스 앞쪽 넓은 범위 공격 패링 가능), Princess_Trans1 스프라이트를 사용해 전범위 공격(게임이 일시정지 되면서 qte리듬게임이 시작되며 성공하면 보스가 그로기에 걸리고 실패하면 공격 진행 패링 불가능)을 구현해주고 추가로 MiddleBoss처럼 이 프리팹에 EnemyAi, WorldHealthBar, MonsterHealth 스크립트를 붙여줘
+### 조사
+기존 BossOrbLauncher/BossOrb/BossBeam(리듬 빔)은 사용하지 않기로 함(사용자 지시). Princess_Boss_Knight!!!는 프리팹 인스턴스(Assets/Prefabs/Princess_Boss_Knight!!!.prefab)로 확인, 인스턴스 오버라이드로만 작업. Animator Controller가 "Princess_Intro"이며 Princess_Trans1/2/3 애니메이터 상태(0.5초 클립)와 별도의 정적 PNG 스프라이트가 둘 다 존재 — 기존 BossIntroSequencer 관례(anim.Play(stateName))에 맞춰 애니메이터 상태 재생 방식 채택
+### 조작 내역
+- NAN2026.Core.PrincessBossLogic 신규(순수): IsBeatHit(QTE 비트 판정), QteSucceeded. 테스트 7개
+- PrincessBossAttackConfig(SO) 신규: 패턴 쿨다운, 구체 5발 속도 배열·데미지, 중범위 공격 판정 박스·데미지, QTE 비트 수·간격·허용오차·실패데미지·그로기 지속시간
+- PrincessBossAttackPatterns.cs 신규(IEnemyAttackOverride 구현):
+  - ① DoOrbVolley: PTrans2 재생 → 선딜 → SpikeProjectile(기존 재사용, IParryReflector 기반 패링 내장) 5발을 서로 다른 속도로 순차 발사
+  - ② DoFrontalAoE: PTrans3 재생 → 선딜(텔레그래프) → 보스 정면 OverlapBox 판정, 맞으면 패링 체크 후 데미지(패링 성공 시 보스가 반격 데미지)
+  - ③ DoFullScreenQte: PTrans1 재생 → Time.timeScale=0으로 일시정지, Time.unscaledDeltaTime 기반 리듬 QTE(Z키, 비트 4개) 진행(OnGUI로 진행상황 표시) → 전부 성공 시 그로기(IsBusy를 그로기 동안도 true로 묶어 완전 무행동화), 실패 시 패링 불가 데미지 후 재개
+  - MonsterController2D와의 애니메이션/이동 제어 충돌 방지를 위해 패턴 실행 중 controller.enabled=false (기존 MiddleBoss 수정과 동일 패턴)
+- Princess_Boss_Knight!!!에 부착: MonsterHealth, EnemyAI(신규 PrincessBossAIConfig: maxHealth=20, xpReward=40, usePatrol=false), WorldHealthBar, PrincessBossAttackPatterns
+### 발견·수정한 부수 문제
+- EnemyAI 부착 시도 시 AddComponent가 조용히 실패(예외 없음) — MonsterController2D가 요구하는 Collider2D가 추상 타입이라 RequireComponent 자동 추가가 작동하지 않음. BoxCollider2D+Rigidbody2D를 수동으로 먼저 추가해 해결
+- 재생 중 UnassignedReferenceException(Monster.Animator) 발견 — PixelFantasy Monster 컴포넌트의 Animator/Body 필드가 프로그래밍 방식 AddComponent로는 자동 연결이 안 되어 SerializedObject로 직접 연결
+- 재생 중 콘솔에 "Parameter 'Idle/Ready/Walk/Run/Jump/Die' does not exist" 경고가 매 프레임 반복 — MonsterAnimation이 기대하는 Animator 파라미터 10개(Bool 6 + Trigger 4)가 Princess_Intro 컨트롤러에 없었음. 기존 상태·전환은 건드리지 않고 파라미터만 추가해 해결(Assets/Sprites_AI/Boss/Anim/Princess_Intro.controller)
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건, 타입 로드 확인
+- 저장 → manage_scene(load) 강제 재로드 → 컴포넌트 4종·config 연결 재확인
+- run_tests(EditMode) → 109/109 통과
+- **재생 모드 실측**: 콘솔 경고 0건(파라미터 수정 후) 확인. 보스를 플레이어 근접 위치로 이동시켜 자연스러운 AI 흐름 관찰 → EnemyAI.CurrentState가 Patrol→Attack으로 정상 전환, 플레이어 HP가 5→2로 실제 감소해 전투가 실제로 작동함을 확인
+- 씬 오브젝트 수가 세션 중 18→10으로 줄어든 것을 발견해 사용자에게 확인 요청 → 의도된 정리라는 답변 받고 저장 진행(MiddleBoss/DeathDog1-3 등 삭제는 이번 작업과 무관, 사용자 본인 작업)
+### 실패와 수정
+- 위 '발견·수정한 부수 문제' 3건 모두 이번 세션 내에서 즉시 발견·수정함
+### 눈으로 확인 필요
+- 3패턴이 실제 플레이에서 골고루 발동하는지(랜덤 선택), 특히 QTE 일시정지·리듬 타이밍이 체감상 적절한지
+- 구체 5발의 속도 차이, 중범위 공격의 판정 범위가 밸런스상 괜찮은지
+- 그로기 지속시간(3초)이 적절한지

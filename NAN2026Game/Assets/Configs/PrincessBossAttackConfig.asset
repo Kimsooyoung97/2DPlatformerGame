@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 87ee453daa00cfb4d9a587bd39339e52, type: 3}
+  m_Name: PrincessBossAttackConfig
+  m_EditorClassIdentifier: Assembly-CSharp::PrincessBossAttackConfig
+  minPatternCooldown: 3
+  maxPatternCooldown: 5
+  orbWindup: 0.5
+  orbSpeeds:
+  - 4
+  - 6
+  - 8
+  - 10
+  - 12
+  orbDamage: 1
+  orbSpawnHeight: 1.5
+  orbLaunchInterval: 0.12
+  aoeWindup: 0.6
+  aoeForwardRange: 4
+  aoeHeight: 2.5
+  aoeDamage: 2
+  qteBeatCount: 4
+  qteBeatInterval: 0.6
+  qteHitWindow: 0.18
+  qteFailDamage: 3
+  groggyDuration: 3
