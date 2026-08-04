@@ -254,7 +254,7 @@ public sealed class PrincessBossAttackPatterns : MonoBehaviour, IEnemyAttackOver
 
         if (qteWaitingToStart)
         {
-            GUI.Label(new Rect(left, top, w, 36f), "\uacf7 QTE\uac00 \uc2dc\uc791\ub429\ub2c8\ub2e4...", titleStyle);
+            GUI.Label(new Rect(left, top, w, 36f), "\uace7 QTE\uac00 \uc2dc\uc791\ub429\ub2c8\ub2e4...", titleStyle);
             GUIStyle countStyle = new GUIStyle(GUI.skin.label) { fontSize = 40, alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold };
             countStyle.normal.textColor = Color.yellow;
             GUI.Label(new Rect(left, top + 44f, w, 60f), Mathf.CeilToInt(Mathf.Max(qteStartCountdown, 0f)).ToString(), countStyle);

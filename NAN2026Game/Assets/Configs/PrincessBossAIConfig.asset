@@ -16,7 +16,7 @@ MonoBehaviour:
   attackRange: 2
   chaseStopDistance: 20
   patrolSpeed: 0
-  chaseSpeed: 0
+  chaseSpeed: 0.8
   patrolRadius: 0
   jumpYThreshold: 1.2
   jumpConfirmDuration: 0.35
