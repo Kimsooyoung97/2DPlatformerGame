@@ -13,13 +13,16 @@ MonoBehaviour:
   m_Name: MovementConfig
   m_EditorClassIdentifier: Assembly-CSharp::NAN2026.MovementConfig
   walkSpeed: 7
-  runSpeed: 50
+  runSpeed: 7
   jumpVelocity: 10.5
   gravityScale: 2.5
   groundCheckDistance: 0.06
   groundNormalMinY: 0.5
   wallCheckDistance: 0.05
   wallNormalMinX: 0.5
+  dashSpeed: 20
+  dashMaxDistance: 8
+  maxAirDashes: 1
   maxJumps: 2
   onewayRiseThreshold: 0.05
   apexSpeedThreshold: 1.2
@@ -32,8 +35,8 @@ MonoBehaviour:
   parryBoxSize: {x: 0.5, y: 0.7}
   parryBoxOffsetX: 0.3
   parryPerfectDistance: 0.15
-  parryCooldown: 1.5
+  parryCooldown: 0.5
   parryCooldownMinimum: 0.3
-  slashLungeSpeed: 1.5
-  combo2LungeSpeed: 3.5
+  slashLungeSpeed: 1
+  combo2LungeSpeed: 2
   combo3LungeSpeed: 0
