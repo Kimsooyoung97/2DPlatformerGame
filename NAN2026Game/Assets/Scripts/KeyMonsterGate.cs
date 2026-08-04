@@ -11,6 +11,8 @@ public sealed class KeyMonsterGate : MonoBehaviour
     [SerializeField] private NHNDemo.MonsterHealth health;
     [Tooltip("이 몬스터가 죽으면 SetActive(false)로 비활성화할 오브젝트 (예: 잠긴 문/타일맵)")]
     [SerializeField] private GameObject gateObject;
+    [Tooltip("배선 시 즉시 소멸 대신 붕괴 연출 재생")]
+    [SerializeField] private NAN2026.GateCollapseSequencer collapseSequencer;
 
     private void Awake()
     {
@@ -25,6 +27,7 @@ public sealed class KeyMonsterGate : MonoBehaviour
 
     private void HandleDied()
     {
+        if (collapseSequencer != null) { collapseSequencer.Play(); return; }
         if (gateObject != null) gateObject.SetActive(false);
     }
 }

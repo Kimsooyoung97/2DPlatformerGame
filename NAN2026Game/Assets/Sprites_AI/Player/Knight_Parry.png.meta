@@ -20,6 +20,15 @@ TextureImporter:
   - first:
       213: -926395965844510187
     second: PARRY_4
+  - first:
+      213: 3281067381441848902
+    second: PARRY_5
+  - first:
+      213: 7064964789818874603
+    second: PARRY_6
+  - first:
+      213: -4755168076236978423
+    second: PARRY_7
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -66,7 +75,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 848
+  spritePixelsToUnits: 604
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -144,12 +153,12 @@ TextureImporter:
       name: PARRY_0
       rect:
         serializedVersion: 2
-        x: 23
-        y: 143
-        width: 529
-        height: 814
+        x: 124
+        y: 1809
+        width: 570
+        height: 502
       alignment: 9
-      pivot: {x: 0.55, y: 0}
+      pivot: {x: 0.53, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -166,10 +175,10 @@ TextureImporter:
       name: PARRY_1
       rect:
         serializedVersion: 2
-        x: 552
-        y: 143
-        width: 487
-        height: 814
+        x: 1135
+        y: 1793
+        width: 378
+        height: 521
       alignment: 9
       pivot: {x: 0.53, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -188,12 +197,12 @@ TextureImporter:
       name: PARRY_2
       rect:
         serializedVersion: 2
-        x: 1039
-        y: 143
-        width: 590
-        height: 814
+        x: 74
+        y: 1226
+        width: 768
+        height: 511
       alignment: 9
-      pivot: {x: 0.56, y: 0}
+      pivot: {x: 0.53, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -210,12 +219,12 @@ TextureImporter:
       name: PARRY_3
       rect:
         serializedVersion: 2
-        x: 1629
-        y: 143
-        width: 539
-        height: 814
+        x: 983
+        y: 1244
+        width: 714
+        height: 492
       alignment: 9
-      pivot: {x: 0.52, y: 0}
+      pivot: {x: 0.53, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -232,12 +241,12 @@ TextureImporter:
       name: PARRY_4
       rect:
         serializedVersion: 2
-        x: 2200
-        y: 143
-        width: 441
-        height: 814
+        x: 85
+        y: 693
+        width: 621
+        height: 467
       alignment: 9
-      pivot: {x: 0.52, y: 0}
+      pivot: {x: 0.53, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -246,6 +255,72 @@ TextureImporter:
       bones: []
       spriteID: 51aab7ef6c7c423f0800000000000000
       internalID: -926395965844510187
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PARRY_5
+      rect:
+        serializedVersion: 2
+        x: 925
+        y: 645
+        width: 836
+        height: 517
+      alignment: 9
+      pivot: {x: 0.53, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 64666fa4661b88d20800000000000000
+      internalID: 3281067381441848902
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PARRY_6
+      rect:
+        serializedVersion: 2
+        x: 81
+        y: 117
+        width: 328
+        height: 491
+      alignment: 9
+      pivot: {x: 0.53, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: beadbc76b0ccb0260800000000000000
+      internalID: 7064964789818874603
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PARRY_7
+      rect:
+        serializedVersion: 2
+        x: 1123
+        y: 139
+        width: 638
+        height: 470
+      alignment: 9
+      pivot: {x: 0.53, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9070e9024df320eb0800000000000000
+      internalID: -4755168076236978423
       vertices: []
       indices: 
       edges: []
@@ -270,6 +345,9 @@ TextureImporter:
       PARRY_2: 2668509501383107195
       PARRY_3: 2966020140754561822
       PARRY_4: -926395965844510187
+      PARRY_5: 3281067381441848902
+      PARRY_6: 7064964789818874603
+      PARRY_7: -4755168076236978423
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

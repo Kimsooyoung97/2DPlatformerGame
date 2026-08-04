@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e3d17428607c9ec4b8e44f1b4041346c, type: 3}
+  m_Name: IntroConfig
+  m_EditorClassIdentifier: Assembly-CSharp::NAN2026.IntroConfig
+  blackSeconds: 1
+  igniteSeconds: 1.2
+  expandSeconds: 1.2
+  igniteStagger: 0.6
+  candleIntensity: 1.1
+  candleOuterRadius: 1.2
+  candleInnerRadius: 0.25
+  candleColor: {r: 1, g: 0.72, b: 0.35, a: 1}
+  globalMaxIntensity: 1
+  bgmVolume: 0.55
+  bgmFadeSeconds: 1.2
