@@ -2419,3 +2419,561 @@ Forest Wall은 Ground 윗에 사라지지 않고 위에 붙이게 할수는없�
 - 저장 True, 꽃 9/10. 밀도·구도는 사용자 판정
 ### 실패와 수정
 - 실측 경로 확인 원칙 (Props/Flower/{색}/flower_{색}_{n}.png)
+
+
+## [수정] 소품 카탈로그 No cameras rendering 수리 + 쇼룸 도구 추적 해제 — 2026-08-04 00:23
+### 프롬프트
+우리 에셋 쇼룸에 소품 카탈로그 누르니깐 No cameras rendering 된거 같은데 이거 만들어줄래? 이거 바꾼거는 .gitignore에 넣자. 다른 팀원들은 필요없는거니깐
+### 조작 내역
+- 원인: SC All Props 씬의 카메라가 비활성 상태(존재하나 렌더링 0)
+- EnsurePreviewCamera() 추가 — 씬 전환 후 활성 카메라 부재 시 콘텐츠 바운즈에 맞춘 임시 직교 카메라 생성(HideFlags.DontSave, 팩 원본 무저장). 1차 가드가 비활성 카메라를 '있음'으로 오판 → isActiveAndEnabled 기준으로 교정
+- .gitignore에 쇼룸 도구 2종(+meta) 추가, git rm --cached로 추적 해제(로컬 파일 보존)
+### 검증
+- 컴파일 에러 0. 실측: 활성 카메라 0→1대, 임시카메라 hideFlags=DontSave, 씬 dirty=False(팩 원본 무손상), 로컬 파일 생존=True
+### 실패와 수정
+- 카메라 존재 판별 오류 1회(비활성 포함 집계) → isActiveAndEnabled로 수정
+
+
+## [조사] 인트로 조명 연출 타당성 — 2026-08-04 00:37
+### 프롬프트
+[조사]일단 연출부터 들어가자. 지금은 캐릭터의 시선에 따라 화면이 밝아지게 설정되어있지? 2.6,3.5에 보면 Candle 05를 비롯해서 여러 캔들이 있을거야. 처음에 완전 까만 화면이었다가 촛불이 켜지면서 촛불랑 비슷한 크기만큼 밝아졌다가 주인공 범위까지 밝아지면서 게임이 시작되는 연출에 대해서 어떻게 생각하니?
+### 조사 결과
+- 조명 체계: Global Light 2D(Light2D type=4 전역, 세기 1.0) 1개가 화면 전체 밝기 담당. 플레이어에는 조명 없음 — '시선 따라 밝아짐'은 사실이 아님(전역 균일 조명)
+- 촛불: (2.6,3.5) 주변에 Candle 05(3)/05(4)/02(3)/02(4) 4기 밀집. 각 촛불 구조 = Candle > Lit > {Flame, Glow, Light}. Light는 Light2D가 아니라 3D Point Light(세기 1.2, 반경 2.5) — 2D 렌더러에서는 스프라이트 조명에 기여하지 않음. 즉 현재 촛불 빛은 Glow 스프라이트가 내는 가짜 빛
+- 시작 위치: Player (1.4,-0.1) — 촛불군(2.6,3.5)과 y차 3.6u. 인트로 프레이밍 시 고려 필요
+- BGM: Assets/Audio/BGM에 4곡(게임시작BGM/감옥 입장/전투소리/공주 만남.mp3) 존재, 미임포트 설정
+- 연출 실현 경로: Global 세기 0→촛불급→플레이어 시야급 3단 페이드가 최소 비용. 촛불 국소 발광은 Light2D 추가 또는 Glow 알파 페이드로 대체 가능
+### 검증
+해당 없음
+### 커밋
+해당 없음(무수정)
+
+
+## [구현] 인트로 연출(암전→촛불 점화→전역 확장) + 게임시작BGM — 2026-08-04 00:50
+### 프롬프트
+[구현] 너가 권장하는 대로 해보자. 그리고 플레이어 범위까지 밝아지면 게임시작BGM음악을 틀어줘.
+### 조작 내역
+- IntroSequenceLogic(NAN2026.Core, 순수·엡실론 경계 보호) + 테스트 6종
+- IntroConfig(SO — 페이즈 길이·촛불 조명·BGM 수치 소유) / IntroSequencer(아무 키 스킵, 완료 시 self-disable)
+- SecondScene 배선: 시작 촛불 4기에 Light2D(Point, 반경 1.7) 부착·Lit(파티클) 점화 전 소등(발견: Flame/Glow는 SR 아닌 파티클 — 암전 위해 노드 게이트로 전환, CandleLight2D는 루트로 분리), Global Light 2D 구동, IntroDirector+AudioSource(게임시작BGM, 루프), mp3 WebGL 임포트(Vorbis 0.6·CompressedInMemory·백그라운드 로드)
+### 검증
+- 컴파일 에러 0, EditMode 108/108 통과(신규 6). 연출 체감·타이밍은 사용자 재생 판정
+### 실패와 수정
+- 부동소수 경계로 테스트 2건 실패 → 로직에 EPS 보정(테스트 불변)
+- Glow SR 가정 오류 → 파티클 확인 후 설계 전환
+
+
+## [수정] 점화 단계 촛불 단독 노출 — 이웃 소품 숨김 — 2026-08-04 00:55
+### 프롬프트
+지금 연출은 괜찮은데 촛불만 보이게 하고 다른 props는 안보이게 연출해줄 수 없나?
+### 조작 내역
+- hiddenDuringIgnite 필드 추가: 확장(gf>0) 전까지 SetActive(false), 확장 시작 순간 켜져 어둠에서 페이드인
+- 자동 수집: 촛불 반경 2.2u 내 이웃 SR 4개(벽장식 Dent 2·은접시 2), 촛불 계층·플레이어 제외
+- 촛불 조명 반경 1.7→1.2 (라이트 4기 + IntroConfig 동기)
+### 검증
+- 컴파일 에러 0, EditMode 108/108. 시각 판정은 사용자 재생
+### 실패와 수정
+없음
+
+
+## [수정] 점화 단계 게이트를 Stage_Props 전원으로 확대 — 2026-08-04 00:56
+### 프롬프트
+촛불이 밝혀지면서 뒤에 wall 타입은 안보이는데 PF Dungeon Wall Deco - Dent 05 (1)만 덩그러니 보이니깐 너무 이질적으로 보여
+### 조작 내역
+- 반경 수집(4개) → Stage_Props 직계 중 촛불 제외 전원(136개) 게이트로 전환 — 점화 중 노출 보장 범위를 원천 확대(잔존 노출 원인 추정: 언릿 재질 또는 반경 밖 개체). 확장 시작 시 일괄 등장은 동일
+### 검증
+- 저장 True. 시각 판정은 사용자 재생
+### 실패와 수정
+- 부분 수집의 누수 → 전원 게이트 원칙
+
+
+## [수정] 인트로 BGM 전투소리로 교체 — 2026-08-04 01:03
+### 프롬프트
+전투소리 BGM으로 바꿔줘.
+### 조작 내역
+- IntroDirector clip=전투소리.mp3 + WebGL 임포트(Vorbis 0.6·CompressedInMemory·백그라운드). 재생 중 1회 휘발→정지 후 재실행
+### 검증
+- clip 배선·저장 True
+### 실패와 수정
+없음
+
+
+## [수정] 인트로 연출 토치 재배선 — 2026-08-04 01:05
+### 프롬프트
+[수정]Torch01로 변경했는데 거기에 우리 연출을 새로 적용시켜줘.
+### 조작 내역
+- 시작 구역(x<15) 토치 3기(PF Dungeon Props - Torch 01@2.8 PF Dungeon Props - Torch 01 (1)@3.7 PF Dungeon Props - Torch 01 (2)@4.7)에 Light2D 부착(루트 자식·반경 1.2·점화 구동), Lit 노드 게이트 재배선, 숨김 대상=Stage_Props 토치 제외 140개
+### 검증
+- 저장 True. 시각 판정은 사용자 재생
+### 실패와 수정
+없음
+
+
+## [수정] 토치 3기 리듬 재배치 — 2026-08-04 01:06
+### 프롬프트
+토치 배치는 저게 좋아보여? 너가 생각하기에 괜찮은 배치 해봐
+### 조작 내역
+- 밀집(1.9u 폭) → 진행 방향 3u 등간격 x2.5/5.5/8.5, 높이 유지. 조명·Lit 게이트는 자식이라 자동 추종
+### 검증
+- 저장 True. 구도는 사용자 판정
+### 실패와 수정
+없음
+
+
+## [조사] 몬스터 처치→벽 개방 연출 설계 자문 — 2026-08-04 01:09
+### 프롬프트
+[조사] 2층으로 올라가지 못하고 몬스터를 죽였을때 벽이 열리도록 더미 형태로 놓아놨다. 너가 완벽하다고 생각하는 연출은 무엇이며 어떻게 배치하는게 좋을까?
+### 조사 결과
+- 현행: KeyMonster(60.1,2.2)에 KeyMonsterGate 부착 — MonsterHealth.OnDied→gateObject.SetActive(false) 즉시 소멸 방식. gateObject 배선은 인스펙터 확인 필요(더미). Portal(72.3,10.2)=2층 목적지, x55~75 상부 y20 천장 구조
+- 진단: 즉시 SetActive(false)는 기능은 되나 '벽이 사라진 걸 플레이어가 인지 못함' — 연출 부재. NHNDemo.MonsterHealth 의존이 여기도 있음(빌드 리허설 시 주의)
+- 제안(요지): 처치→0.2s 히트스톱+흔들림→카메라 벽으로 팬→벽 하강+먼지 파티클+돌소리(1.2s)→개방부 토치 점화(기존 인트로 자산 재사용)→카메라 복귀. 총 2.5s. 배치는 벽=2층 계단 입구, 몬스터=벽 시야 내 8u
+### 검증
+해당 없음
+### 커밋
+해당 없음(무수정)
+
+
+## [수정] 점화 제외를 시작 토치 3기로 한정 — 2026-08-04 01:11
+### 프롬프트
+처음에 토치 3개만 불빛들어오게 하고 오른쪽 사이드에 있는 토치는 은은한 빛도 안보이게 해줘.
+### 조작 내역
+- 게이트 재배선: Torch 전체 제외 → x<15 시작 토치 3기만 제외. 우측 토치 10기 포함 총 135개 게이트 — 암전·점화 중 완전 소등, 확장 시 등장
+### 검증
+- 저장 True. 시각 판정은 사용자 재생
+### 실패와 수정
+없음
+
+
+## [조사] 2층 차단물 실측 + 개방 연출 재자문 — 2026-08-04 01:14
+### 프롬프트
+[조사]몬스터를 잡으면 2층을 올라갈 수 있게 만드려고 임시로 막아놨다. 어떤 연출이 좋을까?
+### 조사 결과
+- gateObject = Locked / 위치 (0.0, 0.0, 0.0) active=True 부모=Stage_Grid / 컴포넌트: Transform Tilemap TilemapRenderer TilemapCollider2D PlatformEffector2D Rigidbody2D CompositeCollider2D  / Player (1.4, -0.1, 0.0) | KeyMonster (60.1, 2.2, 0.0)
+- 권고: 직전 조사의 2.5s 시퀀스(히트스톱→카메라 팬→벽 하강+먼지+SFX→개방부 토치 점화→복귀) 유지. 차단물은 독립 SR+콜라이더 형태가 하강 연출에 적합
+### 검증
+해당 없음
+### 커밋
+해당 없음(무수정)
+
+
+## [구현] 게이트 붕괴 연출 — 2026-08-04 01:23
+### 프롬프트
+[구현]게이트 붕괴 연출
+### 조작 내역
+- GateCollapseLogic(Core, EPS 경계) + 테스트 5종 / GateConfig(SO 수치 소유) / GateCollapseSequencer(틴트 디졸브·충돌 해제·Dust 4점·Debris Brick 4종 물리 낙하·개방부 Light2D 점화·vcam 타깃 스왑 팬)
+- KeyMonsterGate: 시퀀서 배선 시 Play() 호출(미배선 시 기존 즉시 소멸 유지)
+- 배선: Locked 11셀 실측 중심 (40.5,5.5), GateDirector(GateAnchor·OpenLight·DustTemplate), CinemachineCamera 연결
+### 검증
+- 컴파일 에러 0, EditMode 113/113(신규 5). 연출 체감은 사용자 재생 판정
+### 실패와 수정
+- LightFactor 경계 부동소수 1건 → EPS 보정(테스트 불변)
+
+
+## [수정] 게이트 붕괴 강화 — 창살 실체·파편 폭우·카메라 흔들림 — 2026-08-04 01:28
+### 프롬프트
+기존에 막혀 있는 벽도 새로운 props로 구현을 해주던가 아니면 너가 만들어주던가 해서 해주고 떨어지는 파티클이 벽 주변에서 많이 떨어져야지 한두개 떨어지면 어떻게 하니. 그리고 문이 열릴때 벽을 카메라가 조준하고 흔들림을 구현해주면 좋겠어.
+### 조작 내역
+- Locked 산개 발견(11셀 x18~62) → 3군집 분할, 군집별 Gate 01 창살 소품 배치(셀 범위 스케일·발밑 스냅·콜라이더 제거·SR 9개 디졸브 연동)
+- 파편 14개로 확대 + 전체 11셀 분산 스폰, 먼지 11점
+- 카메라: 팬 앵커=몬스터 최근접 군집(62.5,3.5), CinemachineBasicMultiChannelPerlin(6D)로 붕괴 페이즈 흔들림 1.7
+### 검증
+- 컴파일 0, EditMode 113/113. 체감은 사용자 재생 판정
+### 실패와 수정
+없음
+
+
+## [조사] 창살 왜곡 — 대체 구도 3안 — 2026-08-04 01:31
+### 프롬프트
+[조사]이상해 다른 구도를 생각해봐 차라리 이미지로 대체하는게 좋겠다.
+### 조사 결과
+- 원인 진단: Gate 01(고정 비율 도트)을 군집 크기(1x1·3x3)에 비균등 스트레치 → 픽셀 밀도 붕괴로 왜곡
+- A안: 창살 소품 제거, Locked 타일 원래 모습 복귀(디졸브·파편·흔들림이 이미 연출 담당) — 5분
+- B안: SpriteRenderer drawMode=Tiled로 Door Iron Fence를 원배율 반복 채움 — 왜곡 0, 15분
+- C안: 사용자 AI 생성 이미지 대체 — 군집별 스펙: 소형 2칸 32x32px x2, 대형 96x96px(PPU 32, 투명배경) — 이미지 수급 후 10분
+### 검증
+해당 없음
+### 커밋
+해당 없음(무수정)
+
+
+## [수정] 왜곡 창살 철수 — 경사 통로 확인 — 2026-08-04 01:38
+### 프롬프트
+게이트는 아무리 봐도 안될거 같은데 비스듬한 공간인데 문을 놓는다는게 이해가 안돼
+### 조작 내역
+- 진단: 대형 군집이 계단형 대각(46,6→48,8) — 문 소품 부적합 확정. GateWallProps 3개 철수, wallSprites 해제. 디졸브·파편·흔들림·팬 연출은 유지(A안 기준선)
+### 검증
+- 저장 True
+### 실패와 수정
+- 경사 공간에 고정비율 문 소품 선정 오류 — 형태 실측 후 소품 선정 원칙
+
+
+## [구현] 마법 결계 전환 — 2026-08-04 01:42
+### 프롬프트
+마법 결계로 가보자
+### 조작 내역
+- Locked 타일을 반투명 청록 결계 틴트(0.55,0.9,1,a0.75), 군집 3곳 결계 Light2D(청록·군집 크기 비례 반경, 디졸브 연동 소등), 붕괴 순간 Spark 악센트(씬 원본 복제 템플릿)
+- 시퀀서: lockedBaseAlpha 곱 디졸브(틴트 점프 방지), barrierLights·sparkTemplate 필드. Config: barrierColor·barrierLightIntensity
+- 재생 중 배선 1회 차단→정지 후 재실행
+### 검증
+- 컴파일 0, EditMode 113/113. 결계 비주얼·해제 연출은 사용자 재생 판정
+### 실패와 수정
+없음
+
+
+## [수정] 결계 → 돌무더기 전환 — 2026-08-04 01:47
+### 프롬프트
+[수정] 돌무더기로 바꿔
+### 조작 내역
+- 결계 해체(틴트 원복·결계등 3기 제거·Spark 해제) → Locked 11셀마다 Debris Brick 원배율 3개 무작위 적층(총 33개, 회전·오프셋 변주, 콜라이더 제거) — wallSprites로 디졸브 연동, 파편 낙하·먼지·흔들림 유지
+### 검증
+- 코드 무변경(씬만) — 직전 113/113 유효. 저장 True
+### 실패와 수정
+없음
+
+
+## [수정] Locked 타일 렌더러 소등 — 돌무더기 단독 비주얼 — 2026-08-04 01:50
+### 프롬프트
+돌 더미는 좋은데 기존 벽돌은 지우는게 좋지 않아?
+### 조작 내역
+- Locked TilemapRenderer.enabled=false (타일 삭제 아님 — 충돌 유지, 시각만 소등). 비주얼=돌무더기 33개 단독
+### 검증
+- 충돌체 활성=True, 저장 True
+### 실패와 수정
+없음
+
+
+## [수정] 돌무더기 실물 낙하 — 잔존 벽돌 제거 — 2026-08-04 01:55
+### 프롬프트
+Brick05 포함해서 길이 열리면 다 떨어지면서 열려야지 지금은 그대로 남아있어
+### 조작 내역
+- FireCollapse에서 wallSprites 33개 전원에 Rigidbody2D 부여(중력 1.6·임펄스·토크) + 수명 후 Destroy — 페이드 병행. 물리적으로 잔존 불가
+### 검증
+- 컴파일 0, EditMode 113/113. 낙하 체감은 사용자 재생
+### 실패와 수정
+- 페이드 단독의 잔존 증상 → 실물 낙하+파괴로 확정 처리
+
+
+## [조사] 붕괴 SFX 프롬프트 + BGM 생성 AI 자문 — 2026-08-04 01:56
+### 프롬프트
+[조사]벽돌 무너지는 사운드 생성하려고 하는데 프롬프트 생성해줘. 어느 AI가 BGM을 가장 잘 생성하니?
+### 조사 결과
+- SFX 추천: ElevenLabs Sound Effects(단발 효과음 최적) — 영문 프롬프트 제공. BGM: Suno(대중성·루프 편의)/Udio(음질), 대회 제출 라이선스 관점은 유료 플랜 상업권 또는 Stable Audio 계열 권장
+- 수급 시 ASSET_CREDITS에 프롬프트 기록 의무, 시퀀서 배선은 5분 작업
+### 검증
+해당 없음
+### 커밋
+해당 없음(무수정)
+
+
+## [수정] 붕괴 사운드 배선 + 흔들림 증폭·경계 응시 연장 — 2026-08-04 02:05
+### 프롬프트
+C:\...\Assets\Audio\Effect\UI에 돌무더기 붕괴로 넣었어. 카메라가 더 흔들리면서 경계면을 강조하고 붕괴사운드 넣어줘.
+### 조작 내역
+- 돌무더기붕괴(4.0s) 임포트(DecompressOnLoad·Vorbis 0.9) → GateDirector AudioSource, FireCollapse에서 피치 0.85 재생
+- 흔들림 1.7→3.2, 경계 응시(hold) 0.6→0.9s
+### 검증
+- 컴파일 0, EditMode 113/113. 굉음·흔들림 체감은 사용자 재생
+### 실패와 수정
+없음
+
+
+## [수정] 인트로 순차 점화 + 게이트 접근 페이즈(흔들림·줌) — 2026-08-04 02:14
+### 프롬프트
+[수정] 1. 지금 토치가 오른쪽에서 부터 하나씩 켜지는데 켜지는 속도가 너무 빨라. 그리고 처음 검은색 화면이었다가 살짝 대기한 다음에 토치가 천천히 하나씩 켜지고 주인공이 보이는 식으로 수정. 2. 몬스터를 죽인 다음에 바로 게이트가 열리지 말고 카메라가 크게 흔들리면서 돌무더기 벽 쪽으로 카메라가 줌을 하고 붕괴사운드와 함께 무너지기 연출로 수정
+### 조작 내역
+- 인트로: 라이트·Lit 노드 x오름차순 동기 정렬(왼쪽부터), 토치별 시차 점화(간격 0.6s — 기존 CandleFactor에 시간 시프트 재사용), 유효 점화 길이(EffIgnite)로 확장·BGM 지점 자동 이동. 대기 0.5→1.0s, 점화 0.9→1.2s. 총 ~4.6s
+- 게이트: 접근 페이즈(0.4→0.9s) 동안 흔들림 3.2 + 줌 1→0.7 진행, 붕괴 개시에 사운드+낙하(기존), 복귀 시 렌즈 원복
+### 검증
+- 컴파일 0, EditMode 113/113(순수 로직 무변경 — 시프트 재사용). 타이밍 체감은 사용자 재생
+### 실패와 수정
+없음
+
+
+## [수정] 게이트 줌 타깃 교정 + 젤다식 캐스케이드 붕괴 — 2026-08-04 02:19
+### 프롬프트
+[수정]47.4 7.6 위치에 있는 돌무더기에 카메라가 줌을 해야지 왜 다른곳을 줌을 하니. 그리고 붕괴과정이 너무 급박해 아직. 젤다의 전설이나 스위치 게임 종류의 붕괴 씬을 참고해서 연출을 해봐.
+### 조작 내역
+- 팬·줌·개방광 타깃을 (47.5,7.5) 대형 군집으로 교정(기존: 몬스터 최근접 x62 — 오판)
+- 젤다식 재설계: 접근 0.9→1.6s(흔들림 0→풀 램프=예고 진동), 붕괴 0.8→1.6s에 벽돌 33개 진행률 기반 순차 방출(캐스케이드, 일괄 낙하·알파 페이드 제거 — 방출 전 원형 유지), 정적 0.9→1.4s. 총 ~4.6s
+### 검증
+- 컴파일 0, EditMode 113/113. 페이싱 체감은 사용자 재생
+### 실패와 수정
+- 팬 타깃 '몬스터 최근접' 휴리스틱 오판 — 연출 초점은 사용자 지정 좌표 우선 원칙
+
+
+## [구현] 접근 페이즈 진동 사운드 배선 — 2026-08-04 02:29
+### 프롬프트
+[구현]진동소음2를 써서 연출에 넣어줘.
+### 조작 내역
+- 진동소음2(3.0s) 임포트 후 2번째 AudioSource로 루프 재생: Play() 시작·볼륨 0→rumbleVolume 램프(진동 증폭과 동조)·붕괴 개시 컷아웃(붕괴음 인계). Config rumbleVolume 추가
+### 검증
+- 컴파일 0, EditMode 113/113. 사운드 체감은 사용자 재생
+### 실패와 수정
+없음
+
+
+## [수정] 게이트 줌 완화·흔들림 축소 — 프레임 안정화 — 2026-08-04 02:32
+### 프롬프트
+[수정]흔들리는 연출은 좋은데 좀 더 멀리 카메라 줌을 했으면 좋겠고 흔들리면서 내가 배치한 props들이 다 보이는데 수정 요청
+### 조작 내역
+- 기전: 타이트 줌×큰 진폭=프레임 요동으로 주변 소품 난입. zoomFactor 0.7→0.85(더 멀리서), shakeAmplitude 3.2→2.0. 코드 무변경(Config만) — 113/113 유효
+### 검증
+- 값 적용. 체감은 사용자 재생
+### 실패와 수정
+없음
+
+
+## [수정] 임시 테스트 트리거 — 몬스터 정지·우클릭 붕괴 재생 — 2026-08-04 02:34
+### 프롬프트
+일단 몬스터 잠시 멈춰있게 해주고 마우스 오른쪽 버튼 누르면 진행되는걸로하자.
+### 조작 내역
+- GateTestTrigger(임시): Start에서 MonsterController2D/EnemyAI/MonsterControls 비활성+속도 0, 우클릭→sequencer.Play(). 제거는 컴포넌트 삭제 한 번("테스트 트리거 제거해")
+### 검증
+- 컴파일 0. 동작은 사용자 재생
+### 실패와 수정
+없음
+
+
+## [수정] 게이트 조준점 하향 — 2층 노출 차단 — 2026-08-04 02:38
+### 프롬프트
+[수정]흔들릴때 2층 Props가 싹다 보인데
+### 조작 내역
+- 원인: 조준 y7.5로 프레임 상단이 2층(y13대) 도달. GateAnchor y7.5→5.0(돌무더기 y6~8 유지), OpenLight y7.0. 코드 무변경
+### 검증
+- 저장 True. 잔존 노출 시 소품 게이트(B안) 예비
+### 실패와 수정
+없음
+
+
+## [조사] 2층 소품 은닉 방안 — 2026-08-04 02:39
+### 프롬프트
+[조사]카메라 조준으로 바꾸는거 말고 안보이게 하는 방법은 없어?
+### 조사 결과
+- ① 연출 중 게이트: Play시 y≥11 소품 숨김→복귀시 복원(인트로 게이트 패턴, 20분)
+- ② 상시 게이트: 시작부터 2층 소품 비활성→붕괴 완료 시 활성(스포일러 원천 차단+개방 연출 보너스, 25분) [추천]
+- ③ 레이어 컬링: Project Settings 저촉 위험 — 비추천 / ④ 조명 재설계: 범위 과대 — 비추천
+### 검증
+해당 없음
+### 커밋
+해당 없음(무수정)
+
+
+## [수정] 2층 소품 상시 숨김 — 붕괴 완료 시 활성 — 2026-08-04 02:43
+### 프롬프트
+[수정]상시 숨김
+### 조작 내역
+- secondFloorProps 필드: Awake에서 비활성(게임 시작부터 은닉), 붕괴 페이즈 완료(phase 2 진입, 개방광 점화와 동시)에 일괄 활성. Stage_Props y≥11 소품 30개 배선. 인트로 게이트(hiddenDuringIgnite)와는 별개 축
+### 검증
+- 컴파일 0, EditMode 113/113. 은닉·활성 타이밍은 사용자 재생
+### 실패와 수정
+없음
+
+- 추기: 인트로 게이트가 확장 시 2층을 재점등하는 충돌 자체 발견 → 인트로 목록에서 y≥11 제외(103개로 재배선), 2층은 게이트 시퀀서 전담
+
+
+## [조사] 흔들림 잔상 원인 — 2026-08-04 02:45
+### 프롬프트
+[조사]돌무더기 흔들리는 표현으로 한건가 싶긴한데 약간 잔상같은게 남는데 이건 못 수정하지? 약간 2d 에셋의 한계인가?
+### 조사 결과
+- [Stage_Volume 프로파일: Post Processing Profile] / - Bloom active=True / - Vignette active=True / - Tonemapping active=True / - ColorAdjustments active=True /  / [MainCamera] 포스트프로세싱=False AA=0
+### 검증
+해당 없음
+### 커밋
+해당 없음(무수정)
+
+
+## [수정] 흔들림 주파수 다이얼 — 잔상 저감 — 2026-08-04 02:47
+### 프롬프트
+1번
+### 조작 내역
+- GateConfig.shakeFrequency(0.5) 추가, 시퀀서에서 noise.FrequencyGain 구동 — 고주파 스트로브형 진동을 저주파 묵직한 진동으로 전환(잔상 저감·젤다식 무게감)
+### 검증
+- 컴파일 0, EditMode 113/113. 잔상 체감은 사용자 재생(+빌드 재판정 예정)
+### 실패와 수정
+없음
+
+
+## [조사] SecondScene 사운드 슬롯 + ElevenLabs MCP 가능성 — 2026-08-04 02:50
+### 프롬프트
+[조사]SecondScene에 각종 소리들을 넣을거야. 너가 Audio를 보고 어울리는 소리를 적용시켜도 되고 혹시 ElevenLabs MCP 연결이 가능하니?
+### 조사 결과
+- 오디오 자산·씬 AudioSource 전수 실측(본문). 미사용 BGM: 게임시작BGM·감옥 입장·공주 만남 — 구간 전환·보스 인트로 후보. SFX 공백: 발소리·점프·검격·패링·피격·토치 점화·포탈
+- ElevenLabs MCP: 레지스트리 검색 후 연결 카드 제시 예정
+### 검증
+해당 없음
+### 커밋
+해당 없음(무수정)
+
+
+## [구현] 사운드 배선 1 — 플레이어 + SecondScene_1 공주만남 BGM — 2026-08-04 02:55
+### 프롬프트
+[구현] 사운드 배선 1번부터, 대신 SecondScene에서 포탈을 타고 SecondScene_1으로 이동했을때는 "공주만남"사운드로 재생시켜줘.
+### 조작 내역
+- SoundConfig(SO: 클립·간격·볼륨 소유) / PlayerSoundPlayer(무침습 관찰형: 발소리 Walk1~3 순환·점프 입력·공격 클릭) / SceneBgmPlayer(씬 진입 페이드인 루프)
+- SecondScene Player 배선, SecondScene_1에 SceneBgm(공주 만남, CompressedInMemory) 신설 — Portal(Portal·PortalUpKey) 무수정, 씬 자체 BGM 방식. SFX 5종 DecompressOnLoad. 두 씬 저장, 작업장 복귀
+- 사망 사운드는 사망 이벤트 소스 확인 후 별도 배선(보류 명시)
+### 검증
+- 컴파일 0, EditMode 113/113. 소리 체감·포탈 전환은 사용자 재생
+### 실패와 수정
+없음
+
+
+## [수정] 점프 볼륨 하향 0.8→0.35 — 2026-08-04 03:05
+### 프롬프트
+점프 소리가 너무 크게 점프할때마다 들려서 너무 거슬리는데 (+발소리·검기 SFX 프롬프트 요청)
+### 조작 내역
+- SoundConfig.jumpVolume 0.35 (Config만, 코드 무변경 — 113/113 유효). 발소리·검기 프롬프트는 본문 제공
+### 검증
+- 값 적용
+### 실패와 수정
+없음
+
+
+## [수정] 발소리 3종 교체 + 검기발사 배선(전용 피치) — 2026-08-04 03:16
+### 프롬프트
+C:\...\hit소리에 검기발사1, CharacterMove에 발소리1,2,3 넣음
+### 조작 내역
+- walkClips=발소리1~3(Walk1~3 대체), attackClip=검기발사1(일반공격1 대체)
+- 공격 전용 AudioSource 분리 + attackPitch 0.85(발소리 피치 오염 방지). 이중 확장자 .wav.wav → .wav 개명(GUID 유지). 임포트 4종 DecompressOnLoad
+### 검증
+- 컴파일 0, EditMode 113/113. 음감은 사용자 재생
+### 실패와 수정
+없음
+
+
+## [구현] NHNDemo 의존 검증(이미 해소 확인) + 검기 사운드 Z키 전환 — 2026-08-04 03:20
+### 프롬프트
+[구현]NHNDemo 의존송 해소 + 검기 사운드 z를 눌렀을때로 변경
+### 조작 내역
+- 의존 실측: MonsterHealth.cs=Assets/Player/Scripts/ 소재, git ls-files 등재·ignore 규칙 무해당·커밋 3b940a27 포함 — fresh clone 컴파일 정상. 과거 우려(gitignore 폴더)는 낡은 정보로 판명, 추가 조치 불필요. NHNDemo 참조 8개 스크립트 전부 안전
+- PlayerSoundPlayer: 검기발사 트리거 좌클릭→Z키(전용 소스·피치 0.85 유지). 좌클릭은 현재 무음
+### 검증
+- 컴파일 0, EditMode 113/113
+### 실패와 수정
+없음
+
+
+## [수정] STATE.md 일일 갱신 — 2026-08-04 03:24
+### 프롬프트
+STATE 갱신
+### 조작 내역
+- 오늘 완료(연출·사운드·NHNDemo 확증)·내일 수순(빌드→대시→보스P2)·미결 3건 기록, 이전 기록 하단 보존
+### 검증
+- 파일 저장 확인
+### 실패와 수정
+없음
+
+
+## [수정] 패링 시트 8프레임 수정본 교체 — 2026-08-04 20:57
+### 프롬프트
+일단 MCP 연결했지? 패링 스프라이트 시트 교체하자. C:\...\공주를 구하라 경로에 "패링" 이름으로 스프라이트 시트 넣었고 4,5프레임이 실질적으로 막는 부분이야
+### 조작 내역
+- 신판 1824x2326 알파 스캔 → 4행x2열 8프레임 검출(행 기준 좌→우 정렬 보정), 파일 교체(GUID 유지)
+- PPU 848→604 정밀 보정(구 실측 콘텐츠H 732 ↔ 신 521, 월드 크기 유지), 피벗 하단(0.53,0) 승계, PARRY_0~7 슬라이스
+- 클립 재편: Start=0→1→2→3(0.14s 유지 — 반응성 보존, 방어 자세=4번 프레임), End=4→5→6→7(0.28s) — 방어 창이 사용자 지정 4·5프레임에 정합
+### 검증
+- 스프라이트 8개·채움율 36~58% 전 프레임 건강, 클립 키 재로드 확인. 코드 무변경 — 113/113 유효. 실전 패링 감각은 사용자 재생
+### 실패와 수정
+- 검출 정렬이 y단순 내림차순으로 행내 순서 오류 → 행 클러스터 기준 재정렬
+## [구현] Princess_Boss_Knight 신규 3패턴 + EnemyAI/WorldHealthBar/MonsterHealth 부착 — 2026-08-03
+### 프롬프트
+기존의 스킬들은 사용하지 말고 Princess_Trans2 스프라이트를 사용해 플레이어에게 구체 투척(속도가 다른 5개의 구체 발사 패링 가능), Princess_Trans3 스프라이트를 사용해 중범위 공격(보스 앞쪽 넓은 범위 공격 패링 가능), Princess_Trans1 스프라이트를 사용해 전범위 공격(게임이 일시정지 되면서 qte리듬게임이 시작되며 성공하면 보스가 그로기에 걸리고 실패하면 공격 진행 패링 불가능)을 구현해주고 추가로 MiddleBoss처럼 이 프리팹에 EnemyAi, WorldHealthBar, MonsterHealth 스크립트를 붙여줘
+### 조사
+기존 BossOrbLauncher/BossOrb/BossBeam(리듬 빔)은 사용하지 않기로 함(사용자 지시). Princess_Boss_Knight!!!는 프리팹 인스턴스(Assets/Prefabs/Princess_Boss_Knight!!!.prefab)로 확인, 인스턴스 오버라이드로만 작업. Animator Controller가 "Princess_Intro"이며 Princess_Trans1/2/3 애니메이터 상태(0.5초 클립)와 별도의 정적 PNG 스프라이트가 둘 다 존재 — 기존 BossIntroSequencer 관례(anim.Play(stateName))에 맞춰 애니메이터 상태 재생 방식 채택
+### 조작 내역
+- NAN2026.Core.PrincessBossLogic 신규(순수): IsBeatHit(QTE 비트 판정), QteSucceeded. 테스트 7개
+- PrincessBossAttackConfig(SO) 신규: 패턴 쿨다운, 구체 5발 속도 배열·데미지, 중범위 공격 판정 박스·데미지, QTE 비트 수·간격·허용오차·실패데미지·그로기 지속시간
+- PrincessBossAttackPatterns.cs 신규(IEnemyAttackOverride 구현):
+  - ① DoOrbVolley: PTrans2 재생 → 선딜 → SpikeProjectile(기존 재사용, IParryReflector 기반 패링 내장) 5발을 서로 다른 속도로 순차 발사
+  - ② DoFrontalAoE: PTrans3 재생 → 선딜(텔레그래프) → 보스 정면 OverlapBox 판정, 맞으면 패링 체크 후 데미지(패링 성공 시 보스가 반격 데미지)
+  - ③ DoFullScreenQte: PTrans1 재생 → Time.timeScale=0으로 일시정지, Time.unscaledDeltaTime 기반 리듬 QTE(Z키, 비트 4개) 진행(OnGUI로 진행상황 표시) → 전부 성공 시 그로기(IsBusy를 그로기 동안도 true로 묶어 완전 무행동화), 실패 시 패링 불가 데미지 후 재개
+  - MonsterController2D와의 애니메이션/이동 제어 충돌 방지를 위해 패턴 실행 중 controller.enabled=false (기존 MiddleBoss 수정과 동일 패턴)
+- Princess_Boss_Knight!!!에 부착: MonsterHealth, EnemyAI(신규 PrincessBossAIConfig: maxHealth=20, xpReward=40, usePatrol=false), WorldHealthBar, PrincessBossAttackPatterns
+### 발견·수정한 부수 문제
+- EnemyAI 부착 시도 시 AddComponent가 조용히 실패(예외 없음) — MonsterController2D가 요구하는 Collider2D가 추상 타입이라 RequireComponent 자동 추가가 작동하지 않음. BoxCollider2D+Rigidbody2D를 수동으로 먼저 추가해 해결
+- 재생 중 UnassignedReferenceException(Monster.Animator) 발견 — PixelFantasy Monster 컴포넌트의 Animator/Body 필드가 프로그래밍 방식 AddComponent로는 자동 연결이 안 되어 SerializedObject로 직접 연결
+- 재생 중 콘솔에 "Parameter 'Idle/Ready/Walk/Run/Jump/Die' does not exist" 경고가 매 프레임 반복 — MonsterAnimation이 기대하는 Animator 파라미터 10개(Bool 6 + Trigger 4)가 Princess_Intro 컨트롤러에 없었음. 기존 상태·전환은 건드리지 않고 파라미터만 추가해 해결(Assets/Sprites_AI/Boss/Anim/Princess_Intro.controller)
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건, 타입 로드 확인
+- 저장 → manage_scene(load) 강제 재로드 → 컴포넌트 4종·config 연결 재확인
+- run_tests(EditMode) → 109/109 통과
+- **재생 모드 실측**: 콘솔 경고 0건(파라미터 수정 후) 확인. 보스를 플레이어 근접 위치로 이동시켜 자연스러운 AI 흐름 관찰 → EnemyAI.CurrentState가 Patrol→Attack으로 정상 전환, 플레이어 HP가 5→2로 실제 감소해 전투가 실제로 작동함을 확인
+- 씬 오브젝트 수가 세션 중 18→10으로 줄어든 것을 발견해 사용자에게 확인 요청 → 의도된 정리라는 답변 받고 저장 진행(MiddleBoss/DeathDog1-3 등 삭제는 이번 작업과 무관, 사용자 본인 작업)
+### 실패와 수정
+- 위 '발견·수정한 부수 문제' 3건 모두 이번 세션 내에서 즉시 발견·수정함
+### 눈으로 확인 필요
+- 3패턴이 실제 플레이에서 골고루 발동하는지(랜덤 선택), 특히 QTE 일시정지·리듬 타이밍이 체감상 적절한지
+- 구체 5발의 속도 차이, 중범위 공격의 판정 범위가 밸런스상 괜찮은지
+- 그로기 지속시간(3초)이 적절한지
+
+## [수정] Princess 보스 오브 미표시·QTE 체감 부족 수정, 플레이어 충돌 재확인 — 2026-08-03
+### 프롬프트
+플레이어와 princess보스는 서로 통과되야함 (콜라이더 미적용) QTE 리듬 타이밍이 전혀 느껴지지 않음, 구체 나오는 패턴 없음
+### 조사
+1) 플레이어-보스 충돌: 재생 모드 실측(Physics2D.GetIgnoreCollision)으로 확인한 결과 FirstScene에서는 이미 True(정상)로 걸려있음. SecondScene에는 애초에 Princess 보스가 없음. 재현 못 해 사용자에게 추가 확인 요청 필요
+2) 구체 패턴: SpikeProjectile이 SpriteRenderer를 전혀 만들지 않는 순수 판정용 컴포넌트인데, PrincessBossAttackPatterns.DoOrbVolley에서 new GameObject로 생성할 때 스프라이트를 안 붙여서 완전히 투명하게(안 보이게) 날아가고 있었음 — '패턴이 없다'가 아니라 '보이지 않게 실행되고 있었다'
+3) QTE 체감: OnGUI가 텍스트 진행상황(N/M)만 표시하고 실제 타이밍을 보여주는 시각 요소가 전혀 없었음
+### 조작 내역
+- PrincessBossAttackPatterns에 orbSprite/orbSortingOrder 필드 추가, DoOrbVolley에서 오브 생성 시 SpriteRenderer 부착(기존 Boss_Orb.prefab의 비주얼 에셋 Assets/Sprites_AI/Effects/BossOrb.png 재사용, 스크립트는 재사용 안 함)
+- QTE OnGUI 전면 개편: 현재 비트 구간 내 진행률을 가로 바로 표시, 오른쪽 끝 히트 판정 구간을 초록색으로 강조, 흰색 마커가 왼쪽에서 오른쪽으로 이동하며 히트 구간 진입 시점이 곧 눌러야 할 타이밍이 되도록 시각화. 비트 판정 직후 GOOD!/MISS 텍스트를 짧게 표시(qteLastResult/qteLastResultTimer, unscaled 기준)
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- 저장 → manage_scene(load) 강제 재로드 → orbSprite 연결 유지 확인
+- run_tests(EditMode) → 109/109 통과 (job 099bec7367b346e1a38fbe10d76de255)
+- **재생 모드 실측**: DoOrbVolley를 리플렉션으로 직접 호출 → 플레이어 체력이 5→1로 실제 감소(오브가 스프라이트 부착된 채 날아가 명중했음을 데미지로 간접 확인, 명중 즉시 파괴되어 사후 조회 시점엔 이미 사라짐). DoFullScreenQte도 직접 호출 → Time.timeScale이 0으로 떨어졌다가 4비트(qteCurrentBeat=4) 진행 후 1로 정상 복귀 확인
+### 실패와 수정
+- 없음
+### 미해결 — 사람 확인 필요
+- 플레이어-Princess보스 물리 충돌 무시가 이번 재생 세션에서는 이미 정상(True)으로 확인됐으나, 재현이 안 돼 정확한 상황(어느 씬, 어느 타이밍)을 파악 못 함. 재현되면 구체적 상황을 알려주시면 다시 조사하겠습니다
+### 눈으로 확인 필요
+- 구체가 실제로 화면에 보이는지, QTE 진행 바의 판정 구간(초록)과 실제 타이밍이 체감상 맞는지
+
+## [수정] QTE 시작 대기시간·ZXC 랜덤 입력·그로기 시각효과 추가 — 2026-08-03
+### 프롬프트
+QTE 시작하고 대기시간 3초정도 있게 해주고 입력키도 Z가 아니라 ZXC 세 개로 늘려서 랜덤으로 나오게 해줘, 또한 QTE패턴을 성공하면 보스가 그로기에 걸려야하는데 그런게 없네
+### 조사
+그로기 메커니즘 자체(IsBusy가 그로기 동안 true를 반환해 EnemyAI.Update()를 완전히 막음)는 정상 동작하고 있었으나, 시각적으로 아무 변화가 없어 사용자가 '없다'고 느꼈을 가능성이 높음
+### 조작 내역
+- PrincessBossAttackConfig에 qteStartDelay(기본 3초) 추가
+- DoFullScreenQte: Time.timeScale=0 직후 qteStartDelay만큼 실시간 대기(qteWaitingToStart 플래그로 OnGUI에 카운트다운 표시) 후 비트 시작
+- 비트마다 Z/X/C 중 랜덤으로 요구 키 결정(qteCurrentKeyIndex), WasQteKeyPressedThisFrame으로 해당 키만 판정. 비트가 넘어갈 때마다 다음 요구 키를 다시 랜덤 선택
+- OnGUI: 대기 중엔 큰 카운트다운 숫자 표시, 진행 중엔 현재 요구 키(Z/X/C)를 제목에 표시
+- 그로기 시각화: PrincessBossAttackPatterns.Update()에서 Time.time<groggyUntil 여부가 바뀔 때만 SpriteRenderer.color를 노란색(1, 0.85, 0.2)으로 물들이고 종료 시 원래 색으로 복원
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- 저장 → manage_scene(load) 강제 재로드
+- run_tests(EditMode) → 109/109 통과 (job 9eb0d84d1f77424d863b800ff4da77aa)
+- 재생 모드 실측: DoFullScreenQte를 리플렉션으로 직접 호출해 아무 키도 안 누르고 자연 흐름 관찰 → 3초 대기 후 4비트 전부 미스 처리(qteCurrentBeat=4), groggyUntil=0(정상, 성공 안 했으므로), 패링 불가 데미지로 플레이어 HP 5→2 확인. groggyUntil을 리플렉션으로 강제 설정해 그로기 성공 경로도 별도 검증 → sprite color가 정확히 (1, 0.85, 0.2, 1)로 바뀜을 확인, 원복도 확인
+### 실패와 수정
+- 검증 중 Time.timeScale=0으로 걸린 채로 재생 모드가 남아있던 걸 발견(이전 턴에서 QTE 강제 실행 후 정리 없이 종료됨) → Time.timeScale=1 복원 후 재생 종료로 정리. 이후 QTE 강제 종료 시에는 항상 timeScale 복원까지 확인할 것
+
+## [수정] QTE 4비트 성공 시 5번째 프롬프트가 스치듯 보이던 문제 수정 — 2026-08-04
+### 프롬프트
+현재 qte 카운트가 4회인데 4회까지 성공했을 때 끝이 나는게 아니라 5회가 오류로 보여지고 끝나버리는데 4회 성공하면 바로 끝나게 해줘
+### 조사
+실제 루프 반복 횟수는 정확히 4회였음(while (qteCurrentBeat < qteBeatCount) 조건 자체는 정상). 문제는 4번째 비트가 판정된 직후, 루프 종료 여부를 확인하기 전에 qteCurrentKeyIndex를 다음 비트용으로 미리 랜덤 재선택해버려서 — 루프가 끝나기 전 마지막 한 프레임(yield return null) 동안 '있지도 않은 5번째 비트'의 요구 키가 OnGUI에 노출되고 있었음
+### 조작 내역
+- DoFullScreenQte의 히트/미스 두 분기 모두에서, qteCurrentBeat를 증가시킨 후 다음 비트가 실제로 있을 때만(qteCurrentBeat < config.qteBeatCount) qteCurrentKeyIndex를 다시 뽑도록 가드 추가
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- 저장 → manage_scene(load) 강제 재로드 → run_tests(EditMode) → 109/109 통과 (job 8d086dfe359344a2a2b9daa13bf81ca3)
+- 재생 모드 실측: DoFullScreenQte 강제 실행 → qteCurrentBeat=4, qteActive=False, timeScale=1로 깔끔하게 종료됨을 확인
+### 실패와 수정
+- 없음
+
+## [수정] 패링을 플레이어 정면 방향 공격에만 적용되도록 제한 — 2026-08-04
+### 프롬프트
+지금 현재 패링이 플레이어 기준 모든 방향이 막아지는데 플레이어가 바라보는 앞쪽 방향으로 날라오는 구체만 패링되게 가능할까
+### 조사
+PlayerController2D.TryParry(GameObject attacker)가 IParryReflector 인터페이스로 attacker(공격 주체)를 이미 받고 있었는데도, 실제로는 IsParryWindowActive()(타이밍)만 체크하고 attacker 위치는 전혀 안 보고 있었음 — 그래서 방향 상관없이 타이밍만 맞으면 전부 패링됐음. SpikeProjectile/EnemyAI/MiddleBossAttackPatterns/PrincessBossAttackPatterns 4곳 전부 attacker로 몬스터 자신의 GameObject를 넘기고 있어서(투사체는 발사한 보스, 근접은 몬스터 자신) 위치 기반 방향 판정에 그대로 활용 가능함을 확인
+### 조작 내역
+- NAN2026.Core.PlayerLocomotionLogic에 IsAttackerInFront(playerX, attackerX, facingLeft) 순수 함수 추가(스프라이트 flipX 기준 정면 판정, 동일 X는 정면으로 인정). 테스트 5개
+- PlayerController2D.TryParry: 기존 타이밍 체크 통과 후, attacker가 null이 아니면 IsAttackerInFront로 방향까지 확인하도록 변경. attacker가 null인 예외 상황은 안전하게 허용(기존 동작 유지)
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- TryParry의 다른 호출부(SpikeProjectile/EnemyAI/MiddleBossAttackPatterns/PrincessBossAttackPatterns) 전부 attacker에 몬스터 GameObject를 정상 전달하고 있음을 코드 검색으로 재확인 — 이번 변경으로 깨지는 곳 없음
+- 저장 → manage_scene(load) 강제 재로드 → run_tests(EditMode) → 114/114 통과 (job c1b18c1de8e14333b26fbf97934f7baa, 기존 109 + 신규 5)
+- 재생 모드 실측: 패링 타이밍을 리플렉션으로 강제 활성화한 뒤, 오른쪽을 보는 상태(flipX=false)에서 정면(오른쪽)의 공격자는 TryParry=True, 뒤쪽(왼쪽)의 공격자는 TryParry=False로 정확히 갈리는 것을 직접 확인
+### 실패와 수정
+- 없음
+
