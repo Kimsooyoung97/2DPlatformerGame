@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: PrincessBossAIConfig
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAIConfig
   aggroRange: 12
-  attackRange: 2
+  attackRange: 5
   chaseStopDistance: 20
   patrolSpeed: 0
-  chaseSpeed: 0.8
+  chaseSpeed: 0.3
   patrolRadius: 0
   jumpYThreshold: 1.2
   jumpConfirmDuration: 0.35

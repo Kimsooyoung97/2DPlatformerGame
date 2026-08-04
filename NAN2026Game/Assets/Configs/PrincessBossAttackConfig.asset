@@ -14,20 +14,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PrincessBossAttackConfig
   minPatternCooldown: 3
   maxPatternCooldown: 5
-  orbWindup: 0.5
+  orbWindup: 1
   orbSpeeds:
-  - 4
-  - 6
-  - 8
+  - 2
+  - 3
+  - 5
+  - 7
   - 10
-  - 12
   orbDamage: 1
   orbSpawnHeight: 1.5
   orbLaunchInterval: 0.12
-  aoeWindup: 0.6
+  aoeWindup: 1
   aoeForwardRange: 4
   aoeHeight: 2.5
   aoeDamage: 2
+  qteStartDelay: 3
   qteBeatCount: 4
   qteBeatInterval: 0.6
   qteHitWindow: 0.18
