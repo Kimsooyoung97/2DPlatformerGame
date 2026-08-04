@@ -3004,3 +3004,5 @@ PlayerController2D.TryParry(GameObject attacker)가 IParryReflector 인터페이
 - 활성 씬=SecondScene_extra 루트 23개: Main Camera CM_PlayerCamera Global Light 2D Player Stage_Grid Stage_CameraBounds PF Dungeon Props - Torch 01 PF Dungeon Props - Torch 01 PF Dungeon Props - Torch 01 PF Dungeon Props - Torch 01 PF Dungeon Props - Torch 01 PF Dungeon Props - Torch 01 PF Dungeon Props - Torch 01 PF Dungeon Props - Torch 01 PF Dungeon Props - Torch 01 PF Dungeon Props - Torch 01 PF Dungeon Props - Torch 01 PF Dungeon Props - Torch 01 PF Dungeon Props - Torch 01 PF Dungeon Props - Torch 01 PF Dungeon Props - Torch 01 PF Dungeon Props - Torch 01 PF Dungeon Props - Torch 01  / Ground 범위 -6~120 | 콜라이더 도형 5 / Player(3,4) 발밑: Stage_CameraBounds @-0.1
 ### 실패와 수정
 없음
+
+- 추기: 검증이 이중 씬 Find 오염(원본 수치 오독) → 씬 한정 재검증: Ground x-3~203 도형 2, 접지=Stage_Ground @3.0. 토치 17기 Stage_Props 정리. FAIL 교훈: 다중 씬 시 Find 금지, 씬 한정 탐색
