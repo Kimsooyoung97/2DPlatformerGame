@@ -28,12 +28,20 @@ public sealed class PrincessBossAttackPatterns : MonoBehaviour, IEnemyAttackOver
     private float nextAllowedPatternTime;
     private float groggyUntil;
 
+    private static readonly string[] QteKeyNames = { "Z", "X", "C" };
+
     private bool qteActive;
+    private bool qteWaitingToStart;
+    private float qteStartCountdown;
     private int qteBeatsHit;
     private int qteCurrentBeat;
     private float qteElapsed;
+    private int qteCurrentKeyIndex;
     private string qteLastResult = string.Empty;
     private float qteLastResultTimer;
+    private SpriteRenderer spriteRenderer;
+    private Color spriteOriginalColor = Color.white;
+    private bool wasGroggyLastFrame;
 
     /// 패턴 실행 중이거나 그로기 상태면 EnemyAI가 완전히 개입하지 않는다(그로기 = 무행동).
     public bool IsBusy => busy || Time.time < groggyUntil;
@@ -43,6 +51,18 @@ public sealed class PrincessBossAttackPatterns : MonoBehaviour, IEnemyAttackOver
         if (animator == null) animator = GetComponent<Animator>();
         controller = GetComponent<Assets.PixelFantasy.PixelMonsters.Common.Scripts.ExampleScripts.MonsterController2D>();
         health = GetComponent<NHNDemo.MonsterHealth>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        if (spriteRenderer != null) spriteOriginalColor = spriteRenderer.color;
+    }
+
+    // 그로기 상태를 눈에 보이게 스프라이트 색을 물들인다(그로기 시작/종료 시 한 번씩만 갱신).
+    private void Update()
+    {
+        if (spriteRenderer == null) return;
+        bool groggyNow = Time.time < groggyUntil;
+        if (groggyNow == wasGroggyLastFrame) return;
+        wasGroggyLastFrame = groggyNow;
+        spriteRenderer.color = groggyNow ? new Color(1f, 0.85f, 0.2f, spriteOriginalColor.a) : spriteOriginalColor;
     }
 
     public bool TryStartAttack(Transform player)
@@ -129,6 +149,18 @@ public sealed class PrincessBossAttackPatterns : MonoBehaviour, IEnemyAttackOver
         qteCurrentBeat = 0;
         qteElapsed = 0f;
 
+        // 일시정지 직후 비트가 바로 시작되면 반응할 시간이 없어 대기시간을 둔다.
+        qteWaitingToStart = true;
+        qteStartCountdown = config.qteStartDelay;
+        while (qteStartCountdown > 0f)
+        {
+            qteStartCountdown -= Time.unscaledDeltaTime;
+            yield return null;
+        }
+        qteWaitingToStart = false;
+
+        qteCurrentKeyIndex = Random.Range(0, QteKeyNames.Length);
+
         while (qteCurrentBeat < config.qteBeatCount)
         {
             qteElapsed += Time.unscaledDeltaTime;
@@ -136,20 +168,21 @@ public sealed class PrincessBossAttackPatterns : MonoBehaviour, IEnemyAttackOver
 
             qteLastResultTimer -= Time.unscaledDeltaTime;
 
-            Keyboard kb = Keyboard.current;
-            if (kb != null && kb.zKey.wasPressedThisFrame)
+            if (WasQteKeyPressedThisFrame(qteCurrentKeyIndex))
             {
                 bool hit = PrincessBossLogic.IsBeatHit(beatTarget, qteElapsed, config.qteHitWindow);
                 if (hit) qteBeatsHit++;
                 qteLastResult = hit ? "GOOD!" : "MISS";
                 qteLastResultTimer = config.qteBeatInterval * 0.5f;
                 qteCurrentBeat++;
+                qteCurrentKeyIndex = Random.Range(0, QteKeyNames.Length);
             }
             else if (qteElapsed > beatTarget + config.qteHitWindow)
             {
                 qteLastResult = "MISS";
                 qteLastResultTimer = config.qteBeatInterval * 0.5f;
                 qteCurrentBeat++;
+                qteCurrentKeyIndex = Random.Range(0, QteKeyNames.Length);
             }
             yield return null;
         }
@@ -171,6 +204,18 @@ public sealed class PrincessBossAttackPatterns : MonoBehaviour, IEnemyAttackOver
 
         if (animator != null) animator.Play("PIdle2");
         EndPattern();
+    }
+
+    private bool WasQteKeyPressedThisFrame(int keyIndex)
+    {
+        Keyboard kb = Keyboard.current;
+        if (kb == null) return false;
+        switch (keyIndex)
+        {
+            case 0: return kb.zKey.wasPressedThisFrame;
+            case 1: return kb.xKey.wasPressedThisFrame;
+            default: return kb.cKey.wasPressedThisFrame;
+        }
     }
 
     private void DealDamageWithParryCheck(Transform player, float damage)
@@ -206,7 +251,18 @@ public sealed class PrincessBossAttackPatterns : MonoBehaviour, IEnemyAttackOver
 
         GUIStyle titleStyle = new GUIStyle(GUI.skin.label) { fontSize = 24, alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold };
         titleStyle.normal.textColor = Color.white;
-        GUI.Label(new Rect(left, top, w, 36f), "QTE! Z\ub97c \ub9ac\ub4ec\uc5d0 \ub9de\ucdb0 \ub204\ub974\uc138\uc694 (" + qteBeatsHit + " / " + config.qteBeatCount + ")", titleStyle);
+
+        if (qteWaitingToStart)
+        {
+            GUI.Label(new Rect(left, top, w, 36f), "\uacf7 QTE\uac00 \uc2dc\uc791\ub429\ub2c8\ub2e4...", titleStyle);
+            GUIStyle countStyle = new GUIStyle(GUI.skin.label) { fontSize = 40, alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold };
+            countStyle.normal.textColor = Color.yellow;
+            GUI.Label(new Rect(left, top + 44f, w, 60f), Mathf.CeilToInt(Mathf.Max(qteStartCountdown, 0f)).ToString(), countStyle);
+            return;
+        }
+
+        string keyName = QteKeyNames[qteCurrentKeyIndex];
+        GUI.Label(new Rect(left, top, w, 36f), keyName + " \ub97c \ub9ac\ub4ec\uc5d0 \ub9de\ucdb0 \ub204\ub974\uc138\uc694 (" + qteBeatsHit + " / " + config.qteBeatCount + ")", titleStyle);
 
         // 현재 비트 구간 안에서의 진행률(0~1)을 가로 바로 보여준다.
         // 오른쪽 끝(히트 구간)이 강조된 색으로 표시되고, 찾아오는 순간이 누르는 타이밍이다.

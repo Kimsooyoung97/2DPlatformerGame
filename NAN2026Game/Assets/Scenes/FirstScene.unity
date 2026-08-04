@@ -10132,6 +10132,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Princess_Boss_Knight!!!
       objectReference: {fileID: 0}
+    - target: {fileID: 8304059680248046753, guid: ddea801384273f445b75204524ec4adf, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 7288732855211941738, guid: ddea801384273f445b75204524ec4adf, type: 3}
     m_RemovedGameObjects: []

@@ -30,6 +30,8 @@ public sealed class PrincessBossAttackConfig : ScriptableObject
     public float aoeDamage = 2f;
 
     [Header("③ 전범위 QTE (Princess_Trans1)")]
+    [Tooltip("일시정지 직후, 비트가 시작되기 전 대기시간(실시간 기준)")]
+    public float qteStartDelay = 3f;
     [Tooltip("맞혀야 하는 비트 개수")]
     public int qteBeatCount = 4;
     [Tooltip("비트 사이 간격(초, 일시정지 중에는 실시간 기준으로 흐름)")]

@@ -2472,3 +2472,22 @@ Forest Wall은 Ground 윗에 사라지지 않고 위에 붙이게 할수는없�
 - 플레이어-Princess보스 물리 충돌 무시가 이번 재생 세션에서는 이미 정상(True)으로 확인됐으나, 재현이 안 돼 정확한 상황(어느 씬, 어느 타이밍)을 파악 못 함. 재현되면 구체적 상황을 알려주시면 다시 조사하겠습니다
 ### 눈으로 확인 필요
 - 구체가 실제로 화면에 보이는지, QTE 진행 바의 판정 구간(초록)과 실제 타이밍이 체감상 맞는지
+
+## [수정] QTE 시작 대기시간·ZXC 랜덤 입력·그로기 시각효과 추가 — 2026-08-03
+### 프롬프트
+QTE 시작하고 대기시간 3초정도 있게 해주고 입력키도 Z가 아니라 ZXC 세 개로 늘려서 랜덤으로 나오게 해줘, 또한 QTE패턴을 성공하면 보스가 그로기에 걸려야하는데 그런게 없네
+### 조사
+그로기 메커니즘 자체(IsBusy가 그로기 동안 true를 반환해 EnemyAI.Update()를 완전히 막음)는 정상 동작하고 있었으나, 시각적으로 아무 변화가 없어 사용자가 '없다'고 느꼈을 가능성이 높음
+### 조작 내역
+- PrincessBossAttackConfig에 qteStartDelay(기본 3초) 추가
+- DoFullScreenQte: Time.timeScale=0 직후 qteStartDelay만큼 실시간 대기(qteWaitingToStart 플래그로 OnGUI에 카운트다운 표시) 후 비트 시작
+- 비트마다 Z/X/C 중 랜덤으로 요구 키 결정(qteCurrentKeyIndex), WasQteKeyPressedThisFrame으로 해당 키만 판정. 비트가 넘어갈 때마다 다음 요구 키를 다시 랜덤 선택
+- OnGUI: 대기 중엔 큰 카운트다운 숫자 표시, 진행 중엔 현재 요구 키(Z/X/C)를 제목에 표시
+- 그로기 시각화: PrincessBossAttackPatterns.Update()에서 Time.time<groggyUntil 여부가 바뀔 때만 SpriteRenderer.color를 노란색(1, 0.85, 0.2)으로 물들이고 종료 시 원래 색으로 복원
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- 저장 → manage_scene(load) 강제 재로드
+- run_tests(EditMode) → 109/109 통과 (job 9eb0d84d1f77424d863b800ff4da77aa)
+- 재생 모드 실측: DoFullScreenQte를 리플렉션으로 직접 호출해 아무 키도 안 누르고 자연 흐름 관찰 → 3초 대기 후 4비트 전부 미스 처리(qteCurrentBeat=4), groggyUntil=0(정상, 성공 안 했으므로), 패링 불가 데미지로 플레이어 HP 5→2 확인. groggyUntil을 리플렉션으로 강제 설정해 그로기 성공 경로도 별도 검증 → sprite color가 정확히 (1, 0.85, 0.2, 1)로 바뀜을 확인, 원복도 확인
+### 실패와 수정
+- 검증 중 Time.timeScale=0으로 걸린 채로 재생 모드가 남아있던 걸 발견(이전 턴에서 QTE 강제 실행 후 정리 없이 종료됨) → Time.timeScale=1 복원 후 재생 종료로 정리. 이후 QTE 강제 종료 시에는 항상 timeScale 복원까지 확인할 것
