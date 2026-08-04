@@ -3020,3 +3020,23 @@ ThirdScenetmp의 Stage_Grid/Stage_Ground를 조사한 결과 메인 지면(y=-2~
 - 없음
 ### 눈으로 확인 필요
 - 딥 구간(내려가는 지점)에서 실제로 자연스럽게 내려갔다가 다시 올라갈 수 있는 점프 궤적인지 확인 필요
+
+## [수정] Stage_Background/SkyBG·BG에 패럴랙스 적용 — 2026-08-04
+### 프롬프트
+지금 배경이 이미지로 돼있어서 이어붙이니까 너무 부자연스러운게 문제라 그런데 혹시 내가 묶어놓은 Stage_Background/SkyBG랑 Stage_Background/BG 들을 카메라가 어느정도 이동하면 얘네도 자연스럽게 이동하게끔 할 수 없나? 아니면 카메라 주사 방법을 바꿔서라도
+### 조사
+Stage_Background 하위에 34개 자식이 있는데, 그 중 SkyBG(BG_sky_cloud0/1/2, 64유닛 폭 타일 3장)와 BG(BG_pine1~4)만 사용자가 지정한 대상. 이미 FirstScene에서 검증된 Assets/Scripts/ParallaxLayer.cs가 있음 — 단, [RequireComponent(typeof(SpriteRenderer))]라 그룹 부모가 아니라 SpriteRenderer를 가진 개별 자식 오브젝트에 직접 부착하는 설계. 스크립트 변경 없이 기존 검증된 방식 그대로 재사용하기로 함
+### 조작 내역
+- SkyBG 하위 3개(BG_sky_cloud0/1/2)에 ParallaxLayer 부착, parallaxEffect=0.1(하늘/구름, 가장 먼 레이어)
+- BG 하위 4개(BG_pine1~4)에 ParallaxLayer 부착, parallaxEffect=0.4(소나무, 더 가까운 레이어)
+- Stage_Background 직속의 나머지 27개 개별 소품(BG_mountain, BG_cloud, 흩어진 BG_sky_cloud(1)~(11) 등)은 사용자가 지정한 범위 밖이라 손대지 않음
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건 (스크립트 변경 없이 기존 컴포넌트만 부착)
+- Main Camera가 MainCamera 태그를 갖고 있어 ParallaxLayer의 Camera.main 참조가 정상 작동함을 확인
+- 저장 → manage_scene(load) 강제 재로드 → 컴포넌트·effect값 유지 확인
+- run_tests(EditMode) → 125/125 통과 (job a1e0d68a895647199fec3753157b972b)
+- 재생 모드 실측: 플레이어를 x=60으로 이동시켜 Cinemachine 카메라가 따라가게 한 뒤, SkyBG/BG 자식들의 실제 위치가 카메라 이동에 비례해 변하는 것을 확인. 이동 중 타일 랩어라운드(무한 반복)도 정상 작동(위치가 tileWidth만큼 정확히 점프하는 것으로 확인)
+### 실패와 수정
+- 없음
+### 참고 — 요청 범위 밖이라 손대지 않음
+- 이번 패럴랙스는 가로(X축)만 처리함(ParallaxLayer 자체가 X축 전용 설계). 최근 세로로 크게 확장된 계단 구간(y=44까지)에서는 카메라가 위로 많이 올라가도 SkyBG/BG는 세로로 안 움직여서, 고지대에서는 배경이 안 맞는 느낌이 날 수 있음 — 필요하시면 별도로 세로 패럴랙스나 배경 확장을 요청해주세요

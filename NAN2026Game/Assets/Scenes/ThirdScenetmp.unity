@@ -2838,6 +2838,7 @@ GameObject:
   m_Component:
   - component: {fileID: 793691039}
   - component: {fileID: 793691040}
+  - component: {fileID: 793691041}
   m_Layer: 0
   m_Name: BG_pine1
   m_TagString: Untagged
@@ -2920,6 +2921,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &793691041
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 793691038}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5447a599f44c76438f2f96fb2e980f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
+  parallaxEffect: 0.4
 --- !u!1 &796074069
 GameObject:
   m_ObjectHideFlags: 0
@@ -3446,6 +3460,7 @@ GameObject:
   m_Component:
   - component: {fileID: 905438448}
   - component: {fileID: 905438449}
+  - component: {fileID: 905438450}
   m_Layer: 0
   m_Name: BG_pine3
   m_TagString: Untagged
@@ -3528,6 +3543,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &905438450
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 905438447}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5447a599f44c76438f2f96fb2e980f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
+  parallaxEffect: 0.4
 --- !u!1 &950273544
 GameObject:
   m_ObjectHideFlags: 0
@@ -13565,6 +13593,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1109289192}
   - component: {fileID: 1109289193}
+  - component: {fileID: 1109289194}
   m_Layer: 0
   m_Name: BG_pine4
   m_TagString: Untagged
@@ -13647,6 +13676,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &1109289194
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1109289191}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5447a599f44c76438f2f96fb2e980f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
+  parallaxEffect: 0.4
 --- !u!1 &1204924006
 GameObject:
   m_ObjectHideFlags: 0
@@ -24357,6 +24399,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1440749620}
   - component: {fileID: 1440749621}
+  - component: {fileID: 1440749622}
   m_Layer: 0
   m_Name: BG_sky_cloud2
   m_TagString: Untagged
@@ -24439,6 +24482,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &1440749622
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1440749619}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5447a599f44c76438f2f96fb2e980f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
+  parallaxEffect: 0.1
 --- !u!1 &1441131896
 GameObject:
   m_ObjectHideFlags: 0
@@ -24449,6 +24505,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1441131897}
   - component: {fileID: 1441131898}
+  - component: {fileID: 1441131899}
   m_Layer: 0
   m_Name: BG_sky_cloud1
   m_TagString: Untagged
@@ -24531,6 +24588,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &1441131899
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1441131896}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5447a599f44c76438f2f96fb2e980f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
+  parallaxEffect: 0.1
 --- !u!1 &1468043942
 GameObject:
   m_ObjectHideFlags: 0
@@ -27230,6 +27300,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1995100090}
   - component: {fileID: 1995100091}
+  - component: {fileID: 1995100092}
   m_Layer: 0
   m_Name: BG_pine2
   m_TagString: Untagged
@@ -27312,6 +27383,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &1995100092
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1995100089}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5447a599f44c76438f2f96fb2e980f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
+  parallaxEffect: 0.4
 --- !u!1 &1995267362
 GameObject:
   m_ObjectHideFlags: 0
@@ -27322,6 +27406,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1995267363}
   - component: {fileID: 1995267364}
+  - component: {fileID: 1995267365}
   m_Layer: 0
   m_Name: BG_sky_cloud0
   m_TagString: Untagged
@@ -27404,6 +27489,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &1995267365
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1995267362}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5447a599f44c76438f2f96fb2e980f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
+  parallaxEffect: 0.1
 --- !u!1 &2020420586
 GameObject:
   m_ObjectHideFlags: 0
