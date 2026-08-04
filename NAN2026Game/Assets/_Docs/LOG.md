@@ -2419,3 +2419,105 @@ Forest Wall은 Ground 윗에 사라지지 않고 위에 붙이게 할수는없�
 - 저장 True, 꽃 9/10. 밀도·구도는 사용자 판정
 ### 실패와 수정
 - 실측 경로 확인 원칙 (Props/Flower/{색}/flower_{색}_{n}.png)
+
+## [구현] Princess_Boss_Knight 신규 3패턴 + EnemyAI/WorldHealthBar/MonsterHealth 부착 — 2026-08-03
+### 프롬프트
+기존의 스킬들은 사용하지 말고 Princess_Trans2 스프라이트를 사용해 플레이어에게 구체 투척(속도가 다른 5개의 구체 발사 패링 가능), Princess_Trans3 스프라이트를 사용해 중범위 공격(보스 앞쪽 넓은 범위 공격 패링 가능), Princess_Trans1 스프라이트를 사용해 전범위 공격(게임이 일시정지 되면서 qte리듬게임이 시작되며 성공하면 보스가 그로기에 걸리고 실패하면 공격 진행 패링 불가능)을 구현해주고 추가로 MiddleBoss처럼 이 프리팹에 EnemyAi, WorldHealthBar, MonsterHealth 스크립트를 붙여줘
+### 조사
+기존 BossOrbLauncher/BossOrb/BossBeam(리듬 빔)은 사용하지 않기로 함(사용자 지시). Princess_Boss_Knight!!!는 프리팹 인스턴스(Assets/Prefabs/Princess_Boss_Knight!!!.prefab)로 확인, 인스턴스 오버라이드로만 작업. Animator Controller가 "Princess_Intro"이며 Princess_Trans1/2/3 애니메이터 상태(0.5초 클립)와 별도의 정적 PNG 스프라이트가 둘 다 존재 — 기존 BossIntroSequencer 관례(anim.Play(stateName))에 맞춰 애니메이터 상태 재생 방식 채택
+### 조작 내역
+- NAN2026.Core.PrincessBossLogic 신규(순수): IsBeatHit(QTE 비트 판정), QteSucceeded. 테스트 7개
+- PrincessBossAttackConfig(SO) 신규: 패턴 쿨다운, 구체 5발 속도 배열·데미지, 중범위 공격 판정 박스·데미지, QTE 비트 수·간격·허용오차·실패데미지·그로기 지속시간
+- PrincessBossAttackPatterns.cs 신규(IEnemyAttackOverride 구현):
+  - ① DoOrbVolley: PTrans2 재생 → 선딜 → SpikeProjectile(기존 재사용, IParryReflector 기반 패링 내장) 5발을 서로 다른 속도로 순차 발사
+  - ② DoFrontalAoE: PTrans3 재생 → 선딜(텔레그래프) → 보스 정면 OverlapBox 판정, 맞으면 패링 체크 후 데미지(패링 성공 시 보스가 반격 데미지)
+  - ③ DoFullScreenQte: PTrans1 재생 → Time.timeScale=0으로 일시정지, Time.unscaledDeltaTime 기반 리듬 QTE(Z키, 비트 4개) 진행(OnGUI로 진행상황 표시) → 전부 성공 시 그로기(IsBusy를 그로기 동안도 true로 묶어 완전 무행동화), 실패 시 패링 불가 데미지 후 재개
+  - MonsterController2D와의 애니메이션/이동 제어 충돌 방지를 위해 패턴 실행 중 controller.enabled=false (기존 MiddleBoss 수정과 동일 패턴)
+- Princess_Boss_Knight!!!에 부착: MonsterHealth, EnemyAI(신규 PrincessBossAIConfig: maxHealth=20, xpReward=40, usePatrol=false), WorldHealthBar, PrincessBossAttackPatterns
+### 발견·수정한 부수 문제
+- EnemyAI 부착 시도 시 AddComponent가 조용히 실패(예외 없음) — MonsterController2D가 요구하는 Collider2D가 추상 타입이라 RequireComponent 자동 추가가 작동하지 않음. BoxCollider2D+Rigidbody2D를 수동으로 먼저 추가해 해결
+- 재생 중 UnassignedReferenceException(Monster.Animator) 발견 — PixelFantasy Monster 컴포넌트의 Animator/Body 필드가 프로그래밍 방식 AddComponent로는 자동 연결이 안 되어 SerializedObject로 직접 연결
+- 재생 중 콘솔에 "Parameter 'Idle/Ready/Walk/Run/Jump/Die' does not exist" 경고가 매 프레임 반복 — MonsterAnimation이 기대하는 Animator 파라미터 10개(Bool 6 + Trigger 4)가 Princess_Intro 컨트롤러에 없었음. 기존 상태·전환은 건드리지 않고 파라미터만 추가해 해결(Assets/Sprites_AI/Boss/Anim/Princess_Intro.controller)
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건, 타입 로드 확인
+- 저장 → manage_scene(load) 강제 재로드 → 컴포넌트 4종·config 연결 재확인
+- run_tests(EditMode) → 109/109 통과
+- **재생 모드 실측**: 콘솔 경고 0건(파라미터 수정 후) 확인. 보스를 플레이어 근접 위치로 이동시켜 자연스러운 AI 흐름 관찰 → EnemyAI.CurrentState가 Patrol→Attack으로 정상 전환, 플레이어 HP가 5→2로 실제 감소해 전투가 실제로 작동함을 확인
+- 씬 오브젝트 수가 세션 중 18→10으로 줄어든 것을 발견해 사용자에게 확인 요청 → 의도된 정리라는 답변 받고 저장 진행(MiddleBoss/DeathDog1-3 등 삭제는 이번 작업과 무관, 사용자 본인 작업)
+### 실패와 수정
+- 위 '발견·수정한 부수 문제' 3건 모두 이번 세션 내에서 즉시 발견·수정함
+### 눈으로 확인 필요
+- 3패턴이 실제 플레이에서 골고루 발동하는지(랜덤 선택), 특히 QTE 일시정지·리듬 타이밍이 체감상 적절한지
+- 구체 5발의 속도 차이, 중범위 공격의 판정 범위가 밸런스상 괜찮은지
+- 그로기 지속시간(3초)이 적절한지
+
+## [수정] Princess 보스 오브 미표시·QTE 체감 부족 수정, 플레이어 충돌 재확인 — 2026-08-03
+### 프롬프트
+플레이어와 princess보스는 서로 통과되야함 (콜라이더 미적용) QTE 리듬 타이밍이 전혀 느껴지지 않음, 구체 나오는 패턴 없음
+### 조사
+1) 플레이어-보스 충돌: 재생 모드 실측(Physics2D.GetIgnoreCollision)으로 확인한 결과 FirstScene에서는 이미 True(정상)로 걸려있음. SecondScene에는 애초에 Princess 보스가 없음. 재현 못 해 사용자에게 추가 확인 요청 필요
+2) 구체 패턴: SpikeProjectile이 SpriteRenderer를 전혀 만들지 않는 순수 판정용 컴포넌트인데, PrincessBossAttackPatterns.DoOrbVolley에서 new GameObject로 생성할 때 스프라이트를 안 붙여서 완전히 투명하게(안 보이게) 날아가고 있었음 — '패턴이 없다'가 아니라 '보이지 않게 실행되고 있었다'
+3) QTE 체감: OnGUI가 텍스트 진행상황(N/M)만 표시하고 실제 타이밍을 보여주는 시각 요소가 전혀 없었음
+### 조작 내역
+- PrincessBossAttackPatterns에 orbSprite/orbSortingOrder 필드 추가, DoOrbVolley에서 오브 생성 시 SpriteRenderer 부착(기존 Boss_Orb.prefab의 비주얼 에셋 Assets/Sprites_AI/Effects/BossOrb.png 재사용, 스크립트는 재사용 안 함)
+- QTE OnGUI 전면 개편: 현재 비트 구간 내 진행률을 가로 바로 표시, 오른쪽 끝 히트 판정 구간을 초록색으로 강조, 흰색 마커가 왼쪽에서 오른쪽으로 이동하며 히트 구간 진입 시점이 곧 눌러야 할 타이밍이 되도록 시각화. 비트 판정 직후 GOOD!/MISS 텍스트를 짧게 표시(qteLastResult/qteLastResultTimer, unscaled 기준)
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- 저장 → manage_scene(load) 강제 재로드 → orbSprite 연결 유지 확인
+- run_tests(EditMode) → 109/109 통과 (job 099bec7367b346e1a38fbe10d76de255)
+- **재생 모드 실측**: DoOrbVolley를 리플렉션으로 직접 호출 → 플레이어 체력이 5→1로 실제 감소(오브가 스프라이트 부착된 채 날아가 명중했음을 데미지로 간접 확인, 명중 즉시 파괴되어 사후 조회 시점엔 이미 사라짐). DoFullScreenQte도 직접 호출 → Time.timeScale이 0으로 떨어졌다가 4비트(qteCurrentBeat=4) 진행 후 1로 정상 복귀 확인
+### 실패와 수정
+- 없음
+### 미해결 — 사람 확인 필요
+- 플레이어-Princess보스 물리 충돌 무시가 이번 재생 세션에서는 이미 정상(True)으로 확인됐으나, 재현이 안 돼 정확한 상황(어느 씬, 어느 타이밍)을 파악 못 함. 재현되면 구체적 상황을 알려주시면 다시 조사하겠습니다
+### 눈으로 확인 필요
+- 구체가 실제로 화면에 보이는지, QTE 진행 바의 판정 구간(초록)과 실제 타이밍이 체감상 맞는지
+
+## [수정] QTE 시작 대기시간·ZXC 랜덤 입력·그로기 시각효과 추가 — 2026-08-03
+### 프롬프트
+QTE 시작하고 대기시간 3초정도 있게 해주고 입력키도 Z가 아니라 ZXC 세 개로 늘려서 랜덤으로 나오게 해줘, 또한 QTE패턴을 성공하면 보스가 그로기에 걸려야하는데 그런게 없네
+### 조사
+그로기 메커니즘 자체(IsBusy가 그로기 동안 true를 반환해 EnemyAI.Update()를 완전히 막음)는 정상 동작하고 있었으나, 시각적으로 아무 변화가 없어 사용자가 '없다'고 느꼈을 가능성이 높음
+### 조작 내역
+- PrincessBossAttackConfig에 qteStartDelay(기본 3초) 추가
+- DoFullScreenQte: Time.timeScale=0 직후 qteStartDelay만큼 실시간 대기(qteWaitingToStart 플래그로 OnGUI에 카운트다운 표시) 후 비트 시작
+- 비트마다 Z/X/C 중 랜덤으로 요구 키 결정(qteCurrentKeyIndex), WasQteKeyPressedThisFrame으로 해당 키만 판정. 비트가 넘어갈 때마다 다음 요구 키를 다시 랜덤 선택
+- OnGUI: 대기 중엔 큰 카운트다운 숫자 표시, 진행 중엔 현재 요구 키(Z/X/C)를 제목에 표시
+- 그로기 시각화: PrincessBossAttackPatterns.Update()에서 Time.time<groggyUntil 여부가 바뀔 때만 SpriteRenderer.color를 노란색(1, 0.85, 0.2)으로 물들이고 종료 시 원래 색으로 복원
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- 저장 → manage_scene(load) 강제 재로드
+- run_tests(EditMode) → 109/109 통과 (job 9eb0d84d1f77424d863b800ff4da77aa)
+- 재생 모드 실측: DoFullScreenQte를 리플렉션으로 직접 호출해 아무 키도 안 누르고 자연 흐름 관찰 → 3초 대기 후 4비트 전부 미스 처리(qteCurrentBeat=4), groggyUntil=0(정상, 성공 안 했으므로), 패링 불가 데미지로 플레이어 HP 5→2 확인. groggyUntil을 리플렉션으로 강제 설정해 그로기 성공 경로도 별도 검증 → sprite color가 정확히 (1, 0.85, 0.2, 1)로 바뀜을 확인, 원복도 확인
+### 실패와 수정
+- 검증 중 Time.timeScale=0으로 걸린 채로 재생 모드가 남아있던 걸 발견(이전 턴에서 QTE 강제 실행 후 정리 없이 종료됨) → Time.timeScale=1 복원 후 재생 종료로 정리. 이후 QTE 강제 종료 시에는 항상 timeScale 복원까지 확인할 것
+
+## [수정] QTE 4비트 성공 시 5번째 프롬프트가 스치듯 보이던 문제 수정 — 2026-08-04
+### 프롬프트
+현재 qte 카운트가 4회인데 4회까지 성공했을 때 끝이 나는게 아니라 5회가 오류로 보여지고 끝나버리는데 4회 성공하면 바로 끝나게 해줘
+### 조사
+실제 루프 반복 횟수는 정확히 4회였음(while (qteCurrentBeat < qteBeatCount) 조건 자체는 정상). 문제는 4번째 비트가 판정된 직후, 루프 종료 여부를 확인하기 전에 qteCurrentKeyIndex를 다음 비트용으로 미리 랜덤 재선택해버려서 — 루프가 끝나기 전 마지막 한 프레임(yield return null) 동안 '있지도 않은 5번째 비트'의 요구 키가 OnGUI에 노출되고 있었음
+### 조작 내역
+- DoFullScreenQte의 히트/미스 두 분기 모두에서, qteCurrentBeat를 증가시킨 후 다음 비트가 실제로 있을 때만(qteCurrentBeat < config.qteBeatCount) qteCurrentKeyIndex를 다시 뽑도록 가드 추가
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- 저장 → manage_scene(load) 강제 재로드 → run_tests(EditMode) → 109/109 통과 (job 8d086dfe359344a2a2b9daa13bf81ca3)
+- 재생 모드 실측: DoFullScreenQte 강제 실행 → qteCurrentBeat=4, qteActive=False, timeScale=1로 깔끔하게 종료됨을 확인
+### 실패와 수정
+- 없음
+
+## [수정] 패링을 플레이어 정면 방향 공격에만 적용되도록 제한 — 2026-08-04
+### 프롬프트
+지금 현재 패링이 플레이어 기준 모든 방향이 막아지는데 플레이어가 바라보는 앞쪽 방향으로 날라오는 구체만 패링되게 가능할까
+### 조사
+PlayerController2D.TryParry(GameObject attacker)가 IParryReflector 인터페이스로 attacker(공격 주체)를 이미 받고 있었는데도, 실제로는 IsParryWindowActive()(타이밍)만 체크하고 attacker 위치는 전혀 안 보고 있었음 — 그래서 방향 상관없이 타이밍만 맞으면 전부 패링됐음. SpikeProjectile/EnemyAI/MiddleBossAttackPatterns/PrincessBossAttackPatterns 4곳 전부 attacker로 몬스터 자신의 GameObject를 넘기고 있어서(투사체는 발사한 보스, 근접은 몬스터 자신) 위치 기반 방향 판정에 그대로 활용 가능함을 확인
+### 조작 내역
+- NAN2026.Core.PlayerLocomotionLogic에 IsAttackerInFront(playerX, attackerX, facingLeft) 순수 함수 추가(스프라이트 flipX 기준 정면 판정, 동일 X는 정면으로 인정). 테스트 5개
+- PlayerController2D.TryParry: 기존 타이밍 체크 통과 후, attacker가 null이 아니면 IsAttackerInFront로 방향까지 확인하도록 변경. attacker가 null인 예외 상황은 안전하게 허용(기존 동작 유지)
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- TryParry의 다른 호출부(SpikeProjectile/EnemyAI/MiddleBossAttackPatterns/PrincessBossAttackPatterns) 전부 attacker에 몬스터 GameObject를 정상 전달하고 있음을 코드 검색으로 재확인 — 이번 변경으로 깨지는 곳 없음
+- 저장 → manage_scene(load) 강제 재로드 → run_tests(EditMode) → 114/114 통과 (job c1b18c1de8e14333b26fbf97934f7baa, 기존 109 + 신규 5)
+- 재생 모드 실측: 패링 타이밍을 리플렉션으로 강제 활성화한 뒤, 오른쪽을 보는 상태(flipX=false)에서 정면(오른쪽)의 공격자는 TryParry=True, 뒤쪽(왼쪽)의 공격자는 TryParry=False로 정확히 갈리는 것을 직접 확인
+### 실패와 수정
+- 없음
