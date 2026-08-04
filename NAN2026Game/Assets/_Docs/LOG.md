@@ -2491,3 +2491,17 @@ QTE 시작하고 대기시간 3초정도 있게 해주고 입력키도 Z가 아�
 - 재생 모드 실측: DoFullScreenQte를 리플렉션으로 직접 호출해 아무 키도 안 누르고 자연 흐름 관찰 → 3초 대기 후 4비트 전부 미스 처리(qteCurrentBeat=4), groggyUntil=0(정상, 성공 안 했으므로), 패링 불가 데미지로 플레이어 HP 5→2 확인. groggyUntil을 리플렉션으로 강제 설정해 그로기 성공 경로도 별도 검증 → sprite color가 정확히 (1, 0.85, 0.2, 1)로 바뀜을 확인, 원복도 확인
 ### 실패와 수정
 - 검증 중 Time.timeScale=0으로 걸린 채로 재생 모드가 남아있던 걸 발견(이전 턴에서 QTE 강제 실행 후 정리 없이 종료됨) → Time.timeScale=1 복원 후 재생 종료로 정리. 이후 QTE 강제 종료 시에는 항상 timeScale 복원까지 확인할 것
+
+## [수정] QTE 4비트 성공 시 5번째 프롬프트가 스치듯 보이던 문제 수정 — 2026-08-04
+### 프롬프트
+현재 qte 카운트가 4회인데 4회까지 성공했을 때 끝이 나는게 아니라 5회가 오류로 보여지고 끝나버리는데 4회 성공하면 바로 끝나게 해줘
+### 조사
+실제 루프 반복 횟수는 정확히 4회였음(while (qteCurrentBeat < qteBeatCount) 조건 자체는 정상). 문제는 4번째 비트가 판정된 직후, 루프 종료 여부를 확인하기 전에 qteCurrentKeyIndex를 다음 비트용으로 미리 랜덤 재선택해버려서 — 루프가 끝나기 전 마지막 한 프레임(yield return null) 동안 '있지도 않은 5번째 비트'의 요구 키가 OnGUI에 노출되고 있었음
+### 조작 내역
+- DoFullScreenQte의 히트/미스 두 분기 모두에서, qteCurrentBeat를 증가시킨 후 다음 비트가 실제로 있을 때만(qteCurrentBeat < config.qteBeatCount) qteCurrentKeyIndex를 다시 뽑도록 가드 추가
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- 저장 → manage_scene(load) 강제 재로드 → run_tests(EditMode) → 109/109 통과 (job 8d086dfe359344a2a2b9daa13bf81ca3)
+- 재생 모드 실측: DoFullScreenQte 강제 실행 → qteCurrentBeat=4, qteActive=False, timeScale=1로 깔끔하게 종료됨을 확인
+### 실패와 수정
+- 없음

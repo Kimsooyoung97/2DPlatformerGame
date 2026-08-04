@@ -175,14 +175,19 @@ public sealed class PrincessBossAttackPatterns : MonoBehaviour, IEnemyAttackOver
                 qteLastResult = hit ? "GOOD!" : "MISS";
                 qteLastResultTimer = config.qteBeatInterval * 0.5f;
                 qteCurrentBeat++;
-                qteCurrentKeyIndex = Random.Range(0, QteKeyNames.Length);
+                // 마지막 비트였다면 다음 키를 새로 뽑지 않는다 — 뽑아버리면 루프가
+                // 끝나기 전 한 프레임 동안 '있지도 않은 다음 비트'의 키가 화면에 잠깐
+                // 노출돼 5번째 비트가 있는 것처럼 보이는 원인이었다.
+                if (qteCurrentBeat < config.qteBeatCount)
+                    qteCurrentKeyIndex = Random.Range(0, QteKeyNames.Length);
             }
             else if (qteElapsed > beatTarget + config.qteHitWindow)
             {
                 qteLastResult = "MISS";
                 qteLastResultTimer = config.qteBeatInterval * 0.5f;
                 qteCurrentBeat++;
-                qteCurrentKeyIndex = Random.Range(0, QteKeyNames.Length);
+                if (qteCurrentBeat < config.qteBeatCount)
+                    qteCurrentKeyIndex = Random.Range(0, QteKeyNames.Length);
             }
             yield return null;
         }
