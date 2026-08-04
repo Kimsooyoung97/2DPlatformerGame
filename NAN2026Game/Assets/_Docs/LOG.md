@@ -3075,3 +3075,19 @@ Stage_CameraBounds(카메라 이동 가능 범위)의 실제 폴리곤 x범위�
 - 첫 시도에서 씬 구조가 바뀐 걸 모르고 기존 인덱스 가정으로 순회하다 NullReferenceException 발생(ParallaxLayer 없는 새 자식에 접근) → null 체크 후 안전하게 재시도
 ### 사람 확인 필요
 - BG 그룹에 새로 들어온 BG_mountain 7개는 ParallaxLayer가 없어 이번 세로 패럴랙스 대상에서 제외했습니다. 이 산들도 같이 움직이게 하고 싶으시면 말씀해주세요
+
+## [수정] BG_mountain 7개에도 패럴랙스 적용 — 2026-08-04
+### 프롬프트
+산들도 추가해줘
+### 조사
+BG 그룹의 BG_mountain 7개 중 4개(폭 32.63로 완전히 동일, x=16.60/49.26/81.81/109.85로 그 폭만큼 고르게 배치)는 진짜 반복 타일로 보이고, 나머지 3개(폭 17.60/35.20/24.20으로 제각각, 위치도 불규칙)는 개별 장식으로 판단
+### 조작 내역
+- 7개 전부에 ParallaxLayer 부착, parallaxEffect=0.25(하늘 0.1과 소나무 0.4 사이 거리감), applyVerticalParallax=true
+- 폭 32.63로 균일한 4개만 infiniteWrap=true(진짜 반복 타일로 판단), 나머지 3개는 infiniteWrap=false(개별 장식이라 순간이동 방지)
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- 저장 → manage_scene(load) 강제 재로드 → BG 그룹 10개(소나무3+산7) 전부 ParallaxLayer 유지 확인
+- run_tests(EditMode) → 125/125 통과 (job fe67c5c2b4f24a2cb5ec8f0188ea4348)
+- 재생 모드 실측: 플레이어를 크게 이동시켜 카메라가 70유닛 이동하는 동안 균일 타일 산(BG_mountain)이 예상대로 패럴랙스 이동(17.7유닛) + 랩어라운드 1회(32.6유닛) 합산으로 총 50.3유닛 이동함을 확인, Y축도 카메라 Y 상승에 비례해 함께 이동 확인
+### 실패와 수정
+- 없음

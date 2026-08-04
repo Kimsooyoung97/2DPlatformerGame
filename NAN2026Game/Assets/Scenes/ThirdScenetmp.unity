@@ -129,6 +129,7 @@ GameObject:
   m_Component:
   - component: {fileID: 31896088}
   - component: {fileID: 31896089}
+  - component: {fileID: 31896090}
   m_Layer: 0
   m_Name: BG_mountain
   m_TagString: Untagged
@@ -211,6 +212,21 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &31896090
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 31896087}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5447a599f44c76438f2f96fb2e980f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
+  parallaxEffect: 0.25
+  infiniteWrap: 0
+  applyVerticalParallax: 1
 --- !u!1 &63007730
 GameObject:
   m_ObjectHideFlags: 0
@@ -405,6 +421,7 @@ GameObject:
   m_Component:
   - component: {fileID: 94249735}
   - component: {fileID: 94249736}
+  - component: {fileID: 94249737}
   m_Layer: 0
   m_Name: BG_mountain
   m_TagString: Untagged
@@ -487,6 +504,21 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &94249737
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 94249734}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5447a599f44c76438f2f96fb2e980f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
+  parallaxEffect: 0.25
+  infiniteWrap: 0
+  applyVerticalParallax: 1
 --- !u!1 &99728444
 GameObject:
   m_ObjectHideFlags: 0
@@ -497,6 +529,7 @@ GameObject:
   m_Component:
   - component: {fileID: 99728445}
   - component: {fileID: 99728446}
+  - component: {fileID: 99728447}
   m_Layer: 0
   m_Name: BG_mountain (2)
   m_TagString: Untagged
@@ -579,6 +612,21 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &99728447
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 99728444}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5447a599f44c76438f2f96fb2e980f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
+  parallaxEffect: 0.25
+  infiniteWrap: 1
+  applyVerticalParallax: 1
 --- !u!1 &130473036
 GameObject:
   m_ObjectHideFlags: 0
@@ -589,6 +637,7 @@ GameObject:
   m_Component:
   - component: {fileID: 130473037}
   - component: {fileID: 130473038}
+  - component: {fileID: 130473039}
   m_Layer: 0
   m_Name: BG_mountain
   m_TagString: Untagged
@@ -671,6 +720,21 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &130473039
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 130473036}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5447a599f44c76438f2f96fb2e980f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
+  parallaxEffect: 0.25
+  infiniteWrap: 0
+  applyVerticalParallax: 1
 --- !u!1 &141493638
 GameObject:
   m_ObjectHideFlags: 0
@@ -2209,6 +2273,7 @@ GameObject:
   m_Component:
   - component: {fileID: 783348546}
   - component: {fileID: 783348547}
+  - component: {fileID: 783348548}
   m_Layer: 0
   m_Name: BG_mountain (3)
   m_TagString: Untagged
@@ -2291,6 +2356,21 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &783348548
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 783348545}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5447a599f44c76438f2f96fb2e980f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
+  parallaxEffect: 0.25
+  infiniteWrap: 1
+  applyVerticalParallax: 1
 --- !u!1 &793691038
 GameObject:
   m_ObjectHideFlags: 0
@@ -26709,6 +26789,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1504734812}
   - component: {fileID: 1504734813}
+  - component: {fileID: 1504734814}
   m_Layer: 0
   m_Name: BG_mountain
   m_TagString: Untagged
@@ -26791,6 +26872,21 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &1504734814
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1504734811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5447a599f44c76438f2f96fb2e980f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
+  parallaxEffect: 0.25
+  infiniteWrap: 1
+  applyVerticalParallax: 1
 --- !u!1 &1543418665
 GameObject:
   m_ObjectHideFlags: 0
@@ -27077,6 +27173,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1606275406}
   - component: {fileID: 1606275407}
+  - component: {fileID: 1606275408}
   m_Layer: 0
   m_Name: BG_mountain (1)
   m_TagString: Untagged
@@ -27159,6 +27256,21 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &1606275408
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1606275405}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5447a599f44c76438f2f96fb2e980f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
+  parallaxEffect: 0.25
+  infiniteWrap: 1
+  applyVerticalParallax: 1
 --- !u!1 &1621873940
 GameObject:
   m_ObjectHideFlags: 0
