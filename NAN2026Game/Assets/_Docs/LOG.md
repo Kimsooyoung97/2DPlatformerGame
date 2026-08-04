@@ -2450,3 +2450,25 @@ Forest Wall은 Ground 윗에 사라지지 않고 위에 붙이게 할수는없�
 - 3패턴이 실제 플레이에서 골고루 발동하는지(랜덤 선택), 특히 QTE 일시정지·리듬 타이밍이 체감상 적절한지
 - 구체 5발의 속도 차이, 중범위 공격의 판정 범위가 밸런스상 괜찮은지
 - 그로기 지속시간(3초)이 적절한지
+
+## [수정] Princess 보스 오브 미표시·QTE 체감 부족 수정, 플레이어 충돌 재확인 — 2026-08-03
+### 프롬프트
+플레이어와 princess보스는 서로 통과되야함 (콜라이더 미적용) QTE 리듬 타이밍이 전혀 느껴지지 않음, 구체 나오는 패턴 없음
+### 조사
+1) 플레이어-보스 충돌: 재생 모드 실측(Physics2D.GetIgnoreCollision)으로 확인한 결과 FirstScene에서는 이미 True(정상)로 걸려있음. SecondScene에는 애초에 Princess 보스가 없음. 재현 못 해 사용자에게 추가 확인 요청 필요
+2) 구체 패턴: SpikeProjectile이 SpriteRenderer를 전혀 만들지 않는 순수 판정용 컴포넌트인데, PrincessBossAttackPatterns.DoOrbVolley에서 new GameObject로 생성할 때 스프라이트를 안 붙여서 완전히 투명하게(안 보이게) 날아가고 있었음 — '패턴이 없다'가 아니라 '보이지 않게 실행되고 있었다'
+3) QTE 체감: OnGUI가 텍스트 진행상황(N/M)만 표시하고 실제 타이밍을 보여주는 시각 요소가 전혀 없었음
+### 조작 내역
+- PrincessBossAttackPatterns에 orbSprite/orbSortingOrder 필드 추가, DoOrbVolley에서 오브 생성 시 SpriteRenderer 부착(기존 Boss_Orb.prefab의 비주얼 에셋 Assets/Sprites_AI/Effects/BossOrb.png 재사용, 스크립트는 재사용 안 함)
+- QTE OnGUI 전면 개편: 현재 비트 구간 내 진행률을 가로 바로 표시, 오른쪽 끝 히트 판정 구간을 초록색으로 강조, 흰색 마커가 왼쪽에서 오른쪽으로 이동하며 히트 구간 진입 시점이 곧 눌러야 할 타이밍이 되도록 시각화. 비트 판정 직후 GOOD!/MISS 텍스트를 짧게 표시(qteLastResult/qteLastResultTimer, unscaled 기준)
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- 저장 → manage_scene(load) 강제 재로드 → orbSprite 연결 유지 확인
+- run_tests(EditMode) → 109/109 통과 (job 099bec7367b346e1a38fbe10d76de255)
+- **재생 모드 실측**: DoOrbVolley를 리플렉션으로 직접 호출 → 플레이어 체력이 5→1로 실제 감소(오브가 스프라이트 부착된 채 날아가 명중했음을 데미지로 간접 확인, 명중 즉시 파괴되어 사후 조회 시점엔 이미 사라짐). DoFullScreenQte도 직접 호출 → Time.timeScale이 0으로 떨어졌다가 4비트(qteCurrentBeat=4) 진행 후 1로 정상 복귀 확인
+### 실패와 수정
+- 없음
+### 미해결 — 사람 확인 필요
+- 플레이어-Princess보스 물리 충돌 무시가 이번 재생 세션에서는 이미 정상(True)으로 확인됐으나, 재현이 안 돼 정확한 상황(어느 씬, 어느 타이밍)을 파악 못 함. 재현되면 구체적 상황을 알려주시면 다시 조사하겠습니다
+### 눈으로 확인 필요
+- 구체가 실제로 화면에 보이는지, QTE 진행 바의 판정 구간(초록)과 실제 타이밍이 체감상 맞는지

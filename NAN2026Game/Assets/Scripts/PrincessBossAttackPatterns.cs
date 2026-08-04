@@ -17,6 +17,9 @@ public sealed class PrincessBossAttackPatterns : MonoBehaviour, IEnemyAttackOver
 {
     [SerializeField] private PrincessBossAttackConfig config;
     [SerializeField] private Animator animator;
+    [Tooltip("구체 투척에 사용할 스프라이트(기존 BossOrb 비주얼 재사용, 스크립트는 재사용 안 함)")]
+    [SerializeField] private Sprite orbSprite;
+    [SerializeField] private int orbSortingOrder = 25;
 
     private Assets.PixelFantasy.PixelMonsters.Common.Scripts.ExampleScripts.MonsterController2D controller;
     private NHNDemo.MonsterHealth health;
@@ -29,6 +32,8 @@ public sealed class PrincessBossAttackPatterns : MonoBehaviour, IEnemyAttackOver
     private int qteBeatsHit;
     private int qteCurrentBeat;
     private float qteElapsed;
+    private string qteLastResult = string.Empty;
+    private float qteLastResultTimer;
 
     /// 패턴 실행 중이거나 그로기 상태면 EnemyAI가 완전히 개입하지 않는다(그로기 = 무행동).
     public bool IsBusy => busy || Time.time < groggyUntil;
@@ -72,6 +77,14 @@ public sealed class PrincessBossAttackPatterns : MonoBehaviour, IEnemyAttackOver
                 Vector2 dir = ((Vector2)player.position - (Vector2)spawnPos).normalized;
                 GameObject go = new GameObject("PrincessOrb_" + i);
                 go.transform.position = spawnPos;
+                // SpikeProjectile은 시각 요소가 전혀 없어(투명 판정만) 눈에 안 보였다 —
+                // 여기서 스프라이트를 직접 붙여준다.
+                if (orbSprite != null)
+                {
+                    SpriteRenderer orbSr = go.AddComponent<SpriteRenderer>();
+                    orbSr.sprite = orbSprite;
+                    orbSr.sortingOrder = orbSortingOrder;
+                }
                 SpikeProjectile proj = go.AddComponent<SpikeProjectile>();
                 proj.Init(dir, config.orbSpeeds[i], config.orbDamage, health);
             }
@@ -121,15 +134,21 @@ public sealed class PrincessBossAttackPatterns : MonoBehaviour, IEnemyAttackOver
             qteElapsed += Time.unscaledDeltaTime;
             float beatTarget = (qteCurrentBeat + 1) * config.qteBeatInterval;
 
+            qteLastResultTimer -= Time.unscaledDeltaTime;
+
             Keyboard kb = Keyboard.current;
             if (kb != null && kb.zKey.wasPressedThisFrame)
             {
-                if (PrincessBossLogic.IsBeatHit(beatTarget, qteElapsed, config.qteHitWindow))
-                    qteBeatsHit++;
+                bool hit = PrincessBossLogic.IsBeatHit(beatTarget, qteElapsed, config.qteHitWindow);
+                if (hit) qteBeatsHit++;
+                qteLastResult = hit ? "GOOD!" : "MISS";
+                qteLastResultTimer = config.qteBeatInterval * 0.5f;
                 qteCurrentBeat++;
             }
             else if (qteElapsed > beatTarget + config.qteHitWindow)
             {
+                qteLastResult = "MISS";
+                qteLastResultTimer = config.qteBeatInterval * 0.5f;
                 qteCurrentBeat++;
             }
             yield return null;
@@ -181,9 +200,40 @@ public sealed class PrincessBossAttackPatterns : MonoBehaviour, IEnemyAttackOver
     {
         if (!qteActive) return;
 
-        GUIStyle style = new GUIStyle(GUI.skin.box) { fontSize = 22, alignment = TextAnchor.MiddleCenter, normal = { textColor = Color.white } };
-        float w = 360f, h = 90f;
-        Rect rect = new Rect((Screen.width - w) * 0.5f, Screen.height * 0.2f, w, h);
-        GUI.Box(rect, "QTE! Z\ub97c \ub9ac\ub4ec\uc5d0 \ub9de\ucdb0 \ub204\ub974\uc138\uc694\n" + qteBeatsHit + " / " + config.qteBeatCount, style);
+        float w = 500f, h = 150f;
+        float left = (Screen.width - w) * 0.5f;
+        float top = Screen.height * 0.2f;
+
+        GUIStyle titleStyle = new GUIStyle(GUI.skin.label) { fontSize = 24, alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold };
+        titleStyle.normal.textColor = Color.white;
+        GUI.Label(new Rect(left, top, w, 36f), "QTE! Z\ub97c \ub9ac\ub4ec\uc5d0 \ub9de\ucdb0 \ub204\ub974\uc138\uc694 (" + qteBeatsHit + " / " + config.qteBeatCount + ")", titleStyle);
+
+        // 현재 비트 구간 안에서의 진행률(0~1)을 가로 바로 보여준다.
+        // 오른쪽 끝(히트 구간)이 강조된 색으로 표시되고, 찾아오는 순간이 누르는 타이밍이다.
+        float beatStart = qteCurrentBeat * config.qteBeatInterval;
+        float tRaw = config.qteBeatInterval > 0f ? (qteElapsed - beatStart) / config.qteBeatInterval : 0f;
+        float t = Mathf.Clamp01(tRaw);
+
+        Rect barRect = new Rect(left, top + 50f, w, 34f);
+        GUI.color = new Color(0.15f, 0.15f, 0.15f, 0.9f);
+        GUI.DrawTexture(barRect, Texture2D.whiteTexture);
+
+        float hitZoneWidth = config.qteBeatInterval > 0f ? (config.qteHitWindow / config.qteBeatInterval) * w : 0f;
+        Rect hitZoneRect = new Rect(left + w - hitZoneWidth, top + 50f, hitZoneWidth, 34f);
+        GUI.color = new Color(0.3f, 0.9f, 0.4f, 0.9f);
+        GUI.DrawTexture(hitZoneRect, Texture2D.whiteTexture);
+
+        float markerX = left + t * w;
+        Rect markerRect = new Rect(markerX - 3f, top + 44f, 6f, 46f);
+        GUI.color = Color.white;
+        GUI.DrawTexture(markerRect, Texture2D.whiteTexture);
+        GUI.color = Color.white;
+
+        if (qteLastResultTimer > 0f && !string.IsNullOrEmpty(qteLastResult))
+        {
+            GUIStyle resultStyle = new GUIStyle(GUI.skin.label) { fontSize = 28, alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold };
+            resultStyle.normal.textColor = qteLastResult == "GOOD!" ? new Color(0.4f, 1f, 0.5f) : new Color(1f, 0.4f, 0.4f);
+            GUI.Label(new Rect(left, top + 92f, w, 40f), qteLastResult, resultStyle);
+        }
     }
 }

@@ -10189,6 +10189,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PrincessBossAttackPatterns
   config: {fileID: 11400000, guid: 021ffd80a5401a7469b9e0b203d28d69, type: 2}
   animator: {fileID: 1235007943}
+  orbSprite: {fileID: 3648656473015033539, guid: beac4f98558ec68428994f43449e0480, type: 3}
+  orbSortingOrder: 25
 --- !u!114 &1235007945
 MonoBehaviour:
   m_ObjectHideFlags: 0
