@@ -3057,3 +3057,21 @@ Stage_CameraBounds(카메라 이동 가능 범위)의 실제 폴리곤 x범위�
 - 재생 모드 실측: 플레이어를 (10,8)→(80,30)으로 이동시켜 카메라가 69유닛 이동하는 동안 pine0 위치가 매끄럽게(불연속 점프 없이) 변하는 것을 확인. infiniteWrap=false라 순간이동 자체가 구조적으로 불가능함(랩어라운드 분기 미실행)
 ### 실패와 수정
 - 재생 모드 테스트 초반에 플레이어를 여러 좌표로 연속 순간이동시키며 관찰했더니 Cinemachine 댐핑이 따라잡을 시간이 없어 카메라 위치가 갱신 안 되는 것처럼 보여 혼란 있었음 — 도구 호출 사이 실제 시간이 흐르도록 개별 호출로 나눠 재확인해서 해결. 앞으로 카메라 추적 확인 시 연속 순간이동 대신 한 번 이동 후 별도 호출로 간격을 두고 관찰할 것
+
+## [구현] 배경 세로(Y축) 패럴랙스 추가 — 2026-08-04
+### 프롬프트
+혹시 이 배경이 플레이어가 점프했을 때 위아래로도 따라다니게 해줄 수 있나?
+### 조작 내역
+- ParallaxLayer.cs에 applyVerticalParallax(기본값 false, 기존 사용처는 그대로 동작해 하위호환) 추가. 켜면 Y축도 X축과 동일한 parallaxEffect 계수로 카메라를 따라 이동(Y축은 무한 랩어라운드 미적용 — 하늘/땅이 뒤집혀 보이는 걸 방지)
+- ThirdScenetmp의 SkyBG(2개)·BG(3개) 기존 ParallaxLayer 보유 오브젝트에 applyVerticalParallax=true 설정
+### 발견한 것 — 씬 구조 변경
+작업 중 Stage_Background 구조가 이전(34개 자식)과 달라져 있음을 발견(현재 8개 자식: SkyBG/BG/BG_cloud×6). SkyBG는 2개(BG_sky_cloud2 없어짐), BG는 pine 3개 + ParallaxLayer 없는 BG_mountain 7개로 구성 — 사용자가 씬을 동시에 편집 중이었던 것으로 보임. ParallaxLayer 없는 오브젝트는 건드리지 않고 건너뜀(null 체크로 안전 처리)
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- 저장 → manage_scene(load) 강제 재로드 → applyVerticalParallax=True 유지 확인
+- run_tests(EditMode) → 125/125 통과 (job 03522246f2524e1293058df60cb7f8bb)
+- 재생 모드 실측: 플레이어를 (20,10)→(30,30)으로 이동시켜 카메라 Y가 상승하는 동안 SkyBG 자식의 Y좌표도 비례해서 증가하는 것을 단계별로 확인
+### 실패와 수정
+- 첫 시도에서 씬 구조가 바뀐 걸 모르고 기존 인덱스 가정으로 순회하다 NullReferenceException 발생(ParallaxLayer 없는 새 자식에 접근) → null 체크 후 안전하게 재시도
+### 사람 확인 필요
+- BG 그룹에 새로 들어온 BG_mountain 7개는 ParallaxLayer가 없어 이번 세로 패럴랙스 대상에서 제외했습니다. 이 산들도 같이 움직이게 하고 싶으시면 말씀해주세요

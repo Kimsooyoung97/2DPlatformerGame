@@ -1122,6 +1122,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
   parallaxEffect: 0.4
   infiniteWrap: 1
+  applyVerticalParallax: 1
 --- !u!212 &371430835
 SpriteRenderer:
   serializedVersion: 3
@@ -2397,6 +2398,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
   parallaxEffect: 0.88
   infiniteWrap: 0
+  applyVerticalParallax: 1
 --- !u!1 &796074069
 GameObject:
   m_ObjectHideFlags: 0
@@ -2902,6 +2904,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
   parallaxEffect: 0.91
   infiniteWrap: 0
+  applyVerticalParallax: 1
 --- !u!1 &963709759
 GameObject:
   m_ObjectHideFlags: 0
@@ -28940,6 +28943,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
   parallaxEffect: 0.89
   infiniteWrap: 0
+  applyVerticalParallax: 1
 --- !u!1 &1995267362
 GameObject:
   m_ObjectHideFlags: 0
@@ -29047,6 +29051,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
   parallaxEffect: 0.4
   infiniteWrap: 1
+  applyVerticalParallax: 1
 --- !u!1 &2020420586
 GameObject:
   m_ObjectHideFlags: 0
