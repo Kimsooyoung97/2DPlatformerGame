@@ -70,7 +70,10 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
     /// <summary>IParryReflector 구현 — SpikeProjectile 등 투사체가 자동으로 패링 여부를 물어본다.</summary>
     public bool TryParry(GameObject attacker)
     {
-        return IsParryWindowActive();
+        if (!IsParryWindowActive()) return false;
+        // 방향 정보가 없는 공격(attacker==null)은 안전하게 그냥 허용한다.
+        if (attacker == null) return true;
+        return PlayerLocomotionLogic.IsAttackerInFront(transform.position.x, attacker.transform.position.x, sr.flipX);
     }
     private UnityEngine.Collider2D[] groundColliders;
     private bool ignoringGround;

@@ -137,5 +137,13 @@ namespace NAN2026.Core
         {
             return grounded || airDashesUsed < maxAirDashes;
         }
+
+        /// 패링이 플레이어가 바라보는 정면 방향에서 오는 공격에만 통하도록 판정한다.
+        /// facingLeft=true(스프라이트 좌우반전 상태)면 정면은 왼쪽, 아니면 오른쪽.
+        public static bool IsAttackerInFront(float playerX, float attackerX, bool facingLeft)
+        {
+            float dx = attackerX - playerX;
+            return facingLeft ? dx <= 0f : dx >= 0f;
+        }
     }
 }

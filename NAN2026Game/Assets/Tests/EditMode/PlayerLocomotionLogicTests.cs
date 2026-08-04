@@ -180,5 +180,31 @@ namespace NAN2026.Tests
         {
             Assert.IsFalse(PlayerLocomotionLogic.CanDash(false, 1, 1));
         }
+
+        [Test] public void ParryDirection_FacingRight_AttackerToRight_IsFront()
+        {
+            Assert.IsTrue(PlayerLocomotionLogic.IsAttackerInFront(0f, 5f, false));
+        }
+
+        [Test] public void ParryDirection_FacingRight_AttackerToLeft_IsBehind()
+        {
+            Assert.IsFalse(PlayerLocomotionLogic.IsAttackerInFront(0f, -5f, false));
+        }
+
+        [Test] public void ParryDirection_FacingLeft_AttackerToLeft_IsFront()
+        {
+            Assert.IsTrue(PlayerLocomotionLogic.IsAttackerInFront(0f, -5f, true));
+        }
+
+        [Test] public void ParryDirection_FacingLeft_AttackerToRight_IsBehind()
+        {
+            Assert.IsFalse(PlayerLocomotionLogic.IsAttackerInFront(0f, 5f, true));
+        }
+
+        [Test] public void ParryDirection_SamePosition_CountsAsFront()
+        {
+            Assert.IsTrue(PlayerLocomotionLogic.IsAttackerInFront(3f, 3f, false));
+            Assert.IsTrue(PlayerLocomotionLogic.IsAttackerInFront(3f, 3f, true));
+        }
     }
 }

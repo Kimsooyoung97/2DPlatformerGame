@@ -2505,3 +2505,19 @@ QTE 시작하고 대기시간 3초정도 있게 해주고 입력키도 Z가 아�
 - 재생 모드 실측: DoFullScreenQte 강제 실행 → qteCurrentBeat=4, qteActive=False, timeScale=1로 깔끔하게 종료됨을 확인
 ### 실패와 수정
 - 없음
+
+## [수정] 패링을 플레이어 정면 방향 공격에만 적용되도록 제한 — 2026-08-04
+### 프롬프트
+지금 현재 패링이 플레이어 기준 모든 방향이 막아지는데 플레이어가 바라보는 앞쪽 방향으로 날라오는 구체만 패링되게 가능할까
+### 조사
+PlayerController2D.TryParry(GameObject attacker)가 IParryReflector 인터페이스로 attacker(공격 주체)를 이미 받고 있었는데도, 실제로는 IsParryWindowActive()(타이밍)만 체크하고 attacker 위치는 전혀 안 보고 있었음 — 그래서 방향 상관없이 타이밍만 맞으면 전부 패링됐음. SpikeProjectile/EnemyAI/MiddleBossAttackPatterns/PrincessBossAttackPatterns 4곳 전부 attacker로 몬스터 자신의 GameObject를 넘기고 있어서(투사체는 발사한 보스, 근접은 몬스터 자신) 위치 기반 방향 판정에 그대로 활용 가능함을 확인
+### 조작 내역
+- NAN2026.Core.PlayerLocomotionLogic에 IsAttackerInFront(playerX, attackerX, facingLeft) 순수 함수 추가(스프라이트 flipX 기준 정면 판정, 동일 X는 정면으로 인정). 테스트 5개
+- PlayerController2D.TryParry: 기존 타이밍 체크 통과 후, attacker가 null이 아니면 IsAttackerInFront로 방향까지 확인하도록 변경. attacker가 null인 예외 상황은 안전하게 허용(기존 동작 유지)
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- TryParry의 다른 호출부(SpikeProjectile/EnemyAI/MiddleBossAttackPatterns/PrincessBossAttackPatterns) 전부 attacker에 몬스터 GameObject를 정상 전달하고 있음을 코드 검색으로 재확인 — 이번 변경으로 깨지는 곳 없음
+- 저장 → manage_scene(load) 강제 재로드 → run_tests(EditMode) → 114/114 통과 (job c1b18c1de8e14333b26fbf97934f7baa, 기존 109 + 신규 5)
+- 재생 모드 실측: 패링 타이밍을 리플렉션으로 강제 활성화한 뒤, 오른쪽을 보는 상태(flipX=false)에서 정면(오른쪽)의 공격자는 TryParry=True, 뒤쪽(왼쪽)의 공격자는 TryParry=False로 정확히 갈리는 것을 직접 확인
+### 실패와 수정
+- 없음
