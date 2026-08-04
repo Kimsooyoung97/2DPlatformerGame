@@ -2991,3 +2991,16 @@ PlayerController2D.TryParry(GameObject attacker)가 IParryReflector 인터페이
 해당 없음
 ### 커밋
 해당 없음(무수정)
+
+
+## [구현] SecondScene_extra 200u 일자 복도 신축 — 2026-08-04 22:37
+### 프롬프트
+진행SecondScene이랑 SecondScene_extra빼고는 건드리면 안돼
+### 조작 내역
+- SecondScene에서 읽기 전용 수확(표면 103·채움 17·벽 6종 타일 참조, 카메라 리그·플레이어·조명 사본) → 새 씬 활성 후 복제(원본 dirty=False 확증)
+- 200u 복도: 바닥 4겹(표면+채움)·천장 3겹·배경벽 12겹 랜덤·양끝 밀폐, 콜라이더 ProcessTilemapChanges→GenerateGeometry, confiner 200x16 재배선, vcam 추적=새 Player, 토치 17기(12u 간격)
+- 씬 연결(포탈)은 보류 — 팀 배선 대기. 작업 영역: SecondScene(참조)+extra만, SecondScene_1 불가침 전환
+### 검증
+- 활성 씬=SecondScene_extra 루트 23개: Main Camera CM_PlayerCamera Global Light 2D Player Stage_Grid Stage_CameraBounds PF Dungeon Props - Torch 01 PF Dungeon Props - Torch 01 PF Dungeon Props - Torch 01 PF Dungeon Props - Torch 01 PF Dungeon Props - Torch 01 PF Dungeon Props - Torch 01 PF Dungeon Props - Torch 01 PF Dungeon Props - Torch 01 PF Dungeon Props - Torch 01 PF Dungeon Props - Torch 01 PF Dungeon Props - Torch 01 PF Dungeon Props - Torch 01 PF Dungeon Props - Torch 01 PF Dungeon Props - Torch 01 PF Dungeon Props - Torch 01 PF Dungeon Props - Torch 01 PF Dungeon Props - Torch 01  / Ground 범위 -6~120 | 콜라이더 도형 5 / Player(3,4) 발밑: Stage_CameraBounds @-0.1
+### 실패와 수정
+없음
