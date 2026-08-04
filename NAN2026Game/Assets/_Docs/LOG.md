@@ -2977,3 +2977,27 @@ PlayerController2D.TryParry(GameObject attacker)가 IParryReflector 인터페이
 ### 실패와 수정
 - 없음
 
+
+## [구현] ThirdScenetmp에 계단형 상승 플랫폼 12개 추가 (FinishPoint 유도) — 2026-08-04
+### 프롬프트
+현재 씬의 타일맵이 일자로 쭉 이어진 맵인데 너무 단조로워서 층계가 생기도록 확장해줄 수 있을까 길이는 지금이 적당한데 위로도 플레이어가 이동하여서 FinishPoint 지점에서 포탈을 탈 수 있게끔 유도하고 싶어
+(마감 D-3 상황이라 우선순위를 먼저 확인함 — 사용자가 '현재 씬은 ThirdScenetmp, 이 지시가 최우선'이라고 명시적으로 확정해 진행)
+### 조사
+ThirdScenetmp의 Stage_Grid/Stage_Ground를 조사한 결과 메인 지면(y=-2~3)에 이미 뜬 플랫폼 2개(12~14,y=6 / 17~21,y=8)가 존재. 타일 언어 확인: forest_tileset_12=왼쪽캡, 13=중간(반복), 14=오른쪽캡(뜬 플랫폼용), 18=채움(메인 지면용). FinishPoint는 (133.5, 44) — 기존 지형 최고점(y=9) 대비 35유닛 이상 높음
+### 조작 내역
+- 기존 (17~21,8) 플랫폼에서 이어서, x+9/y+3 간격으로 4타일 폭(12,13,13,14) 플랫폼 12개를 Stage_Ground Tilemap에 SetTile로 페인트(x=26→128, y=11→44). 기존 수동 배치 오브젝트(FinishPoint, 기존 플랫폼 등)는 변경하지 않고 새 타일만 추가
+- 가로 길이(x=141 이내)는 확장하지 않고 기존 범위 안에서만 세로로 상승하도록 구성(사용자 요청 반영)
+### 발견·수정한 문제
+- SetTile 직후 CompositeCollider2D.pathCount가 3에서 그대로 안 늘어남(신규 플랫폼 콜라이더 미생성) — TilemapCollider2D.enabled를 false→true로 토글해 강제 재생성, pathCount 3→15로 정상화 확인
+- 에디트 모드에서 Physics2D.OverlapPoint(ContactFilter2D)가 계속 0건을 반환해 잠시 콜라이더 문제로 오인 — Physics2D 쿼리는 재생 모드에서만 신뢰 가능함을 재확인(에디트 모드에서는 물리월드가 시뮬레이션되지 않음). 재생 모드에서 OverlapCircleAll로 재검증하니 정상
+### 검증
+- SetTile 직후 GetTile로 즉시 라이브 검증 → 저장 → manage_scene(load) 강제 재로드 → 타일 유지 확인 (FAIL.md #14 절차)
+- TilemapCollider2D 토글로 pathCount 3→15 확인, GetPath로 12개 신규 플랫폼 전부 정확한 x/y 범위로 존재 확인
+- 저장 → 재로드 → 재생 모드 진입 → OverlapCircleAll로 계단 6곳(시작~끝) 전부 Stage_Ground 콜라이더 존재 실측 확인
+- run_tests(EditMode) → 125/125 통과 (job c859f684e159476f94ef9e4f0fe6cc59, 씬 작업만 있어 테스트 수 무관)
+### 실패와 수정
+- 위 '발견·수정한 문제' 2건 모두 이번 세션 내 즉시 발견·해결
+### 눈으로 확인 필요
+- 실제 플레이로 각 계단 사이 점프(이단점프/대쉬 포함)가 실제로 도달 가능한 간격인지 체감 확인 필요(x+9/y+3 간격으로 설계했으나 정확한 점프 궤적 시뮬레이션은 안 함)
+- 마지막 계단(125~128,44)에서 FinishPoint(133.5,44)까지 약 5~8유닛 갭이 남아있어 마지막 점프/이동 동선 확인 필요
+- FinishPoint 자체에 포탈 트리거 로직이 없음(Transform만 있는 마커) — 실제로 '포탈을 탈 수 있게' 하려면 별도 트리거/씬 전환 스크립트 구현이 필요할 수 있음, 이번 작업 범위 밖으로 판단해 손대지 않음
