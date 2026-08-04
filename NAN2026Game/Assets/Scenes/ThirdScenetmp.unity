@@ -2588,11 +2588,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3086483477089436676, guid: e1c63970810f83842815a18438855f12, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 10.05
+      value: -25.4
       objectReference: {fileID: 0}
     - target: {fileID: 3086483477089436676, guid: e1c63970810f83842815a18438855f12, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 4.07
+      value: 3.99
       objectReference: {fileID: 0}
     - target: {fileID: 3086483477089436676, guid: e1c63970810f83842815a18438855f12, type: 3}
       propertyPath: m_LocalPosition.z
@@ -2933,7 +2933,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5447a599f44c76438f2f96fb2e980f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
-  parallaxEffect: 0.4
+  parallaxEffect: 0.15
+  infiniteWrap: 0
 --- !u!1 &796074069
 GameObject:
   m_ObjectHideFlags: 0
@@ -2997,10 +2998,10 @@ PolygonCollider2D:
   m_AutoTiling: 0
   m_Points:
     m_Paths:
-    - - {x: -4.26696, y: -7.8687286}
+    - - {x: -31.830853, y: -7.562462}
       - {x: 240.31898, y: -7.4667854}
       - {x: 240.07454, y: 65.18164}
-      - {x: -5.2223206, y: 65.42611}
+      - {x: -31.86742, y: 65.11985}
   m_UseDelaunayMesh: 1
 --- !u!4 &796074071
 Transform:
@@ -3555,7 +3556,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5447a599f44c76438f2f96fb2e980f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
-  parallaxEffect: 0.4
+  parallaxEffect: 0.25
+  infiniteWrap: 0
 --- !u!1 &950273544
 GameObject:
   m_ObjectHideFlags: 0
@@ -13688,7 +13690,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5447a599f44c76438f2f96fb2e980f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
-  parallaxEffect: 0.4
+  parallaxEffect: 0.3
+  infiniteWrap: 0
 --- !u!1 &1204924006
 GameObject:
   m_ObjectHideFlags: 0
@@ -24494,7 +24497,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5447a599f44c76438f2f96fb2e980f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
-  parallaxEffect: 0.1
+  parallaxEffect: 0.205
+  infiniteWrap: 1
 --- !u!1 &1441131896
 GameObject:
   m_ObjectHideFlags: 0
@@ -24600,7 +24604,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5447a599f44c76438f2f96fb2e980f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
-  parallaxEffect: 0.1
+  parallaxEffect: 0.205
+  infiniteWrap: 1
 --- !u!1 &1468043942
 GameObject:
   m_ObjectHideFlags: 0
@@ -27284,7 +27289,7 @@ Transform:
   m_GameObject: {fileID: 1969329692}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 11.943959, y: 7.1791825, z: -10}
+  m_LocalPosition: {x: -15.6136265, y: 7.0958557, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -27395,7 +27400,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5447a599f44c76438f2f96fb2e980f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
-  parallaxEffect: 0.4
+  parallaxEffect: 0.2
+  infiniteWrap: 0
 --- !u!1 &1995267362
 GameObject:
   m_ObjectHideFlags: 0
@@ -27501,7 +27507,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5447a599f44c76438f2f96fb2e980f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
-  parallaxEffect: 0.1
+  parallaxEffect: 0.205
+  infiniteWrap: 1
 --- !u!1 &2020420586
 GameObject:
   m_ObjectHideFlags: 0
@@ -28222,7 +28229,7 @@ Transform:
   m_GameObject: {fileID: 2125927614}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 10.05, y: 7.175, z: -10}
+  m_LocalPosition: {x: -25.4, y: 7.0950003, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
