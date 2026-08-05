@@ -3159,3 +3159,17 @@ Lich는 0, 3.5, 0 으로 설정해줘
 - 재생 모드 실측: Lich2의 HealthBar localPosition이 (0, 3.50, 0)으로 정확히 반영됨을 확인
 ### 실패와 수정
 - 없음
+
+## [수정] 몬스터끼리 물리 충돌 무시 추가 — 2026-08-05
+### 프롬프트
+Lich랑 DeathDog끼리도 ignore 돼야해
+### 조사
+EnemyAI.Awake()는 기존에 '몬스터-플레이어' 충돌만 무시했고, '몬스터-몬스터' 간 충돌 무시는 없었음(별도로 확인했던 Lich-플레이어 무시는 이미 정상이었으나, Lich-DeathDog 등 몬스터끼리는 처리된 적 없음)
+### 조작 내역
+- EnemyAI.cs에 IgnoreOtherMonstersPhysicalCollision() 추가: Awake 시점에 씬의 모든 EnemyAI 인스턴스를 찾아(FindObjectsByType, 몬스터 종류 불문 — DeathDog/Lich/보스 등 EnemyAI를 가진 모든 몬스터가 대상) 자기 자신을 제외한 나머지 전부와 Physics2D.IgnoreCollision 설정. Awake 실행 순서에 무관하게 동작(씬 로드 시 모든 컴포넌트가 이미 존재하므로 FindObjectsByType은 다른 몬스터의 Awake 실행 여부와 무관하게 전부 찾아냄)
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- 저장 → manage_scene(load) 강제 재로드 → run_tests(EditMode) → 128/128 통과 (job 421876ca111b4e5cbd0e8ded0ef390db)
+- 재생 모드 실측: Lich2↔DeathDog1, Lich2↔DeathDog2, DeathDog1↔DeathDog2 세 조합 전부 IgnoreCollision=True 확인(같은 종류끼리도 자동으로 적용됨을 함께 확인)
+### 실패와 수정
+- 없음
