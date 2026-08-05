@@ -3149,3 +3149,13 @@ WorldHealthBar는 config.healthBarOffset(로컬 좌표)만큼 부모(몬스터) 
 - 재생 모드 실측: Lich2의 HealthBar localPosition이 (0, 2.40, 0)으로 DeathDog와 동일하게 반영됨을 확인(WorldHealthBar가 참조로 같은 config 에셋을 보고 있어 별도 씬 수정 없이 3개 Lich 전부에 자동 반영됨)
 ### 실패와 수정
 - 없음
+
+## [수정] Lich 체력바 오프셋을 3.5로 재조정 — 2026-08-05
+### 프롬프트
+Lich는 0, 3.5, 0 으로 설정해줘
+### 조작 내역
+- LichAIConfig.asset의 healthBarOffset을 (0, 2.4, 0) → (0, 3.5, 0)으로 변경
+### 검증
+- 재생 모드 실측: Lich2의 HealthBar localPosition이 (0, 3.50, 0)으로 정확히 반영됨을 확인
+### 실패와 수정
+- 없음
