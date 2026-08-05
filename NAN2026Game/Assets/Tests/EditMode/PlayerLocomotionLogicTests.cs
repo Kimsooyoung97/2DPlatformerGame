@@ -206,5 +206,30 @@ namespace NAN2026.Tests
             Assert.IsTrue(PlayerLocomotionLogic.IsAttackerInFront(3f, 3f, false));
             Assert.IsTrue(PlayerLocomotionLogic.IsAttackerInFront(3f, 3f, true));
         }
+
+        [Test] public void LaunchVelocity_FlatDistance_NoGravity()
+        {
+            var (vx, vy) = PlayerLocomotionLogic.LaunchVelocityForTarget(10f, 0f, 2f, 0f);
+            Assert.AreEqual(5f, vx, 0.001f);
+            Assert.AreEqual(0f, vy, 0.001f);
+        }
+
+        [Test] public void LaunchVelocity_UpwardTarget_CompensatesGravity()
+        {
+            // dy=0, duration=2, gravity=10 -> vy = (0 + 0.5*10*4)/2 = 10
+            var (vx, vy) = PlayerLocomotionLogic.LaunchVelocityForTarget(0f, 0f, 2f, 10f);
+            Assert.AreEqual(10f, vy, 0.001f);
+        }
+
+        [Test] public void LaunchVelocity_ReachesTargetUnderGravity()
+        {
+            float dx = 8f, dy = 5f, duration = 1.5f, gravity = 9.8f;
+            var (vx, vy) = PlayerLocomotionLogic.LaunchVelocityForTarget(dx, dy, duration, gravity);
+            // 위치 공식으로 역검증: x(T)=vx*T, y(T)=vy*T-0.5*g*T^2
+            float finalX = vx * duration;
+            float finalY = vy * duration - 0.5f * gravity * duration * duration;
+            Assert.AreEqual(dx, finalX, 0.01f);
+            Assert.AreEqual(dy, finalY, 0.01f);
+        }
     }
 }

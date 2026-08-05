@@ -47,6 +47,9 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
     private float dashDir;
     private int airDashesUsed;
     private float landTimer;
+    private bool launching;
+    private float launchEndTime;
+    private Vector3 launchTarget;
     private string currentState;
     public bool IsGrounded { get { return grounded; } }
 
@@ -54,6 +57,24 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
     private float EffectiveParryWindow()
     {
         return config.parryWindow + (progression != null ? progression.ParryDurationBonus : 0f);
+    }
+
+    /// <summary>JumpZoneLauncher가 호출한다. 정확히 duration초 뒤 target에 도착하도록
+    /// 포물선 궤적의 초기 속도를 계산해 물리에 맡긴다(슈퍼점프).</summary>
+    public void LaunchTo(Vector3 target, float duration)
+    {
+        if (duration <= 0f) return;
+        float gravity = -Physics2D.gravity.y * rb.gravityScale;
+        Vector3 delta = target - transform.position;
+        var v = PlayerLocomotionLogic.LaunchVelocityForTarget(delta.x, delta.y, duration, gravity);
+        rb.linearVelocity = new Vector2(v.vx, v.vy);
+        launching = true;
+        launchEndTime = Time.time + duration;
+        launchTarget = target;
+        dashing = false;
+        attackTimer = 0f;
+        activeAttack = null;
+        queuedAttack = null;
     }
 
     private float EffectiveParryCooldown()
@@ -242,6 +263,20 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
 
     private void FixedUpdate()
     {
+        // 점프존 슈퍼점프 비행 중에는 물리 궤적(포물선)에 전부 맡기고 평소 이동/공격
+        // 로직을 건너뛴다. 벽 클램프·중력 오버라이드 등과 충돌하면 목표 지점에
+        // 정확히 도착하지 못할 수 있기 때문이다.
+        if (launching)
+        {
+            if (Time.time >= launchEndTime)
+            {
+                transform.position = launchTarget;
+                rb.linearVelocity = Vector2.zero;
+                launching = false;
+            }
+            return;
+        }
+
         bool wantIgnore = PlayerLocomotionLogic.ShouldIgnoreGround(rb.linearVelocity.y, config.onewayRiseThreshold);
         if (wantIgnore) SetGroundIgnored(true);
         else if (ignoringGround && !OverlappingGround()) SetGroundIgnored(false);

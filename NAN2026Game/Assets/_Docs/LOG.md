@@ -3091,3 +3091,26 @@ BG 그룹의 BG_mountain 7개 중 4개(폭 32.63로 완전히 동일, x=16.60/49
 - 재생 모드 실측: 플레이어를 크게 이동시켜 카메라가 70유닛 이동하는 동안 균일 타일 산(BG_mountain)이 예상대로 패럴랙스 이동(17.7유닛) + 랩어라운드 1회(32.6유닛) 합산으로 총 50.3유닛 이동함을 확인, Y축도 카메라 Y 상승에 비례해 함께 이동 확인
 ### 실패와 수정
 - 없음
+
+## [구현] JumpZone→ArriveZone 슈퍼점프(포물선 발사) — 2026-08-05
+### 프롬프트
+플레이어가 각 JumpZone1~3에서 점프를 누르면 거기에 대응하는 ArriveZone 으로 슈퍼점프같은 효과를 주어 이동하게 해줘
+### 조사
+ThirdScenetmp에 ArriveZone1/2/3(pos 81.14,15.03 / 136.38,15.00 / 145.11,27.16)은 있으나 JumpZone은 JumpZone1 하나만 존재(2/3은 아직 미배치). 전부 Transform만 있는 순수 마커였음. 숫자 매칭(JumpZoneN↔ArriveZoneN) 방식으로 만들어 나중에 JumpZone2/3을 배치해도 별도 코드 수정 없이 바로 동작하도록 설계
+### 조작 내역
+- NAN2026.Core.PlayerLocomotionLogic에 LaunchVelocityForTarget(dx, dy, duration, gravity) 순수 함수 추가 — 정확히 duration초 뒤 목표 지점에 도착하는 포물선 초기 속도 계산(UnityEngine 비의존 모듈이라 Vector2 대신 튜플 반환). 테스트 3개(중력 없는 평면 이동, 중력 보정, 위치공식 역검증)
+- JumpZoneConfig(SO) 신규: flightDuration(기본 1초)
+- PlayerController2D.LaunchTo(target, duration) 신규 공개 메서드: 현재 중력(gravityScale 반영)과 순수 로직으로 속도를 계산해 물리에 맡김. 발사 중엔 dashing/attackTimer/queuedAttack 등 기존 이동·공격 상태를 정리해 충돌 방지
+- FixedUpdate 맨 앞에 launching 가드 추가: 비행 중엔 평소 이동/벽클램프/공격 로직을 전부 건너뛰고 물리 궤적에만 맡기다가, duration 경과 시 좌표를 목표에 정확히 스냅(중간에 벽 등에 걸려 미세하게 어긋나는 걸 방지, 100% 도착 보장)
+- JumpZoneLauncher.cs 신규: 트리거로 플레이어 진입/이탈 감지, 안에 있는 동안 방향키 위(점프)를 누르면 이름 매칭으로 찾은 ArriveZone으로 PlayerController2D.LaunchTo 호출. RequireComponent(Collider2D)로 부착 시 자동으로 트리거 콜라이더 필요
+- JumpZone1에 BoxCollider2D(트리거, 2x2)와 JumpZoneLauncher(config=JumpZoneConfig.asset) 부착
+### 검증
+- refresh_unity(compile=force) — 1차 시도에서 'attacking' 필드 오타(존재하지 않는 필드) 컴파일 에러 발견, 실제 필드명(attackTimer/activeAttack)으로 수정 후 재확인 → 0건
+- 저장 → manage_scene(load) 강제 재로드 → JumpZoneLauncher.config 연결 유지 확인
+- run_tests(EditMode) → 128/128 통과 (job 7d60e630b3614c55afdf73eadcdf6b21, 기존 125 + 신규 3)
+- 재생 모드 실측: JumpZoneLauncher의 arriveZone이 이름 매칭으로 ArriveZone1을 정확히 자동 연결한 것 확인. PlayerController2D.LaunchTo를 직접 호출(JumpZone1 위치 → ArriveZone1 목표, duration=1초) → 발사 직후 속도(1.80, 20.36) 확인, 착지 후 위치가 목표(81.14, 15.03)와 거의 정확히 일치(81.14, 15.01)함을 확인
+### 실패와 수정
+- LaunchTo 첫 작성 시 존재하지 않는 필드 'attacking'을 참조해 컴파일 에러 → 실제 필드명 확인 후 attackTimer=0f/activeAttack=null로 수정
+### 사람 확인 필요
+- JumpZone2/JumpZone3은 아직 씬에 없습니다 — 필요한 위치에 배치하고 BoxCollider2D(트리거)+JumpZoneLauncher(config=JumpZoneConfig.asset)만 붙이면 이름 매칭으로 자동으로 ArriveZone2/3에 연결됩니다
+- flightDuration(현재 1초)이 체감상 적절한지, 발사 방향키가 위쪽(점프키)으로 고정된 게 맞는지 확인 부탁드립니다
