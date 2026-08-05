@@ -49,7 +49,6 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
     private float landTimer;
     private bool launching;
     private float launchEndTime;
-    private Vector3 launchTarget;
     private string currentState;
     public bool IsGrounded { get { return grounded; } }
 
@@ -70,7 +69,6 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
         rb.linearVelocity = new Vector2(v.vx, v.vy);
         launching = true;
         launchEndTime = Time.time + duration;
-        launchTarget = target;
         dashing = false;
         attackTimer = 0f;
         activeAttack = null;
@@ -270,7 +268,6 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
         {
             if (Time.time >= launchEndTime)
             {
-                transform.position = launchTarget;
                 rb.linearVelocity = Vector2.zero;
                 launching = false;
             }

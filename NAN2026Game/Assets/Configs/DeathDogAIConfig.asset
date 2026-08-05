@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: defc207cb5290274d84a36d470dc11ad, type: 3}
   m_Name: DeathDogAIConfig
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAIConfig
-  aggroRange: 6
+  aggroRange: 4
   attackRange: 1.2
   chaseStopDistance: 9
   patrolSpeed: 1
-  chaseSpeed: 3
-  patrolRadius: 2.5
+  chaseSpeed: 2
+  patrolRadius: 1.5
   jumpYThreshold: 1.2
   jumpConfirmDuration: 0.6
   attackCooldown: 1
