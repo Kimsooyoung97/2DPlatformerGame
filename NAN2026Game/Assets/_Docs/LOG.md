@@ -2977,3 +2977,266 @@ PlayerController2D.TryParry(GameObject attacker)가 IParryReflector 인터페이
 ### 실패와 수정
 - 없음
 
+
+## [구현] ThirdScenetmp에 계단형 상승 플랫폼 12개 추가 (FinishPoint 유도) — 2026-08-04
+### 프롬프트
+현재 씬의 타일맵이 일자로 쭉 이어진 맵인데 너무 단조로워서 층계가 생기도록 확장해줄 수 있을까 길이는 지금이 적당한데 위로도 플레이어가 이동하여서 FinishPoint 지점에서 포탈을 탈 수 있게끔 유도하고 싶어
+(마감 D-3 상황이라 우선순위를 먼저 확인함 — 사용자가 '현재 씬은 ThirdScenetmp, 이 지시가 최우선'이라고 명시적으로 확정해 진행)
+### 조사
+ThirdScenetmp의 Stage_Grid/Stage_Ground를 조사한 결과 메인 지면(y=-2~3)에 이미 뜬 플랫폼 2개(12~14,y=6 / 17~21,y=8)가 존재. 타일 언어 확인: forest_tileset_12=왼쪽캡, 13=중간(반복), 14=오른쪽캡(뜬 플랫폼용), 18=채움(메인 지면용). FinishPoint는 (133.5, 44) — 기존 지형 최고점(y=9) 대비 35유닛 이상 높음
+### 조작 내역
+- 기존 (17~21,8) 플랫폼에서 이어서, x+9/y+3 간격으로 4타일 폭(12,13,13,14) 플랫폼 12개를 Stage_Ground Tilemap에 SetTile로 페인트(x=26→128, y=11→44). 기존 수동 배치 오브젝트(FinishPoint, 기존 플랫폼 등)는 변경하지 않고 새 타일만 추가
+- 가로 길이(x=141 이내)는 확장하지 않고 기존 범위 안에서만 세로로 상승하도록 구성(사용자 요청 반영)
+### 발견·수정한 문제
+- SetTile 직후 CompositeCollider2D.pathCount가 3에서 그대로 안 늘어남(신규 플랫폼 콜라이더 미생성) — TilemapCollider2D.enabled를 false→true로 토글해 강제 재생성, pathCount 3→15로 정상화 확인
+- 에디트 모드에서 Physics2D.OverlapPoint(ContactFilter2D)가 계속 0건을 반환해 잠시 콜라이더 문제로 오인 — Physics2D 쿼리는 재생 모드에서만 신뢰 가능함을 재확인(에디트 모드에서는 물리월드가 시뮬레이션되지 않음). 재생 모드에서 OverlapCircleAll로 재검증하니 정상
+### 검증
+- SetTile 직후 GetTile로 즉시 라이브 검증 → 저장 → manage_scene(load) 강제 재로드 → 타일 유지 확인 (FAIL.md #14 절차)
+- TilemapCollider2D 토글로 pathCount 3→15 확인, GetPath로 12개 신규 플랫폼 전부 정확한 x/y 범위로 존재 확인
+- 저장 → 재로드 → 재생 모드 진입 → OverlapCircleAll로 계단 6곳(시작~끝) 전부 Stage_Ground 콜라이더 존재 실측 확인
+- run_tests(EditMode) → 125/125 통과 (job c859f684e159476f94ef9e4f0fe6cc59, 씬 작업만 있어 테스트 수 무관)
+### 실패와 수정
+- 위 '발견·수정한 문제' 2건 모두 이번 세션 내 즉시 발견·해결
+### 눈으로 확인 필요
+- 실제 플레이로 각 계단 사이 점프(이단점프/대쉬 포함)가 실제로 도달 가능한 간격인지 체감 확인 필요(x+9/y+3 간격으로 설계했으나 정확한 점프 궤적 시뮬레이션은 안 함)
+- 마지막 계단(125~128,44)에서 FinishPoint(133.5,44)까지 약 5~8유닛 갭이 남아있어 마지막 점프/이동 동선 확인 필요
+- FinishPoint 자체에 포탈 트리거 로직이 없음(Transform만 있는 마커) — 실제로 '포탈을 탈 수 있게' 하려면 별도 트리거/씬 전환 스크립트 구현이 필요할 수 있음, 이번 작업 범위 밖으로 판단해 손대지 않음
+
+## [수정] 계단 높이에 오르내림(딥) 추가 — 일자 상승 탈피 — 2026-08-04
+### 프롬프트
+지금은 너무 단일하게 일자로 올라가는 느낌인데 올라갔다 내려갔다 올라갔다 내려갔다 하면서 게임의 재미를 늘려줄 순 없을까?
+### 조작 내역
+- 시작(플랫폼0, y=11)과 끝(플랫폼11, y=44)은 고정한 채, 중간 10개 플랫폼의 Y값만 재설계 — 순증가(11→14→17→...→44, +3 일정)에서 오르내림이 있는 파형으로 변경
+- 새 Y 시퀀스: 11, 16, 18, 16(딥), 22, 25, 22(딥), 29, 32, 30(딥), 36, 44 — 딥 3곳을 배치해 오름-내림 리듬을 만들되 전체적으로는 여전히 상승 추세 유지, 최종적으로 FinishPoint 높이(44)에 정확히 도달
+- X 위치는 변경 없음(기존 계단과 동일한 가로 진행)
+- 기존 Y 위치의 타일은 SetTile(null)로 지우고 새 Y 위치에 다시 페인트(고아 타일 안 남도록 이동 대상만 정확히 지우고 다시 그림)
+### 검증
+- SetTile 직후 GetTile로 즉시 라이브 검증(옛 위치 비어있음, 새 위치 채워짐, 변경 없는 플랫폼0·11 그대로인지 확인)
+- TilemapCollider2D 토글로 콜라이더 재생성, pathCount=15 유지 확인(개수는 그대로, 위치만 이동했으므로 정상)
+- 저장 → manage_scene(load) 강제 재로드 → 타일 유지 확인
+- 재생 모드 실측: OverlapCircleAll로 딥 구간 포함 6개 지점 전부 Stage_Ground 콜라이더 존재 확인
+- run_tests(EditMode) → 125/125 통과 (job cdec8f5c1ee44ac0889ecb08f24c179e)
+### 실패와 수정
+- 없음
+### 눈으로 확인 필요
+- 딥 구간(내려가는 지점)에서 실제로 자연스럽게 내려갔다가 다시 올라갈 수 있는 점프 궤적인지 확인 필요
+
+## [수정] Stage_Background/SkyBG·BG에 패럴랙스 적용 — 2026-08-04
+### 프롬프트
+지금 배경이 이미지로 돼있어서 이어붙이니까 너무 부자연스러운게 문제라 그런데 혹시 내가 묶어놓은 Stage_Background/SkyBG랑 Stage_Background/BG 들을 카메라가 어느정도 이동하면 얘네도 자연스럽게 이동하게끔 할 수 없나? 아니면 카메라 주사 방법을 바꿔서라도
+### 조사
+Stage_Background 하위에 34개 자식이 있는데, 그 중 SkyBG(BG_sky_cloud0/1/2, 64유닛 폭 타일 3장)와 BG(BG_pine1~4)만 사용자가 지정한 대상. 이미 FirstScene에서 검증된 Assets/Scripts/ParallaxLayer.cs가 있음 — 단, [RequireComponent(typeof(SpriteRenderer))]라 그룹 부모가 아니라 SpriteRenderer를 가진 개별 자식 오브젝트에 직접 부착하는 설계. 스크립트 변경 없이 기존 검증된 방식 그대로 재사용하기로 함
+### 조작 내역
+- SkyBG 하위 3개(BG_sky_cloud0/1/2)에 ParallaxLayer 부착, parallaxEffect=0.1(하늘/구름, 가장 먼 레이어)
+- BG 하위 4개(BG_pine1~4)에 ParallaxLayer 부착, parallaxEffect=0.4(소나무, 더 가까운 레이어)
+- Stage_Background 직속의 나머지 27개 개별 소품(BG_mountain, BG_cloud, 흩어진 BG_sky_cloud(1)~(11) 등)은 사용자가 지정한 범위 밖이라 손대지 않음
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건 (스크립트 변경 없이 기존 컴포넌트만 부착)
+- Main Camera가 MainCamera 태그를 갖고 있어 ParallaxLayer의 Camera.main 참조가 정상 작동함을 확인
+- 저장 → manage_scene(load) 강제 재로드 → 컴포넌트·effect값 유지 확인
+- run_tests(EditMode) → 125/125 통과 (job a1e0d68a895647199fec3753157b972b)
+- 재생 모드 실측: 플레이어를 x=60으로 이동시켜 Cinemachine 카메라가 따라가게 한 뒤, SkyBG/BG 자식들의 실제 위치가 카메라 이동에 비례해 변하는 것을 확인. 이동 중 타일 랩어라운드(무한 반복)도 정상 작동(위치가 tileWidth만큼 정확히 점프하는 것으로 확인)
+### 실패와 수정
+- 없음
+### 참고 — 요청 범위 밖이라 손대지 않음
+- 이번 패럴랙스는 가로(X축)만 처리함(ParallaxLayer 자체가 X축 전용 설계). 최근 세로로 크게 확장된 계단 구간(y=44까지)에서는 카메라가 위로 많이 올라가도 SkyBG/BG는 세로로 안 움직여서, 고지대에서는 배경이 안 맞는 느낌이 날 수 있음 — 필요하시면 별도로 세로 패럴랙스나 배경 확장을 요청해주세요
+
+## [수정] 배경(BG 소나무) 순간이동 버그 수정 — 무한 랩어라운드 on/off 옵션 추가 — 2026-08-04
+### 프롬프트
+지금 배경 범위 밖으로 플레이어가 이동하면 배경이 순간이동돼서 따라오는데 이건 좀 이상해
+### 조사
+Stage_CameraBounds(카메라 이동 가능 범위)의 실제 폴리곤 x범위를 재보니 -31.87~240.32(총 272유닛). SkyBG는 64유닛 타일 3장이 고르게 배치되어 190유닛을 커버(효과값 0.1이라 실제 필요한 이동폭은 272*0.1≈27유닛에 불과해 문제 없음). 반면 BG(소나무)는 애초에 반복 타일링용으로 배치된 게 아니라 4개가 한 군데(x=-16~42, 58유닛)에 뭉쳐있는 장식 무리인데, 효과값 0.4라 실제 필요한 이동폭은 272*0.4≈109유닛 — 58유닛짜리 좁은 범위를 억지로 늘려 커버하려고 ParallaxLayer의 무한 랩어라운드(화면 밖으로 나가면 반대편으로 순간이동해 재배치)가 자주 발동해 눈에 띄게 순간이동하고 있었음
+### 조작 내역
+- ParallaxLayer.cs에 public bool infiniteWrap(기본값 true, 기존 사용처는 그대로 동작해 하위호환) 추가. LateUpdate 끝에서 !infiniteWrap이면 랩어라운드 분기 자체를 건너뜀
+- BG(소나무) 4개(BG_pine1~4) 전부 infiniteWrap=false로 설정 — 이제 순수 패럴랙스 이동만 하고 순간이동 없음(구조적으로 불가능해짐, 조건 분기 자체가 실행 안 됨)
+- SkyBG 3개는 원래 설계대로 고르게 타일링돼있고 필요 이동폭도 커버 범위 안이라 그대로 둠(infiniteWrap=true 유지)
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- 저장 → manage_scene(load) 강제 재로드 → infiniteWrap=False 유지 확인
+- run_tests(EditMode) → 125/125 통과 (job 71c752701f504449a648688a49c6dae5)
+- 재생 모드 실측: 플레이어를 (10,8)→(80,30)으로 이동시켜 카메라가 69유닛 이동하는 동안 pine0 위치가 매끄럽게(불연속 점프 없이) 변하는 것을 확인. infiniteWrap=false라 순간이동 자체가 구조적으로 불가능함(랩어라운드 분기 미실행)
+### 실패와 수정
+- 재생 모드 테스트 초반에 플레이어를 여러 좌표로 연속 순간이동시키며 관찰했더니 Cinemachine 댐핑이 따라잡을 시간이 없어 카메라 위치가 갱신 안 되는 것처럼 보여 혼란 있었음 — 도구 호출 사이 실제 시간이 흐르도록 개별 호출로 나눠 재확인해서 해결. 앞으로 카메라 추적 확인 시 연속 순간이동 대신 한 번 이동 후 별도 호출로 간격을 두고 관찰할 것
+
+## [구현] 배경 세로(Y축) 패럴랙스 추가 — 2026-08-04
+### 프롬프트
+혹시 이 배경이 플레이어가 점프했을 때 위아래로도 따라다니게 해줄 수 있나?
+### 조작 내역
+- ParallaxLayer.cs에 applyVerticalParallax(기본값 false, 기존 사용처는 그대로 동작해 하위호환) 추가. 켜면 Y축도 X축과 동일한 parallaxEffect 계수로 카메라를 따라 이동(Y축은 무한 랩어라운드 미적용 — 하늘/땅이 뒤집혀 보이는 걸 방지)
+- ThirdScenetmp의 SkyBG(2개)·BG(3개) 기존 ParallaxLayer 보유 오브젝트에 applyVerticalParallax=true 설정
+### 발견한 것 — 씬 구조 변경
+작업 중 Stage_Background 구조가 이전(34개 자식)과 달라져 있음을 발견(현재 8개 자식: SkyBG/BG/BG_cloud×6). SkyBG는 2개(BG_sky_cloud2 없어짐), BG는 pine 3개 + ParallaxLayer 없는 BG_mountain 7개로 구성 — 사용자가 씬을 동시에 편집 중이었던 것으로 보임. ParallaxLayer 없는 오브젝트는 건드리지 않고 건너뜀(null 체크로 안전 처리)
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- 저장 → manage_scene(load) 강제 재로드 → applyVerticalParallax=True 유지 확인
+- run_tests(EditMode) → 125/125 통과 (job 03522246f2524e1293058df60cb7f8bb)
+- 재생 모드 실측: 플레이어를 (20,10)→(30,30)으로 이동시켜 카메라 Y가 상승하는 동안 SkyBG 자식의 Y좌표도 비례해서 증가하는 것을 단계별로 확인
+### 실패와 수정
+- 첫 시도에서 씬 구조가 바뀐 걸 모르고 기존 인덱스 가정으로 순회하다 NullReferenceException 발생(ParallaxLayer 없는 새 자식에 접근) → null 체크 후 안전하게 재시도
+### 사람 확인 필요
+- BG 그룹에 새로 들어온 BG_mountain 7개는 ParallaxLayer가 없어 이번 세로 패럴랙스 대상에서 제외했습니다. 이 산들도 같이 움직이게 하고 싶으시면 말씀해주세요
+
+## [수정] BG_mountain 7개에도 패럴랙스 적용 — 2026-08-04
+### 프롬프트
+산들도 추가해줘
+### 조사
+BG 그룹의 BG_mountain 7개 중 4개(폭 32.63로 완전히 동일, x=16.60/49.26/81.81/109.85로 그 폭만큼 고르게 배치)는 진짜 반복 타일로 보이고, 나머지 3개(폭 17.60/35.20/24.20으로 제각각, 위치도 불규칙)는 개별 장식으로 판단
+### 조작 내역
+- 7개 전부에 ParallaxLayer 부착, parallaxEffect=0.25(하늘 0.1과 소나무 0.4 사이 거리감), applyVerticalParallax=true
+- 폭 32.63로 균일한 4개만 infiniteWrap=true(진짜 반복 타일로 판단), 나머지 3개는 infiniteWrap=false(개별 장식이라 순간이동 방지)
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- 저장 → manage_scene(load) 강제 재로드 → BG 그룹 10개(소나무3+산7) 전부 ParallaxLayer 유지 확인
+- run_tests(EditMode) → 125/125 통과 (job fe67c5c2b4f24a2cb5ec8f0188ea4348)
+- 재생 모드 실측: 플레이어를 크게 이동시켜 카메라가 70유닛 이동하는 동안 균일 타일 산(BG_mountain)이 예상대로 패럴랙스 이동(17.7유닛) + 랩어라운드 1회(32.6유닛) 합산으로 총 50.3유닛 이동함을 확인, Y축도 카메라 Y 상승에 비례해 함께 이동 확인
+### 실패와 수정
+- 없음
+
+## [구현] JumpZone→ArriveZone 슈퍼점프(포물선 발사) — 2026-08-05
+### 프롬프트
+플레이어가 각 JumpZone1~3에서 점프를 누르면 거기에 대응하는 ArriveZone 으로 슈퍼점프같은 효과를 주어 이동하게 해줘
+### 조사
+ThirdScenetmp에 ArriveZone1/2/3(pos 81.14,15.03 / 136.38,15.00 / 145.11,27.16)은 있으나 JumpZone은 JumpZone1 하나만 존재(2/3은 아직 미배치). 전부 Transform만 있는 순수 마커였음. 숫자 매칭(JumpZoneN↔ArriveZoneN) 방식으로 만들어 나중에 JumpZone2/3을 배치해도 별도 코드 수정 없이 바로 동작하도록 설계
+### 조작 내역
+- NAN2026.Core.PlayerLocomotionLogic에 LaunchVelocityForTarget(dx, dy, duration, gravity) 순수 함수 추가 — 정확히 duration초 뒤 목표 지점에 도착하는 포물선 초기 속도 계산(UnityEngine 비의존 모듈이라 Vector2 대신 튜플 반환). 테스트 3개(중력 없는 평면 이동, 중력 보정, 위치공식 역검증)
+- JumpZoneConfig(SO) 신규: flightDuration(기본 1초)
+- PlayerController2D.LaunchTo(target, duration) 신규 공개 메서드: 현재 중력(gravityScale 반영)과 순수 로직으로 속도를 계산해 물리에 맡김. 발사 중엔 dashing/attackTimer/queuedAttack 등 기존 이동·공격 상태를 정리해 충돌 방지
+- FixedUpdate 맨 앞에 launching 가드 추가: 비행 중엔 평소 이동/벽클램프/공격 로직을 전부 건너뛰고 물리 궤적에만 맡기다가, duration 경과 시 좌표를 목표에 정확히 스냅(중간에 벽 등에 걸려 미세하게 어긋나는 걸 방지, 100% 도착 보장)
+- JumpZoneLauncher.cs 신규: 트리거로 플레이어 진입/이탈 감지, 안에 있는 동안 방향키 위(점프)를 누르면 이름 매칭으로 찾은 ArriveZone으로 PlayerController2D.LaunchTo 호출. RequireComponent(Collider2D)로 부착 시 자동으로 트리거 콜라이더 필요
+- JumpZone1에 BoxCollider2D(트리거, 2x2)와 JumpZoneLauncher(config=JumpZoneConfig.asset) 부착
+### 검증
+- refresh_unity(compile=force) — 1차 시도에서 'attacking' 필드 오타(존재하지 않는 필드) 컴파일 에러 발견, 실제 필드명(attackTimer/activeAttack)으로 수정 후 재확인 → 0건
+- 저장 → manage_scene(load) 강제 재로드 → JumpZoneLauncher.config 연결 유지 확인
+- run_tests(EditMode) → 128/128 통과 (job 7d60e630b3614c55afdf73eadcdf6b21, 기존 125 + 신규 3)
+- 재생 모드 실측: JumpZoneLauncher의 arriveZone이 이름 매칭으로 ArriveZone1을 정확히 자동 연결한 것 확인. PlayerController2D.LaunchTo를 직접 호출(JumpZone1 위치 → ArriveZone1 목표, duration=1초) → 발사 직후 속도(1.80, 20.36) 확인, 착지 후 위치가 목표(81.14, 15.03)와 거의 정확히 일치(81.14, 15.01)함을 확인
+### 실패와 수정
+- LaunchTo 첫 작성 시 존재하지 않는 필드 'attacking'을 참조해 컴파일 에러 → 실제 필드명 확인 후 attackTimer=0f/activeAttack=null로 수정
+### 사람 확인 필요
+- JumpZone2/JumpZone3은 아직 씬에 없습니다 — 필요한 위치에 배치하고 BoxCollider2D(트리거)+JumpZoneLauncher(config=JumpZoneConfig.asset)만 붙이면 이름 매칭으로 자동으로 ArriveZone2/3에 연결됩니다
+- flightDuration(현재 1초)이 체감상 적절한지, 발사 방향키가 위쪽(점프키)으로 고정된 게 맞는지 확인 부탁드립니다
+
+## [구현] Lich1~3을 원거리 몬스터로 설정 (사거리 5, 구체 1개 발사) — 2026-08-05
+### 프롬프트
+Lich1~3 도 DeathDog과 같이 적 몬스터로 설정할 것인데 이 유닛은 사거리 5에서 플레이어에게 구체 1개를 발사하는 공격을 하게끔 해줘
+### 조사
+Lich1 (1)/Lich2/Lich3 발견 — DeathDog(Monster/MonsterController2D/MonsterAnimation/MonsterHealth/EnemyAI/WorldHealthBar 완비)과 달리 MonsterHealth/EnemyAI/WorldHealthBar가 없는 상태(Monster/MonsterController2D/MonsterAnimation/Collider2D/Rigidbody2D는 이미 있어 Princess보스 때 겪은 추상 Collider2D 이슈는 재발 안 함). Monster.Animator/Body 필드도 이미 정상 연결되어 있었음
+### 조작 내역
+- LichAttackConfig(SO) 신규: attackRange=5, windup=0.4, orbSpeed=6, orbDamage=1, minCooldown~maxCooldown=1.5~2.5
+- LichAIConfig(EnemyAIConfig 인스턴스) 신규: aggroRange=8, attackRange=5(패턴 사거리와 동일하게 맞춤), chaseStopDistance=12, maxHealth=3, xpReward=6, usePatrol=true(DeathDog 참고)
+- LichAttackPattern.cs 신규(IEnemyAttackOverride): TryStartAttack에서 거리가 config.attackRange(5) 이내일 때만 발동(MiddleBoss/Princess와 달리 사거리 게이팅을 명시적으로 유지 — '사거리 5에서'라는 요청을 그대로 반영). 기존 SpikeProjectile 재사용해 구체 1개를 플레이어 방향으로 발사, 스프라이트는 기존 Assets/Sprites_AI/Effects/BossOrb.png 재사용
+- Lich1 (1)/Lich2/Lich3 전부에 MonsterHealth/EnemyAI(config=LichAIConfig)/WorldHealthBar/LichAttackPattern(config=LichAttackConfig, orbSprite=BossOrb) 부착
+### 검증
+- refresh_unity(compile=force) — 1차 시도에서 Animator.Attack() 오호출(존재하지 않는 메서드) 컴파일 에러 발견, MonsterAnimation.Attack()으로 수정 후 재확인 → 0건
+- 저장 → manage_scene(load) 강제 재로드 → 3개 전부 config/orbSprite 연결 유지 확인
+- run_tests(EditMode) → 128/128 통과 (job 47ecfaca747a45748c567d7c07c2e6ff)
+- 재생 모드 실측: 사거리 8유닛에서 TryStartAttack=False, 4유닛에서 True로 사거리 게이팅 정확히 동작 확인. 근접(1유닛) 상황에서 실제 발동 후 플레이어 HP가 5→1로 감소해 구체가 실제로 명중·데미지를 입힘을 확인
+### 실패와 수정
+- LichAttackPattern 첫 작성 시 UnityEngine.Animator에 없는 Attack() 메서드를 호출해 컴파일 에러 → MonsterAnimation(PixelFantasy) 컴포넌트로 교체
+- 재생 세션이 오래(196초) 열려있는 상태에서 오브 위치를 지연 확인하니 y=-28570 같은 비정상적으로 먼 위치가 관측됨 — 실시간으로 계속 시뮬레이션되는 플레이 세션에서 플레이어 없이 빈 하늘로 날아간 오브가 lifeTime(5초) 동안 실제 등속 이동한 결과로 판단(테스트 아티팩트, 코드 버그 아님). 근접 상황 즉시 확인으로 실제 명중·데미지를 재확인해 문제 없음을 최종 검증
+### 눈으로 확인 필요
+- 실제 플레이에서 사거리 5 진입 시 구체가 자연스럽게 발사되는지, 쿨다운(1.5~2.5초) 체감이 적절한지
+
+## [수정] Lich 체력바가 몸 중간에 뜨던 문제 수정 — 2026-08-05
+### 프롬프트
+DeathDog는 체력바가 정상적으로 오브젝트 위쪽에 출력되는데 Lich는 몸 중간에 출력되는 문제고쳐줘
+### 조사
+WorldHealthBar는 config.healthBarOffset(로컬 좌표)만큼 부모(몬스터) 위에 체력바를 배치한다. DeathDogAIConfig는 healthBarOffset=(0,2.4,0)로 직접 커스텀되어 있었는데, LichAIConfig는 새로 만들 때 이 필드를 안 건드려서 클래스 기본값 (0,1.6,0) 그대로였음. 두 몬스터의 실제 스프라이트(Body) 크기를 비교해보니 완전히 동일(Extents 1.60,1.60) — 즉 Lich도 DeathDog와 같은 오프셋(2.4)이 필요한데 1.6(스프라이트 중심 부근)에 머물러 있어 몸 중간에 뜨고 있었음
+### 조작 내역
+- LichAIConfig.asset의 healthBarOffset을 (0, 1.6, 0) → (0, 2.4, 0)으로 변경(DeathDogAIConfig와 동일). 코드/씬 변경 없음 — Config 에셋 값만 수정
+### 검증
+- Config 에셋 값 변경이라 컴파일 대상 아님
+- run_tests(EditMode) → 128/128 통과 (job 1cf556eba58a4b9c97920c0d1dd92f0b, 이번 변경과 무관, 회귀 없음 확인용)
+- 재생 모드 실측: Lich2의 HealthBar localPosition이 (0, 2.40, 0)으로 DeathDog와 동일하게 반영됨을 확인(WorldHealthBar가 참조로 같은 config 에셋을 보고 있어 별도 씬 수정 없이 3개 Lich 전부에 자동 반영됨)
+### 실패와 수정
+- 없음
+
+## [수정] Lich 체력바 오프셋을 3.5로 재조정 — 2026-08-05
+### 프롬프트
+Lich는 0, 3.5, 0 으로 설정해줘
+### 조작 내역
+- LichAIConfig.asset의 healthBarOffset을 (0, 2.4, 0) → (0, 3.5, 0)으로 변경
+### 검증
+- 재생 모드 실측: Lich2의 HealthBar localPosition이 (0, 3.50, 0)으로 정확히 반영됨을 확인
+### 실패와 수정
+- 없음
+
+## [수정] 몬스터끼리 물리 충돌 무시 추가 — 2026-08-05
+### 프롬프트
+Lich랑 DeathDog끼리도 ignore 돼야해
+### 조사
+EnemyAI.Awake()는 기존에 '몬스터-플레이어' 충돌만 무시했고, '몬스터-몬스터' 간 충돌 무시는 없었음(별도로 확인했던 Lich-플레이어 무시는 이미 정상이었으나, Lich-DeathDog 등 몬스터끼리는 처리된 적 없음)
+### 조작 내역
+- EnemyAI.cs에 IgnoreOtherMonstersPhysicalCollision() 추가: Awake 시점에 씬의 모든 EnemyAI 인스턴스를 찾아(FindObjectsByType, 몬스터 종류 불문 — DeathDog/Lich/보스 등 EnemyAI를 가진 모든 몬스터가 대상) 자기 자신을 제외한 나머지 전부와 Physics2D.IgnoreCollision 설정. Awake 실행 순서에 무관하게 동작(씬 로드 시 모든 컴포넌트가 이미 존재하므로 FindObjectsByType은 다른 몬스터의 Awake 실행 여부와 무관하게 전부 찾아냄)
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- 저장 → manage_scene(load) 강제 재로드 → run_tests(EditMode) → 128/128 통과 (job 421876ca111b4e5cbd0e8ded0ef390db)
+- 재생 모드 실측: Lich2↔DeathDog1, Lich2↔DeathDog2, DeathDog1↔DeathDog2 세 조합 전부 IgnoreCollision=True 확인(같은 종류끼리도 자동으로 적용됨을 함께 확인)
+### 실패와 수정
+- 없음
+
+## [수정] 플레이어 벽 감지가 몬스터를 벽으로 오판하던 진짜 원인 수정 — 2026-08-05
+### 프롬프트
+모든 몬스터가 막히고있다
+### 조사
+Physics2D.GetIgnoreCollision으로 재확인해도 씬의 EnemyAI 17개 전부 Player와 IgnoreCollision=True — 즉 '물리적으로 밀리는' 문제는 처음부터 없었음. 진짜 원인은 별개 시스템: PlayerController2D.WallInDirection()이 이동 방향에 벽이 있으면 속도를 0으로 자르는 로직인데, 이 캐스트 쿼리는 트리거만 제외할 뿐 몬스터의 солид 콜라이더는 그대로 '벽'으로 잡고 있었음. Physics2D.IgnoreCollision은 물리 시뮬레이션(밀림 반응)만 막을 뿐 Collider2D.Cast 같은 쿼리 결과에는 전혀 영향을 주지 않는다는 걸 놓치고 있었음 — 그래서 몬스터에 안 밀리는데도(물리적으로) 이동 자체가 막혀서(캐스트 쿼리 때문에) '막힌다'고 느껴졌던 것
+### 조작 내역
+- PlayerController2D.WallInDirection()에서, 캐스트로 잡힌 콜라이더가 NHNDemo.MonsterHealth를 가지고 있으면(부모 포함 GetComponentInParent) 벽 판정에서 제외하도록 continue 추가. 몬스터는 태그가 전부 Untagged라 태그 기반 필터링 대신 컴포넌트 기반으로 판별(레이어·태그 설정에 무관하게 항상 정확)
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- 저장 → manage_scene(load) 강제 재로드 → run_tests(EditMode) → 128/128 통과 (job 2017634ff5dd4de18f176d2211082d19)
+- 재생 모드 실측: 플레이어를 Lich2 바로 옆(거의 겹치게)에 놓고 WallInDirection(Vector2.right)을 리플렉션으로 직접 호출 → False(더 이상 몬스터를 벽으로 안 잡음) 확인. 임시 BoxCollider2D를 벽처럼 놓고 동일하게 테스트 → True(진짜 벽은 여전히 정상 감지) 확인 — 몬스터만 정확히 제외됨을 검증
+### 실패와 수정
+- 지난 두 턴 동안 Physics2D.IgnoreCollision 값만 확인하고 '이미 정상'이라고 결론 냈던 것이 실수 — IgnoreCollision은 물리 밀림만 담당하고, 이동을 막는 실제 원인은 플레이어 자신의 벽 감지 캐스트 쿼리였음. 앞으로 '막힌다/밀린다' 계열 버그는 IgnoreCollision만 보지 말고 이동 로직의 캐스트/레이캐스트 쿼리도 함께 점검할 것
+
+## [구현] WarpPortal → WarpZone 이동 + 카메라 경계 전환 — 2026-08-05
+### 프롬프트
+현재 WarpPoint의 WarpPortal에 Player가 닿으면 WarpZone으로 플레이어가 이동되며 CM_PlayerCamera의 BoundingShape2D를 SecondCameraBounds로 바꿔줘
+### 조사
+WarpPortal은 WarpPoint의 자식(SpriteRenderer+CapsuleCollider2D, isTrigger=false였음). WarpZone은 순수 위치 마커. SecondCameraBounds는 PolygonCollider2D. CinemachineConfiner2D.BoundingShape2D는 public 필드(Collider2D 타입), 변경 후 InvalidateBoundingShapeCache() 호출 필요함을 리플렉션으로 확인
+### 조작 내역
+- WarpPortalController.cs 신규: OnTriggerEnter2D로 플레이어 감지 시 transform.position을 warpZone.position으로 이동 + rb 속도 초기화, confiner.BoundingShape2D를 newCameraBounds로 교체 후 InvalidateBoundingShapeCache() 호출. Awake에서 자기 콜라이더를 isTrigger=true로 강제 설정
+- WarpPortal에 부착, warpZone=WarpZone, confiner=CM_PlayerCamera의 CinemachineConfiner2D, newCameraBounds=SecondCameraBounds의 PolygonCollider2D로 연결
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- 저장 → manage_scene(load) 강제 재로드 → 참조 3개 전부 유지 확인
+- run_tests(EditMode) → 128/128 통과 (job 6b6255f6744d4f15b12abd66452cbe46)
+- 재생 모드 실측: 플레이어를 WarpPortal 위치로 이동시켜 트리거 발동 확인 → confiner.BoundingShape2D가 FirstCameraBounds에서 SecondCameraBounds로 정확히 전환됨을 확인. 위치 이동 로직도 직접 재현해 같은 호출 안에서는 정확히 WarpZone(106.54,17.08)로 이동함을 확인
+### 발견한 문제 — 코드 아님, 지형 배치 이슈로 추정
+- 워프 직후 잠시 지나면 플레이어가 원래 스폰 근처((-29.48, 4.01))로 되돌아가고 체력은 5/5 그대로 — 낙사 후 리스폰되는 패턴과 일치. WarpZone(106.54,17.08) 정확한 지점엔 겹치는 콜라이더가 없어(허공) 아래로 떨어지는 것으로 추정. 최근 세션 중 지형(Stage_Ground)이 사용자에 의해 재구성되고 있는 것으로 보여(이전 턴에서 보고한 미해결 사항과 동일 맥락), WarpZone 좌표가 새 지형과 안 맞을 가능성이 높음. 이번 워프 기능 자체의 구현·배선은 정상이라고 판단
+### 실패와 수정
+- 없음(워프 컴포넌트 자체는 정상, 목적지 지형 정합성은 별도 확인 필요)
+### 사람 확인 필요
+- WarpZone(106.54, 17.08) 아래에 실제 밟을 수 있는 바닥이 있는지 확인 부탁드립니다. 지형이 계속 바뀌고 있는 것 같아 제가 임의로 좌표를 조정하지 않았습니다
+
+## [수정] 워프에 화면 페이드인/아웃 연출 추가 — 2026-08-05
+### 프롬프트
+Warp될 때 화면이 까맣게 fadein 되었다가 워프 완료되면 fadeout되게 해줘
+### 조사
+기존 IntroSequencer는 Light2D 밝기로 암전을 표현하는 방식이라 범용 화면 페이드로 재사용 불가. 프로젝트 전반에 범용 화면 페이드 유틸리티가 없어 신규 제작
+### 조작 내역
+- ScreenFader.cs 신규: OnGUI로 화면 전체를 덮는 검은 텍스처를 그리는 싱글턴(Canvas 불필요, 필요 시 자동 생성 후 DontDestroyOnLoad). FadeTo(targetAlpha, duration) 코루틴 제공
+- WarpPortalController를 코루틴 기반으로 재구성: 트리거 진입 → ScreenFader.FadeTo(1, fadeInDuration)로 완전히 검게 → (화면이 검은 상태에서) 플레이어 위치 이동 + 카메라 경계 교체 → ScreenFader.FadeTo(0, fadeOutDuration)로 다시 보이게. fadeInDuration/fadeOutDuration 각각 0.4초, 워프 중 재진입 방지용 warping 플래그 추가
+### 검증
+- refresh_unity(compile=force) — 타입 로드로 컴파일 정상 확인(무관한 NRE 1건은 최근 턴들과 동일 패턴)
+- 저장 → manage_scene(load) 강제 재로드 → run_tests(EditMode) → 128/128 통과 (job 35df31c35cea42569c9407e97b9e6f9e)
+- 재생 모드 실측: 플레이어를 WarpPortal로 이동시켜 트리거 발동 → ScreenFader 오브젝트 자동 생성 확인, 시퀀스 완료 후 alpha=0(완전히 밝음)·warping=False로 정상 정리됨을 확인
+### 실패와 수정
+- 없음
+
+## [수정] 워프 시 카메라가 화면 밝아진 뒤에도 이동하는 어색함 수정 시도 — 2026-08-05
+### 프롬프트
+화면이 까매진 상태에서 모든 이동이 끝나고 이동된 상태에서 화면이 다시 원래대로 돌아와야하는데 지금 그게 어색하네
+### 조사
+기존 구현은 플레이어 위치·카메라 경계만 바꾸고 바로 페이드아웃을 시작 — Cinemachine 카메라는 댐핑 때문에 목표 위치까지 서서히 따라오므로, 화면이 밝아진 뒤에도 카메라가 이동하는 게 보임(사용자가 지적한 어색함의 원인으로 추정)
+### 조작 내역
+- WarpPortalController에 CinemachineCamera 참조(cmCamera) 추가
+- 플레이어 위치 이동 직후 cmCamera.OnTargetObjectWarped(player.transform, 이동거리)를 호출 — Cinemachine에 '타깃이 순간이동했다'고 알려 댐핑 없이 카메라도 같은 프레임에 즉시 스냅하도록 함(정확히 이런 텔레포트 상황을 위한 공식 API)
+### 검증
+- refresh_unity(compile=force) — 타입 로드로 컴파일 정상 확인
+- 저장 → manage_scene(load) 강제 재로드 → cmCamera 참조 유지 확인
+- run_tests(EditMode) → 128/128 통과 (job 7a78ac1f7ddf44b7b84d627d8053cee9)
+- 재생 모드 실측 시도: 플레이어를 WarpPortal로 이동시켜 워프 발동 → 이전과 동일하게 WarpZone 목적지에 실제 바닥이 없어 플레이어가 낙사 후 스폰 지점으로 리스폰됨을 재확인. 카메라도 리스폰 지점을 다시 쫓아가느라 추가로 움직여서, 카메라 스냅 수정 자체의 효과를 깨끗하게 검증하지 못함(낙사 문제가 검증을 가로막음)
+### 실패와 수정
+- 없음(수정 자체는 정상 적용됐다고 판단하나, 선행 조건인 지형 문제 때문에 최종 확인이 막혀있음)
+### 사람 확인 필요
+- WarpZone 아래 실제 바닥이 있는지 아직 확인을 못 받았습니다. 이게 해결돼야 카메라 스냅 수정도 제대로 눈으로 확인하실 수 있을 것 같습니다

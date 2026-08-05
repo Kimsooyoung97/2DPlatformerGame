@@ -64,6 +64,8 @@ public sealed class EnemyAI : MonoBehaviour
             IgnorePlayerPhysicalCollision(playerGO);
         }
 
+        IgnoreOtherMonstersPhysicalCollision();
+
         selfHealthForXp = GetComponent<NHNDemo.MonsterHealth>();
         if (selfHealthForXp != null)
         {
@@ -92,6 +94,23 @@ public sealed class EnemyAI : MonoBehaviour
         Collider2D playerCollider = playerGO.GetComponent<Collider2D>();
         if (selfCollider != null && playerCollider != null)
             Physics2D.IgnoreCollision(selfCollider, playerCollider, true);
+    }
+
+    // 몬스터끼리도 서로 몸으로 밀거나 막지 않도록 물리 충돌을 무시한다.
+    // EnemyAI를 가진 모든 몬스터(DeathDog/Lich/보스 등 종류 불문)끼리 전부 적용된다.
+    private void IgnoreOtherMonstersPhysicalCollision()
+    {
+        Collider2D selfCollider = GetComponent<Collider2D>();
+        if (selfCollider == null) return;
+
+        EnemyAI[] others = FindObjectsByType<EnemyAI>();
+        foreach (EnemyAI other in others)
+        {
+            if (other == this) continue;
+            Collider2D otherCollider = other.GetComponent<Collider2D>();
+            if (otherCollider != null)
+                Physics2D.IgnoreCollision(selfCollider, otherCollider, true);
+        }
     }
 
     private void RecomputePatrolBounds()

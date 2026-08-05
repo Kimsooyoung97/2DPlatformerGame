@@ -145,5 +145,14 @@ namespace NAN2026.Core
             float dx = attackerX - playerX;
             return facingLeft ? dx <= 0f : dx >= 0f;
         }
+
+        /// 점프존(슈퍼점프) 발사 속도 계산: 정확히 duration초 뒤 (dx, dy)만큼 떨어진
+        /// 지점에 도착하도록 하는 초기 속도. gravity는 양수(중력 가속도 크기).
+        public static (float vx, float vy) LaunchVelocityForTarget(float dx, float dy, float duration, float gravity)
+        {
+            float vx = dx / duration;
+            float vy = (dy + 0.5f * gravity * duration * duration) / duration;
+            return (vx, vy);
+        }
     }
 }

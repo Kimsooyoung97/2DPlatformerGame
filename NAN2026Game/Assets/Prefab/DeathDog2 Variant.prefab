@@ -8,6 +8,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 946586124018522105, guid: 25ab37668c412a441a40028cc08d8847, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 946586124018522108, guid: 25ab37668c412a441a40028cc08d8847, type: 3}
       propertyPath: m_Name
       value: DeathDog2 Variant
@@ -66,9 +70,14 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1216077943389837531, guid: 25ab37668c412a441a40028cc08d8847, type: 3}
       propertyPath: MaxSpeed
-      value: 4
+      value: 3
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    - target: {fileID: 1216077943389837532, guid: 25ab37668c412a441a40028cc08d8847, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 1216077943389837532, guid: 25ab37668c412a441a40028cc08d8847, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:

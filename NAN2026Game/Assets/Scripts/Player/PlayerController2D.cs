@@ -47,6 +47,8 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
     private float dashDir;
     private int airDashesUsed;
     private float landTimer;
+    private bool launching;
+    private float launchEndTime;
     private string currentState;
     public bool IsGrounded { get { return grounded; } }
 
@@ -54,6 +56,23 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
     private float EffectiveParryWindow()
     {
         return config.parryWindow + (progression != null ? progression.ParryDurationBonus : 0f);
+    }
+
+    /// <summary>JumpZoneLauncher가 호출한다. 정확히 duration초 뒤 target에 도착하도록
+    /// 포물선 궤적의 초기 속도를 계산해 물리에 맡긴다(슈퍼점프).</summary>
+    public void LaunchTo(Vector3 target, float duration)
+    {
+        if (duration <= 0f) return;
+        float gravity = -Physics2D.gravity.y * rb.gravityScale;
+        Vector3 delta = target - transform.position;
+        var v = PlayerLocomotionLogic.LaunchVelocityForTarget(delta.x, delta.y, duration, gravity);
+        rb.linearVelocity = new Vector2(v.vx, v.vy);
+        launching = true;
+        launchEndTime = Time.time + duration;
+        dashing = false;
+        attackTimer = 0f;
+        activeAttack = null;
+        queuedAttack = null;
     }
 
     private float EffectiveParryCooldown()
@@ -93,7 +112,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
         // 트리거가 섞여 들어오면 결과 배열이 오염되어(자리 차지) 정작 진짜 지면 히트가
         // 배열에서 밀려날 수 있고, 트리거의 접촉 법선이 옆방향이라 오판의 원인도 됐다.
         groundCastFilter = new ContactFilter2D();
-        groundCastFilter.NoFilter();
+        groundCastFilter = ContactFilter2D.noFilter;
         groundCastFilter.useTriggers = false;
         groundCastFilter.SetLayerMask(LayerMask.GetMask("Ground", "Wall", "Default"));
         groundCastFilter.useLayerMask = true;
@@ -101,15 +120,15 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
         // 벽·바닥·천장(솔리드 지형)은 항상 충돌 유지 — 전체 무시는 벽 관통·중간 착지 사고의 원인이었다.
         // Stage_Platform(타일맵 원웨이)은 PlatformEffector2D가 전담하므로 여기서도 제외한다.
         var found = new System.Collections.Generic.List<Collider2D>();
-        foreach (var tc in FindObjectsByType<UnityEngine.Tilemaps.TilemapCollider2D>(FindObjectsSortMode.None))
+        foreach (var tc in FindObjectsByType<UnityEngine.Tilemaps.TilemapCollider2D>())
         {
             if (tc.gameObject.name.StartsWith("Platform_")) found.Add(tc);
         }
-        foreach (var cc in FindObjectsByType<CompositeCollider2D>(FindObjectsSortMode.None))
+        foreach (var cc in FindObjectsByType<CompositeCollider2D>())
         {
             if (cc.gameObject.name.StartsWith("Platform_")) found.Add(cc);
         }
-        foreach (var bc in FindObjectsByType<BoxCollider2D>(FindObjectsSortMode.None))
+        foreach (var bc in FindObjectsByType<BoxCollider2D>())
         {
             if (bc.gameObject.name.StartsWith("Platform_")) found.Add(bc);
         }
@@ -143,6 +162,11 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
         for (int i = 0; i < hitCount; i++)
         {
             if (castHits[i].collider == null) continue;
+            // Physics2D.IgnoreCollision은 물리 밀림(시뮬레이션)만 막을 뿐 이런 캐스트
+            // 쿼리에는 영향이 없다. 몬스터는 태그/레이어가 일관되지 않을 수 있어
+            // MonsterHealth 보유 여부로 판별해 벽 판정에서 제외한다(몬스터를 밀지도,
+            // 몬스터한테 막히지도 않게).
+            if (castHits[i].collider.GetComponentInParent<NHNDemo.MonsterHealth>() != null) continue;
             // 위/아래 방향에 가까운 법선(바닥·발판 경사면 등)은 벽으로 취급하지 않는다.
             float absNormalX = Mathf.Abs(castHits[i].normal.x);
             if (absNormalX >= config.wallNormalMinX) return true;
@@ -242,6 +266,19 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
 
     private void FixedUpdate()
     {
+        // 점프존 슈퍼점프 비행 중에는 물리 궤적(포물선)에 전부 맡기고 평소 이동/공격
+        // 로직을 건너뛴다. 벽 클램프·중력 오버라이드 등과 충돌하면 목표 지점에
+        // 정확히 도착하지 못할 수 있기 때문이다.
+        if (launching)
+        {
+            if (Time.time >= launchEndTime)
+            {
+                rb.linearVelocity = Vector2.zero;
+                launching = false;
+            }
+            return;
+        }
+
         bool wantIgnore = PlayerLocomotionLogic.ShouldIgnoreGround(rb.linearVelocity.y, config.onewayRiseThreshold);
         if (wantIgnore) SetGroundIgnored(true);
         else if (ignoringGround && !OverlappingGround()) SetGroundIgnored(false);
