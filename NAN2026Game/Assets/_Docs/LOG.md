@@ -3533,3 +3533,17 @@ Warp될 때 화면이 까맣게 fadein 되었다가 워프 완료되면 fadeout�
 해당 없음
 ### 커밋
 해당 없음(무수정)
+
+
+## [수정] SecondScene_1 방 확장 +50u + 리그 정리 + 보스 복원 — 2026-08-06 02:46
+### 프롬프트
+B안 + 50 U 진행
+### 조작 내역
+- 병합 중복 정리: 팀 세트 4개 제거(MainCamera·CinemachineCamera·고장 CameraBoundary 0x0·비활성 Player) — 작동 세트(Main Camera·CM_PlayerCamera·Stage_CameraBounds·활성 Player) 정본화
+- 구조 판독: 실내 x0~34, 우측 통벽 x35~49(15u) → 통벽 관통+실내 패턴(x20 표본 스트립) 복제로 x84까지 연장, 새 캡 x85~87, 배경벽 랜덤 채움, 콜라이더 재생성, confiner 36x14→87x14
+- Princess_Boss 소실 발견(내 정리 이전 시점 부재 실측) → Princess_Boss.prefab 재소환 @ x77 바닥 스냅(새 방 오른쪽 끝)
+- 중도 NRE 1회(경계 참조) → 방어 재실행으로 마감
+### 검증
+- 표본 검증 x60:11·x84:11·캡86:23, 저장 완료. 실주행·보스 동작은 사용자 재생
+### 실패와 수정
+- NRE 1회 / 보스 소실 원인 미상(병합 or 편집 중 유실 추정) — 프리팹 복원으로 해소
