@@ -250,7 +250,7 @@ public sealed class PrincessBossAttackPatterns : MonoBehaviour, IEnemyAttackOver
     {
         if (!qteActive) return;
 
-        float w = 500f, h = 150f;
+        float w = 500f;
         float left = (Screen.width - w) * 0.5f;
         float top = Screen.height * 0.2f;
 

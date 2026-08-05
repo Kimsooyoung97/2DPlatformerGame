@@ -41,7 +41,7 @@ namespace NAN2026
 
         private void Start()
         {
-            var pc = FindFirstObjectByType<PlayerController2D>();
+            var pc = FindAnyObjectByType<PlayerController2D>();
             if (pc != null)
             {
                 player = pc.transform;

@@ -112,7 +112,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
         // 트리거가 섞여 들어오면 결과 배열이 오염되어(자리 차지) 정작 진짜 지면 히트가
         // 배열에서 밀려날 수 있고, 트리거의 접촉 법선이 옆방향이라 오판의 원인도 됐다.
         groundCastFilter = new ContactFilter2D();
-        groundCastFilter.NoFilter();
+        groundCastFilter = ContactFilter2D.noFilter;
         groundCastFilter.useTriggers = false;
         groundCastFilter.SetLayerMask(LayerMask.GetMask("Ground", "Wall", "Default"));
         groundCastFilter.useLayerMask = true;
@@ -120,15 +120,15 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
         // 벽·바닥·천장(솔리드 지형)은 항상 충돌 유지 — 전체 무시는 벽 관통·중간 착지 사고의 원인이었다.
         // Stage_Platform(타일맵 원웨이)은 PlatformEffector2D가 전담하므로 여기서도 제외한다.
         var found = new System.Collections.Generic.List<Collider2D>();
-        foreach (var tc in FindObjectsByType<UnityEngine.Tilemaps.TilemapCollider2D>(FindObjectsSortMode.None))
+        foreach (var tc in FindObjectsByType<UnityEngine.Tilemaps.TilemapCollider2D>())
         {
             if (tc.gameObject.name.StartsWith("Platform_")) found.Add(tc);
         }
-        foreach (var cc in FindObjectsByType<CompositeCollider2D>(FindObjectsSortMode.None))
+        foreach (var cc in FindObjectsByType<CompositeCollider2D>())
         {
             if (cc.gameObject.name.StartsWith("Platform_")) found.Add(cc);
         }
-        foreach (var bc in FindObjectsByType<BoxCollider2D>(FindObjectsSortMode.None))
+        foreach (var bc in FindObjectsByType<BoxCollider2D>())
         {
             if (bc.gameObject.name.StartsWith("Platform_")) found.Add(bc);
         }

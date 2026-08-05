@@ -19,46 +19,47 @@ namespace Assets.PixelFantasy.PixelMonsters.Common.Scripts.ExampleScripts
             _animation = GetComponent<MonsterAnimation>();
         }
 
-        public void Update()
-        {
-            Move();
-            Attack();
+        //    public void Update()
+        //    {
+        //        Move();
+        //        Attack();
 
-            // Play other animations, just for example.
-            if (Input.GetKeyDown(KeyCode.I)) { _animation.SetState(MonsterState.Idle); }
-            if (Input.GetKeyDown(KeyCode.R)) { _animation.SetState(MonsterState.Ready); }
-            if (Input.GetKeyDown(KeyCode.D)) _animation.SetState(MonsterState.Die);
-            if (Input.GetKeyUp(KeyCode.H)) _animation.Hit();
-            if (Input.GetKeyUp(KeyCode.L)) EffectManager.Instance.Blink(_monster);
-        }
+        //        // Play other animations, just for example.
+        //        if (Input.GetKeyDown(KeyCode.I)) { _animation.SetState(MonsterState.Idle); }
+        //        if (Input.GetKeyDown(KeyCode.R)) { _animation.SetState(MonsterState.Ready); }
+        //        if (Input.GetKeyDown(KeyCode.D)) _animation.SetState(MonsterState.Die);
+        //        if (Input.GetKeyUp(KeyCode.H)) _animation.Hit();
+        //        if (Input.GetKeyUp(KeyCode.L)) EffectManager.Instance.Blink(_monster);
+        //    }
 
-        private void Move()
-        {
-            _controller.Input = Vector2.zero;
+        //    private void Move()
+        //    {
+        //        _controller.Input = Vector2.zero;
 
-            if (Input.GetKey(KeyCode.LeftArrow))
-            {
-                _controller.Input.x = -1;
-            }
-            else if (Input.GetKey(KeyCode.RightArrow))
-            {
-                _controller.Input.x = 1;
-            }
+        //        if (Input.GetKey(KeyCode.LeftArrow))
+        //        {
+        //            _controller.Input.x = -1;
+        //        }
+        //        else if (Input.GetKey(KeyCode.RightArrow))
+        //        {
+        //            _controller.Input.x = 1;
+        //        }
 
-            if (Input.GetKey(KeyCode.UpArrow))
-            {
-                _controller.Input.y = 1;
-            }
-            else if (Input.GetKey(KeyCode.DownArrow))
-            {
-                _controller.Input.y = -1;
-            }
-        }
+        //        if (Input.GetKey(KeyCode.UpArrow))
+        //        {
+        //            _controller.Input.y = 1;
+        //        }
+        //        else if (Input.GetKey(KeyCode.DownArrow))
+        //        {
+        //            _controller.Input.y = -1;
+        //        }
+        //    }
 
-        private void Attack()
-        {
-            if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.J)) _animation.Attack();
-            if (Input.GetKeyDown(KeyCode.S)) _animation.Attack2();
-        }
+        //    private void Attack()
+        //    {
+        //        if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.J)) _animation.Attack();
+        //        if (Input.GetKeyDown(KeyCode.S)) _animation.Attack2();
+        //    }
+        //
     }
 }

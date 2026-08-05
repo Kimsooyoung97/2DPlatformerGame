@@ -103,7 +103,7 @@ public sealed class EnemyAI : MonoBehaviour
         Collider2D selfCollider = GetComponent<Collider2D>();
         if (selfCollider == null) return;
 
-        EnemyAI[] others = FindObjectsByType<EnemyAI>(FindObjectsSortMode.None);
+        EnemyAI[] others = FindObjectsByType<EnemyAI>();
         foreach (EnemyAI other in others)
         {
             if (other == this) continue;
