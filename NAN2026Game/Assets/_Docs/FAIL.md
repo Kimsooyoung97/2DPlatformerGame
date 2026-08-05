@@ -82,3 +82,5 @@
 - **방지 규칙**: 지면/충돌 판정용 캐스트는 항상 `ContactFilter2D`를 명시하고 `useTriggers=false`로 트리거를 제외한다. 물리 판정 버그는 가설(코드 리딩)만으로 고치지 말고, 재생 모드에서 실제 캐스트 결과(히트 콜라이더 이름·법선·거리)를 직접 찍어 확정한 뒤 수정한다
 - **재발 사례 (2026-08-03)**: MiddleBossAttackPatterns.DoCharge의 벽 감지 Physics2D.Raycast도 동일한 이유로 Stage_CameraBounds 트리거에 거리 0으로 항상 걸려 돌진이 즉시 끊기는 버그 발생. 몬스터의 이동/충돌 판정 코드를 새로 짤 때마다 이 체크리스트를 먼저 적용할 것
 
+
+- #16 사용자 미저장 타일 편집 소실: OpenScene(Single)·강제 Play 정지가 미저장 편집을 무경고 파괴 → 원인: 열기/정지 전 isDirty 미검사 → 방지: 모든 OpenScene·강제 정지 전 로드된 전 씬 isDirty 검사, dirty면 작업 중단하고 사용자에게 저장 여부 확인. 사용자 편집 세션 중엔 씬 전환 금지
