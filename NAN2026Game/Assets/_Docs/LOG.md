@@ -3006,3 +3006,16 @@ PlayerController2D.TryParry(GameObject attacker)가 IParryReflector 인터페이
 없음
 
 - 추기: 검증이 이중 씬 Find 오염(원본 수치 오독) → 씬 한정 재검증: Ground x-3~203 도형 2, 접지=Stage_Ground @3.0. 토치 17기 Stage_Props 정리. FAIL 교훈: 다중 씬 시 Find 금지, 씬 한정 탐색
+
+
+## [구현] TestScene — 도면·신규 타일셋 기반 신축 — 2026-08-05 20:44
+### 프롬프트
+3번쨰 타일셋을 활용해서 1,2번째 구조를 최대한 구현한 씬을 만들어줘. 이름은 TestScene로 (레이아웃 도면·레퍼런스·타일셋 이미지 3장 첨부)
+### 조작 내역
+- 타일셋 계측(컨테이너): 체커보드가 픽셀 소성 → 회색조 마스킹 CC로 51조각 검출, 건축용 4종 선정(벽·바닥·경사·덩굴)
+- 반입: OneDrive\사진 원본(2816x1536) → Assets/Sprites_AI/Tiles, PPU 80·FullRect·Point. 초기 임포트 2048 클램프로 배율 오산 1회 → 정치 재슬라이스
+- 신축: 도면 1u=20px 번역 — 블록 9(Tiled SR+Box)·경사 2(폴리곤+시각)·덩굴 4·기반 바닥 150u·confiner 153x30·리그/플레이어 복제(SecondScene 읽기 전용). 두 줄 도면은 연속 구간(x0~150)으로 해석 명시
+### 검증
+- 루트 6 | 블록 자식 15 | 접지=A1_Pedestal @1.6 | 원본 씬 무저장
+### 실패와 수정
+- default 리터럴 C#7 비호환 1회 → 구식 초기화 / 임포트 클램프 배율 오염 → 재보정
