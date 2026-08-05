@@ -4272,6 +4272,7 @@ GameObject:
   m_Component:
   - component: {fileID: 452953532}
   - component: {fileID: 452953533}
+  - component: {fileID: 452953534}
   m_Layer: 0
   m_Name: Portal
   m_TagString: Untagged
@@ -4354,6 +4355,22 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!111 &452953534
+Animation:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 452953531}
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Animation: {fileID: 7400000, guid: cdb36cd9024d2944b830625c58c556aa, type: 2}
+  m_Animations: []
+  m_WrapMode: 0
+  m_PlayAutomatically: 1
+  m_AnimatePhysics: 0
+  m_UpdateMode: 0
+  m_CullingType: 0
 --- !u!1 &463938671
 GameObject:
   m_ObjectHideFlags: 0
@@ -9228,6 +9245,7 @@ GameObject:
   - component: {fileID: 912540880}
   - component: {fileID: 912540879}
   - component: {fileID: 912540881}
+  - component: {fileID: 912540882}
   m_Layer: 0
   m_Name: WarpPortal
   m_TagString: Untagged
@@ -9361,9 +9379,26 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WarpPortalController
   warpZone: {fileID: 418135847}
   confiner: {fileID: 2125927616}
+  cmCamera: {fileID: 2125927618}
   newCameraBounds: {fileID: 463938672}
   fadeInDuration: 0.5
-  fadeOutDuration: 5
+  fadeOutDuration: 0.5
+--- !u!111 &912540882
+Animation:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 912540877}
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Animation: {fileID: 7400000, guid: cdb36cd9024d2944b830625c58c556aa, type: 2}
+  m_Animations: []
+  m_WrapMode: 0
+  m_PlayAutomatically: 1
+  m_AnimatePhysics: 0
+  m_UpdateMode: 0
+  m_CullingType: 0
 --- !u!1 &928358496
 GameObject:
   m_ObjectHideFlags: 0
