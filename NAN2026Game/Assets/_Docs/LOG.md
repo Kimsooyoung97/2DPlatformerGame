@@ -3207,3 +3207,18 @@ WarpPortal은 WarpPoint의 자식(SpriteRenderer+CapsuleCollider2D, isTrigger=fa
 - 없음(워프 컴포넌트 자체는 정상, 목적지 지형 정합성은 별도 확인 필요)
 ### 사람 확인 필요
 - WarpZone(106.54, 17.08) 아래에 실제 밟을 수 있는 바닥이 있는지 확인 부탁드립니다. 지형이 계속 바뀌고 있는 것 같아 제가 임의로 좌표를 조정하지 않았습니다
+
+## [수정] 워프에 화면 페이드인/아웃 연출 추가 — 2026-08-05
+### 프롬프트
+Warp될 때 화면이 까맣게 fadein 되었다가 워프 완료되면 fadeout되게 해줘
+### 조사
+기존 IntroSequencer는 Light2D 밝기로 암전을 표현하는 방식이라 범용 화면 페이드로 재사용 불가. 프로젝트 전반에 범용 화면 페이드 유틸리티가 없어 신규 제작
+### 조작 내역
+- ScreenFader.cs 신규: OnGUI로 화면 전체를 덮는 검은 텍스처를 그리는 싱글턴(Canvas 불필요, 필요 시 자동 생성 후 DontDestroyOnLoad). FadeTo(targetAlpha, duration) 코루틴 제공
+- WarpPortalController를 코루틴 기반으로 재구성: 트리거 진입 → ScreenFader.FadeTo(1, fadeInDuration)로 완전히 검게 → (화면이 검은 상태에서) 플레이어 위치 이동 + 카메라 경계 교체 → ScreenFader.FadeTo(0, fadeOutDuration)로 다시 보이게. fadeInDuration/fadeOutDuration 각각 0.4초, 워프 중 재진입 방지용 warping 플래그 추가
+### 검증
+- refresh_unity(compile=force) — 타입 로드로 컴파일 정상 확인(무관한 NRE 1건은 최근 턴들과 동일 패턴)
+- 저장 → manage_scene(load) 강제 재로드 → run_tests(EditMode) → 128/128 통과 (job 35df31c35cea42569c9407e97b9e6f9e)
+- 재생 모드 실측: 플레이어를 WarpPortal로 이동시켜 트리거 발동 → ScreenFader 오브젝트 자동 생성 확인, 시퀀스 완료 후 alpha=0(완전히 밝음)·warping=False로 정상 정리됨을 확인
+### 실패와 수정
+- 없음
