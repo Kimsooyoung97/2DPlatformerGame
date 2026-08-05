@@ -3368,13 +3368,90 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8000705773982908398, guid: a9226b92dc7de2a4e86e08088f72259a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 825781218}
+    - targetCorrespondingSourceObject: {fileID: 8000705773982908398, guid: a9226b92dc7de2a4e86e08088f72259a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 825781217}
+    - targetCorrespondingSourceObject: {fileID: 8000705773982908398, guid: a9226b92dc7de2a4e86e08088f72259a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 825781216}
+    - targetCorrespondingSourceObject: {fileID: 8000705773982908398, guid: a9226b92dc7de2a4e86e08088f72259a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 825781215}
   m_SourcePrefab: {fileID: 100100000, guid: a9226b92dc7de2a4e86e08088f72259a, type: 3}
 --- !u!4 &825781213 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7124248982103812794, guid: a9226b92dc7de2a4e86e08088f72259a, type: 3}
   m_PrefabInstance: {fileID: 825781212}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &825781214 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8000705773982908398, guid: a9226b92dc7de2a4e86e08088f72259a, type: 3}
+  m_PrefabInstance: {fileID: 825781212}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &825781215
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 825781214}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 249aede296446b64b845aee5345d0a08, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LichAttackPattern
+  config: {fileID: 11400000, guid: e957e1439a3d52a4ea1b6c4692af4f22, type: 2}
+  orbSprite: {fileID: 3648656473015033539, guid: beac4f98558ec68428994f43449e0480, type: 3}
+  orbSortingOrder: 20
+--- !u!114 &825781216
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 825781214}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c60cd89d932b4440b71638c25a4f19b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WorldHealthBar
+  config: {fileID: 11400000, guid: 48a6ab0e3edcda144a2d2e3c0019a9c1, type: 2}
+  target: {fileID: 825781218}
+--- !u!114 &825781217
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 825781214}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9fddf96ebd36b9f4383d1b9cea5838ad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyAI
+  config: {fileID: 11400000, guid: 48a6ab0e3edcda144a2d2e3c0019a9c1, type: 2}
+  patrolPointA: {fileID: 0}
+  patrolPointB: {fileID: 0}
+  usePatrol: 1
+  playerTag: Player
+--- !u!114 &825781218
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 825781214}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632dc363094c40f43889a661d45dbedd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NHNDemo.MonsterHealth
+  maxHealth: 4
+  knockbackDistance: 0.12
 --- !u!1 &871289138
 GameObject:
   m_ObjectHideFlags: 0
@@ -39402,13 +39479,90 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4541141169256728734, guid: 19621c3739a5aeb4888afe115b19b479, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 977366748}
+    - targetCorrespondingSourceObject: {fileID: 4541141169256728734, guid: 19621c3739a5aeb4888afe115b19b479, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 977366747}
+    - targetCorrespondingSourceObject: {fileID: 4541141169256728734, guid: 19621c3739a5aeb4888afe115b19b479, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 977366746}
+    - targetCorrespondingSourceObject: {fileID: 4541141169256728734, guid: 19621c3739a5aeb4888afe115b19b479, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 977366745}
   m_SourcePrefab: {fileID: 100100000, guid: 19621c3739a5aeb4888afe115b19b479, type: 3}
 --- !u!4 &977366743 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3662274093201595850, guid: 19621c3739a5aeb4888afe115b19b479, type: 3}
   m_PrefabInstance: {fileID: 977366742}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &977366744 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4541141169256728734, guid: 19621c3739a5aeb4888afe115b19b479, type: 3}
+  m_PrefabInstance: {fileID: 977366742}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &977366745
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 977366744}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 249aede296446b64b845aee5345d0a08, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LichAttackPattern
+  config: {fileID: 11400000, guid: e957e1439a3d52a4ea1b6c4692af4f22, type: 2}
+  orbSprite: {fileID: 3648656473015033539, guid: beac4f98558ec68428994f43449e0480, type: 3}
+  orbSortingOrder: 20
+--- !u!114 &977366746
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 977366744}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c60cd89d932b4440b71638c25a4f19b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WorldHealthBar
+  config: {fileID: 11400000, guid: 48a6ab0e3edcda144a2d2e3c0019a9c1, type: 2}
+  target: {fileID: 977366748}
+--- !u!114 &977366747
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 977366744}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9fddf96ebd36b9f4383d1b9cea5838ad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyAI
+  config: {fileID: 11400000, guid: 48a6ab0e3edcda144a2d2e3c0019a9c1, type: 2}
+  patrolPointA: {fileID: 0}
+  patrolPointB: {fileID: 0}
+  usePatrol: 1
+  playerTag: Player
+--- !u!114 &977366748
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 977366744}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632dc363094c40f43889a661d45dbedd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NHNDemo.MonsterHealth
+  maxHealth: 4
+  knockbackDistance: 0.12
 --- !u!1 &1004456760
 GameObject:
   m_ObjectHideFlags: 0
@@ -39652,13 +39806,90 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 299659562362870732, guid: fac87ab76c0a1e341aefefe662d17c7b, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1039911038}
+    - targetCorrespondingSourceObject: {fileID: 299659562362870732, guid: fac87ab76c0a1e341aefefe662d17c7b, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1039911037}
+    - targetCorrespondingSourceObject: {fileID: 299659562362870732, guid: fac87ab76c0a1e341aefefe662d17c7b, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1039911036}
+    - targetCorrespondingSourceObject: {fileID: 299659562362870732, guid: fac87ab76c0a1e341aefefe662d17c7b, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1039911035}
   m_SourcePrefab: {fileID: 100100000, guid: fac87ab76c0a1e341aefefe662d17c7b, type: 3}
 --- !u!4 &1039911033 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 720232891931856536, guid: fac87ab76c0a1e341aefefe662d17c7b, type: 3}
   m_PrefabInstance: {fileID: 1039911032}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1039911034 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 299659562362870732, guid: fac87ab76c0a1e341aefefe662d17c7b, type: 3}
+  m_PrefabInstance: {fileID: 1039911032}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1039911035
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1039911034}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 249aede296446b64b845aee5345d0a08, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LichAttackPattern
+  config: {fileID: 11400000, guid: e957e1439a3d52a4ea1b6c4692af4f22, type: 2}
+  orbSprite: {fileID: 3648656473015033539, guid: beac4f98558ec68428994f43449e0480, type: 3}
+  orbSortingOrder: 20
+--- !u!114 &1039911036
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1039911034}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c60cd89d932b4440b71638c25a4f19b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WorldHealthBar
+  config: {fileID: 11400000, guid: 48a6ab0e3edcda144a2d2e3c0019a9c1, type: 2}
+  target: {fileID: 1039911038}
+--- !u!114 &1039911037
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1039911034}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9fddf96ebd36b9f4383d1b9cea5838ad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyAI
+  config: {fileID: 11400000, guid: 48a6ab0e3edcda144a2d2e3c0019a9c1, type: 2}
+  patrolPointA: {fileID: 0}
+  patrolPointB: {fileID: 0}
+  usePatrol: 1
+  playerTag: Player
+--- !u!114 &1039911038
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1039911034}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632dc363094c40f43889a661d45dbedd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NHNDemo.MonsterHealth
+  maxHealth: 4
+  knockbackDistance: 0.12
 --- !u!1 &1040141951
 GameObject:
   m_ObjectHideFlags: 0

@@ -3114,3 +3114,24 @@ ThirdScenetmp에 ArriveZone1/2/3(pos 81.14,15.03 / 136.38,15.00 / 145.11,27.16)�
 ### 사람 확인 필요
 - JumpZone2/JumpZone3은 아직 씬에 없습니다 — 필요한 위치에 배치하고 BoxCollider2D(트리거)+JumpZoneLauncher(config=JumpZoneConfig.asset)만 붙이면 이름 매칭으로 자동으로 ArriveZone2/3에 연결됩니다
 - flightDuration(현재 1초)이 체감상 적절한지, 발사 방향키가 위쪽(점프키)으로 고정된 게 맞는지 확인 부탁드립니다
+
+## [구현] Lich1~3을 원거리 몬스터로 설정 (사거리 5, 구체 1개 발사) — 2026-08-05
+### 프롬프트
+Lich1~3 도 DeathDog과 같이 적 몬스터로 설정할 것인데 이 유닛은 사거리 5에서 플레이어에게 구체 1개를 발사하는 공격을 하게끔 해줘
+### 조사
+Lich1 (1)/Lich2/Lich3 발견 — DeathDog(Monster/MonsterController2D/MonsterAnimation/MonsterHealth/EnemyAI/WorldHealthBar 완비)과 달리 MonsterHealth/EnemyAI/WorldHealthBar가 없는 상태(Monster/MonsterController2D/MonsterAnimation/Collider2D/Rigidbody2D는 이미 있어 Princess보스 때 겪은 추상 Collider2D 이슈는 재발 안 함). Monster.Animator/Body 필드도 이미 정상 연결되어 있었음
+### 조작 내역
+- LichAttackConfig(SO) 신규: attackRange=5, windup=0.4, orbSpeed=6, orbDamage=1, minCooldown~maxCooldown=1.5~2.5
+- LichAIConfig(EnemyAIConfig 인스턴스) 신규: aggroRange=8, attackRange=5(패턴 사거리와 동일하게 맞춤), chaseStopDistance=12, maxHealth=3, xpReward=6, usePatrol=true(DeathDog 참고)
+- LichAttackPattern.cs 신규(IEnemyAttackOverride): TryStartAttack에서 거리가 config.attackRange(5) 이내일 때만 발동(MiddleBoss/Princess와 달리 사거리 게이팅을 명시적으로 유지 — '사거리 5에서'라는 요청을 그대로 반영). 기존 SpikeProjectile 재사용해 구체 1개를 플레이어 방향으로 발사, 스프라이트는 기존 Assets/Sprites_AI/Effects/BossOrb.png 재사용
+- Lich1 (1)/Lich2/Lich3 전부에 MonsterHealth/EnemyAI(config=LichAIConfig)/WorldHealthBar/LichAttackPattern(config=LichAttackConfig, orbSprite=BossOrb) 부착
+### 검증
+- refresh_unity(compile=force) — 1차 시도에서 Animator.Attack() 오호출(존재하지 않는 메서드) 컴파일 에러 발견, MonsterAnimation.Attack()으로 수정 후 재확인 → 0건
+- 저장 → manage_scene(load) 강제 재로드 → 3개 전부 config/orbSprite 연결 유지 확인
+- run_tests(EditMode) → 128/128 통과 (job 47ecfaca747a45748c567d7c07c2e6ff)
+- 재생 모드 실측: 사거리 8유닛에서 TryStartAttack=False, 4유닛에서 True로 사거리 게이팅 정확히 동작 확인. 근접(1유닛) 상황에서 실제 발동 후 플레이어 HP가 5→1로 감소해 구체가 실제로 명중·데미지를 입힘을 확인
+### 실패와 수정
+- LichAttackPattern 첫 작성 시 UnityEngine.Animator에 없는 Attack() 메서드를 호출해 컴파일 에러 → MonsterAnimation(PixelFantasy) 컴포넌트로 교체
+- 재생 세션이 오래(196초) 열려있는 상태에서 오브 위치를 지연 확인하니 y=-28570 같은 비정상적으로 먼 위치가 관측됨 — 실시간으로 계속 시뮬레이션되는 플레이 세션에서 플레이어 없이 빈 하늘로 날아간 오브가 lifeTime(5초) 동안 실제 등속 이동한 결과로 판단(테스트 아티팩트, 코드 버그 아님). 근접 상황 즉시 확인으로 실제 명중·데미지를 재확인해 문제 없음을 최종 검증
+### 눈으로 확인 필요
+- 실제 플레이에서 사거리 5 진입 시 구체가 자연스럽게 발사되는지, 쿨다운(1.5~2.5초) 체감이 적절한지
