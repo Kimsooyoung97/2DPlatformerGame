@@ -61,7 +61,7 @@ namespace NAN2026
                 if (transform.position.y < 2.6f || Vector3.Distance(transform.position, home) > 40f) Break(false);
                 return;
             }
-            float dist = Vector2.Distance(transform.position, player.position);
+            float dist = Mathf.Abs(transform.position.x - player.position.x); // 천장 트랩: 수평거리 기준
             int p = SpikeBallLogic.Phase(dist, visionR, config.warnMultiplier, config.launchMultiplier);
             if (p >= 2 && phase != 2)
             {
