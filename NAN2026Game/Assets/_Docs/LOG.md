@@ -3172,3 +3172,15 @@ PF Dungeon Props - Door Wood 01 앞으로 player가 지나갈때 문이 캐릭�
 - 저장 True. 겹침 시각은 사용자 재생
 ### 실패와 수정
 없음
+
+
+## [수정] Door Frame 가림 재수리 — 본체 기준 전수 실측 — 2026-08-05 23:19
+### 프롬프트
+PF Dungeon Props - Door Wood 01 의 Frame이 캐릭터보다 앞에 있는거 같아
+### 조작 내역
+- 플레이어 SR 전수: Player:Default/30 (최저 30) / 문: SortingGroup 없음
+- 적용: Door=28 Frame=29 Inside=27 Shadow=26 — 본체 최저 순번 아래, 내부 겹층(그림자→안쪽→문짝→프레임) 보존
+### 검증
+- 저장 True. 시각은 사용자 재생
+### 실패와 수정
+- 1차 수리가 첫 SR(30)만 보고 본체를 놓침 → 전수 실측 정정
