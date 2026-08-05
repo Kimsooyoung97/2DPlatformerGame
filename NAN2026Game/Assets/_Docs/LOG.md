@@ -3207,3 +3207,15 @@ PF Dungeon Props - Door Wood 01 의 Frame이 캐릭터보다 앞에 있는거 �
 - 저장 True
 ### 실패와 수정
 - 정적/안전지대 순번 3회 무효 — 동적 정렬엔 그룹화가 정답
+
+
+## [구현] 귀환 포탈 + 어둠 원복 — 2026-08-05 23:30
+### 프롬프트
+194.4, 1.9 포탈(윗키→SecondScene) + 그리고 이제 다시 화면 어둡게 해주고 Torch만 밝게해줘
+### 조작 내역
+- 검증 포탈 복제 @ (194.4, 1.9), 목적지 필드: Portal.nextSceneName='SecondScene'→'SecondScene' PortalUpKey.nextSceneName='SecondScene_1'→'SecondScene', PortalGlow(보라 2.4)
+- 전역 1.0→0.2 원복 (토치 17기 광원·플레이어 시야광 유지). 빌드 목록: SecondScene=True extra=False (수정 금지라 보고만)
+### 검증
+- 저장 True. 전환·명암은 사용자 재생
+### 실패와 수정
+없음
