@@ -20,7 +20,7 @@ namespace NAN2026
             if (config == null || source == null || rb == null) return;
 
             bool walking = Mathf.Abs(rb.linearVelocity.x) > config.walkVelThreshold
-                        && Mathf.Abs(rb.linearVelocity.y) < 0.05f;
+                        && Mathf.Abs(rb.linearVelocity.y) < Mathf.Abs(rb.linearVelocity.x) * 0.8f + 0.1f; // 경사 보행 허용
             if (walking)
             {
                 stepT += Time.deltaTime;

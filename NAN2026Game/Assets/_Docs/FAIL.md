@@ -83,6 +83,8 @@
 - **재발 사례 (2026-08-03)**: MiddleBossAttackPatterns.DoCharge의 벽 감지 Physics2D.Raycast도 동일한 이유로 Stage_CameraBounds 트리거에 거리 0으로 항상 걸려 돌진이 즉시 끊기는 버그 발생. 몬스터의 이동/충돌 판정 코드를 새로 짤 때마다 이 체크리스트를 먼저 적용할 것
 
 
+- #16 사용자 미저장 타일 편집 소실: OpenScene(Single)·강제 Play 정지가 미저장 편집을 무경고 파괴 → 원인: 열기/정지 전 isDirty 미검사 → 방지: 모든 OpenScene·강제 정지 전 로드된 전 씬 isDirty 검사, dirty면 작업 중단하고 사용자에게 저장 여부 확인. 사용자 편집 세션 중엔 씬 전환 금지
+
 ## 16. Physics2D.IgnoreCollision은 물리 밀림만 막지, 캐스트/레이캐스트 쿼리에는 영향 없음
 - **증상**: 몬스터-플레이어 IgnoreCollision을 확인하면 True인데도 실제 플레이에서는 여전히 '막힌다'고 느껴짐
 - **원인**: PlayerController2D의 벽 감지(WallInDirection, Collider2D.Cast 기반)는 IgnoreCollision 설정과 무관하게 동작한다 — IgnoreCollision은 물리 시뮬레이션의 충돌 반응(밀림)만 억제할 뿐, Cast/Raycast 같은 쿼리 API의 히트 결과에는 전혀 영향을 주지 않는다. 즉 두 콜라이더가 서로 안 밀려도 캐스트로는 여전히 '보인다'
