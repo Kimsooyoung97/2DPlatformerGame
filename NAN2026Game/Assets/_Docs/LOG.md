@@ -3184,3 +3184,15 @@ PF Dungeon Props - Door Wood 01 의 Frame이 캐릭터보다 앞에 있는거 �
 - 저장 True. 시각은 사용자 재생
 ### 실패와 수정
 - 1차 수리가 첫 SR(30)만 보고 본체를 놓침 → 전수 실측 정정
+
+
+## [수정] Door 최종 — 동적 정렬 안전지대 -700 — 2026-08-05 23:21
+### 프롬프트
+여전히 뒤에 캐릭터가 보인다 (스크린샷: 프레임이 캐릭터 가림)
+### 조작 내역
+- 확진: 에디터 29<30인데 가림 = 재생 중 플레이어 순번 동적 변경. 플레이어 컴포넌트 채증: Transform SpriteRenderer Animator Rigidbody2D BoxCollider2D PlayerController2D PlayerHealth PlayerProgression PlayerSoundPlayer AudioSource AudioSource
+- 문 1개 전체 -703~-700 이전(겹층 보존) — 동적 범위 아래·벽(-1000) 위 안전지대: PF Dungeon Props - Door Wood 01@x193
+### 검증
+- 저장 True. 최종 시각은 사용자 재생
+### 실패와 수정
+- 정적 순번 접근 2회 실패 → 동적 정렬 대응으로 전환
