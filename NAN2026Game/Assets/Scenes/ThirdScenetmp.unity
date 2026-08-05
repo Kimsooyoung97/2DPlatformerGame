@@ -9735,6 +9735,7 @@ GameObject:
   - component: {fileID: 912540878}
   - component: {fileID: 912540880}
   - component: {fileID: 912540879}
+  - component: {fileID: 912540881}
   m_Layer: 0
   m_Name: WarpPortal
   m_TagString: Untagged
@@ -9854,6 +9855,21 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &912540881
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 912540877}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 08c846c54b269494b8cd71fc4cd03657, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WarpPortalController
+  warpZone: {fileID: 418135847}
+  confiner: {fileID: 2125927616}
+  newCameraBounds: {fileID: 463938672}
 --- !u!1 &928358496
 GameObject:
   m_ObjectHideFlags: 0

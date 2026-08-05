@@ -3187,3 +3187,23 @@ Physics2D.GetIgnoreCollision으로 재확인해도 씬의 EnemyAI 17개 전부 P
 - 재생 모드 실측: 플레이어를 Lich2 바로 옆(거의 겹치게)에 놓고 WallInDirection(Vector2.right)을 리플렉션으로 직접 호출 → False(더 이상 몬스터를 벽으로 안 잡음) 확인. 임시 BoxCollider2D를 벽처럼 놓고 동일하게 테스트 → True(진짜 벽은 여전히 정상 감지) 확인 — 몬스터만 정확히 제외됨을 검증
 ### 실패와 수정
 - 지난 두 턴 동안 Physics2D.IgnoreCollision 값만 확인하고 '이미 정상'이라고 결론 냈던 것이 실수 — IgnoreCollision은 물리 밀림만 담당하고, 이동을 막는 실제 원인은 플레이어 자신의 벽 감지 캐스트 쿼리였음. 앞으로 '막힌다/밀린다' 계열 버그는 IgnoreCollision만 보지 말고 이동 로직의 캐스트/레이캐스트 쿼리도 함께 점검할 것
+
+## [구현] WarpPortal → WarpZone 이동 + 카메라 경계 전환 — 2026-08-05
+### 프롬프트
+현재 WarpPoint의 WarpPortal에 Player가 닿으면 WarpZone으로 플레이어가 이동되며 CM_PlayerCamera의 BoundingShape2D를 SecondCameraBounds로 바꿔줘
+### 조사
+WarpPortal은 WarpPoint의 자식(SpriteRenderer+CapsuleCollider2D, isTrigger=false였음). WarpZone은 순수 위치 마커. SecondCameraBounds는 PolygonCollider2D. CinemachineConfiner2D.BoundingShape2D는 public 필드(Collider2D 타입), 변경 후 InvalidateBoundingShapeCache() 호출 필요함을 리플렉션으로 확인
+### 조작 내역
+- WarpPortalController.cs 신규: OnTriggerEnter2D로 플레이어 감지 시 transform.position을 warpZone.position으로 이동 + rb 속도 초기화, confiner.BoundingShape2D를 newCameraBounds로 교체 후 InvalidateBoundingShapeCache() 호출. Awake에서 자기 콜라이더를 isTrigger=true로 강제 설정
+- WarpPortal에 부착, warpZone=WarpZone, confiner=CM_PlayerCamera의 CinemachineConfiner2D, newCameraBounds=SecondCameraBounds의 PolygonCollider2D로 연결
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- 저장 → manage_scene(load) 강제 재로드 → 참조 3개 전부 유지 확인
+- run_tests(EditMode) → 128/128 통과 (job 6b6255f6744d4f15b12abd66452cbe46)
+- 재생 모드 실측: 플레이어를 WarpPortal 위치로 이동시켜 트리거 발동 확인 → confiner.BoundingShape2D가 FirstCameraBounds에서 SecondCameraBounds로 정확히 전환됨을 확인. 위치 이동 로직도 직접 재현해 같은 호출 안에서는 정확히 WarpZone(106.54,17.08)로 이동함을 확인
+### 발견한 문제 — 코드 아님, 지형 배치 이슈로 추정
+- 워프 직후 잠시 지나면 플레이어가 원래 스폰 근처((-29.48, 4.01))로 되돌아가고 체력은 5/5 그대로 — 낙사 후 리스폰되는 패턴과 일치. WarpZone(106.54,17.08) 정확한 지점엔 겹치는 콜라이더가 없어(허공) 아래로 떨어지는 것으로 추정. 최근 세션 중 지형(Stage_Ground)이 사용자에 의해 재구성되고 있는 것으로 보여(이전 턴에서 보고한 미해결 사항과 동일 맥락), WarpZone 좌표가 새 지형과 안 맞을 가능성이 높음. 이번 워프 기능 자체의 구현·배선은 정상이라고 판단
+### 실패와 수정
+- 없음(워프 컴포넌트 자체는 정상, 목적지 지형 정합성은 별도 확인 필요)
+### 사람 확인 필요
+- WarpZone(106.54, 17.08) 아래에 실제 밟을 수 있는 바닥이 있는지 확인 부탁드립니다. 지형이 계속 바뀌고 있는 것 같아 제가 임의로 좌표를 조정하지 않았습니다
