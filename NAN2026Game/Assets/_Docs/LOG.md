@@ -3135,3 +3135,17 @@ Lich1 (1)/Lich2/Lich3 발견 — DeathDog(Monster/MonsterController2D/MonsterAni
 - 재생 세션이 오래(196초) 열려있는 상태에서 오브 위치를 지연 확인하니 y=-28570 같은 비정상적으로 먼 위치가 관측됨 — 실시간으로 계속 시뮬레이션되는 플레이 세션에서 플레이어 없이 빈 하늘로 날아간 오브가 lifeTime(5초) 동안 실제 등속 이동한 결과로 판단(테스트 아티팩트, 코드 버그 아님). 근접 상황 즉시 확인으로 실제 명중·데미지를 재확인해 문제 없음을 최종 검증
 ### 눈으로 확인 필요
 - 실제 플레이에서 사거리 5 진입 시 구체가 자연스럽게 발사되는지, 쿨다운(1.5~2.5초) 체감이 적절한지
+
+## [수정] Lich 체력바가 몸 중간에 뜨던 문제 수정 — 2026-08-05
+### 프롬프트
+DeathDog는 체력바가 정상적으로 오브젝트 위쪽에 출력되는데 Lich는 몸 중간에 출력되는 문제고쳐줘
+### 조사
+WorldHealthBar는 config.healthBarOffset(로컬 좌표)만큼 부모(몬스터) 위에 체력바를 배치한다. DeathDogAIConfig는 healthBarOffset=(0,2.4,0)로 직접 커스텀되어 있었는데, LichAIConfig는 새로 만들 때 이 필드를 안 건드려서 클래스 기본값 (0,1.6,0) 그대로였음. 두 몬스터의 실제 스프라이트(Body) 크기를 비교해보니 완전히 동일(Extents 1.60,1.60) — 즉 Lich도 DeathDog와 같은 오프셋(2.4)이 필요한데 1.6(스프라이트 중심 부근)에 머물러 있어 몸 중간에 뜨고 있었음
+### 조작 내역
+- LichAIConfig.asset의 healthBarOffset을 (0, 1.6, 0) → (0, 2.4, 0)으로 변경(DeathDogAIConfig와 동일). 코드/씬 변경 없음 — Config 에셋 값만 수정
+### 검증
+- Config 에셋 값 변경이라 컴파일 대상 아님
+- run_tests(EditMode) → 128/128 통과 (job 1cf556eba58a4b9c97920c0d1dd92f0b, 이번 변경과 무관, 회귀 없음 확인용)
+- 재생 모드 실측: Lich2의 HealthBar localPosition이 (0, 2.40, 0)으로 DeathDog와 동일하게 반영됨을 확인(WorldHealthBar가 참조로 같은 config 에셋을 보고 있어 별도 씬 수정 없이 3개 Lich 전부에 자동 반영됨)
+### 실패와 수정
+- 없음
