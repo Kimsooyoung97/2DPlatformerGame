@@ -3173,3 +3173,17 @@ EnemyAI.Awake()는 기존에 '몬스터-플레이어' 충돌만 무시했고, '�
 - 재생 모드 실측: Lich2↔DeathDog1, Lich2↔DeathDog2, DeathDog1↔DeathDog2 세 조합 전부 IgnoreCollision=True 확인(같은 종류끼리도 자동으로 적용됨을 함께 확인)
 ### 실패와 수정
 - 없음
+
+## [수정] 플레이어 벽 감지가 몬스터를 벽으로 오판하던 진짜 원인 수정 — 2026-08-05
+### 프롬프트
+모든 몬스터가 막히고있다
+### 조사
+Physics2D.GetIgnoreCollision으로 재확인해도 씬의 EnemyAI 17개 전부 Player와 IgnoreCollision=True — 즉 '물리적으로 밀리는' 문제는 처음부터 없었음. 진짜 원인은 별개 시스템: PlayerController2D.WallInDirection()이 이동 방향에 벽이 있으면 속도를 0으로 자르는 로직인데, 이 캐스트 쿼리는 트리거만 제외할 뿐 몬스터의 солид 콜라이더는 그대로 '벽'으로 잡고 있었음. Physics2D.IgnoreCollision은 물리 시뮬레이션(밀림 반응)만 막을 뿐 Collider2D.Cast 같은 쿼리 결과에는 전혀 영향을 주지 않는다는 걸 놓치고 있었음 — 그래서 몬스터에 안 밀리는데도(물리적으로) 이동 자체가 막혀서(캐스트 쿼리 때문에) '막힌다'고 느껴졌던 것
+### 조작 내역
+- PlayerController2D.WallInDirection()에서, 캐스트로 잡힌 콜라이더가 NHNDemo.MonsterHealth를 가지고 있으면(부모 포함 GetComponentInParent) 벽 판정에서 제외하도록 continue 추가. 몬스터는 태그가 전부 Untagged라 태그 기반 필터링 대신 컴포넌트 기반으로 판별(레이어·태그 설정에 무관하게 항상 정확)
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- 저장 → manage_scene(load) 강제 재로드 → run_tests(EditMode) → 128/128 통과 (job 2017634ff5dd4de18f176d2211082d19)
+- 재생 모드 실측: 플레이어를 Lich2 바로 옆(거의 겹치게)에 놓고 WallInDirection(Vector2.right)을 리플렉션으로 직접 호출 → False(더 이상 몬스터를 벽으로 안 잡음) 확인. 임시 BoxCollider2D를 벽처럼 놓고 동일하게 테스트 → True(진짜 벽은 여전히 정상 감지) 확인 — 몬스터만 정확히 제외됨을 검증
+### 실패와 수정
+- 지난 두 턴 동안 Physics2D.IgnoreCollision 값만 확인하고 '이미 정상'이라고 결론 냈던 것이 실수 — IgnoreCollision은 물리 밀림만 담당하고, 이동을 막는 실제 원인은 플레이어 자신의 벽 감지 캐스트 쿼리였음. 앞으로 '막힌다/밀린다' 계열 버그는 IgnoreCollision만 보지 말고 이동 로직의 캐스트/레이캐스트 쿼리도 함께 점검할 것

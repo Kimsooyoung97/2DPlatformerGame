@@ -162,6 +162,11 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
         for (int i = 0; i < hitCount; i++)
         {
             if (castHits[i].collider == null) continue;
+            // Physics2D.IgnoreCollision은 물리 밀림(시뮬레이션)만 막을 뿐 이런 캐스트
+            // 쿼리에는 영향이 없다. 몬스터는 태그/레이어가 일관되지 않을 수 있어
+            // MonsterHealth 보유 여부로 판별해 벽 판정에서 제외한다(몬스터를 밀지도,
+            // 몬스터한테 막히지도 않게).
+            if (castHits[i].collider.GetComponentInParent<NHNDemo.MonsterHealth>() != null) continue;
             // 위/아래 방향에 가까운 법선(바닥·발판 경사면 등)은 벽으로 취급하지 않는다.
             float absNormalX = Mathf.Abs(castHits[i].normal.x);
             if (absNormalX >= config.wallNormalMinX) return true;

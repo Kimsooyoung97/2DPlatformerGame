@@ -82,3 +82,8 @@
 - **방지 규칙**: 지면/충돌 판정용 캐스트는 항상 `ContactFilter2D`를 명시하고 `useTriggers=false`로 트리거를 제외한다. 물리 판정 버그는 가설(코드 리딩)만으로 고치지 말고, 재생 모드에서 실제 캐스트 결과(히트 콜라이더 이름·법선·거리)를 직접 찍어 확정한 뒤 수정한다
 - **재발 사례 (2026-08-03)**: MiddleBossAttackPatterns.DoCharge의 벽 감지 Physics2D.Raycast도 동일한 이유로 Stage_CameraBounds 트리거에 거리 0으로 항상 걸려 돌진이 즉시 끊기는 버그 발생. 몬스터의 이동/충돌 판정 코드를 새로 짤 때마다 이 체크리스트를 먼저 적용할 것
 
+
+## 16. Physics2D.IgnoreCollision은 물리 밀림만 막지, 캐스트/레이캐스트 쿼리에는 영향 없음
+- **증상**: 몬스터-플레이어 IgnoreCollision을 확인하면 True인데도 실제 플레이에서는 여전히 '막힌다'고 느껴짐
+- **원인**: PlayerController2D의 벽 감지(WallInDirection, Collider2D.Cast 기반)는 IgnoreCollision 설정과 무관하게 동작한다 — IgnoreCollision은 물리 시뮬레이션의 충돌 반응(밀림)만 억제할 뿐, Cast/Raycast 같은 쿼리 API의 히트 결과에는 전혀 영향을 주지 않는다. 즉 두 콜라이더가 서로 안 밀려도 캐스트로는 여전히 '보인다'
+- **방지 규칙**: '몬스터/오브젝트를 안 막히게 해달라'는 요청은 IgnoreCollision 확인만으로 끝내지 말고, 이동을 제어하는 캐스트/레이캐스트 기반 로직(벽 감지, 지면 판정 등)에서도 해당 오브젝트를 제외하고 있는지 함께 확인한다. 컴포넌트(MonsterHealth 등) 또는 레이어 기반으로 캐스트 필터링에서 명시적으로 제외해야 한다
