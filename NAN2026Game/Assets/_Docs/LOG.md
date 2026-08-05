@@ -3161,3 +3161,14 @@ Stairs에 물리법칙을 적용해서 걸어 올라갈 수 있게 만들고 싶
 - 저장 True
 ### 실패와 수정
 없음
+
+
+## [수정] Door Wood 렌더 순서 — 플레이어 뒤로 — 2026-08-05 23:10
+### 프롬프트
+PF Dungeon Props - Door Wood 01 앞으로 player가 지나갈때 문이 캐릭터보다 앞에 있는거 같은데
+### 조작 내역
+- 실측 Player: Default/30 | Wall: Default/-1000 | Ground: Default/0 → 문 4개 정렬 재배치: Door(전:Default/-257) (후:29) Frame(전:Default/-257) (후:29) Inside(전:Default/-257) (후:29) Shadow(전:Default/-257) (후:29) (벽 앞·플레이어 뒤)
+### 검증
+- 저장 True. 겹침 시각은 사용자 재생
+### 실패와 수정
+없음
