@@ -3019,3 +3019,5 @@ PlayerController2D.TryParry(GameObject attacker)가 IParryReflector 인터페이
 - 루트 6 | 블록 자식 15 | 접지=A1_Pedestal @1.6 | 원본 씬 무저장
 ### 실패와 수정
 - default 리터럴 C#7 비호환 1회 → 구식 초기화 / 임포트 클램프 배율 오염 → 재보정
+
+- 추기: 스폰이 A1 내부(도면 무표기 기본값) → (12, 8.4) 받침대 상면 이동, 접지=A1_Pedestal @7.7
