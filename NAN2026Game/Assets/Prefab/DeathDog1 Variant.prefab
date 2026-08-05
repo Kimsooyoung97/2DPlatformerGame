@@ -10,11 +10,23 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 7862834921201971433, guid: 2c8177f2561f13e4b9533fa5ac2d4244, type: 3}
       propertyPath: MaxSpeed
-      value: 4
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 7862834921201971433, guid: 2c8177f2561f13e4b9533fa5ac2d4244, type: 3}
+      propertyPath: IsGrounded
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7862834921201971438, guid: 2c8177f2561f13e4b9533fa5ac2d4244, type: 3}
+      propertyPath: m_Enabled
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8132645305167690128, guid: 2c8177f2561f13e4b9533fa5ac2d4244, type: 3}
       propertyPath: m_SpriteHash
       value: 288431053
+      objectReference: {fileID: 0}
+    - target: {fileID: 8132645306870792139, guid: 2c8177f2561f13e4b9533fa5ac2d4244, type: 3}
+      propertyPath: m_Enabled
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8132645306870792142, guid: 2c8177f2561f13e4b9533fa5ac2d4244, type: 3}
       propertyPath: m_Name
@@ -68,7 +80,8 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 7862834921201971438, guid: 2c8177f2561f13e4b9533fa5ac2d4244, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:

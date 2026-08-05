@@ -84,3 +84,8 @@
 
 
 - #16 사용자 미저장 타일 편집 소실: OpenScene(Single)·강제 Play 정지가 미저장 편집을 무경고 파괴 → 원인: 열기/정지 전 isDirty 미검사 → 방지: 모든 OpenScene·강제 정지 전 로드된 전 씬 isDirty 검사, dirty면 작업 중단하고 사용자에게 저장 여부 확인. 사용자 편집 세션 중엔 씬 전환 금지
+
+## 16. Physics2D.IgnoreCollision은 물리 밀림만 막지, 캐스트/레이캐스트 쿼리에는 영향 없음
+- **증상**: 몬스터-플레이어 IgnoreCollision을 확인하면 True인데도 실제 플레이에서는 여전히 '막힌다'고 느껴짐
+- **원인**: PlayerController2D의 벽 감지(WallInDirection, Collider2D.Cast 기반)는 IgnoreCollision 설정과 무관하게 동작한다 — IgnoreCollision은 물리 시뮬레이션의 충돌 반응(밀림)만 억제할 뿐, Cast/Raycast 같은 쿼리 API의 히트 결과에는 전혀 영향을 주지 않는다. 즉 두 콜라이더가 서로 안 밀려도 캐스트로는 여전히 '보인다'
+- **방지 규칙**: '몬스터/오브젝트를 안 막히게 해달라'는 요청은 IgnoreCollision 확인만으로 끝내지 말고, 이동을 제어하는 캐스트/레이캐스트 기반 로직(벽 감지, 지면 판정 등)에서도 해당 오브젝트를 제외하고 있는지 함께 확인한다. 컴포넌트(MonsterHealth 등) 또는 레이어 기반으로 캐스트 필터링에서 명시적으로 제외해야 한다

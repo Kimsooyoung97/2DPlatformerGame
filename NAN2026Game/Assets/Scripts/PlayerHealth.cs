@@ -197,7 +197,7 @@ public class PlayerHealth : MonoBehaviour
     {
         int count = 0;
         MonoBehaviour[] all = FindObjectsByType<MonoBehaviour>(
-            FindObjectsInactive.Include, FindObjectsSortMode.None);
+            FindObjectsInactive.Include);
 
         foreach (MonoBehaviour behaviour in all)
         {

@@ -10,7 +10,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3322142329500899553, guid: db1260c4377feea49bddb13e8fee5f5f, type: 3}
       propertyPath: MaxSpeed
-      value: 4
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3322142329500899558, guid: db1260c4377feea49bddb13e8fee5f5f, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3735750984202246083, guid: db1260c4377feea49bddb13e8fee5f5f, type: 3}
+      propertyPath: m_Enabled
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3735750984202246086, guid: db1260c4377feea49bddb13e8fee5f5f, type: 3}
       propertyPath: m_Name
@@ -68,7 +76,8 @@ PrefabInstance:
       propertyPath: m_SpriteHash
       value: 288431053
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 3322142329500899558, guid: db1260c4377feea49bddb13e8fee5f5f, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
