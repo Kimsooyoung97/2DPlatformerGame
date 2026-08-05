@@ -61181,7 +61181,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6265670936862214329, guid: 1abe683ad08b41b43b86ba30de32ba21, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -7.53125
+      value: 14.55
       objectReference: {fileID: 0}
     - target: {fileID: 6265670936862214329, guid: 1abe683ad08b41b43b86ba30de32ba21, type: 3}
       propertyPath: m_LocalPosition.z
@@ -61222,13 +61222,35 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 390456860282783827, guid: 1abe683ad08b41b43b86ba30de32ba21, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1618325854}
   m_SourcePrefab: {fileID: 100100000, guid: 1abe683ad08b41b43b86ba30de32ba21, type: 3}
 --- !u!4 &1618325852 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: 1abe683ad08b41b43b86ba30de32ba21, type: 3}
   m_PrefabInstance: {fileID: 1618325851}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1618325853 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 390456860282783827, guid: 1abe683ad08b41b43b86ba30de32ba21, type: 3}
+  m_PrefabInstance: {fileID: 1618325851}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1618325854
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1618325853}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a54c9eb3f3098b4eb2da6815182be21, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NAN2026.SpikeBallTrap
+  config: {fileID: 11400000, guid: 31b4bd26897983b4fb8fcb4703f841b5, type: 2}
+  player: {fileID: 1739690762}
 --- !u!1001 &1622058831
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -62873,7 +62895,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6265670936862214329, guid: 564038775ec525c4db35558a6951ab32, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -7.59375
+      value: 14.55
       objectReference: {fileID: 0}
     - target: {fileID: 6265670936862214329, guid: 564038775ec525c4db35558a6951ab32, type: 3}
       propertyPath: m_LocalPosition.z
@@ -62914,13 +62936,35 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 390456860282783827, guid: 564038775ec525c4db35558a6951ab32, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1831284007}
   m_SourcePrefab: {fileID: 100100000, guid: 564038775ec525c4db35558a6951ab32, type: 3}
 --- !u!4 &1831284005 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6265670936862214329, guid: 564038775ec525c4db35558a6951ab32, type: 3}
   m_PrefabInstance: {fileID: 1831284004}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1831284006 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 390456860282783827, guid: 564038775ec525c4db35558a6951ab32, type: 3}
+  m_PrefabInstance: {fileID: 1831284004}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1831284007
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1831284006}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a54c9eb3f3098b4eb2da6815182be21, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NAN2026.SpikeBallTrap
+  config: {fileID: 11400000, guid: 31b4bd26897983b4fb8fcb4703f841b5, type: 2}
+  player: {fileID: 1739690762}
 --- !u!1001 &1847436006
 PrefabInstance:
   m_ObjectHideFlags: 0

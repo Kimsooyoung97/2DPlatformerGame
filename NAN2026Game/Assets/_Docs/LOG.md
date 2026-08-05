@@ -3244,3 +3244,16 @@ PF Dungeon Props - Door Wood 01 의 Frame이 캐릭터보다 앞에 있는거 �
 없음
 
 - 추기: 광원 실체는 Light2D 아닌 신규 배치분 Unlit 재질 — 62개 Lit 재질 재교체(PF Dungeon Props - Stairs 01 PF Dungeon Props - Stairs 01 Base Chain Cage Base Chain Cage PF Dungeon Props - Debris Brick 03 PF Dungeon Props - Debris Brick 03 (1) PF Dungeon Props - Debris Brick 04 B PF Dungeon Props - Debris Brick 01 A...), 토치·포탈 제외
+
+
+## [구현] 스파이크볼 트랩 — 천장 낙하·경고 점멸·패링 판정 팝업 — 2026-08-05 23:52
+### 프롬프트
+[구현] Spike Ball 01, 02가 위쪽 벽에서 부터 시작해서 주인공으로 공격할 수 있게 해줄래? 그리고 주인공 빛 반경 2배 위치에서 부터 반짝여서 미리 패링 준비할 수 있게해주고 패링했을때 성공했는지 실패했는지 화면에 잘 보이게 표시 좀 해봐
+### 조작 내역
+- SpikeBallLogic(Core 순수: Phase/BlinkAlpha/LaunchDir) + 테스트 5종 / SpikeBallConfig(SO: 배수·속도·점멸·팝업 수치 전부) / SpikeBallTrap(대기→시야x2 점멸 경고→x1.1 조준 돌진→PlayerController2D.TryParry 리플렉션 훅→성공: 초록 '패링 성공!' 팝업+튕김 / 실패: 빨강 '패링 실패!'+TakeDamage→3초 후 천장 리스폰)
+- 사용자 배치 볼 2기(맵 밑 -7.6 가라앉음) → 천장 y14.55 인양, x17.5/19.5 유지, Config·Player 배선. 시야 반경은 PlayerVisionLight에서 런타임 실측
+- 실패 1건: 컨테이너 파일도구로 로직 파일 오작성(PC 미반영) → Unity 경유 재작성. 교훈: PC 파일은 execute_code로만
+### 검증
+- 컴파일 0, EditMode 130/130 (신규 5 포함). 트랩 체감·팝업 가독은 사용자 재생
+### 실패와 수정
+- 위 파일 경계 1건
