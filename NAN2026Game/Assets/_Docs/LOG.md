@@ -3242,3 +3242,5 @@ PF Dungeon Props - Door Wood 01 의 Frame이 캐릭터보다 앞에 있는거 �
 - 저장 True
 ### 실패와 수정
 없음
+
+- 추기: 광원 실체는 Light2D 아닌 신규 배치분 Unlit 재질 — 62개 Lit 재질 재교체(PF Dungeon Props - Stairs 01 PF Dungeon Props - Stairs 01 Base Chain Cage Base Chain Cage PF Dungeon Props - Debris Brick 03 PF Dungeon Props - Debris Brick 03 (1) PF Dungeon Props - Debris Brick 04 B PF Dungeon Props - Debris Brick 01 A...), 토치·포탈 제외
