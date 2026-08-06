@@ -25,6 +25,8 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
                 && e <  config.backstepDuration * config.backstepIFrameEndFrac;
         }
     }
+    private int comboVStage = 0;
+    private float comboVWindowEnd = 0f;
     [SerializeField] private float rollDuration = 0.75f;
     [SerializeField] private float rollSpeed = 4f;
 
@@ -214,6 +216,14 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
             if (kb.zKey.wasPressedThisFrame) QueueAttack("Slash", config.slashDuration, config.slashLungeSpeed);
             // 스킬 공격(구 K) → X
             if (kb.xKey.wasPressedThisFrame) QueueAttack("Combo2", config.combo2Duration, config.combo2LungeSpeed);
+            // V 2단 콤보 (이펙트 없음): 1타 Slash모션 → 창 내 재입력 시 2타 Combo2모션
+            if (kb.vKey.wasPressedThisFrame)
+            {
+                if (comboVStage == 1 && Time.time <= comboVWindowEnd)
+                { QueueAttack("ComboV2", config.combo2Duration, config.combo2LungeSpeed); comboVStage = 0; }
+                else
+                { QueueAttack("ComboV1", config.slashDuration, config.slashLungeSpeed); comboVStage = 1; comboVWindowEnd = Time.time + config.comboVWindow; }
+            }
             if (kb.lKey.wasPressedThisFrame) QueueAttack("Combo3", config.combo3Duration, config.combo3LungeSpeed);
             // 구르기: G키 제거, Ctrl(좌/우)만 사용. 공중에서는 사용할 수 없다(접지 중에만).
             if (grounded && (kb.leftCtrlKey.wasPressedThisFrame || kb.rightCtrlKey.wasPressedThisFrame))

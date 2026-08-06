@@ -52,5 +52,8 @@ namespace NAN2026
     [Range(0f,1f)] public float backstepMoveEndFrac = 0.85f;   // 4프레임까지 이동, 이후 정지
     [Range(0f,1f)] public float backstepIFrameStartFrac = 0.333f; // 3프레임 시작
     [Range(0f,1f)] public float backstepIFrameEndFrac = 0.833f;   // 5프레임 끝
+
+    [Header("V 2단 콤보")]
+    public float comboVWindow = 0.4f; // 2단 입력 유효창
 }
 }
