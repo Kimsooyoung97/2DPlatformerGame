@@ -284,8 +284,8 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
         {
             var fxFrames = attackName == "ComboV1" ? comboV1Fx : comboV2Fx;
             float fxDir = PlayerLocomotionLogic.EffectDirection(sr.flipX);
-            Vector3 fxPos = transform.position + new Vector3(effectConfig.spawnOffset.x * fxDir, effectConfig.spawnOffset.y, 0f);
-            VSlashFx.Play(fxPos, fxFrames, config.comboVFxFps, fxDir < 0f, config.comboVFxScale);
+            Vector3 fxPos = transform.position + new Vector3(config.comboVFxOffsetX * fxDir, config.comboVFxOffsetY, 0f);
+            VSlashFx.Play(fxPos, fxFrames, config.comboVFxFps, fxDir < 0f, config.comboVFxScale, config.comboVFxAlpha);
             return;
         }
         GameObject prefab = null;
