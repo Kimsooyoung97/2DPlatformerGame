@@ -220,23 +220,13 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
             // V 2단 콤보 (이펙트 없음): 1타 Slash모션 → 창 내 재입력 시 2타 Combo2모션
             if (kb.vKey.wasPressedThisFrame)
             {
-                bool atk = attackTimer > 0f;
-                bool inCancel = atk && activeAttack == "ComboV1"
-                    && attackTimer <= config.slashDuration * (1f - config.comboVCancelFrac);
-                bool windowOpen = comboVStage == 1 && (!atk) && Time.time <= comboVWindowEnd;
-                if (comboVStage == 1 && (inCancel || windowOpen))
+                if (comboVStage == 1)
                 {
-                    // 2타: 1타 캔슬 구간이거나 종료 후 창 안
-                    QueueAttack("ComboV2", config.combo2Duration, config.combo2LungeSpeed);
-                    comboVStage = 0; comboVBuffered = false;
+                    // 1타 진행/직후 어느 시점이든 2타를 예약 → 프레임 경합 제거
+                    comboVBuffered = true;
                 }
-                else if (comboVStage == 1 && atk && !inCancel)
+                else if (attackTimer <= 0f)
                 {
-                    comboVBuffered = true; // 캔슬 전 선입력 → 예약
-                }
-                else if (comboVStage == 0 && !atk)
-                {
-                    // 1타 시작
                     QueueAttack("ComboV1", config.slashDuration, config.slashLungeSpeed);
                     comboVStage = 1; comboVWindowEnd = 0f; comboVBuffered = false;
                 }
@@ -389,6 +379,14 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
         if (attacking)
         {
             attackTimer -= Time.fixedDeltaTime;
+            // 1타 캔슬 구간 진입 + 2타 예약됨 → 즉시 2타 발동(반응성)
+            if (comboVStage == 1 && comboVBuffered && activeAttack == "ComboV1"
+                && attackTimer <= config.slashDuration * (1f - config.comboVCancelFrac))
+            {
+                activeAttack = null; attackTimer = 0f;
+                QueueAttack("ComboV2", config.combo2Duration, config.combo2LungeSpeed);
+                comboVStage = 0; comboVBuffered = false;
+            }
             if (attackTimer <= 0f)
             {
                 activeAttack = null;
