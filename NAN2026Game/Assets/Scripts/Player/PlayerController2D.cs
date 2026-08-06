@@ -290,15 +290,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
 
     private void FixedUpdate()
     {
-        // 백스텝 이동창: 3~4프레임 후진, 창 밖 순간정지 (미끄러짐 종결)
-        float __bsE = Time.time - backstepStartTime;
-        if (__bsE >= 0f && __bsE < config.backstepDuration)
-        {
-            bool __win = __bsE >= config.backstepDuration * config.backstepMoveStartFrac
-                      && __bsE <  config.backstepDuration * config.backstepMoveEndFrac;
-            float __vx = __win ? (transform.localScale.x >= 0f ? -1f : 1f) * config.backstepSpeed : 0f;
-            rb.linearVelocity = new Vector2(__vx, rb.linearVelocity.y);
-        }
+
 
         // 점프존 슈퍼점프 비행 중에는 물리 궤적(포물선)에 전부 맡기고 평소 이동/공격
         // 로직을 건너뛴다. 벽 클램프·중력 오버라이드 등과 충돌하면 목표 지점에
@@ -429,6 +421,17 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
         }
         rb.linearVelocity = new Vector2(vx, vy);
     
+    
+        // 백스텝 이동창 (말미 배치 — 모든 속도 기록 이후 최종 적용)
+        // 백스텝 이동창: 3~4프레임 후진, 창 밖 순간정지 (미끄러짐 종결)
+        float __bsE = Time.time - backstepStartTime;
+        if (__bsE >= 0f && __bsE < config.backstepDuration)
+        {
+            bool __win = __bsE >= config.backstepDuration * config.backstepMoveStartFrac
+                      && __bsE <  config.backstepDuration * config.backstepMoveEndFrac;
+            float __vx = __win ? (transform.localScale.x >= 0f ? -1f : 1f) * config.backstepSpeed : 0f;
+            rb.linearVelocity = new Vector2(__vx, rb.linearVelocity.y);
+        }
     }
 
     // 접지 캐스트: 트리거 무시 — 실지형만 인정
