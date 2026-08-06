@@ -45,11 +45,11 @@ namespace NAN2026
     
     [Header("백스텝")]
     public float backstepDuration = 0.35f;
-    public float backstepSpeed = 20f;
+    public float backstepSpeed = 12f;
     public float backstepCooldown = 0.15f;
-    public float backstepHopSpeed = 3.5f; // 소도약 상향 속도
-    [Range(0f,1f)] public float backstepMoveStartFrac = 0.333f; // 3프레임부터 이동
-    [Range(0f,1f)] public float backstepMoveEndFrac = 0.667f;   // 4프레임까지 이동, 이후 정지
+    public float backstepHopSpeed = 1.6f; // 소도약 상향 속도
+    [Range(0f,1f)] public float backstepMoveStartFrac = 0.30f; // 3프레임부터 이동
+    [Range(0f,1f)] public float backstepMoveEndFrac = 0.85f;   // 4프레임까지 이동, 이후 정지
     [Range(0f,1f)] public float backstepIFrameStartFrac = 0.333f; // 3프레임 시작
     [Range(0f,1f)] public float backstepIFrameEndFrac = 0.833f;   // 5프레임 끝
 }

@@ -41,9 +41,10 @@ MonoBehaviour:
   combo2LungeSpeed: 2
   combo3LungeSpeed: 0
   backstepDuration: 0.35
-  backstepSpeed: 20
+  backstepSpeed: 12
   backstepCooldown: 0.15
-  backstepMoveStartFrac: 0.333
-  backstepMoveEndFrac: 0.667
+  backstepHopSpeed: 1.6
+  backstepMoveStartFrac: 0.3
+  backstepMoveEndFrac: 0.85
   backstepIFrameStartFrac: 0.333
   backstepIFrameEndFrac: 0.833
