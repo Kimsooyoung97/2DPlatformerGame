@@ -4147,3 +4147,15 @@ B로 진행 → 진행하고 오늘 작업한것들 중에 팀원과 공유해�
 - 컴파일 0, EditMode 133/133. 빠른/느린/단발 체감은 사용자 재생
 ### 실패와 수정
 - 3회 오진(프레임경합·예약) 끝에 로그 실측으로 CanAttack 게이트 확진. FAIL#18 후보: 큐 기반 공격에서 캔슬 시 attacking 로컬도 동기화
+
+
+## [수정] 패링 성공 사운드 배선 — swordParry — 2026-08-07 03:32
+### 프롬프트
+패링 성공시 그 사운드가 들리게 해줘
+### 조작 내역
+- SpikeBallConfig에 clashSound/clashVolume(0.9) 신설. ClashFlash.Play 시 AudioSource.PlayClipAtPoint(격돌 접점)로 재생 — 히트스톱·섬광과 동시
+- Assets/Configs/SpikeBallConfig.asset 에셋에 swordParry.wav 배선
+### 검증
+- 컴파일 0. 소리는 사용자 재생 (구체 패링 성공 시)
+### 실패와 수정
+없음

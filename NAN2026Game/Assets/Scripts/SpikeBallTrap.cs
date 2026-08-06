@@ -132,6 +132,8 @@ namespace NAN2026
             go.transform.position = pos;
             var f = go.AddComponent<ClashFlash>();
             f.Init(cfg != null ? cfg.clashDuration : 0.16f, cfg != null ? cfg.clashLines : 8, cfg != null ? cfg.clashRadius : 1.3f, cfg != null ? cfg.clashHitstop : 0.08f);
+            if (cfg != null && cfg.clashSound != null)
+                AudioSource.PlayClipAtPoint(cfg.clashSound, pos, cfg.clashVolume);
         }
     }
 

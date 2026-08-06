@@ -27,6 +27,8 @@ namespace NAN2026
         public int clashLines = 8;
         public float clashRadius = 1.3f;
         public float clashHitstop = 0.08f;
+        public AudioClip clashSound;
+        [Range(0f,1f)] public float clashVolume = 0.9f;
 
         [Header("팝업")]
         public float popupRise = 1.2f;
