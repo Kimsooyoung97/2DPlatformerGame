@@ -25,6 +25,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
                 && e <  config.backstepDuration * config.backstepIFrameEndFrac;
         }
     }
+    [SerializeField] private UnityEngine.Sprite[] parryFx; // C 패링 슬래시
     [SerializeField] private UnityEngine.Sprite[] comboV1Fx; // V 1타 슬래시(1~5)
     [SerializeField] private UnityEngine.Sprite[] comboV2Fx; // V 2타 슬래시(6~9)
     private int comboVStage = 0;
@@ -255,6 +256,12 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
             if (kb.cKey.wasPressedThisFrame && attackTimer <= 0f && Time.time >= parryReadyTime)
             {
                 parryHeld = true;
+                // 패링 이펙트 스폰
+                {
+                    float pfDir = PlayerLocomotionLogic.EffectDirection(sr.flipX);
+                    Vector3 pfPos = transform.position + new Vector3(config.parryFxOffsetX * pfDir, config.parryFxOffsetY, 0f);
+                    VSlashFx.Play(pfPos, parryFx, config.parryFxFps, pfDir < 0f, config.parryFxScale, config.parryFxAlpha);
+                }
                 parryPressTime = Time.time;
                 parryReadyTime = Time.time + EffectiveParryCooldown();
             }
