@@ -42,5 +42,12 @@ namespace NAN2026
         public float slashLungeSpeed = 1.5f;
         public float combo2LungeSpeed = 3.5f;
         public float combo3LungeSpeed = 0f;
-    }
+    
+    [Header("백스텝")]
+    public float backstepDuration = 0.35f;
+    public float backstepSpeed = 10f;
+    public float backstepCooldown = 1f;
+    [Range(0f,1f)] public float backstepIFrameStartFrac = 0.333f; // 3프레임 시작
+    [Range(0f,1f)] public float backstepIFrameEndFrac = 0.833f;   // 5프레임 끝
+}
 }

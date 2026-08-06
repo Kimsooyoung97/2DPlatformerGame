@@ -3700,3 +3700,17 @@ X를 눌렀을때 적용된 스프라이트 시트를 C에도 적용해달라 (�
 - 에셋 저장. 모션 체감은 사용자 재생 (C 홀드·릴리즈)
 ### 실패와 수정
 - 'B' 오기 → X로 정정
+
+
+## [구현] 백스텝 — Ctrl(무방향)·i프레임·쿨타임 — 2026-08-06 22:30
+### 프롬프트
+[구현]첨부한 6프레임짜리 세로 픽셀 아트 스프라이트 시트를 사용해... (세로 6프레임, Ctrl 발동, 3~5프레임 무적, 뒤로 이동, 행동 잠금+쿨타임 1초, 경로: 기사_백스텝)
+### 조작 내역
+- 시트 반입(서브폴더 발견, OneDrive 바이트 복사 우회): 338x1024→세로 6분할, PPU 480(기사 실측), Player_Backstep.anim 생성, 기사 컨트롤러에 Backstep 상태 추가
+- MovementConfig: backstep Duration 0.35/Speed 10/Cooldown 1/iFrame 0.333~0.833(3~5프레임) — 수치 SO 소유 규칙 준수
+- PlayerController2D: Ctrl 분기 개편 — 방향키 有=기존 Roll / 無=Backstep(QueueAttack 음수 런지=후진, 기존 공격락 승계) + IsBackstepInvincible 프로퍼티
+- PlayerHealth.TakeDamage 선두 무적 가드 (경로 Assets/Scripts/PlayerHealth.cs — Player 하위 아님 주의)
+### 검증
+- 컴파일 에러 0, EditMode 133/133. 체감(후진 거리·무적 타이밍·Roll 공존)은 사용자 재생
+### 실패와 수정
+- OneDrive 직접 Copy 실패→바이트 복사 / PlayerHealth 경로 오추정 1회→전수 수색

@@ -13,6 +13,17 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
     [SerializeField] private Sprite[] poweredEffectFrames;
 
     [Header("Roll")]
+    private float backstepStartTime = -999f;
+    private float backstepReadyTime = 0f;
+    public bool IsBackstepInvincible
+    {
+        get
+        {
+            float e = Time.time - backstepStartTime;
+            return e >= config.backstepDuration * config.backstepIFrameStartFrac
+                && e <  config.backstepDuration * config.backstepIFrameEndFrac;
+        }
+    }
     [SerializeField] private float rollDuration = 0.75f;
     [SerializeField] private float rollSpeed = 4f;
 
@@ -205,7 +216,20 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
             if (kb.lKey.wasPressedThisFrame) QueueAttack("Combo3", config.combo3Duration, config.combo3LungeSpeed);
             // 구르기: G키 제거, Ctrl(좌/우)만 사용. 공중에서는 사용할 수 없다(접지 중에만).
             if (grounded && (kb.leftCtrlKey.wasPressedThisFrame || kb.rightCtrlKey.wasPressedThisFrame))
-                QueueAttack("Roll", rollDuration, rollSpeed);
+            {
+                bool dirHeld = kb.leftArrowKey.isPressed || kb.rightArrowKey.isPressed;
+                if (dirHeld)
+                {
+                    QueueAttack("Roll", rollDuration, rollSpeed);
+                }
+                else if (Time.time >= backstepReadyTime)
+                {
+                    // 방향키 없는 Ctrl = 백스텝 (뒤로 회피, 음수 런지)
+                    QueueAttack("Backstep", config.backstepDuration, -config.backstepSpeed);
+                    backstepStartTime = Time.time;
+                    backstepReadyTime = Time.time + config.backstepDuration + config.backstepCooldown;
+                }
+            }
             // 패링: 마우스 휠클릭 → C
             if (kb.cKey.wasPressedThisFrame && attackTimer <= 0f && Time.time >= parryReadyTime)
             {
