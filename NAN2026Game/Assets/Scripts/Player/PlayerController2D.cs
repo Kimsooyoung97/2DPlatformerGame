@@ -283,7 +283,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
         if (attackName == "ComboV1" || attackName == "ComboV2")
         {
             var fxFrames = attackName == "ComboV1" ? comboV1Fx : comboV2Fx;
-            float fxDir = -PlayerLocomotionLogic.EffectDirection(sr.flipX); // 영상 확진: 부호 반전 교정
+            float fxDir = PlayerLocomotionLogic.EffectDirection(sr.flipX);
             Vector3 fxPos = transform.position + new Vector3(config.comboVFxOffsetX * fxDir, config.comboVFxOffsetY, 0f);
             VSlashFx.Play(fxPos, fxFrames, config.comboVFxFps, fxDir < 0f, config.comboVFxScale, config.comboVFxAlpha);
             return;
