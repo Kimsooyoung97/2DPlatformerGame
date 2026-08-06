@@ -297,7 +297,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
         {
             float bDir = PlayerLocomotionLogic.EffectDirection(sr.flipX);
             Vector3 bPos = transform.position + new Vector3(config.comboVFxOffsetX * bDir, config.comboVFxOffsetY, 0f);
-            VSlashFx.Play(bPos, comboB1FxArr, config.comboB1FxFps, bDir < 0f, config.comboVFxScale, config.comboVFxAlpha);
+            VSlashFx.Play(bPos, comboB1Fx, config.comboVFxFps, bDir < 0f, config.comboVFxScale, config.comboVFxAlpha);
             return;
         }
         if (attackName == "ComboV1" || attackName == "ComboV2")

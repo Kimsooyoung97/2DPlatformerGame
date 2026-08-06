@@ -4424,3 +4424,16 @@ testParry 스프라이트 시트 놔뒀어. 1열당 하나의 스킬이야. 우�
 - 컴파일 0. 체감은 사용자 재생 (2키)
 ### 실패와 수정
 - 1차 앵커(parryFx 주석 포함 줄) 불일치로 필드 미삽입 — 실측 후 재삽입
+
+
+## [수정] 2키 이펙트 불발 수리 — 인자 불일치 — 2026-08-07 07:59
+### 프롬프트
+2번을 눌러도 이펙트가 안나가는데? → 로그 심어봐 → 로그 확인
+### 조작 내역
+- FXDBG 실측: 입력✓ SpawnFX✓ 분기✓(프레임3) → VSlashFx '프레임 없음' — Play 호출이 미배선 유령 필드(comboB1FxArr/comboB1FxFps) 참조 확진
+- 호출 인자를 comboB1Fx/comboVFxFps로 통일, FXDBG 4곳 제거
+- 유령 선언 잔존 위치: MovementConfig.cs: public float comboB1FxFps = 24f; // 2키 동작 길이(느긋한 묵직함) / PlayerController2D.cs: [SerializeField] private UnityEngine.Sprite[] comboB1FxArr; // 2키 SlashFX / 
+### 검증
+- 컴파일 0. 체감은 사용자 재생 (정지 후 재생 → 2키)
+### 실패와 수정
+- FAIL#19 유형 재발(호출부 이름 불일치 미검증) — 로그 실측으로 확진 후 수리
