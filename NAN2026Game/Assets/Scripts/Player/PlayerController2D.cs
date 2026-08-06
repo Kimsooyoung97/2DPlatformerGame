@@ -27,6 +27,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
     }
     private int comboVStage = 0;
     private float comboVWindowEnd = 0f;
+    private bool comboVBuffered = false;
     [SerializeField] private float rollDuration = 0.75f;
     [SerializeField] private float rollSpeed = 4f;
 
@@ -219,9 +220,13 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
             // V 2단 콤보 (이펙트 없음): 1타 Slash모션 → 창 내 재입력 시 2타 Combo2모션
             if (kb.vKey.wasPressedThisFrame)
             {
+                bool atk = attackTimer > 0f;
                 if (comboVStage == 1 && Time.time <= comboVWindowEnd)
-                { QueueAttack("ComboV2", config.combo2Duration, config.combo2LungeSpeed); comboVStage = 0; }
-                else
+                {
+                    if (atk) comboVBuffered = true; // 1타 진행 중 선입력 → 예약
+                    else { QueueAttack("ComboV2", config.combo2Duration, config.combo2LungeSpeed); comboVStage = 0; comboVBuffered = false; }
+                }
+                else if (!atk)
                 { QueueAttack("ComboV1", config.slashDuration, config.slashLungeSpeed); comboVStage = 1; comboVWindowEnd = Time.time + config.comboVWindow; }
             }
             if (kb.lKey.wasPressedThisFrame) QueueAttack("Combo3", config.combo3Duration, config.combo3LungeSpeed);
@@ -372,7 +377,13 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
         if (attacking)
         {
             attackTimer -= Time.fixedDeltaTime;
-            if (attackTimer <= 0f) activeAttack = null;
+            if (attackTimer <= 0f)
+            {
+                activeAttack = null;
+                if (comboVBuffered && comboVStage == 1 && Time.time <= comboVWindowEnd)
+                { QueueAttack("ComboV2", config.combo2Duration, config.combo2LungeSpeed); comboVStage = 0; }
+                comboVBuffered = false;
+            }
         }
 
         if (queuedAttack != null)
