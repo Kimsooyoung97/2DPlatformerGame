@@ -15,6 +15,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
     [Header("Roll")]
     private float backstepStartTime = -999f;
     private float backstepReadyTime = 0f;
+    private bool backstepHopped = false;
     public bool IsBackstepInvincible
     {
         get
@@ -227,6 +228,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
                     // 방향키 없는 Ctrl = 백스텝 (뒤로 회피, 음수 런지)
                     QueueAttack("Backstep", config.backstepDuration, 0f); // 이동은 자체 창에서
                     backstepStartTime = Time.time;
+                    backstepHopped = false;
                     backstepReadyTime = Time.time + config.backstepDuration + config.backstepCooldown;
                 }
             }
@@ -430,7 +432,9 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
             bool __win = __bsE >= config.backstepDuration * config.backstepMoveStartFrac
                       && __bsE <  config.backstepDuration * config.backstepMoveEndFrac;
             float __vx = __win ? (sr.flipX ? 1f : -1f) * config.backstepSpeed : 0f; // 바라보는 반대로
-            rb.linearVelocity = new Vector2(__vx, rb.linearVelocity.y);
+            float __vy = rb.linearVelocity.y;
+            if (__win && !backstepHopped) { backstepHopped = true; __vy = config.backstepHopSpeed; } // 소도약 1회
+            rb.linearVelocity = new Vector2(__vx, __vy);
         }
     }
 
