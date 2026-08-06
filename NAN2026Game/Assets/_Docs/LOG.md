@@ -3582,3 +3582,15 @@ B안 + 50 U 진행
 해당 없음
 ### 커밋
 해당 없음(무수정)
+
+
+## [구현] 발판 메이플식 전환 — Stage_OneWay 레이어 — 2026-08-06 20:07
+### 프롬프트
+[구현] 발판 메이플식으로 바꿔줘.
+### 조작 내역
+- Stage_OneWay 신설(TilemapCollider usedByEffector + PlatformEffector2D oneWay·arc170, Ground와 동일 레이어·재질·정렬)
+- 발판 A(x5~9,y-3)·B(x10~13,y0) 타일 9셀 이주(시각 무변화), Ground·OneWay 콜라이더 재생성. 코드 무변경 — 130/130 유효
+### 검증
+- 저장 True. 상향 통과·하향 점프는 사용자 재생 판정
+### 실패와 수정
+없음
