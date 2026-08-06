@@ -3549,3 +3549,14 @@ B안 + 50 U 진행
 - NRE 1회 / 보스 소실 원인 미상(병합 or 편집 중 유실 추정) — 프리팹 복원으로 해소
 
 - 추기: 카메라 부재 = 내 리그 정리가 실카메라(팀 MainCamera) 오삭제 — SecondScene 검증 카메라 이식으로 복구. confiner 참조 PolygonCollider2D→새 Box(87x14) 강제, 추적=Player, 구형 폴리곤 경계 제거. FAIL 교훈: 리그 정리는 이름 아닌 컴포넌트 실증으로
+
+
+## [수정] SecondScene_1 카메라 설정 통일 — vcam 통째 이식 — 2026-08-06 19:12
+### 프롬프트
+[수정]SecondScene와 같은 카메라 설정으로 수정 → 진행해
+### 조작 내역
+- SecondScene CM_PlayerCamera(튜닝본) 이식, 구 vcam 제거, 추적=Player·confiner=87x14 Box 재배선, 시작 위치 동기
+### 검증
+- 저장 True. 카메라 감각은 사용자 재생
+### 실패와 수정
+없음
