@@ -3971,3 +3971,16 @@ B로 진행 → 진행하고 오늘 작업한것들 중에 팀원과 공유해�
 - 에셋 저장. 체감은 사용자 재생 (C 홀드·릴리즈)
 ### 실패와 수정
 없음
+
+
+## [구현] WebGL 빌드 리허설 — 최초 성공 — 2026-08-07 01:09
+### 프롬프트
+그래 빌드 진행해 (+file:// 오류 → 로컬 서버 요청)
+### 조작 내역
+- 프리플라이트: 모듈 ✓·씬 6개(FirstTitle/Opening/Second/Second_1/extra/Thirdtmp) ✓ → BuildPipeline.BuildPlayer WebGL
+- 결과: Succeeded, 77MB, 에러 0·경고 0, Build/WebGL
+- file:// 차단 대응: 에디터 내 Brotli 헤더 정적 서버 기동(localhost:8642). Build/ gitignore 등재
+### 검증
+- 리포트 파일 실측. 실기 플레이는 사용자 브라우저
+### 실패와 수정
+- MCP 4분 타임아웃 1회(예고된 것) — 리포트 파일 경유로 회수
