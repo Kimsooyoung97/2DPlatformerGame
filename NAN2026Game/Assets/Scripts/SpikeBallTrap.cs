@@ -151,7 +151,7 @@ namespace NAN2026
             var go = new GameObject("ParryClash");
             go.transform.position = pos;
             var f = go.AddComponent<ClashFlash>();
-            f.Init(cfg != null ? cfg.clashDuration : 0.16f, cfg != null ? cfg.clashLines : 8, cfg != null ? cfg.clashRadius : 1.3f, cfg != null ? cfg.clashHitstop : 0.08f);
+            f.Init(cfg != null ? cfg.clashDuration : 0.16f, cfg != null ? cfg.clashLines : 8, cfg != null ? cfg.clashRadius : 1.3f, cfg != null ? cfg.clashHitstop : 0.08f, cfg);
             if (cfg != null && cfg.clashSound != null)
                 ClashSfx.PlaySegment(cfg.clashSound, cfg.clashVolume, cfg.clashSoundStartMs, cfg.clashSoundEndMs);
         }
@@ -160,11 +160,13 @@ namespace NAN2026
     public class ClashFlash : MonoBehaviour
     {
         float dur, radius, t; int lines; float restoreAt = -1f;
+        Transform recoilCam; Vector3 camBase; float recoilT; bool recoilOn = false;
         LineRenderer[] rays; SpriteRenderer flash;
         static UnityEngine.Sprite dot;
-        public void Init(float d, int n, float r, float hitstop)
+        SpikeBallConfig cfgRef;
+        public void Init(float d, int n, float r, float hitstop, SpikeBallConfig cfg2 = null)
         {
-            dur = d; lines = n; radius = r;
+            dur = d; lines = n; radius = r; cfgRef = cfg2;
             if (dot == null)
             {
                 var tx2 = new Texture2D(4, 4, TextureFormat.RGBA32, false);
@@ -189,7 +191,12 @@ namespace NAN2026
         }
         void Update()
         {
-            if (restoreAt > 0f && Time.unscaledTime >= restoreAt) { Time.timeScale = 1f; restoreAt = -1f; }
+            if (restoreAt > 0f && Time.unscaledTime >= restoreAt)
+            {
+                Time.timeScale = 1f; restoreAt = -1f;
+                if (cfgRef != null && cfgRef.clashRecoilEnabled && Camera.main != null)
+                { recoilCam = Camera.main.transform; recoilT = 0f; recoilOn = true; camBase = recoilCam.localPosition; }
+            }
             t += Time.unscaledDeltaTime;
             float p = Mathf.Clamp01(t / dur);
             if (flash != null)
@@ -205,7 +212,19 @@ namespace NAN2026
                 rays[i].SetPosition(1, transform.position + dir * radius * Mathf.Min(1f, p * 1.6f));
                 var sc = rays[i].startColor; sc.a = 1f - p; rays[i].startColor = sc;
             }
-            if (t >= dur) { Time.timeScale = 1f; Destroy(gameObject); }
+            // 해제 반동: unscaled 감쇠 진동, 종료 시 원위치 복원
+            if (recoilOn && recoilCam != null && cfgRef != null)
+            {
+                recoilT += Time.unscaledDeltaTime;
+                float rp = Mathf.Clamp01(recoilT / Mathf.Max(0.01f, cfgRef.clashRecoilTime));
+                if (rp >= 1f) { recoilCam.localPosition = camBase; recoilOn = false; }
+                else
+                {
+                    float amp = cfgRef.clashRecoilAmp * (1f - rp);
+                    recoilCam.localPosition = camBase + (Vector3)(UnityEngine.Random.insideUnitCircle * amp);
+                }
+            }
+            if (t >= dur && !recoilOn) { Time.timeScale = 1f; Destroy(gameObject); }
         }
     }
 
