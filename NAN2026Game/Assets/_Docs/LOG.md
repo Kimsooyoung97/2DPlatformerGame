@@ -3793,3 +3793,15 @@ X를 눌렀을때 적용된 스프라이트 시트를 C에도 적용해달라 (�
 - 저장 True. 추적 체감은 사용자 재생
 ### 실패와 수정
 - 게임뷰 확대 착오발 13.5 우회 1회 — 원점 복귀
+
+
+## [수정] 카메라 신축 — 최소 리그 재건 — 2026-08-06 22:59
+### 프롬프트
+SecondScene1에 카메라가 주인공을 못 비추잖아. 바닥부분을 비추지도 않고.
+### 조작 내역
+- 검진: Main Camera:CinemachineBrain CM_PlayerCamera:CinemachineCamera CM_PlayerCamera:CinemachinePositionComposer CM_PlayerCamera:CinemachineConfiner2D CM_PlayerCamera:CinemachineImpulseListener CM_PlayerCamera:CinemachineBasicMultiChannelPerlin
+- 이식본 철거 → 신규 CM_PlayerCamera(기본 컴포저·confiner·렌즈 6.75·추적 Player) — 커스텀 잔재 0의 보장 동작 리그. Brain 부재 시 자동 부착
+### 검증
+- 저장 True
+### 실패와 수정
+- 이식 접근 반복 실패 → 신축 전환
