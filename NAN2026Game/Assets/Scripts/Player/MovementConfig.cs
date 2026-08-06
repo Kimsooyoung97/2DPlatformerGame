@@ -55,6 +55,8 @@ namespace NAN2026
 
     [Header("V 2단 콤보")]
     public float comboVWindow = 0.6f;
-    [Range(0f,1f)] public float comboVCancelFrac = 0.6f; // 1타 이 비율 경과 후 2타 캔슬 허용(3/5프레임) // 2단 입력 유효창
+    [Range(0f,1f)] public float comboVCancelFrac = 0.6f;
+    public float comboVFxFps = 18f;
+    public float comboVFxScale = 1f; // 1타 이 비율 경과 후 2타 캔슬 허용(3/5프레임) // 2단 입력 유효창
 }
 }

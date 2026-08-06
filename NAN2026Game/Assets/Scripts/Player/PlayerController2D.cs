@@ -25,6 +25,8 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
                 && e <  config.backstepDuration * config.backstepIFrameEndFrac;
         }
     }
+    [SerializeField] private UnityEngine.Sprite[] comboV1Fx; // V 1타 슬래시(1~5)
+    [SerializeField] private UnityEngine.Sprite[] comboV2Fx; // V 2타 슬래시(6~9)
     private int comboVStage = 0;
     private float comboVWindowEnd = 0f;
     private bool comboVBuffered = false;
@@ -278,6 +280,14 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
 
     private void SpawnAttackEffect(string attackName)
     {
+        if (attackName == "ComboV1" || attackName == "ComboV2")
+        {
+            var fxFrames = attackName == "ComboV1" ? comboV1Fx : comboV2Fx;
+            float fxDir = PlayerLocomotionLogic.EffectDirection(sr.flipX);
+            Vector3 fxPos = transform.position + new Vector3(effectConfig.spawnOffset.x * fxDir, effectConfig.spawnOffset.y, 0f);
+            VSlashFx.Play(fxPos, fxFrames, config.comboVFxFps, fxDir < 0f, config.comboVFxScale);
+            return;
+        }
         GameObject prefab = null;
         Sprite[] frames = null;
         float speed = 0f;
