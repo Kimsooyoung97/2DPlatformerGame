@@ -221,10 +221,14 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
             if (kb.vKey.wasPressedThisFrame)
             {
                 bool atk = attackTimer > 0f;
-                if (comboVStage == 1 && Time.time <= comboVWindowEnd)
+                if (comboVStage == 1)
                 {
-                    if (atk) comboVBuffered = true; // 1타 진행 중 선입력 → 예약
-                    else { QueueAttack("ComboV2", config.combo2Duration, config.combo2LungeSpeed); comboVStage = 0; comboVBuffered = false; }
+                    // 1타 캔슬 구간(모션 60% 경과=3/5프레임) 진입했으면 즉시 2타
+                    bool canCancel = atk && activeAttack == "ComboV1" && attackTimer <= config.slashDuration * (1f - config.comboVCancelFrac);
+                    if (!atk || canCancel)
+                    { QueueAttack("ComboV2", config.combo2Duration, config.combo2LungeSpeed); comboVStage = 0; comboVBuffered = false; }
+                    else if (atk && Time.time <= comboVWindowEnd + config.slashDuration)
+                    { comboVBuffered = true; } // 캔슬 구간 전 입력 → 예약
                 }
                 else if (!atk)
                 { QueueAttack("ComboV1", config.slashDuration, config.slashLungeSpeed); comboVStage = 1; comboVWindowEnd = 0f; } // 창은 1타 종료 시 개시
