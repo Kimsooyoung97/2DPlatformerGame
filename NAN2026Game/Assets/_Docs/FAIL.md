@@ -93,3 +93,5 @@
 - #17 입력 분기 부분 replace 시 기존 else 가지를 덮어써 기능 소실 위험 → 다분기 블록은 중괄호 매칭으로 통째 재작성하고 EditMode로 회귀 확인
 
 - #18 큐 소비형 공격을 코드로 캔슬할 때 attackTimer만 0으로 하면 같은 프레임 attacking 로컬이 true로 남아 CanAttack 게이트가 새 큐를 막음 → attacking도 함께 false. 추측 3회보다 Debug.Log 실측이 빨랐음
+
+- #19 진화한 파일에 기억 기준 주입 → 중복 선언. 클래스 수정 전 현재 필드·시그니처 실독 필수
