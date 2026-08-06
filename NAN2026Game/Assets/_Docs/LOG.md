@@ -3927,3 +3927,25 @@ B로 진행 → 진행하고 오늘 작업한것들 중에 팀원과 공유해�
 - 컴파일 정상. 착탄은 사용자 재생 (발판 위에서 1키)
 ### 실패와 수정
 없음
+
+
+## [조사] 번개 발판 미착탄 — 영상+코드 교차 분석 — 2026-08-06 23:48
+### 프롬프트
+[조사] 영상을 분석해봐. 기존 바닥에서는 번개가 잘 떨어지는데 발판에서는 계속해서 기존 바닥으로 번개가 떨어지고 일정 높이 이상의 바닥에 올라가면 아예 이펙트가 나오지를 않아.
+### 조사 결과
+- 영상: 좁은 석판 발판 구간. 코드: var origin = new Vector2(pos.x, transform.position.y + 0.5f); / foreach (var hit in Physics2D.RaycastAll(origin, Vector2.down, config.groundSnapDepth)) / pos.y = groundY; / pos.y += effectSprites[0].bounds.extents.y * config.effectScale; / go.transform.position = pos; / [에셋] startOffset=1.4 / [에셋] groundSnapDepth=6 /  → 정면 오프셋 착탄점이 좁은 발판을 벗어나 낙하(저지대=바닥 착탄/고지대=스냅深 초과 NaN). 처방: 전방 실패 시 발밑 x 재캐스트 폴백
+### 검증
+해당 없음
+### 커밋
+해당 없음(무수정)
+
+
+## [수정] 번개 발판 착탄 폴백 — 2026-08-06 23:50
+### 프롬프트
+(전방 오프셋이 좁은 발판 이탈 확진) 수정진행해
+### 조작 내역
+- PlayerSkillConfig.platformMissTolerance=1.5 신설. Cast 폴백 사슬: 전방 히트가 발보다 1.5u↓ 또는 부재 → 발밑 x 재캐스트(자기 발판 착탄) → 그래도 없으면 발 높이 시전(무반응 제거)
+### 검증
+- 컴파일 0. 착탄은 사용자 재생(바닥·좁은 발판·고지대 3종)
+### 실패와 수정
+없음
