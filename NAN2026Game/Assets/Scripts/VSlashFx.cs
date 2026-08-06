@@ -5,7 +5,7 @@ namespace NAN2026
     // V콤보 제자리 슬래시 오버레이: 프레임 재생 후 자멸
     public static class VSlashFx
     {
-        public static void Play(Vector3 pos, Sprite[] frames, float fps, bool flipX, float scale, float alpha = 1f, Transform follow = null)
+        public static void Play(Vector3 pos, Sprite[] frames, float fps, bool flipX, float scale, float alpha = 1f, Transform follow = null, Color? tint = null)
         {
             if (frames == null || frames.Length == 0) return;
             var go = new GameObject("VSlashFx");
@@ -16,7 +16,8 @@ namespace NAN2026
             a.frames = frames; a.fps = fps <= 0f ? 18f : fps;
             var sr = go.AddComponent<SpriteRenderer>();
             sr.sortingOrder = 900; sr.flipX = flipX; sr.sprite = frames[0];
-            sr.color = new Color(1f, 1f, 1f, Mathf.Clamp01(alpha));
+            var tc = tint ?? Color.white;
+            sr.color = new Color(tc.r, tc.g, tc.b, Mathf.Clamp01(alpha));
             a.sr = sr;
         }
     }
