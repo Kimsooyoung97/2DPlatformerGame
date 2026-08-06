@@ -87,7 +87,7 @@ namespace NAN2026
             {
                 if (hit.collider == null || hit.collider.isTrigger) continue;
                 if (!(hit.collider is UnityEngine.Tilemaps.TilemapCollider2D) && !(hit.collider is CompositeCollider2D)) continue;
-                groundY = hit.point.y;
+                { if (hit.collider.isTrigger || hit.collider.transform.root == transform.root) continue; groundY = hit.point.y; break; } // 최근접 표면(공중 발판 포함)
                 break;
             }
             if (float.IsNaN(groundY)) return;
