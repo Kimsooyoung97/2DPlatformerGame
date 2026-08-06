@@ -22,6 +22,12 @@ namespace NAN2026
         public float deflectSpeed = 9f;
         public float respawnDelay = 3f;
 
+        [Header("격돌 이펙트(할로우나이트식)")]
+        public float clashDuration = 0.16f;
+        public int clashLines = 8;
+        public float clashRadius = 1.3f;
+        public float clashHitstop = 0.08f;
+
         [Header("팝업")]
         public float popupRise = 1.2f;
         public float popupLife = 0.9f;
