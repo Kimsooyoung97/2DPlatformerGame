@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 300620027912272006}
   - component: {fileID: 3808806000288232274}
   - component: {fileID: 965549846879581559}
+  - component: {fileID: 2138521766740040219}
   m_Layer: 7
   m_Name: Player_Knight!!!!
   m_TagString: Player
@@ -257,3 +258,32 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerProgression
   levelConfig: {fileID: 11400000, guid: 6ee8e4a35d980c94b9c7d4e55e07cbfb, type: 2}
   augmentConfig: {fileID: 11400000, guid: fdac61d070ce07e47a6e0c361e7904bd, type: 2}
+--- !u!114 &2138521766740040219
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7771655860647579471}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 53cfd7f02da7c8e4da81b92e573b3c30, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NAN2026.PlayerSkill
+  config: {fileID: 11400000, guid: 41d5aee7f72324d428b7e5581d92b433, type: 2}
+  skillSprites:
+  - {fileID: -2596143491987553945, guid: 78ccbe5217e5f844a838a74969c5150a, type: 3}
+  - {fileID: 343250204863874052, guid: 78ccbe5217e5f844a838a74969c5150a, type: 3}
+  - {fileID: -1917482722894365826, guid: 78ccbe5217e5f844a838a74969c5150a, type: 3}
+  - {fileID: -2907779354561935520, guid: 78ccbe5217e5f844a838a74969c5150a, type: 3}
+  - {fileID: -6226158559804673461, guid: 78ccbe5217e5f844a838a74969c5150a, type: 3}
+  effectSprites:
+  - {fileID: 7804507693618471803, guid: 669a8822d5fff2b44a51baeb016e6d20, type: 3}
+  - {fileID: 1900847438843248427, guid: 669a8822d5fff2b44a51baeb016e6d20, type: 3}
+  - {fileID: 7666704972312477794, guid: 669a8822d5fff2b44a51baeb016e6d20, type: 3}
+  - {fileID: 795301357266074275, guid: 669a8822d5fff2b44a51baeb016e6d20, type: 3}
+  - {fileID: -6242229374507020571, guid: 669a8822d5fff2b44a51baeb016e6d20, type: 3}
+  - {fileID: 5336224736863034679, guid: 669a8822d5fff2b44a51baeb016e6d20, type: 3}
+  - {fileID: 4780621253200865888, guid: 669a8822d5fff2b44a51baeb016e6d20, type: 3}
+  - {fileID: 1924199025482961911, guid: 669a8822d5fff2b44a51baeb016e6d20, type: 3}
+  - {fileID: -7819861597427018027, guid: 669a8822d5fff2b44a51baeb016e6d20, type: 3}

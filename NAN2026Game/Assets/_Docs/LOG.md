@@ -3883,3 +3883,36 @@ Shelf 01에도 우리 발판처럼 밟고 올라갈 수 있게 → ㄱ
 - 저장 True
 ### 실패와 수정
 없음
+
+
+## [조사] 패링 쿨타임 — 2026-08-06 23:30
+### 프롬프트
+[조사]패링 쿨타임이 몇초야?
+### 조사 결과
+- private float EffectiveParryCooldown() / { / float reduced = config.parryCooldown - (progression != null ? progression.ParryCooldownReduction : 0f); / return Mathf.Max(config.parryCooldownMinimum, reduced); / } /  / public bool IsParryWindowActive() / { / return parryHeld && PlayerLocomotionLogic.ParrySuccessWindow(Time.time - parryPressTime, EffectiveParryWindow()); / } / float reduced = config.parryCooldown - (progression != null ? progression.ParryCooldownReduction : 0f); / [에셋] parryWindow=0.18 / [에셋] parryEndDuration=0.22 / [에셋] parryBoxOffsetX=0.3 / [에셋] parryPerfectDistance=0.15 / [에셋] parryCooldown=0.5 / [에셋] parryCooldownMinimum=0.3 / 
+### 검증
+해당 없음
+### 커밋
+해당 없음(무수정)
+
+
+## [조사] 1키 스킬 불발 원인 — 2026-08-06 23:33
+### 프롬프트
+지금은 1을 눌러도 스킬 발동 안되는데 이유가 뭐야?
+### 조사 결과
+- [씬: SecondScene_1] / Player 컴포넌트: Transform SpriteRenderer Animator Rigidbody2D BoxCollider2D PlayerController2D PlayerHealth PlayerProgression  / → ★ PlayerSkill 미부착! / [기사 프리팹] PlayerSkill=없음 / [SerializeField] private PlayerSkillConfig config; / [SerializeField] private Sprite[] skillSprites;   // 기사_스킬대기 프레임 (후속 연결) / [SerializeField] private Sprite[] effectSprites;  // E
+### 검증
+해당 없음
+### 커밋
+해당 없음(무수정)
+
+
+## [수정] 1키 스킬 본편 활성 — 기사 프리팹 부착 — 2026-08-06 23:36
+### 프롬프트
+B로 진행 → 진행하고 오늘 작업한것들 중에 팀원과 공유해야 할것들 알려줘
+### 조작 내역
+- 기사 프리팹에 PlayerSkill 부착(프리팹 수정 조항 사용자 예외 승인), config=PlayerSkillConfig, 스킬 5·이펙트 9 배선
+### 검증
+- 프리팹 저장. 발동은 사용자 재생
+### 실패와 수정
+없음
