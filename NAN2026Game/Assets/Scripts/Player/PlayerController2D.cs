@@ -235,7 +235,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
                 }
             }
             // 2/3/4 숫자키 = testParry 3동작 개별 발동
-            if (kb.digit2Key.wasPressedThisFrame) QueueAttack("ComboB1", config.slashDuration, config.slashLungeSpeed);
+            if (kb.digit2Key.wasPressedThisFrame) QueueAttack("ComboB1", config.comboB1Duration, config.slashLungeSpeed);
             if (kb.digit3Key.wasPressedThisFrame) QueueAttack("ComboB2", config.combo2Duration, config.combo2LungeSpeed);
             if (kb.digit4Key.wasPressedThisFrame) QueueAttack("ComboB3", config.combo2Duration, config.combo2LungeSpeed);
             if (kb.lKey.wasPressedThisFrame) QueueAttack("Combo3", config.combo3Duration, config.combo3LungeSpeed);
