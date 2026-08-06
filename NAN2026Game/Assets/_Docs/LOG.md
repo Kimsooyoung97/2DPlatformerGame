@@ -3872,3 +3872,14 @@ SecondScene1에 카메라가 주인공을 못 비추잖아. 바닥부분을 비�
 - 에셋 저장. 체감은 사용자 재생
 ### 실패와 수정
 없음
+
+
+## [구현] Shelf 원웨이 상판 — 2026-08-06 23:18
+### 프롬프트
+Shelf 01에도 우리 발판처럼 밟고 올라갈 수 있게 → ㄱ
+### 조작 내역
+- SecondScene_1 Shelf 3개: 알파 윗변 실측 → ShelfTopEdge(Edge+원웨이 170) 부착: PF Dungeon Props - Shelf 01 B@(33~35,y2.2) PF Dungeon Props - Shelf 01 B (1)@(28~30,y0.4) PF Dungeon Props - Shelf 01 B (2)@(28~30,y0.4)
+### 검증
+- 저장 True
+### 실패와 수정
+없음
