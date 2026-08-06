@@ -221,17 +221,25 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
             if (kb.vKey.wasPressedThisFrame)
             {
                 bool atk = attackTimer > 0f;
-                if (comboVStage == 1)
+                bool inCancel = atk && activeAttack == "ComboV1"
+                    && attackTimer <= config.slashDuration * (1f - config.comboVCancelFrac);
+                bool windowOpen = comboVStage == 1 && (!atk) && Time.time <= comboVWindowEnd;
+                if (comboVStage == 1 && (inCancel || windowOpen))
                 {
-                    // 1타 캔슬 구간(모션 60% 경과=3/5프레임) 진입했으면 즉시 2타
-                    bool canCancel = atk && activeAttack == "ComboV1" && attackTimer <= config.slashDuration * (1f - config.comboVCancelFrac);
-                    if (!atk || canCancel)
-                    { QueueAttack("ComboV2", config.combo2Duration, config.combo2LungeSpeed); comboVStage = 0; comboVBuffered = false; }
-                    else if (atk && Time.time <= comboVWindowEnd + config.slashDuration)
-                    { comboVBuffered = true; } // 캔슬 구간 전 입력 → 예약
+                    // 2타: 1타 캔슬 구간이거나 종료 후 창 안
+                    QueueAttack("ComboV2", config.combo2Duration, config.combo2LungeSpeed);
+                    comboVStage = 0; comboVBuffered = false;
                 }
-                else if (!atk)
-                { QueueAttack("ComboV1", config.slashDuration, config.slashLungeSpeed); comboVStage = 1; comboVWindowEnd = 0f; } // 창은 1타 종료 시 개시
+                else if (comboVStage == 1 && atk && !inCancel)
+                {
+                    comboVBuffered = true; // 캔슬 전 선입력 → 예약
+                }
+                else if (comboVStage == 0 && !atk)
+                {
+                    // 1타 시작
+                    QueueAttack("ComboV1", config.slashDuration, config.slashLungeSpeed);
+                    comboVStage = 1; comboVWindowEnd = 0f; comboVBuffered = false;
+                }
             }
             if (kb.lKey.wasPressedThisFrame) QueueAttack("Combo3", config.combo3Duration, config.combo3LungeSpeed);
             // 구르기: G키 제거, Ctrl(좌/우)만 사용. 공중에서는 사용할 수 없다(접지 중에만).
