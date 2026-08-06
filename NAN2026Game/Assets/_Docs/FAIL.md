@@ -95,3 +95,5 @@
 - #18 큐 소비형 공격을 코드로 캔슬할 때 attackTimer만 0으로 하면 같은 프레임 attacking 로컬이 true로 남아 CanAttack 게이트가 새 큐를 막음 → attacking도 함께 false. 추측 3회보다 Debug.Log 실측이 빨랐음
 
 - #19 진화한 파일에 기억 기준 주입 → 중복 선언. 클래스 수정 전 현재 필드·시그니처 실독 필수
+
+- #20 재생 중 컴파일=반낡은 어셈블리 오동작 가능(패링 오인) → 증상 확인은 완전 정지→재생 / #21 UnityEngine.Object에 ?? 연산자 무효(가짜 null) → 명시적 null 체크

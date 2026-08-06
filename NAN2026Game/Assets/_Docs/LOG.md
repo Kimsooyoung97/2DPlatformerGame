@@ -4470,3 +4470,15 @@ C에 적용되었던것처럼 점프하더라도 이펙트도 같이 따라오�
 - 컴파일 0. 색감은 사용자 재생 (2키 vs C 비교)
 ### 실패와 수정
 없음
+
+
+## [구현] 준보스(Fire Knight) SecondScene_1 배치 — 2026-08-07 08:21
+### 프롬프트
+준보스 시트 확인하고 SecondScene_1에 배치해줘 → 진행해
+### 조작 내역
+- Elementals Fire Knight FREE v1.1 idle 8F 반입(콘텐츠 44px→PPU 31, 신장 1.4u, 피벗 콘텐츠 바닥)
+- MidBoss_Idle.anim(10fps 루프)+MidBoss.controller, MidBoss@(70,0.6) Stage_Props 하위, 좌향, order=30. PDBG 청소·FAIL#20 동반
+### 검증
+- 저장 True. 외형·크기·지면은 사용자 재생
+### 실패와 수정
+- 낱장 경로 하위폴더 수색 / 유니티 가짜-null(??) 1회 — 명시적 체크로 교정
