@@ -62,9 +62,9 @@ namespace NAN2026
     public float comboVFxOffsetY = 0.35f;
     [Range(0f,1f)] public float comboVFxAlpha = 0.85f;
     [Header("패링 이펙트")]
-    public float parryFxFps = 10f;
+    public float parryFxFps = 22f;
     public float parryFxScale = 4f;
-    public float parryFxOffsetX = 2f;
+    public float parryFxOffsetX = 0.8f;
     public float parryFxOffsetY = 0.5f;
     [Range(0f,1f)] public float parryFxAlpha = 0.85f; // 1타 이 비율 경과 후 2타 캔슬 허용(3/5프레임) // 2단 입력 유효창
 }
