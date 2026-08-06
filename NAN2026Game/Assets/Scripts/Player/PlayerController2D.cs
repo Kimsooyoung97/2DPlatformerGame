@@ -29,6 +29,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
     [SerializeField] private UnityEngine.Sprite[] comboB1Fx; // 2키 흰 슬래시
     [SerializeField] private UnityEngine.Sprite[] comboV1Fx; // V 1타 슬래시(1~5)
     [SerializeField] private UnityEngine.Sprite[] comboV2Fx; // V 2타 슬래시(6~9)
+    private float parryFollowupAt = 0f; // C→2번 연계 예약
     private int comboVStage = 0;
     private float comboVWindowEnd = 0f;
     private bool comboVBuffered = false;
@@ -261,6 +262,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
             if (kb.cKey.wasPressedThisFrame && attackTimer <= 0f && Time.time >= parryReadyTime)
             {
                 parryHeld = true;
+                parryFollowupAt = Time.time + config.parryFollowupDelay; // 연계 예약
                 // 패링 이펙트 스폰
                 {
                     float pfDir = PlayerLocomotionLogic.EffectDirection(sr.flipX);
@@ -444,6 +446,11 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
             queuedAttack = null;
         }
 
+        if (parryFollowupAt > 0f && Time.time >= parryFollowupAt)
+        {
+            parryFollowupAt = 0f;
+            if (attackTimer <= 0f) QueueAttack("ComboB1", config.comboB1Duration, config.slashLungeSpeed); // 연계 발동
+        }
         if (comboVStage == 1 && comboVWindowEnd > 0f && Time.time > comboVWindowEnd) comboVStage = 0; // comboVStage 만료
         bool parrying = parryHeld || parryEndTimer > 0f;
         float vx = parrying && grounded ? 0f
