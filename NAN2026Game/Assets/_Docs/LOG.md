@@ -3571,3 +3571,14 @@ B안 + 50 U 진행
 - 저장 True
 ### 실패와 수정
 없음
+
+
+## [조사] 메이플 발판 개념 + 프로젝트 원웨이 인프라 — 2026-08-06 20:05
+### 프롬프트
+[조사] 메이플 스토리의 발판 아니?
+### 조사 결과
+- 개념 보고(본문) + 인프라 실측: [원웨이 인프라 흔적] / - ShowroomLayerTool.cs / - MovementConfig.cs / - PlayerController2D.cs / [SecondScene_1 내 PlatformEffector2D] 0개 / 
+### 검증
+해당 없음
+### 커밋
+해당 없음(무수정)
