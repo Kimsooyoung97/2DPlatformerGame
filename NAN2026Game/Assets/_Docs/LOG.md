@@ -4194,3 +4194,15 @@ B로 진행 → 진행하고 오늘 작업한것들 중에 팀원과 공유해�
 - 에셋 저장. 실기 확인은 사용자 (구체 패링 성공음)
 ### 실패와 수정
 - 원인 미궁 지속 시: 히트스톱 겹침·타 SFX 동시발화 순으로 추적 예정
+
+
+## [수정] Second_1 카메라 — SecondScene 컴포저 설정 완전 이식 — 2026-08-07 03:53
+### 프롬프트
+패링 사운드는 잘 들리는데 카메라 설정은 왜 바꾼거야? 카메라 설정은 되돌려
+### 조작 내역
+- 자백: 신축 최소 리그 때 기본 컴포저로 깔아 SecondScene 튜닝(데드존·룩어헤드·감쇠) 누락 — 추적 감각 차이의 원인
+- SecondScene 추가로드 → CinemachinePositionComposer 직렬화 전항목 복사(CameraDistance DeadZoneDepth Composition CenterOnActivate TargetOffset Damping Lookahead) → Second_1 vcam 적용. 렌즈 6.75·추적·confiner 기존 유지
+### 검증
+- 저장 True. 감각 동일 여부는 사용자 재생
+### 실패와 수정
+- '똑같은 카메라' 지시의 절반 이행(렌즈만) — 컴포저까지 완전 이식으로 종결
