@@ -227,7 +227,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
                     else { QueueAttack("ComboV2", config.combo2Duration, config.combo2LungeSpeed); comboVStage = 0; comboVBuffered = false; }
                 }
                 else if (!atk)
-                { QueueAttack("ComboV1", config.slashDuration, config.slashLungeSpeed); comboVStage = 1; comboVWindowEnd = Time.time + config.comboVWindow; }
+                { QueueAttack("ComboV1", config.slashDuration, config.slashLungeSpeed); comboVStage = 1; comboVWindowEnd = 0f; } // 창은 1타 종료 시 개시
             }
             if (kb.lKey.wasPressedThisFrame) QueueAttack("Combo3", config.combo3Duration, config.combo3LungeSpeed);
             // 구르기: G키 제거, Ctrl(좌/우)만 사용. 공중에서는 사용할 수 없다(접지 중에만).
@@ -380,8 +380,12 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
             if (attackTimer <= 0f)
             {
                 activeAttack = null;
-                if (comboVBuffered && comboVStage == 1 && Time.time <= comboVWindowEnd)
-                { QueueAttack("ComboV2", config.combo2Duration, config.combo2LungeSpeed); comboVStage = 0; }
+                if (comboVStage == 1)
+                {
+                    comboVWindowEnd = Time.time + config.comboVWindow; // 1타 종료 순간부터 0.6초 창 개시
+                    if (comboVBuffered)
+                    { QueueAttack("ComboV2", config.combo2Duration, config.combo2LungeSpeed); comboVStage = 0; }
+                }
                 comboVBuffered = false;
             }
         }
@@ -401,6 +405,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
             queuedAttack = null;
         }
 
+        if (comboVStage == 1 && comboVWindowEnd > 0f && Time.time > comboVWindowEnd) comboVStage = 0; // comboVStage 만료
         bool parrying = parryHeld || parryEndTimer > 0f;
         float vx = parrying && grounded ? 0f
             : attacking
