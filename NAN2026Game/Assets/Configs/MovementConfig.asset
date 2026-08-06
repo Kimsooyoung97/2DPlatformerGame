@@ -50,13 +50,16 @@ MonoBehaviour:
   backstepIFrameEndFrac: 0.833
   comboVWindow: 0.6
   comboVCancelFrac: 0.6
-  comboVFxFps: 10
+  comboB1Duration: 0.6
+  comboB1FxTint: {r: 1, g: 1, b: 1, a: 1}
+  comboVFxFps: 8.79
   comboVFxScale: 4
-  comboVFxOffsetX: 2
+  comboVFxOffsetX: 0.53
   comboVFxOffsetY: 0.5
-  comboVFxAlpha: 0.85
+  comboVFxAlpha: 0.66847926
   parryFxFps: 22
   parryFxScale: 4
   parryFxOffsetX: 0.8
-  parryFxOffsetY: 0.5
+  parryFxOffsetY: 2.66
+  parryReachX: 1.5
   parryFxAlpha: 0.85

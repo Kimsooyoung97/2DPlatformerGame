@@ -57,7 +57,7 @@ namespace NAN2026
     public float comboVWindow = 0.6f;
     [Range(0f,1f)] public float comboVCancelFrac = 0.6f;
     public float comboB1Duration = 0.6f;
-    public Color comboB1FxTint = new Color(0.243f, 0.690f, 1f); // 패링과 같은 하늘색
+    public Color comboB1FxTint = Color.white; // 원본색 그대로
 
     public float comboVFxFps = 18f;
     public float comboVFxScale = 1.7f;
