@@ -29,6 +29,8 @@ namespace NAN2026
         public float clashHitstop = 0.08f;
         public AudioClip clashSound;
         [Range(0f,1f)] public float clashVolume = 0.9f;
+        public float clashSoundStartMs = 0f;   // 재생 시작(ms)
+        public float clashSoundEndMs = 2000f;  // 재생 끝(ms, 이 구간만 사용)
 
         [Header("팝업")]
         public float popupRise = 1.2f;

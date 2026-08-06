@@ -124,6 +124,26 @@ namespace NAN2026
         }
     }
 
+    public static class ClashSfx
+    {
+        public static void PlaySegment(AudioClip clip, float vol, float startMs, float endMs)
+        {
+            var go = new GameObject("ClashSfx");
+            var src = go.AddComponent<AudioSource>();
+            src.clip = clip; src.volume = vol; src.playOnAwake = false;
+            float st = Mathf.Clamp(startMs / 1000f, 0f, clip.length);
+            float en = endMs <= 0f ? clip.length : Mathf.Clamp(endMs / 1000f, st, clip.length);
+            src.time = st; src.Play();
+            var stopper = go.AddComponent<ClashSfxStopper>();
+            stopper.stopAt = en - st;
+        }
+    }
+    public class ClashSfxStopper : MonoBehaviour
+    {
+        public float stopAt; float t;
+        void Update() { t += Time.unscaledDeltaTime; if (t >= stopAt) Destroy(gameObject); }
+    }
+
     public static class ParryClashFx
     {
         public static void Play(Vector3 pos, SpikeBallConfig cfg)
@@ -133,7 +153,7 @@ namespace NAN2026
             var f = go.AddComponent<ClashFlash>();
             f.Init(cfg != null ? cfg.clashDuration : 0.16f, cfg != null ? cfg.clashLines : 8, cfg != null ? cfg.clashRadius : 1.3f, cfg != null ? cfg.clashHitstop : 0.08f);
             if (cfg != null && cfg.clashSound != null)
-                AudioSource.PlayClipAtPoint(cfg.clashSound, pos, cfg.clashVolume);
+                ClashSfx.PlaySegment(cfg.clashSound, cfg.clashVolume, cfg.clashSoundStartMs, cfg.clashSoundEndMs);
         }
     }
 

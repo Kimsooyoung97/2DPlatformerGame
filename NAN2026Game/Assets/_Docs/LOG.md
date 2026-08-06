@@ -4159,3 +4159,15 @@ B로 진행 → 진행하고 오늘 작업한것들 중에 팀원과 공유해�
 - 컴파일 0. 소리는 사용자 재생 (구체 패링 성공 시)
 ### 실패와 수정
 없음
+
+
+## [수정] 패링음 구간 지정 + 인스펙터 미리듣기 — 2026-08-07 03:40
+### 프롬프트
+소리가 이상함. 음원 중 어느 부분 쓸지 수동 지정하고 싶다 (2초 클립, ms 정밀)
+### 조작 내역
+- SpikeBallConfig: clashSoundStartMs/EndMs 신설. ClashSfx.PlaySegment(임시 AudioSource, time=시작, 길이 후 unscaled 정지)로 구간만 재생
+- Editor/SpikeBallConfigEditor.cs: 인스펙터에 ▶지정구간 재생·정지 버튼(AudioUtil 리플렉션 프리뷰) — 게임 재생 없이 구간 청취
+### 검증
+- 런타임 컴파일 0(에디터 OK). 구간 확정은 사용자
+### 실패와 수정
+없음
