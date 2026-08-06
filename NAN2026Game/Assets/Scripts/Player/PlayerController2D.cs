@@ -383,7 +383,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
             if (comboVStage == 1 && comboVBuffered && activeAttack == "ComboV1"
                 && attackTimer <= config.slashDuration * (1f - config.comboVCancelFrac))
             {
-                activeAttack = null; attackTimer = 0f;
+                activeAttack = null; attackTimer = 0f; attacking = false; // attacking도 내려 같은 프레임 2타 소비 허용
                 QueueAttack("ComboV2", config.combo2Duration, config.combo2LungeSpeed);
                 comboVStage = 0; comboVBuffered = false;
             }
