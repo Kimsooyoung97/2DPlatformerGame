@@ -56,7 +56,8 @@ namespace NAN2026
     [Header("V 2단 콤보")]
     public float comboVWindow = 0.6f;
     [Range(0f,1f)] public float comboVCancelFrac = 0.6f;
-    public float comboB1Duration = 0.6f; // 2키 동작 길이(느긋한 묵직함)
+    public float comboB1Duration = 0.6f;
+    public float comboB1FxFps = 24f; // 2키 동작 길이(느긋한 묵직함)
     public float comboVFxFps = 18f;
     public float comboVFxScale = 1.7f;
     public float comboVFxOffsetX = 1.2f; // 캐릭터 궤적 너머 전방 이격

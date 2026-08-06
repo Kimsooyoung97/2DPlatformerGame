@@ -74,3 +74,5 @@
 - 발소리1~3.wav·검기발사1.wav(2026-08-04): 사용자 ElevenLabs 생성 SFX — 프롬프트 기입 필요
 
 - RuinedCastleWall.png(2026-08-05): 팀 AI 생성 타일셋(카톡 수신) — 생성자·프롬프트 기입 필요
+
+- Sprites_AI/FX/SlashFX_White456.png — SlashFX FREE v1.2 (7.13.23) GameEndeavor 흰색 프레임 합성 | 라이선스: 팩 동봉 문서 확인 요

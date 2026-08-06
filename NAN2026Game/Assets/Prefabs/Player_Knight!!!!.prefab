@@ -224,6 +224,7 @@ MonoBehaviour:
   - {fileID: 6275229790398187772, guid: 4876c5a6ed4140140b9feb96019ac9c5, type: 3}
   - {fileID: 7067128601961725696, guid: 4876c5a6ed4140140b9feb96019ac9c5, type: 3}
   - {fileID: 8271886749305157008, guid: 4876c5a6ed4140140b9feb96019ac9c5, type: 3}
+  comboB1FxArr: []
   parryFx:
   - {fileID: 2640848902933117097, guid: e81c219977c8aa34fa86fc85df4ca005, type: 3}
   - {fileID: -119877459432535513, guid: e81c219977c8aa34fa86fc85df4ca005, type: 3}
@@ -234,6 +235,10 @@ MonoBehaviour:
   - {fileID: 634448554111309541, guid: e81c219977c8aa34fa86fc85df4ca005, type: 3}
   - {fileID: -2362135707271997696, guid: e81c219977c8aa34fa86fc85df4ca005, type: 3}
   - {fileID: -6957269543686549540, guid: e81c219977c8aa34fa86fc85df4ca005, type: 3}
+  comboB1Fx:
+  - {fileID: 1545080327702295207, guid: ede26f3a53013b542a2d0a91a18e1acf, type: 3}
+  - {fileID: -6096552224415131945, guid: ede26f3a53013b542a2d0a91a18e1acf, type: 3}
+  - {fileID: 4876697970402421158, guid: ede26f3a53013b542a2d0a91a18e1acf, type: 3}
   comboV1Fx:
   - {fileID: 5321137856573052593, guid: b9134e4f56c51e54491b4bb93f2c2f62, type: 3}
   - {fileID: -6297934143841805690, guid: b9134e4f56c51e54491b4bb93f2c2f62, type: 3}
