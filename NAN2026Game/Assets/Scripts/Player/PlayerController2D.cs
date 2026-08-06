@@ -429,7 +429,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
         {
             bool __win = __bsE >= config.backstepDuration * config.backstepMoveStartFrac
                       && __bsE <  config.backstepDuration * config.backstepMoveEndFrac;
-            float __vx = __win ? (transform.localScale.x >= 0f ? -1f : 1f) * config.backstepSpeed : 0f;
+            float __vx = __win ? (sr.flipX ? 1f : -1f) * config.backstepSpeed : 0f; // 바라보는 반대로
             rb.linearVelocity = new Vector2(__vx, rb.linearVelocity.y);
         }
     }
