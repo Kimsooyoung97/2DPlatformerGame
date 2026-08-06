@@ -29,7 +29,13 @@ namespace NAN2026
                 {
                     if (c == null) continue;
                     if (c.GetType().Name == "PlayerController2D")
-                    { controller = c; tryParry = c.GetType().GetMethod("TryParry"); }
+                    { controller = c; windowActive = controller != null ? controller.GetType().GetMethod("IsParryWindowActive") : null;
+                var mcT = System.Type.GetType("NAN2026.MovementConfig, Assembly-CSharp");
+                var mcF = controller != null ? controller.GetType().GetField("config", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance) : null;
+                var mcV = mcF != null ? mcF.GetValue(controller) : null;
+                var prF = mcV != null ? mcV.GetType().GetField("parryReachX") : null;
+                if (prF != null) parryReach = (float)prF.GetValue(mcV);
+                tryParry = c.GetType().GetMethod("TryParry"); }
                 }
                 var pv = player.Find("PlayerVisionLight");
                 if (pv != null)
@@ -51,12 +57,27 @@ namespace NAN2026
             if (phase == 3)
             {
                 if (Time.time >= respawnAt)
-                { transform.position = home; phase = 0; SetAlpha(1f); if (sr != null) sr.enabled = true; }
+                { transform.position = home; phase = 0; resolved = false; SetAlpha(1f); if (sr != null) sr.enabled = true; }
                 return;
             }
             if (phase == 2)
             {
                 transform.position += (Vector3)(dir * config.launchSpeed * Time.deltaTime);
+                // 조기 패링: 이펙트 리치(parryReachX) 안이고 창 활성이면 접촉 전 성공 처리
+                if (!resolved && controller != null && parryReach > 0f)
+                {
+                    float ddx = transform.position.x - player.position.x;
+                    float pface = 0f;
+                    var psr = player.GetComponentInChildren<UnityEngine.SpriteRenderer>();
+                    if (psr != null) pface = psr.flipX ? -1f : 1f;
+                    bool inFront = pface != 0f && ddx * pface > 0f;
+                    float d2 = UnityEngine.Vector2.Distance(transform.position, player.position);
+                    if (inFront && d2 <= parryReach && windowActive != null)
+                    {
+                        object w = windowActive.Invoke(controller, null);
+                        if (w is bool && (bool)w) ResolveHit();
+                    }
+                }
                 transform.Rotate(0f, 0f, config.spinDegPerSec * Time.deltaTime);
                 if (transform.position.y < 2.6f || Vector3.Distance(transform.position, home) > 40f) Break(false);
                 return;
@@ -79,6 +100,15 @@ namespace NAN2026
         {
             if (phase != 2) return;
             if (other.transform.root != null && player != null && other.transform.root == player.root)
+                ResolveHit();
+        }
+
+        bool resolved;
+        float parryReach = 1.5f;
+        System.Reflection.MethodInfo windowActive;
+        void ResolveHit()
+        {
+            if (resolved) return; resolved = true;
             {
                 bool ok = false;
                 if (controller != null && tryParry != null)

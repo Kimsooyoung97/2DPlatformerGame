@@ -260,7 +260,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
                 {
                     float pfDir = PlayerLocomotionLogic.EffectDirection(sr.flipX);
                     Vector3 pfPos = transform.position + new Vector3(config.parryFxOffsetX * pfDir, config.parryFxOffsetY, 0f);
-                    VSlashFx.Play(pfPos, parryFx, config.parryFxFps, pfDir < 0f, config.parryFxScale, config.parryFxAlpha);
+                    VSlashFx.Play(pfPos, parryFx, config.parryFxFps, pfDir < 0f, config.parryFxScale, config.parryFxAlpha, transform); // 점프 중에도 추종
                 }
                 parryPressTime = Time.time;
                 parryReadyTime = Time.time + EffectiveParryCooldown();

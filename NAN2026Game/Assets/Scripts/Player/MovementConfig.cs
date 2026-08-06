@@ -66,6 +66,7 @@ namespace NAN2026
     public float parryFxScale = 4f;
     public float parryFxOffsetX = 0.8f;
     public float parryFxOffsetY = 0.5f;
+    public float parryReachX = 1.5f; // 전방 이 거리 안 위협은 접촉 전 조기 패링
     [Range(0f,1f)] public float parryFxAlpha = 0.85f; // 1타 이 비율 경과 후 2타 캔슬 허용(3/5프레임) // 2단 입력 유효창
 }
 }
