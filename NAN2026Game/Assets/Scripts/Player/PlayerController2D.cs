@@ -25,7 +25,6 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
                 && e <  config.backstepDuration * config.backstepIFrameEndFrac;
         }
     }
-    [SerializeField] private UnityEngine.Sprite[] comboB1FxArr; // 2키 SlashFX
     [SerializeField] private UnityEngine.Sprite[] parryFx; // C 패링 슬래시
     [SerializeField] private UnityEngine.Sprite[] comboB1Fx; // 2키 흰 슬래시
     [SerializeField] private UnityEngine.Sprite[] comboV1Fx; // V 1타 슬래시(1~5)
