@@ -29,6 +29,9 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
     [SerializeField] private UnityEngine.Sprite[] comboV1Fx; // V 1타 슬래시(1~5)
     [SerializeField] private UnityEngine.Sprite[] comboV2Fx; // V 2타 슬래시(6~9)
     private int comboVStage = 0;
+    private int comboBStage = 0;
+    private float comboBWindowEnd = 0f;
+    private bool comboBBuffered = false;
     private float comboVWindowEnd = 0f;
     private bool comboVBuffered = false;
     [SerializeField] private float rollDuration = 0.75f;
@@ -234,6 +237,27 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
                     comboVStage = 1; comboVWindowEnd = 0f; comboVBuffered = false;
                 }
             }
+            // B 3단 콤보 (testParry 시트, 무이펙트)
+            if (kb.bKey.wasPressedThisFrame)
+            {
+                bool batk = attackTimer > 0f;
+                bool bCancel = batk && activeAttack != null && activeAttack.StartsWith("ComboB")
+                    && attackTimer <= config.slashDuration * (1f - config.comboVCancelFrac);
+                bool bWin = comboBStage > 0 && !batk && Time.time <= comboBWindowEnd;
+                if (comboBStage > 0 && comboBStage < 3 && (bCancel || bWin))
+                {
+                    comboBStage++;
+                    QueueAttack("ComboB" + comboBStage, config.combo2Duration, config.combo2LungeSpeed);
+                    if (bCancel) { attackTimer = 0f; activeAttack = null; }
+                    comboBBuffered = false;
+                }
+                else if (comboBStage > 0 && comboBStage < 3 && batk) comboBBuffered = true;
+                else if (comboBStage == 0 && !batk)
+                {
+                    QueueAttack("ComboB1", config.slashDuration, config.slashLungeSpeed);
+                    comboBStage = 1; comboBWindowEnd = 0f; comboBBuffered = false;
+                }
+            }
             if (kb.lKey.wasPressedThisFrame) QueueAttack("Combo3", config.combo3Duration, config.combo3LungeSpeed);
             // 구르기: G키 제거, Ctrl(좌/우)만 사용. 공중에서는 사용할 수 없다(접지 중에만).
             if (grounded && (kb.leftCtrlKey.wasPressedThisFrame || kb.rightCtrlKey.wasPressedThisFrame))
@@ -407,6 +431,13 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
             if (attackTimer <= 0f)
             {
                 activeAttack = null;
+                if (comboBStage > 0 && comboBStage < 3)
+                {
+                    comboBWindowEnd = Time.time + config.comboVWindow;
+                    if (comboBBuffered)
+                    { comboBStage++; QueueAttack("ComboB" + comboBStage, config.combo2Duration, config.combo2LungeSpeed); comboBBuffered = false; }
+                }
+                else if (comboBStage >= 3) { comboBStage = 0; comboBBuffered = false; }
                 if (comboVStage == 1)
                 {
                     comboVWindowEnd = Time.time + config.comboVWindow; // 1타 종료 순간부터 0.6초 창 개시
@@ -433,6 +464,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
         }
 
         if (comboVStage == 1 && comboVWindowEnd > 0f && Time.time > comboVWindowEnd) comboVStage = 0; // comboVStage 만료
+        if (comboBStage > 0 && comboBWindowEnd > 0f && Time.time > comboBWindowEnd && attackTimer <= 0f) comboBStage = 0; // comboBStage 만료
         bool parrying = parryHeld || parryEndTimer > 0f;
         float vx = parrying && grounded ? 0f
             : attacking
