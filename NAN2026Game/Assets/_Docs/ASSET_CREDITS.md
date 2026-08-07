@@ -84,3 +84,14 @@
 - Map/Showroom/Medieval/(장식류: 나무·텐트·조각상·분재·광석 등) — GandalfHardcore FREE Platformer Assets 동일 팩 | 동일 라이선스
 
 - Map/Showroom/Medieval/WaterTiles·WaterAnimSheet·Pine Trees — GandalfHardcore 동일 팩 | 동일 라이선스
+
+
+## 투척무기 SFX 4종 — 2026-08-08
+- 파일: 도끼착탄.wav, 발사기전조_철컥1.wav, 발사기전조_철컥2.wav, 화살1.wav, 회전무기.wav (Assets/Audio/Effect/투척무기/)
+- 출처: ElevenLabs SFX 생성 (동현 생성)
+- 라이선스: ElevenLabs 구독 약관에 따른 상업 이용
+- 생성 프롬프트:
+  - 화살1: "Bow string twang followed by fast arrow whoosh flying past, sharp and quick, retro action game, 0.5 seconds"
+  - 발사기전조_철컥1: "Mechanical trap arming click, metal latch tension winding up, short ominous clank in a stone dungeon, slight echo, 0.7 seconds"
+  - 회전무기: "Spinning blade whirling through the air, rhythmic whoosh-whoosh rotation, metallic edge, seamless loop, 1.5 seconds"
+  - 도끼착탄: "Heavy axe blade slamming into stone wall, deep thunk with metallic ring, dungeon reverb, 0.8 seconds"
