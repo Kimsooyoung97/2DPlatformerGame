@@ -5184,485 +5184,150 @@ AdventureScene_Test에 있는 나무들이랑 Props 들도 AdventureScene_Test1�
 ### 실패와 수정
 - 커스텀 TileBase 혼재 팔레트는 Automatic 셀 크기 금지 — Manual이 표준
 
-
-## [구현] DungeonShowroom 신설 — 2026-08-08 00:31
+## [구현] MidBoss 신규 4패턴(NormalAttack/FireAttack/FireBomb/WheelAttack) + 추격/점프/사망 — 2026-08-05
 ### 프롬프트
-던전 소품 Showroom 추가해서 만들어줄래?
+현재 씬에 존재하는 MidBoss의 공격 패턴을 만들건데 애니메이터의 Parameters를 알맞게 추가해주고 그에 맞게 스크립트도 바꾸어서 NormalAttack(쿨타임없음, 데미지 1), FireAttack(쿨타임4초, 데미지 2), FireBomb(쿨타임 8초, 데미지 4), WheelAttack(쿨타임 6초, 데미지 3씩 2틱), EnemyAI 스크립트도 붙여서 player를 chase하고 점프로 따라올 때 jump 애니메이션이 발동되게 보스가 죽으면 Death 애니메이션이 되도록 해줘
+(대화 중 구조 충돌 확인 — 표준 EnemyAI는 MonsterController2D/MonsterAnimation에 강하게 의존하는데 MidBoss는 팀원이 만든 커스텀 개별 상태 Animator라 안 맞음. 사용자가 '2번'(기존 MidBoss 방식 유지, 로직만 새로 작성) 선택해 그 방향으로 진행)
+### 조사
+MidBoss.controller에 필요한 상태(MidBoss_Idle/Run/FireAtk/WheelAtk/NormalAtk/FireBomb/Death/Jump)는 이미 다 있었으나 파라미터가 Death 트리거 하나뿐이었고, Idle의 기존 전이 5개는 전부 조건 없는 exitTime 전이라 사실상 미완성 상태였음. MonsterHealth.Die()도 animation.Die()를 널 체크 없이 호출해 MonsterAnimation 없는 몬스터는 사망 시 크래시나는 문제 발견. 플레이어 공격 판정 코드가 전부 NHNDemo.MonsterHealth를 찾아서 데미지를 주므로, 자체 체력 시스템 대신 MonsterHealth를 그대로 써야 플레이어가 때릴 수 있음을 확인
 ### 조작 내역
-- Cainos 던전 프리팹 324종 수집(TP·팔레트 제외) → Assets/Map/Showroom/DungeonShowroom.unity 폭 62u 줄바꿈 전시, 던전풍 카메라
-- 쇼룸 창 '던전 소품' 버튼 + 시점 포커스
+- MidBoss.controller: Trigger 5개(NormalAttack/FireAttack/FireBomb/WheelAttack/Jump) + Bool IsMoving 파라미터 추가. Idle의 기존 무조건 전이 5개 제거 후 재구성 — Idle↔Run(IsMoving), AnyState→각 패턴(Trigger), 각 패턴→Idle(exitTime 기반 자동 복귀)
+- MonsterHealth.cs(Assets/Player/Scripts): animation.Die() 호출에 널 체크 추가(MonsterAnimation 없는 몬스터도 안전하게 죽도록, 기존 사용처 영향 없음)
+- MidBossPatternConfig(SO) 신규: 공통(maxHealth/aggroRange/attackRange/chaseSpeed/jumpYThreshold/jumpVelocity) + 4패턴 각각의 windup/데미지/쿨타임/사거리
+- MidBossController.cs 신규(IParryReflector 구현, EnemyAI 미사용): NHNDemo.MonsterHealth 요구, OnDied 구독해 Death 트리거+자체 dead 플래그 설정. Update에서 추격(아이들↔런 Bool), 높이차 유지 기반 점프 판정(EnemyAI와 동일한 '일정 시간 유지' 방식) 후 Jump 트리거+수직 속도 부여, 사거리 안이면 랜덤 패턴(NormalAttack은 쿨타임 없이 항상 후보, 나머지 3개는 각자 쿨타임 지난 것만 후보) 실행. 근접 2종(Normal/Wheel)은 TryHitMelee로 사거리+패링 체크 후 데미지, 원거리 2종(Fire/Bomb)은 기존 SpikeProjectile 재사용해 구체 발사
+- 기존 MidBossAI는 삭제하지 않고 enabled=false로 비활성화만 함(팀원 작업 보존)
+- 씬: MidBoss에 MonsterHealth(maxHealth=30)+MidBossController(config=MidBossPatternConfig, player=Player_Knight!!!!) 부착
 ### 검증
-- 컴파일 0, 저장 True
+- refresh_unity(compile=force) — 1차 시도에서 PlayerController2D/PlayerHealth를 존재하지 않는 네임스페이스(NAN2026.Showroom)로 잘못 참조해 컴파일 에러, 실제로는 전역 네임스페이스임을 확인 후 수정 → 0건
+- 저장 → manage_scene(load) 강제 재로드 → 참조 전부 유지, MidBossAI.enabled=False 확인
+- run_tests(EditMode) → 140/140 통과 (job 746831d55dc7459aac9dbb43361e5402)
+- 재생 모드 실측: 이 씬(UITestScene)에 지면이 거의 없어(GameObject 콜라이더 하나, x≈0 근처만) 초기 원거리 테스트가 낙사로 오염됐던 걸 발견하고 실제 지면 근처로 재배치. controller.enabled=false로 자동 Update 개입을 차단한 뒤 각 패턴을 리플렉션으로 직접 호출해 격리 검증: NormalAttack HP -1(5→4), FireAttack HP -2(5→3), FireBomb HP -4(5→1) 전부 정확히 기대값과 일치 확인. WheelAttack은 1틱만 먼저 -3(5→2) 확인 후 2틱째가 플레이어 피격무적시간(0.6초)보다 짧은 틱 간격(0.35초) 때문에 씹히는 걸 발견해 wheelAttackTickInterval을 0.7초로 조정, 이후 재검증에서 6데미지 합산으로 5짜리 최대체력 플레이어가 사망→리스폰됨을 확인(양쪽 틱 다 명중했다는 간접 증거). Jump는 강제 발동 시 Rigidbody2D.velocity.y가 config.jumpVelocity(8)와 정확히 일치함을 확인. Death는 MonsterHealth.TakeDamage(999)로 즉사시켜 예외 없이(널체크 수정 효과 확인) 사망→페이드→Destroy까지 전체 파이프라인이 정상 완주됨을 확인
 ### 실패와 수정
-없음
+- PlayerController2D/PlayerHealth를 잘못된 네임스페이스로 참조해 컴파일 에러 → 전역 네임스페이스로 수정
+- WheelAttack 2틱 간격(0.35초)이 플레이어 무적시간(0.6초)보다 짧아 2틱째가 무효화되던 문제 → 간격을 0.7초로 조정
+- 초기 테스트에서 UITestScene에 지면이 거의 없다는 걸 모르고 임의 좌표(x=50~70)로 옮겨 낙사로 오염된 결과를 얻음 → 실제 지면 위치(GameObject 콜라이더, x≈0 근처) 확인 후 그 근처에서 재검증
+### 눈으로 확인 필요
+- Jump/각 패턴 애니메이션 전환이 실제로 눈으로 봤을 때 자연스러운지(특히 AnyState 기반 전이라 다른 패턴 도중에도 즉시 끊고 전환됨)
+- WheelAttack 틱 간격을 0.7초로 늘린 게 체감상 너무 느리진 않은지
 
-
-## [수정] 쇼룸 창 타일 전량 편입 — 팔레트 대체 — 2026-08-08 01:22
+## [수정] MidBoss 공격 중 방향 전환 방지 — 2026-08-06
 ### 프롬프트
-Tile Palette를 좀 고쳐줘. 아니면 Tile Palette에 있는 모든 것들을 에셋 쇼룸 커스텀 룸에 옮겨주던가
+지금 MidBoss가 공격을 시전하는 중에 플레이어가 반대편으로 이동하면 MidBoss의 방향이 바뀌는데 그러지말고 공격중에는 한 방향만 보게 해줘
+### 조사
+Update()의 스프라이트 반전(sr.flipX)은 이미 busy일 때 건너뛰도록 되어 있었으나, 원거리 패턴(FireAttack/FireBomb)의 FireOrb()가 발사 순간(윈드업이 끝난 후) 플레이어의 그 시점 위치로 다시 조준 방향을 계산하고 있어 — 윈드업 도중 플레이어가 반대편으로 넘어가면 실제로 반대 방향으로 구체가 나가는 문제가 있었음(사용자가 본 '방향이 바뀐다'는 현상의 실제 원인으로 추정)
 ### 조작 내역
-- 스캔 밖 타일 36개(바이옴 숲/평원·히어로나이트 환경) → SearchRoots 3곳 추가, 밑줄 없는 트레일링 숫자 묶음 규칙(TileGroundN→TileGround)
-- 이로써 프로젝트 전 타일이 쇼룸 창 타일 탭 커버 — 창 자체 붓은 팔레트 셀 캐시와 무관
+- MidBossController에 lockedAimDir 필드 추가: DoRandomPattern 시작 시점(공격 종류를 고르기 전)에 그 순간의 플레이어 방향을 한 번 계산해 고정, 스프라이트 반전(sr.flipX)도 그 자리에서 같이 확정
+- FireOrb()가 발사 순간 플레이어 위치를 다시 조준하지 않고 lockedAimDir을 그대로 사용하도록 변경
 ### 검증
-- 컴파일 0. 드롭다운 신규 패밀리 확인은 사용자
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- 저장 → manage_scene(load) 강제 재로드 → run_tests(EditMode) → 140/140 통과 (job dd4ce9232b0b402f8a73ad5d6ec7ae29)
+- 재생 모드 실측: DoRandomPattern 시작 직후 lockedAimDir=(1,0)·flipX=False(오른쪽) 확인. 이후 플레이어를 반대편으로 옮긴 뒤 확인했을 때 flipX=True로 보였으나, nextPatternAllowedTime이 방금 새로 설정된 상태였음을 리플렉션으로 확인 — 즉 첫 공격이 자연스럽게 끝나고 두 번째 공격이 새 방향으로 다시 시작된 것이지, 진행 중이던 공격의 방향이 바뀐 게 아님을 확인(정상 동작)
 ### 실패와 수정
-없음
+- 없음
 
-
-## [수정] 애니 타일 미리보기 직접 굽기 — 기둥 가시화 — 2026-08-08 01:25
+## [수정] MidBoss 공격 애니메이션 재생 중 방향 고정(busy를 클립 전체 길이로 확장) — 2026-08-06
 ### 프롬프트
-세로 기둥들도 없다니깐 세로 기둥 에셋룸에 어디있는데
+아니 normalattack 이랑 fire attack들을 사용할 때 애니메이션이 끝나기 전에 플레이어가 움직여서 보스 반대편으로 가면 애니메이션 도중에 보스의 방향이 안바뀌게 해줘
+### 조사
+이전 수정(lockedAimDir)은 방향을 공격 '시작 시점'에 고정했지만, busy는 windup 시간만큼만 유지되고 있었음. 실제 애니메이션 클립 길이를 확인하니 windup보다 훨씬 김: NormalAtk 0.92초(windup 0.35초), FireAtk 1.5초(windup 0.5초), FireBomb 0.75초(windup 0.7초), Jump 1.67초(대기 0.5초). 즉 판정(TryHitMelee/FireOrb)이 끝난 뒤에도 애니메이션은 한참 더 재생 중인데 그 구간에서 busy=false가 되어 Update()가 다시 방향을 갱신하고 있었음 — 이게 '애니메이션 도중 방향이 바뀐다'는 실제 원인
 ### 조작 내역
-- 진단: 수집·묶음·폴백 전부 정상(WaterAnim 46 로드, 기둥 _3/_4 존재) — AssetPreview 비동기 null로 칸이 투명 렌더
-- GetTilePreview: 스프라이트 영역 RT 경유 직접 굽기+캐시로 교체 (읽기전용·비동기 무관)
+- MidBossPatternConfig에 각 패턴의 실제 애니메이션 길이 필드 추가(normalAttackAnimLength/fireAttackAnimLength/fireBombAnimLength/wheelAttackAnimLength/jumpAnimLength), MidBoss.controller의 클립 길이와 정확히 맞춤
+- MidBossController에 HoldForRemainingAnim(elapsed, animLength) 헬퍼 추가: 이미 흐른 시간(windup 등)을 빼고 남은 시간만큼 더 대기해 클립이 완전히 끝날 때까지 busy를 유지
+- DoNormalAttack/DoFireAttack/DoFireBomb/DoWheelAttack 전부 판정 로직 뒤에 HoldForRemainingAnim을 yield하도록 수정. WheelAttack은 windup+틱간격 합계를 기준으로 계산(이미 1초 클립보다 길 수 있어 그 경우 추가 대기 없음)
+- DoJump도 동일하게 config.jumpAnimLength만큼 대기하도록 수정, 점프 시작 시점에도 방향을 한 번 고정
 ### 검증
-- 컴파일 0. 물 패밀리에 기둥 표시 여부는 사용자 새로고침
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건 (Config/스크립트 두 차례 수정 각각 확인)
+- 저장 → manage_scene(load) 강제 재로드 → Config 에셋 값(normal=0.92/fire=1.5/bomb=0.75/wheel=1/jump=1.67) 유지 확인
+- run_tests(EditMode) → 140/140 통과 (job cf54648bc64f4f83917820719bd08525, 이후 job 23c3de38069944d5bf11534aeccb55b5로 재확인)
+- 재생 모드 실측: 여러 차례 시도했으나 이 원격·비동기 도구 호출 환경 특성상(매 호출 사이 실제 시간이 흘러 애니메이션이 이미 끝나버리는 경우가 많음) 0.75~1.67초짜리 단일 공격 구간 '도중'을 정확히 포착하는 데 계속 실패함. Time.timeScale을 0.02까지 낮춰 애니메이션을 인위적으로 늘려서 재시도했으나 그마저도 정확한 타이밍 포착에는 실패 — 코드 리뷰로는 로직이 명확히 맞음(HoldForRemainingAnim이 판정 후 남은 시간만큼 반드시 대기하고 나서야 busy=false가 됨을 소스로 재확인)
 ### 실패와 수정
-- AssetPreview 의존 금지 교훈 — 커스텀 에셋 미리보기는 직접 굽기
+- 없음(로직 수정은 코드 리뷰로 정확성 확인, 동적 실측은 도구 환경 한계로 결론 못 냄)
+### 사람 확인 필요 — 중요
+- 이번 수정은 코드 로직상으로는 명확히 맞지만(HoldForRemainingAnim이 클립 전체 길이만큼 busy를 강제 유지), 실제 재생에서 애니메이션 도중 방향이 안 바뀌는지 **직접 눈으로 확인 부탁드립니다**. 도구로 정밀하게 재현·검증하는 데 이번엔 계속 실패했습니다
 
-
-## [수정] 애니 타일 미리보기 텍스코드 직결 — 선택 일치 — 2026-08-08 01:29
+## [구현] 보스 전용 화면 우측 상단 체력바(BossHealthBarUI) — 2026-08-07
 ### 프롬프트
-에셋 쇼룸에 내가 선택한 타일과 다른 물 타일이 나와.
+다른몬스터들 WorldHealthBar와는 다르게 보스전용 체력바로 화면 우측 상단에 존재하는 체력바 스크립트 짜줘
+### 조사
+WorldHealthBar는 SpriteRenderer 두 장으로 몬스터 머리 위에 월드 스페이스로 그리는 범용 몬스터 체력바(모든 몬스터 공용). UI Canvas에 이미 플레이어용 HP바(Portrait/HpBar, Image Type=Filled, PlayerHealthBarUI)가 있어 같은 시각 스타일(Image Filled)로 보스 전용 화면 고정 UI를 만들기로 함
 ### 조작 내역
-- 원인: 직전 RT 굽기의 ReadPixels 세로 뒤집힘 — 물 칸 그림이 상하 반전 위치의 타일 그림으로 표시
-- RT 굽기 제거 → GUI.DrawTextureWithTexCoords로 스프라이트 영역 원좌표 직결 (뒤집힘 원천 차단), 프레임 스프라이트 캐시 헬퍼
+- BossHealthBarUI.cs 신규: NHNDemo.MonsterHealth의 OnHealthChanged/OnDied를 구독. fillImage.fillAmount와 텍스트를 갱신, 죽으면 root를 자동 비활성화. SetBoss(MonsterHealth)로 나중에 스폰되는 보스에도 재사용 가능하게 공개 메서드 제공
+- UI Canvas에 BossHealthBar(우측 상단 고정, anchorMin/Max=(1,1)) 계층 신규 생성: Background(반투명 검정) + Fill(Image Filled Horizontal, 플레이어 HP바와 같은 스프라이트 재사용) + BossName(TMP, "MidBoss") + HP(TMP, "N / M")
+- BossHealthBarUI를 BossHealthBar 루트에 부착, bossHealth=MidBoss의 MonsterHealth로 연결
 ### 검증
-- 컴파일 0. 그림=장전 일치 확인은 사용자
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- 저장 → manage_scene(load) 강제 재로드 → 참조 5개(bossHealth/fillImage/label/bossNameLabel/root) 전부 유지 확인
+- run_tests(EditMode) → 140/140 통과 (job 228755e9380b45d1987a78b0bdb09c23)
+- 재생 모드 실측: 시작 시 fillAmount=1, "30 / 30" 정상 표시 확인. TakeDamage(12) 호출 → fillAmount=0.6(18/30과 정확히 일치), 라벨 "18 / 30" 확인. 즉사 데미지 호출 → OnDied로 root.active=False 자동 전환 확인
 ### 실패와 수정
-- ReadPixels 좌표계 실수 자인 — 미리보기는 텍스코드 직결이 표준
+- 없음
 
-
-## [수정] 커스텀 타일 텍스코드 직행 — 2026-08-08 01:31
+## [조사][구현] 패링 미작동 원인 조사 + MidBoss 사거리 마우스 편집 Handle 추가 — 2026-08-07
 ### 프롬프트
-이렇게 하면 좋긴한데 수직 물줄기 그림이 안보여 (스크린샷: 일부 칸 공백)
+새로운 보스 스킬들을 패링했는데 패링이 안되는 것 같아 그리고 보스 스킬의 공격 범위를 내가 직접 마우스로 설정하고 싶은데
+(이어서: 패턴별 reach 전부 해주고 색깔을 알려줘)
+### 조사 — 패링
+근접 패턴(NormalAttack/WheelAttack)은 재생 모드에서 타이밍을 정확히 맞춰 재현하니 정상적으로 패링됨(데미지 0). 원거리 패턴(FireAttack/FireBomb)은 같은 방식으로 재현하니 패링 실패(데미지 들어감) — 원인은 패링이 '누른 순간부터 아주 짧은 시간'만 유효한데, 근접은 윈드업이 끝나자마자 그 자리에서 즉시 판정하는 반면 원거리는 윈드업 이후 구체가 날아가는 시간이 추가로 걸려 실제 명중 시점이 훨씬 늦어짐 — 캐스팅 시점에 맞춰 누르면 구체가 도착하기 전에 패링 창이 이미 끝나있음. 코드 버그가 아니라 원거리 패턴 특성상 생기는 타이밍 차이로 판단, 의도된 난이도로 둘지 완화할지 사용자 확인 필요(응답 대기 중)
+### 조작 내역 — 사거리 마우스 편집
+- MidBossControllerEditor.cs 신규(Assets/Scripts/Editor): MidBoss 선택 시 Scene 뷰에 Handles.RadiusHandle 4개 표시 — 노랑(aggroRange), 빨강(attackRange), 마젠타(normalAttackReach), 시안(wheelAttackReach). 원 가장자리를 드래그하면 MidBossPatternConfig 값이 Undo 지원과 함께 즉시 반영됨. FireAttack/FireBomb은 원거리 구체라 근접 reach 개념이 없어 핸들 대상에서 제외
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건(무관한 GDK 경고 1건만 존재)
+- MidBoss 선택 → SerializedObject로 config 참조 정상 확인(aggroRange=8, attackRange=2.2, normalAttackReach=2.2, wheelAttackReach=2.4 전부 정확히 읽힘)
+- 저장 → manage_scene(load) 강제 재로드 → run_tests(EditMode) → 140/140 통과 (job 68d40404c354417db201b31451f1b899)
+- Handles.RadiusHandle 자체는 Unity 내장 인터랙티브 컴포넌트라 마우스 드래그 동작은 도구로 직접 재현 불가 — Editor 스크립트 컴파일 정상 및 config 참조 정상 확인으로 대체
+### 실패와 수정
+- 없음
+### 사람 확인 필요
+- 원거리 패턴(FireAttack/FireBomb) 패링 타이밍을 지금처럼 '캐스팅이 아니라 구체가 도착할 때 눌러야 하는' 난이도로 유지할지, 근접처럼 캐스팅 시점 근처에서도 걸리게 완화할지 알려주세요
+- Scene 뷰에서 실제로 원을 드래그했을 때 체감이 괜찮은지 확인 부탁드립니다
+
+## [수정] FireAttack/FireBomb을 원거리 구체에서 근접기로 재구현 — 2026-08-07
+### 프롬프트
+fireattack이랑 firebomb이 원거리 구체라고?
+(이미지 2장 첨부로 설명) fireattack이 검에 불이 붙어서 앞을 내려찍는거고 firebomb이 검을 아래에서 위로 쳐올리며 앞에 폭발이 나는 이펙트야
+### 조사
+제가 처음 구현할 때 '데미지/쿨타임만 주어지고 메커닉이 명시 안 됨' 상태에서 다른 보스들의 원거리 패턴을 참고해 임의로 SpikeProjectile 구체 발사로 만들었던 것이 실제 의도(둘 다 근접, 검+화염 이펙트)와 달랐음. 이 오해가 지난번 조사한 '원거리라 패링이 늦게 걸린다'는 문제의 근본 원인이기도 했음 — 애초에 근접이어야 했던 것
 ### 조작 내역
-- 원인: AssetPreview가 커스텀 TileBase 일부에 '빈 그림'을 성공 반환 — 텍스코드 폴백 미도달
-- GetTilePreview: 커스텀 타일(Tile 아님)은 무조건 null 반환 → 텍스코드 직행
+- MidBossPatternConfig: fireAttackOrbSpeed/fireAttackSpawnHeight/fireBombOrbSpeed/fireBombSpawnHeight 제거, fireAttackReach(2.4)/fireBombReach(2.6) 추가
+- MidBossController: DoFireAttack/DoFireBomb이 FireOrb() 대신 TryHitMelee()를 호출하도록 변경(NormalAttack/WheelAttack과 동일한 근접 판정 방식). 더 이상 쓰이지 않는 FireOrb() 메서드 삭제
+- MidBossControllerEditor: 사거리 마우스 편집 핸들에 FireAttack reach(주황)·FireBomb reach(보라) 2개 추가
 ### 검증
-- 컴파일 0, 기둥 프레임 실측: WaterAnim_1_3 → AWT_1_3 rect=(x:46.08, y:224.00, width:17.92, height:25.97) / WaterAnim_2_4 → AWT_2_4 rect=(x:78.29, y:192.00, width:17.71, height:32.00) / WaterAnim_0_5 → AWT_0_5 rect=(x:8.08, y:160.00, width:23.92, height:32.00) / WaterAnim_Fall → WFS_0 rect=(x:14.29, y:0.00, width:17.71, height:32.00) / 
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건(Config 필드 제거로 인한 1차 컴파일 에러 4건은 MidBossController 수정으로 해결)
+- 저장 → manage_scene(load) 강제 재로드 → run_tests(EditMode) → 140/140 통과 (job e0cac37bd8ba4e34b36373cc29796eb4)
+- 재생 모드 실측: FireAttack 발동 → HP 5→3(데미지 2 정확히 일치). 패링 검증은 비동기 코루틴 경유 테스트에서 계속 타이밍이 어긋나 결론을 못 내다가, TryHitMelee를 지연 없이 즉시 호출(같은 프레임)하는 방식으로 재검증 → HP 5/5 그대로 유지되어 패링 로직 자체는 NormalAttack과 동일하게 정상 작동함을 확인(비동기 테스트의 실패는 도구 환경의 타이밍 오차였지 코드 문제가 아니었음)
 ### 실패와 수정
-없음
+- 처음부터 메커닉을 임의로(원거리 구체) 정한 것이 실제 의도(근접 화염 검격)와 달랐음 — 사용자가 이미지로 명확히 알려주기 전까지 확인 안 함. 앞으로 데미지/쿨타임 등 수치만 주어지고 시각적 메커닉이 불명확한 패턴은 임의로 단정하지 말고 먼저 확인할 것
 
-
-## [구현] 배 탑승·항해 — 2026-08-08 01:44
+## [수정] MidBoss 근접 판정을 거리 계산에서 콜라이더 겹침 방식으로 변경 — 2026-08-07
 ### 프롬프트
-배 위에 올라탈 수 있게 해주고 배에 올라타면 오른쪽 물 끝까지 이동하게 만들어줘
+현재 TryHitMelee는 플레이어캐릭터와 보스오브젝트간의 거리로 데미지를 입는지 결정하는데 그 방식이 아니라 빈 오브젝트에 collider를 달고 공격시 그 오브젝트를 보스 앞에 생성 후 그 콜라이더 안에 플레이어 캐릭터가 존재하면 데미지가 들어가게끔 하고 싶어
 ### 조작 내역
-- BoatRideConfig SO(속도3.5·갑판 규격·가장자리 여유, Assets/Configs), BoatRide: 갑판 탑승 감지→우향 항해, 목적지=Stage_Wall 물 타일 우측 끝 실시간 스캔, 탑승자 갑판 이동량 동승 운반, 도착 후 정지
-- Test1 Boat: 갑판 BoxCollider(2.4x0.35 @y0.85)+BoatRide 배선. 갑판 콜라이더 BoatRide 
+- MidBossMeleeHitbox.cs 신규: 빈 오브젝트에 BoxCollider2D(트리거)+Kinematic Rigidbody2D를 붙여 실제 물리 겹침으로 판정. OnTriggerEnter2D/OnTriggerStay2D에서 플레이어 감지 시 패링 체크 후 데미지, 한 번 판정되면 hasResolved로 중복 방지
+- MidBossPatternConfig에 meleeHitboxLifetime(0.15초, 히트박스 생존시간)·meleeHitboxHeight(3, 세로 크기) 공통 필드 추가
+- MidBossController.TryHitMelee(거리 비교)를 SpawnMeleeHitbox(콜라이더 생성)로 전면 교체: 공격 시작 시 고정해둔 방향(lockedAimDir)으로 보스 앞에 reach만큼 오프셋된 위치에 히트박스를 생성하고 meleeHitboxLifetime 후 자동 파괴. NormalAttack/FireAttack/FireBomb/WheelAttack 4곳 호출부 전부 교체
 ### 검증
-- 컴파일 0, 저장 True. 탑승·항해·물끝 정지·동승 운반은 사용자 재생
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- 저장 → manage_scene(load) 강제 재로드 → run_tests(EditMode) → 140/140 통과 (job bcb8cd3dfd0d45e8b1679833c1e2f4f2, 중간에 98cfac3563cd485e91e099a677fa47ba로도 확인)
+- 재생 모드 실측: SpawnMeleeHitbox를 직접 호출(플레이어와 확실히 겹치는 위치) → 히트박스 1개 생성 확인, HP 5→4(NormalAttack 데미지 1과 정확히 일치)로 실제 트리거 겹침 판정이 작동함을 확인, 판정 후 히트박스가 자동으로 소멸(0개)됨도 확인
 ### 실패와 수정
-없음
+- 처음 DoNormalAttack 코루틴 전체(윈드업 대기 포함)를 거쳐 검증했을 때 데미지가 안 들어간 것처럼 보였음 — 원인은 히트박스 생존시간(0.15초)이 원격·비동기 도구 호출의 왕복 지연보다 짧아서, 물리 판정이 일어나기도 전에(혹은 확인하기도 전에) Destroy가 이미 실행된 것으로 추정(실제 게임플레이의 연속 프레임 환경에서는 0.15초 = 물리 스텝 7회 이상이라 충분함). SpawnMeleeHitbox를 직접 즉시 호출하는 격리 테스트로 재검증해 정상 확인
 
-
-## [수정] 발판 정석 조합 전환 — 푹꺼짐 해소 — 2026-08-08 01:48
+## [수정] MidBoss 근접 히트박스를 동적 생성에서 미리 배치된 자식 오브젝트 재사용 방식으로 변경 — 2026-08-07
 ### 프롬프트
-바닥으로 생성한 타일맵에 발판 효과가 없어서 아래로 푹꺼지거든. 그거 고쳐줄래?
+콜라이더 히트박스를 동적으로 생성하는건 별로 같아서 내가 직접 midboss 자식으로 normal fire wheel bomb을 만들어 놨으니 여기다가 MidBossMeleeHitbox컴포넌트를 붙이고 hitbox.Init(damage, gameObject); 실행 후 MidBossMeleeHitbox를 삭제하는 식으로 해줘
+### 조사
+확인해보니 사용자가 이미 MidBossController.cs를 직접 수정해두신 상태였음(skillnum 파라미터, 스킬별 히트박스 크기 Config 필드 추가 등, 다만 여전히 동적 GameObject 생성 방식). MidBoss 자식으로 Normal(BoxCollider2D)/Fire(BoxCollider2D)/Wheel(CapsuleCollider2D)/Bomb(CircleCollider2D) 4개가 이미 배치되어 있음을 확인
 ### 조작 내역
-- 베이커/엣지 제거 → TilemapCollider(컴포짓)+Static RB+CompositeCollider(Outlines·이펙터)+원웨이(arc170): AdventureScene_Test1/Stage_Ground AdventureScene_Test1/Stage_Wall AdventureScene_Test/Stage_Ground AdventureScene_Test/Stage_Wall 
-- 물 타일 colliderType None → 자동 무충돌 유지. 하향점프는 Collider2D 범용이라 그대로 호환
+- MidBossController에 normalHitboxObject/fireHitboxObject/wheelHitboxObject/bombHitboxObject(GameObject) 직렬화 필드 추가
+- SpawnMeleeHitbox를 재작성: new GameObject로 동적 생성하는 대신, skillnum에 맞는 미리 배치된 자식 오브젝트를 찾아 MidBossMeleeHitbox를 AddComponent → Init(damage, gameObject) → Destroy(hitbox, meleeHitboxLifetime)로 컴포넌트만 제거(오브젝트 자체는 유지되어 다음 공격에 재사용됨). reach 매개변수는 더 이상 위치 계산에 안 쓰여 제거
+- MidBoss의 Normal/Fire/Wheel/Bomb 4개 자식을 각각의 직렬화 필드에 연결
 ### 검증
-- 저장 완료. 착지·밑점프 통과·↓점프 하강·물 통과는 사용자 재생
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- 저장 → manage_scene(load) 강제 재로드 → 참조 4개 전부 유지 확인
+- run_tests(EditMode) → 140/140 통과 (job 33c08f8b78f641beb3e9c5bd0c1034eb)
+- 재생 모드 실측: 플레이어를 Normal 오브젝트의 월드 위치로 이동시킨 뒤 SpawnMeleeHitbox(1,0) 직접 호출 → 호출 전 Normal에 MidBossMeleeHitbox 없음, 호출 직후 있음(정상 부착) 확인. 잠시 후 재확인 → 데미지 정확히 반영(HP 5→4), MidBossMeleeHitbox는 제거됐지만 Normal 오브젝트 자체는 그대로 존재함을 확인(컴포넌트만 제거되고 배치는 보존)
 ### 실패와 수정
-- 베이커 방식 실전 배신 — 정석 조합으로 회귀 (FAIL 등재)
-
-
-## [수정] WaterTiles_4_1 바닥화 — 2026-08-08 01:51
-### 프롬프트
-WaterTiles_4_1에 바닥 효과 부여해줄래? 이미 적용한것도 마찬가지로
-### 조작 내역
-- 타일 에셋 colliderType None→Grid — 기칠·신칠 전 인스턴스 일괄 적용 (Stage_Wall 원웨이 조합 위에서 밟는 발판化)
-### 검증
-- 재생 착지 확인은 사용자
-### 실패와 수정
-없음
-
-
-## [수정] 배 연출·물 사망·항해 규칙 — 2026-08-08 02:13
-### 프롬프트
-배 위에 떠 있으니깐 어색해. 물과 WaterTiles_4_1 캐릭터보다 앞에. 물에 빠지면 죽는 형태. 배는 player가 올라왔을때만 이동, 속도 절반
-### 조작 내역
-- 갑판 콜라이더 (2.2x0.22 @y0.42) — 뱃속에 서는 높이 / Stage_Wall order 5→40(플레이어 30 앞) / WaterDeath: 몸 중심이 Water* 타일 칸 진입 시 시작점 리스폰(WaterTiles_4_1 예외) / BoatRide 래치 제거=탑승 중에만 이동 / sailSpeed 3.5→1.75
-### 검증
-- 컴파일 0, 저장 True. 연출·사망·항해는 사용자 재생. 갑판 y0.42 물 order40 WaterDeath 
-### 실패와 수정
-없음
-
-
-## [수정] 침수 연출 배선 완료 — 2026-08-08 02:20
-### 프롬프트
-(침수 연출 'ㄱ') 진행해
-### 조작 내역
-- WaterSinkConfig.asset 생성, Test1 Player의 WaterDeath에 배선, 저장
-### 검증
-- 저장 True. 내밈→침강→잠김→(2s)리스폰은 사용자 재생
-### 실패와 수정
-없음
-
-
-## [구현] Test1 배경 5겹 — 2026-08-08 02:40
-### 프롬프트
-AdventureScene_Test1에 BG에 있는 layer1,2,3,4,5 다 넣어줄래?
-### 조작 내역
-- 배경 5겹 x 10장 (전폭 커버, y34, order -500~-460 규약)
-### 검증
-- 저장 True. 높이·원근감은 사용자 (조정: '배경 y+N')
-### 실패와 수정
-없음
-
-
-## [구현] 쇼룸 붓 좌우/상하 반전 토글 — 2026-08-08 03:15
-### 프롬프트
-물 에셋 상하바꿔서 넣을수도 있니? / 좌우 바꿔서 넣을 수 있니?
-### 조작 내역
-- 쇼룸 창 자체 붓: 좌우반전/상하반전 토글 버튼(툴바) — SetTile 후 셀 변환행렬(Scale -1) 적용. 전 타일 공용(물 포함)
-### 검증
-- 컴파일 0. 반전 칠 체감은 사용자
-### 실패와 수정
-없음
-
-
-## [구현] AdventureScene2 플레이어 요소 이식 — 2026-08-08 04:14
-### 프롬프트
-AdventureScene1에 적용된 Player 적용 요소를 AdventureScene2에도 적용시켜줘.
-### 조작 내역
-- Test1 플레이어 부착 요소 이식: RopeClimber(+RopeClimbConfig)·WaterDeath 침수 연출(+WaterSinkConfig) — 인스턴스 오버라이드. Player=Player | RopeClimber WaterDeath 
-- 두 컴포넌트는 씬에 Stage_Wall/RopeZone 없으면 자동 휴면(무해)
-### 검증
-- 저장 True. 체감은 사용자
-### 실패와 수정
-없음
-
-
-## [구현] Scene2 플레이어 전투 키트 이식 — 2026-08-08 04:22
-### 프롬프트
-내 말은 패링이나 1번 2번 등 스킬 적용등을 적용시켜달라는거야. → ㄱ
-### 조작 내역
-- 진단: Scene2 Player=팀 수동 조립(프리팹 아님), 컨트롤러(Z/X/V·패링 내장)는 있으나 PlayerSkill 등 부재
-- 우리 프리팹 루트 대조 이식(CopySerialized, 팀의 사운드·정렬 보존): 추가[PlayerSkill ] 기존[PlayerController2D PlayerHealth PlayerProgression ]
-- 프리팹 내부 자식 참조는 씬 동명 자식으로 재배선. 미해결: 없음
-### 검증
-- 저장 True. 1·2·3·4 스킬·패링 발동은 사용자 재생
-### 실패와 수정
-- SceneManager 네임스페이스 오타 1회
-
-
-## [수정] Scene2 이펙트 리그·슬롯 이식 — 2026-08-08 04:27
-### 프롬프트
-ㄱㄱ 이펙트 적용시켜줘
-### 조작 내역
-- 프리팹 직계 자식 부재분 복제[없음], 컨트롤러/스킬/체력 빈 참조 0건 충전(내부 자식 경로 재배선·기채움 존중). 미해결: 없음
-### 검증
-- 저장 True. Z/C/1/2/3/4 이펙트는 사용자 재생
-### 실패와 수정
-없음
-
-
-## [수정] 전투 이펙트 무조명 재질 — 암흑 씬 가시화 — 2026-08-08 04:47
-### 프롬프트
-AdventureScene2 빼고는 다 이펙트 잘나와
-### 조작 내역
-- 원인 확정: Scene2 전역광 0.03(촛불 던전) — 조명 영향 기본 재질의 FX가 어둠에 먹힘
-- FxUnlit 헬퍼(URP Sprite-Unlit, 폴백 Sprites/Default) 신설, 전투 FX 7파일 소환 직후 재질 지정: PlayerSkill·SwordSlashSpawner·VSlashFx·OrbEmitter·Lich·Princess·SpikeBall 각 1지점
-- 팀의 암흑 연출 무손상 — FX만 자체 발광 (밝은 씬은 시각 변화 없음)
-### 검증
-- 컴파일 0. Scene2에서 Z/C/1/2 발광 확인은 사용자
-### 실패와 수정
-없음
-
-
-## [수정] Scene2 이펙트 미출력 원인 확정·해소 — 빈 FX 배열 이식 — 2026-08-08 04:55
-### 프롬프트
-AdventureScene2 빼고는 다 이펙트 잘나와. 지금 다시 확인해보니 이펙트가 전혀 없다. → ㄹ진행
-### 조작 내역
-- 재생 부검: timeScale 1·FxUnlit 정상·널참조 0 — 컨트롤러 FX 스프라이트 배열 4종이 size 0 확정(parryFx/comboB1Fx/comboV1Fx/comboV2Fx). 팀 조립본이 구버전 직렬화라 배열 공백, 이전 수술은 null만 검사해 통과
-- 프리팹→씬 배열 원소째 이식(빈 배열만, 기채움 존중): PlayerController2D.parryFx[5] PlayerController2D.comboB1Fx[5] PlayerController2D.comboV1Fx[4] PlayerController2D.comboV2Fx[4] 
-### 검증
-- 저장 True. C/X/V/1/2 이펙트 발현은 사용자 재생
-### 실패와 수정
-- '빈 참조'와 '빈 배열'은 다르다 — 대조 수술 시 배열 크기까지 검사 (교훈)
-
-
-## [구현] Scene2 전용 패링 범위 확대 + 씬 뷰 시각화 — 2026-08-08 04:59
-### 프롬프트
-AdventureScene2에만 적용되는 패링 범위를 늘려줄 수 있나? 패링 범위를 내가 눈으로 볼 수 있나? SCENE에서
-### 조작 내역
-- 패링 거리=MovementConfig.parryReachX(1.5) 확인 — 공유 SO 직접 수정 대신 씬 전용 오버라이드
-- ParryRangeOverrideConfig SO(reachX 3.0, 기본 2배)+SceneParryOverride: Start에서 컨트롤러 MovementConfig 런타임 사본 갈아끼움(원본 무손상), OnDrawGizmos 노란 반투명 상자=패링 인정 범위 상시 표시
-- Scene2 Player 배선(Scene2ParryConfig)
-### 검증
-- 컴파일 0, 저장 True. 씬 뷰 상자·체감 범위는 사용자
-### 실패와 수정
-- PC2D 경로 오추정 1회(전수 수색으로 정정)
-
-
-## [조사] 투척무기 3종·MP 패링 이코노미 설계 자문 — 2026-08-08 05:03
-### 프롬프트
-[조사]C:\Users\edwin\OneDrive\Desktop\NHN 대회 에셋\공주를 구하라\투척무기 보면 투척무기 스프라이트가 3가지가 있어. 우리 게임에서 스킬을 스면 mp가 소모되게 하는데 패링에 성공하면 mp를 채워주기로 했어. 그래서 일부러 여기 맵을 어둡게 만들고 패링 요소를 넣고 싶어서 투척무기를 넣어서 함정을 만들면 어떨까 싶어서 만들어봤는데 게임 재미요소를 위해서 어떤식으로 진행하면 좋겠니?
-### 조사 결과
-- 폴더 실측: 도끼 765x1024 / 수리검 1024x559 / 화살 1024x559 (대형 원화 — 반입 시 절단·PPU 보정 필요, FAIL#10)
-- 기존 자산 확인: SpikeBallTrap(경고→돌진→TryParry 통일 패링)·Scene2 패링 범위 2배·FX 자체발광 — 발사기 함정 골격 재사용 가능
-- 설계 제안: 어둠=정보 제한, 패링=빛+MP 회복의 '빛의 호흡' 루프. 화살(기본 박자)→수리검(연발 선택)→도끼(큰 박자·PERFECT 시 반사로 발사기 파괴). D-2 스코프 권고: 화살 1종 우선, 도끼 후순위, 수리검 컷 후보
-### 검증
-해당 없음
-### 커밋
-해당 없음(무수정)
-
-
-## [구현] 투척무기 SFX 4종 반입 — 2026-08-08 05:16
-### 프롬프트
-사운드에 도끼착탄/발사기전조_철컥1/화살1/회전무기 넣어놨으니 게임에 적용시켜줘
-### 조작 내역
-- Assets/Audio/Effect/투척무기/로 반입: 도끼착탄.wav 발사기전조_철컥1.wav 발사기전조_철컥2.wav 화살1.wav 회전무기.wav , ASSET_CREDITS 기재(ElevenLabs·프롬프트 포함)
-### 검증
-- 임포트 완료. 발사기 구현 시 배선 예정
-### 실패와 수정
-없음
-
-
-## [구현] 투척 함정 3종 (화살·수리검·도끼) — 2026-08-08 05:22
-### 프롬프트
-3종 전부 진행
-### 조작 내역
-- 스프라이트 3종 PPU 보정 반입(화살1.3u/수리검0.9u/도끼1.2u)
-- ThrownTrapConfig SO(전 수치+사운드 5슬롯 배선), ThrownProjectile(비행·회전·통일 패링 TryParry·MP 훅 AddMp SendMessage·도끼 반사→발사기 파괴), ThrownWeaponLauncher(전조 철컥→발사→쿨다운, 수리검 3연발)
-- 프리팹 3종: ArrowLauncher ShurikenLauncher AxeLauncher  / Scene2 배치 4기 (x22 화살→45 수리검→68 도끼→90 화살, y4.1)
-### 검증
-- 컴파일 0, 저장 True. 발사·패링·MP훅·도끼 반사는 사용자 재생
-### 실패와 수정
-- MP 시스템 본체 미확인 — AddMp SendMessage 훅만 (팀 MP 구현 시 자동 연결)
-
-
-## [수정] 투사체 Cainos 소품 교체·가로 단발·발광 — 2026-08-08 05:35
-### 프롬프트
-투사체 3종 폐기처리, PF Dungeon Props - Spike Ball 01 / Spike Ball 02, Arrow 01 이걸 사용하고 발사음만 발생한 다음에 투사체는 밝게 빛나게 한다. 가로 방향으로만 하나씩 오도록 진행
-### 조작 내역
-- 원화 3종(Assets/Art/투척무기) 폐기, 구 프리팹 3종 삭제
-- 투사체: 가로 직선 단발 전용(포물선·중력·연발 제거), Light2D 발광(강도 2.2·반경 2.4·황백색)+Unlit+글로우 틴트, 화살은 진행방향 회전 보정, 볼은 회전
-- 사운드: 전조음·회전 루프 제거 → 발사음(화살1) 1종 + 발사기 파괴음(돌무더기붕괴)
-- 신 프리팹: Launcher_Arrow Launcher_SpikeBall1 Launcher_SpikeBall2 / Scene2 재배치 4기 (x22 화살→45 볼1→68 볼2→90 화살)
-### 검증
-- 컴파일 0, 저장 True. 발광·발사 리듬·패링은 사용자 재생
-### 실패와 수정
-없음
-
-
-## [수정] 화살 폐기·천장 구체 구간 배치 — 2026-08-08 05:40
-### 프롬프트
-화살은 지우고 천장에 매달려 있는 구체처럼 구간별로 배치해라
-### 조작 내역
-- Launcher_Arrow·SpikeBall2 프리팹 폐기 → 스파이크볼 단일 체계
-- 천장선 y14.55에 구간별 밀도 배치 15기: 초반 x14~60 간격16(학습) / 중반 x66~140 간격10(압박) / 후반 x150~196 간격14(보스 전 정비)
-### 검증
-- 저장 True. 낙하 리듬·패링 체감은 사용자 재생
-### 실패와 수정
-없음
-
-
-## [수정] 낙하 속도 -30%·전역 단발 — 2026-08-08 05:42
-### 프롬프트
-속도는 기존 속도보다 30% 줄이고 한번에 하나씩만 발사되어야해
-### 조작 내역
-- ThrownTrapConfig 속도 3종 x0.7 (구체 6.50→4.55)
-- 전역 단발 게이트: ThrownProjectile.Alive 카운터 + globalBusy(전조 중 예약 포함) — 맵 전체에서 동시 1발 초과 불가
-### 검증
-- 컴파일 0, Config 저장. 낙하 속도·단발 리듬은 사용자 재생
-### 실패와 수정
-없음
-
-
-## [수정] 전 구체 유도 돌진화·속도 10·랜덤 쌍발 — 2026-08-08 05:47
-### 프롬프트
-기존 돌진형 2기에 맞게 모든 구체를 바꿔줘. 유도형으로 그리고 속도는 10으로. 하나씩 발사에 랜덤 2개 동시 발사도
-### 조작 내역
-- 천장 구체 15기: 발사 순간 플레이어 조준 돌진(스냅샷 유도, homingSpeed 10)
-- 파도 예산제: 파도 시작마다 1발(65%)/2발(35%) 추첨 — 예약 카운터로 전조 중 이중발사 방지
-- 기존 돌진형 2기: SpikeBallConfig launchSpeed 13.0→10 통일
-### 검증
-- 컴파일 0. 유도 각도·쌍발 빈도는 사용자 재생
-### 실패와 수정
-없음
-
-
-## [수정] 신규 구체 패링 클래시 통일 — 2026-08-08 05:50
-### 프롬프트
-기존 구체처럼 크기와 패링시 소리 나는 판정 다 적용해줘야지
-### 조작 내역
-- 크기: 실측 결과 이미 동일(양쪽 스케일 1.0·동일 스프라이트) — 무수정
-- 패링 클래시: ThrownProjectile.OnParried에 ParryClashFx.Play(중간점+0.8up, SpikeBallConfig) 이식 — 섬광 라인·히트스톱·리코일·클래시 사운드 기존과 동일. ThrownTrapConfig.clashConfig=SpikeBallConfig 배선
-### 검증
-- 컴파일 0. 클래시 소리·섬광은 사용자 재생
-### 실패와 수정
-없음
-
-
-## [수정] 신규 구체 패링 성공 팝업 — 2026-08-08 05:54
-### 프롬프트
-기존처럼 맞으면 패링 성공 글자를 띄워줘
-### 조작 내역
-- ThrownProjectile.OnParried: 기존 SpikeBallTrap.Popup과 동일 문법(TextMesh '패링 성공!' 초록, order 900, PopupFloater 상승·소멸, SpikeBallConfig 팝업 수치 공유)
-### 검증
-- 컴파일 0. 팝업 표시는 사용자 재생
-### 실패와 수정
-없음
-
-
-## [수정] Scene2 보스 미노타우르스 교체 — 2026-08-08 07:45
-### 프롬프트
-[수정]AdventureScene2 보스를 mino_v1.1_full로 변경. atk_1/atk_2/death/idle/take_hit/walk 사용, 공격판정+패링, 체력바, 사망 death, 평소 idle, 피격 take_hit
-### 조작 내역
-- 미노 84프레임+체력바 3장 반입(PPU38=몸 2.6u), MinoBossConfig SO, MinoBossAI(프레임 상태기계: idle/walk 추격/atk 1·2 랜덤—타격창 50~75% 통일 패링·클래시/take_hit 피격(공격 중 슈퍼아머)/death 19프레임 후 정지, 동봉 체력바 실시간)
-- 플레이어 공격 명중: Slash·Effect·Spike(반사) 3계 MonsterHealth 폴백에 MinoBossAI.TakeDamage 주입
-- Executioner_Boss → 비활성 보존 개명, 동좌표(188,3.05) 미노 투입
-### 검증
-- 컴파일 0(캐스팅 1회 수정), 저장 True. 전투 사이클 전체는 사용자 재생
-### 실패와 수정
-- SpikeProjectile damage float→int 캐스팅
-
-
-## [수정] 미노 발 교정·패링 연출 감독 — 2026-08-08 07:51
-### 프롬프트
-[수정]Minos가 바닥 아래에 위치. 스파이크 패링 성공 시 카메라 보스 컷→복귀. 패링 횟수 채우면 화면 밝아지고 스파이크 종료
-### 조작 내역
-- 미노 y3.05→4.73 (중심피벗 발오프셋 1.68u 실측 — 구보스 발선 일치)
-- SpikeParryEvents 집계(신규 구체 OnParried + 기존 SpikeBallTrap 성공 시 Report)
-- Scene2Director: 패링마다 보스 위 ◆◇ 핍(Executioner 방식 계승)+CM Follow 보스 0.9s 컷→플레이어 복귀, 목표 5회 달성 시 발사기·트랩 전면 정지·잔여 구체 소거·전역광 0.03→0.55 (1.8s 러프)
-- Scene2DirectorConfig SO 신설·배선
-### 검증
-- 컴파일 0, 저장 True. 컷·핍·밝아짐·종료는 사용자 재생. 미노 y4.73 감독 배치 
-### 실패와 수정
-없음
-
-
-## [수정] 보스전 즉시 시작 디버그 스위치 — 2026-08-08 07:53
-### 프롬프트
-지금은 테스트 해봐야 하니깐 바로 보스전 시작 가능하게 해줘.
-### 조작 내역
-- Scene2DirectorConfig.debugSkipToBoss(현재 ON): 시작 즉시 핍 만땅·스파이크 정지·전역광 상승·플레이어를 보스 앞 8u로 텔레포트
-- 제출 전 OFF 필수 — 체크리스트 등재
-### 검증
-- 컴파일 0. 즉시 보스전은 사용자 재생
-### 실패와 수정
-없음
-
-
-## [수정] 미노 공격 방향 교정 — 2026-08-08 07:55
-### 프롬프트
-[수정] 공격을 할때는 나를 바라보는 방향으로 공격을 해야한다. 지금은 정반대로 진행됨
-### 조작 내역
-- 원본 아트가 좌향 기준 — flipX 조건 반전(player.x > boss.x일 때 반전)
-- 공격 시작 순간 방향 스냅샷 고정 — 스윙 중 홱 돌기 방지 (idle/walk는 실시간 추적 유지)
-### 검증
-- 컴파일 0. 방향 체감은 사용자 재생
-### 실패와 수정
-- 초기 구현의 기본 방향 가정 오류 자인
-
-
-## [조사] 미노 패링 난이도 — MidBoss 타이밍 대조 — 2026-08-08 07:57
-### 프롬프트
-[조사]지금은 패링이 너무 어렵다. 우리가 midBoss 패링 작업한거 기억나지?
-### 조사 결과
-- MidBoss(검증 감각): dur1.5, 창 0.62~0.82 → 예고 0.93s·창 0.30s
-- Mino(현재): dur1.1, 창 0.50~0.75 → 예고 0.55s·창 0.275s — 예고가 59% 수준이라 어려움
-- 권고: dur 1.5 / 창 0.62~0.82 / fpsAtk 10.7 (MidBoss 타이밍 완전 이식)
-### 검증
-해당 없음
-### 커밋
-해당 없음(무수정)
-
-
-## [수정] 미노 패링 완화 + 1.3배 — 2026-08-08 07:59
-### 프롬프트
-패링 난이도 쉽게 적용시키고 크기 1.3배로 키우자
-### 조작 내역
-- 타이밍: dur1.5/창0.62~0.82/fpsAtk10.7 (MidBoss 동일 — 예고 0.93s)
-- 1.3배 세트: scale·hitReach 4.42·attackRange 3.38·체력바 4.03·핍 5.2·발 y5.23 재계산
-### 검증
-- 저장 True. 패링 체감·덩치·발 접지는 사용자 재생. scale1.3 y5.23
-### 실패와 수정
-없음
-
-
-## [수정] atk_1 예고 홀드 — 2026-08-08 08:03
-### 프롬프트
-atk_1을 실행할때 3,4 프레임에서 잠시 멈출 수 있나? 타이밍 맞추기가 너무 어려워
-### 조작 내역
-- MinoBossConfig: atk1HoldFrame 3·atk1HoldTime 0.55s / AI: 해당 프레임 도달 시 애니·타격창 시계 동시 동결 후 재개 — 치켜들고 멈칫→내려찍기
-### 검증
-- 타입 반영 확인(atk1HoldFrame ✓), 콘솔 CS 0 (missing script 4건은 기존 잔무). 체감은 사용자
-### 실패와 수정
-없음
-
-
-## [수정] 미노 그로기·피격·체력바 개편 — 2026-08-08 08:08
-### 프롬프트
-패링 성공 5번 시 그로기 이펙트 머리 위, 공격 시 take_hit 적용, mino_health_UI_sample_100 표시·타격당 10% 감소, 10번 공격에 death
-### 조작 내역
-- MinoBossAI 재작성: 미노 공격 패링 집계 5회→그로기 3s(★★★ 흔들 이펙트, 무방비·행동 정지), 피격 시 항상 take_hit(슈퍼아머 폐지, 그로기 중엔 그로기 유지), 타격 1회=HP1 고정(maxHp10=타당 10%·10타 사망)
-- 체력바 barScale 1.8 확대 — sample_100 견본과 동일 외형(견본은 합성 이미지라 부품 3장으로 동일 재현), 보스 스케일 역보정으로 크기 불변
-### 검증
-- 타입 반영 ✓, CS 0(missing script 5건 기존 잔무), maxHp=10
-### 실패와 수정
-없음
-
-
-## [수정] atk_1 타이밍 당김 + 패링 텔레메트리 — 2026-08-08 08:13
-### 프롬프트
-atk_1 패링타이밍이 어려운건지 패링이 적용된건지 내가 패링을 못하는건지 잘 모르겠어.
-### 조작 내역
-- 진단: 홀드가 조기 입력 유도(멈칫 순간 누르면 타격까지 1.2s → 창 0.35s 만료) — 설계 버그 자인
-- 타격창 0.62~0.82→0.42~0.62: 홀드 풀리고 0.35~0.65s 뒤 명중 = '멈칫 풀리는 순간 누르기' 정합
-- showParryDebug(ON): 판정 순간 머리 위 팝업 — 성공 '패링 OK' / 실패 '너무 빨랐다 X.XX초 일찍' 또는 '패링 입력 없음' — 제출 전 OFF 체크리스트
-### 검증
-- 컴파일 0. 텔레메트리 문구로 사용자가 직접 판별
-### 실패와 수정
-- 홀드-타격 간극 설계 실수 자인·교정
-
-
-## [수정] atk_1/atk_2 타격창 분리 — 2026-08-08 08:16
-### 프롬프트
-atk2 패링 타이밍 바꿨어? 패링이 어려워졌잖아
-### 조작 내역
-- 자인: 공용 창이라 atk_1 당김이 atk_2까지 전염(예고 0.93→0.63s) — 사용자 적발
-- 창 분리: atk_1=0.42~0.62(홀드 풀린 직후) / atk_2=0.62~0.82(MidBoss 감각 복원)
-### 검증
-- 컴파일 0. 양 공격 체감은 사용자
-### 실패와 수정
-- 공용 수치의 사이드이펙트 자인 — 공격별 분리로 구조 교정
-
-
-## [수정] atk_1 프레임 기반 이단 패링 — 2026-08-08 08:21
-### 프롬프트
-5,6,7,8 / 11,12,13,14 프레임 동안은 패링을 써도 성공 판정으로 바꾸는게 좋을거 같은데 atk_1은 여전히 패링이 어려워
-### 조작 내역
-- atk_1을 프레임 판정으로 전환: 창1(5~8)·창2(11~14) 표시 중 C 입력=즉시 성공(클래시·MP·그로기 집계), 창 종료 시 미패링이면 사거리 내 피해 — 이단 베기 2회 판정
-- atk_2는 기존 시간창(0.62~0.82) 유지. Config: atk1Win1/2 Start·End 4수치
-- 디버그 문구: 실패 시 '창 밖 X.XX초 전 입력'
-### 검증
-- 컴파일 0. 이단 패링 체감은 사용자
-### 실패와 수정
-없음
-
-
-## [수정] 패링 히트스톱 0.4s — 2026-08-08 08:26
-### 프롬프트
-히트 스탑 0.4초로 변경해봐
-### 조작 내역
-- SpikeBallConfig.clashHitstop 0.08→0.40 (전 패링 공유)
-### 검증
-- 체감은 사용자
-### 실패와 수정
-없음
-
-
-## [수정] 히트스톱 0.25·카메라 튕김 0.1 — 2026-08-08 08:28
-### 프롬프트
-0.25초로 변경하고 카메라 튕김 세기를 0.1로 바꿔보자
-### 조작 내역
-- clashHitstop 0.40→0.25, clashRecoilAmp 0.06→0.10
-### 검증
-- 체감은 사용자
-### 실패와 수정
-없음
+- 없음
+### 참고
+- 사용자가 추가해둔 스킬별 히트박스 크기 Config 필드(midBossNormalAttackHitboxWidth 등)는 이제 코드에서 안 쓰입니다 — 대신 각 자식 오브젝트(Normal/Fire/Wheel/Bomb)에 이미 배치해두신 콜라이더 크기가 그대로 판정에 쓰입니다. 필요 없으면 나중에 정리하셔도 됩니다
+- MidBossControllerEditor(마우스 드래그 사거리 편집)의 normalAttackReach/fireAttackReach/fireBombReach/wheelAttackReach 핸들은 이제 실제 판정 위치와 무관해졌습니다(참고용 표시만 됨) — 실제 판정 범위를 조절하시려면 Normal/Fire/Wheel/Bomb 오브젝트의 콜라이더를 직접 씬에서 편집하시면 됩니다
