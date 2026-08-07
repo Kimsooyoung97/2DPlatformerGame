@@ -1005,6 +1005,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NAN2026.MidBossController
   config: {fileID: 11400000, guid: 2c8e1a0e4e247da42abe2e170874b689, type: 2}
   player: {fileID: 1330517417}
+  normalHitboxObject: {fileID: 767108503}
+  fireHitboxObject: {fileID: 259938319}
+  wheelHitboxObject: {fileID: 924669012}
+  bombHitboxObject: {fileID: 828831991}
 --- !u!114 &1285631398
 MonoBehaviour:
   m_ObjectHideFlags: 0

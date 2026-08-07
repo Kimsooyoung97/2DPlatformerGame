@@ -4844,3 +4844,23 @@ fireattack이랑 firebomb이 원거리 구체라고?
 - 재생 모드 실측: SpawnMeleeHitbox를 직접 호출(플레이어와 확실히 겹치는 위치) → 히트박스 1개 생성 확인, HP 5→4(NormalAttack 데미지 1과 정확히 일치)로 실제 트리거 겹침 판정이 작동함을 확인, 판정 후 히트박스가 자동으로 소멸(0개)됨도 확인
 ### 실패와 수정
 - 처음 DoNormalAttack 코루틴 전체(윈드업 대기 포함)를 거쳐 검증했을 때 데미지가 안 들어간 것처럼 보였음 — 원인은 히트박스 생존시간(0.15초)이 원격·비동기 도구 호출의 왕복 지연보다 짧아서, 물리 판정이 일어나기도 전에(혹은 확인하기도 전에) Destroy가 이미 실행된 것으로 추정(실제 게임플레이의 연속 프레임 환경에서는 0.15초 = 물리 스텝 7회 이상이라 충분함). SpawnMeleeHitbox를 직접 즉시 호출하는 격리 테스트로 재검증해 정상 확인
+
+## [수정] MidBoss 근접 히트박스를 동적 생성에서 미리 배치된 자식 오브젝트 재사용 방식으로 변경 — 2026-08-07
+### 프롬프트
+콜라이더 히트박스를 동적으로 생성하는건 별로 같아서 내가 직접 midboss 자식으로 normal fire wheel bomb을 만들어 놨으니 여기다가 MidBossMeleeHitbox컴포넌트를 붙이고 hitbox.Init(damage, gameObject); 실행 후 MidBossMeleeHitbox를 삭제하는 식으로 해줘
+### 조사
+확인해보니 사용자가 이미 MidBossController.cs를 직접 수정해두신 상태였음(skillnum 파라미터, 스킬별 히트박스 크기 Config 필드 추가 등, 다만 여전히 동적 GameObject 생성 방식). MidBoss 자식으로 Normal(BoxCollider2D)/Fire(BoxCollider2D)/Wheel(CapsuleCollider2D)/Bomb(CircleCollider2D) 4개가 이미 배치되어 있음을 확인
+### 조작 내역
+- MidBossController에 normalHitboxObject/fireHitboxObject/wheelHitboxObject/bombHitboxObject(GameObject) 직렬화 필드 추가
+- SpawnMeleeHitbox를 재작성: new GameObject로 동적 생성하는 대신, skillnum에 맞는 미리 배치된 자식 오브젝트를 찾아 MidBossMeleeHitbox를 AddComponent → Init(damage, gameObject) → Destroy(hitbox, meleeHitboxLifetime)로 컴포넌트만 제거(오브젝트 자체는 유지되어 다음 공격에 재사용됨). reach 매개변수는 더 이상 위치 계산에 안 쓰여 제거
+- MidBoss의 Normal/Fire/Wheel/Bomb 4개 자식을 각각의 직렬화 필드에 연결
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- 저장 → manage_scene(load) 강제 재로드 → 참조 4개 전부 유지 확인
+- run_tests(EditMode) → 140/140 통과 (job 33c08f8b78f641beb3e9c5bd0c1034eb)
+- 재생 모드 실측: 플레이어를 Normal 오브젝트의 월드 위치로 이동시킨 뒤 SpawnMeleeHitbox(1,0) 직접 호출 → 호출 전 Normal에 MidBossMeleeHitbox 없음, 호출 직후 있음(정상 부착) 확인. 잠시 후 재확인 → 데미지 정확히 반영(HP 5→4), MidBossMeleeHitbox는 제거됐지만 Normal 오브젝트 자체는 그대로 존재함을 확인(컴포넌트만 제거되고 배치는 보존)
+### 실패와 수정
+- 없음
+### 참고
+- 사용자가 추가해둔 스킬별 히트박스 크기 Config 필드(midBossNormalAttackHitboxWidth 등)는 이제 코드에서 안 쓰입니다 — 대신 각 자식 오브젝트(Normal/Fire/Wheel/Bomb)에 이미 배치해두신 콜라이더 크기가 그대로 판정에 쓰입니다. 필요 없으면 나중에 정리하셔도 됩니다
+- MidBossControllerEditor(마우스 드래그 사거리 편집)의 normalAttackReach/fireAttackReach/fireBombReach/wheelAttackReach 핸들은 이제 실제 판정 위치와 무관해졌습니다(참고용 표시만 됨) — 실제 판정 범위를 조절하시려면 Normal/Fire/Wheel/Bomb 오브젝트의 콜라이더를 직접 씬에서 편집하시면 됩니다
