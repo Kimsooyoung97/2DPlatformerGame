@@ -95,3 +95,9 @@
   - 발사기전조_철컥1: "Mechanical trap arming click, metal latch tension winding up, short ominous clank in a stone dungeon, slight echo, 0.7 seconds"
   - 회전무기: "Spinning blade whirling through the air, rhythmic whoosh-whoosh rotation, metallic edge, seamless loop, 1.5 seconds"
   - 도끼착탄: "Heavy axe blade slamming into stone wall, deep thunk with metallic ring, dungeon reverb, 0.8 seconds"
+
+
+## 미노타우르스 보스 (mino_v1.1_full) — 2026-08-08
+- 파일: Assets/Art/Mino/ (idle16·walk12·atk_1x16·atk_2x14·take_hit7·death19 + 체력바 UI 3장)
+- 출처: 팀 확보 에셋 팩 (원드라이브 '공주를 구하라/mino_v1.1_full')
+- 라이선스: 팩 동봉 라이선스 준수 — 원 배포처 확인 필요 시 팀 문의
