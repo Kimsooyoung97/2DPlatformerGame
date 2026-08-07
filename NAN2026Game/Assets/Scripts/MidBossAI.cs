@@ -112,13 +112,16 @@ namespace NAN2026
                 { foreach (var lr in rangeRings) if (lr != null) Destroy(lr.gameObject); rangeRings = null; return; }
                 float[] rad = { config.aggroRange, config.attackRange, config.hitReach };
                 float inv = transform.localScale.x != 0f ? 1f / Mathf.Abs(transform.localScale.x) : 1f; // 부모 스케일 상쇄
+                float face = (sr != null && sr.flipX) ? -1f : 1f;
                 for (int r = 0; r < 3; r++)
                 {
                     var lr = rangeRings[r];
+                    bool half = r == 2; // 자홍(타격 리치)만 반원 — 판정과 일치
+                    lr.loop = !half;
                     for (int i = 0; i < 48; i++)
                     {
-                        float a = i / 48f * Mathf.PI * 2f;
-                        lr.SetPosition(i, new Vector3(Mathf.Cos(a) * rad[r] * inv, Mathf.Sin(a) * rad[r] * inv, 0f));
+                        float a = half ? (-0.5f + i / 47f) * Mathf.PI : i / 48f * Mathf.PI * 2f;
+                        lr.SetPosition(i, new Vector3(half ? Mathf.Cos(a) * face * rad[r] * inv : Mathf.Cos(a) * rad[r] * inv, Mathf.Sin(a) * rad[r] * inv, 0f));
                     }
                 }
             }
