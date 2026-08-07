@@ -4794,3 +4794,22 @@ WorldHealthBar는 SpriteRenderer 두 장으로 몬스터 머리 위에 월드 �
 - 재생 모드 실측: 시작 시 fillAmount=1, "30 / 30" 정상 표시 확인. TakeDamage(12) 호출 → fillAmount=0.6(18/30과 정확히 일치), 라벨 "18 / 30" 확인. 즉사 데미지 호출 → OnDied로 root.active=False 자동 전환 확인
 ### 실패와 수정
 - 없음
+
+## [조사][구현] 패링 미작동 원인 조사 + MidBoss 사거리 마우스 편집 Handle 추가 — 2026-08-07
+### 프롬프트
+새로운 보스 스킬들을 패링했는데 패링이 안되는 것 같아 그리고 보스 스킬의 공격 범위를 내가 직접 마우스로 설정하고 싶은데
+(이어서: 패턴별 reach 전부 해주고 색깔을 알려줘)
+### 조사 — 패링
+근접 패턴(NormalAttack/WheelAttack)은 재생 모드에서 타이밍을 정확히 맞춰 재현하니 정상적으로 패링됨(데미지 0). 원거리 패턴(FireAttack/FireBomb)은 같은 방식으로 재현하니 패링 실패(데미지 들어감) — 원인은 패링이 '누른 순간부터 아주 짧은 시간'만 유효한데, 근접은 윈드업이 끝나자마자 그 자리에서 즉시 판정하는 반면 원거리는 윈드업 이후 구체가 날아가는 시간이 추가로 걸려 실제 명중 시점이 훨씬 늦어짐 — 캐스팅 시점에 맞춰 누르면 구체가 도착하기 전에 패링 창이 이미 끝나있음. 코드 버그가 아니라 원거리 패턴 특성상 생기는 타이밍 차이로 판단, 의도된 난이도로 둘지 완화할지 사용자 확인 필요(응답 대기 중)
+### 조작 내역 — 사거리 마우스 편집
+- MidBossControllerEditor.cs 신규(Assets/Scripts/Editor): MidBoss 선택 시 Scene 뷰에 Handles.RadiusHandle 4개 표시 — 노랑(aggroRange), 빨강(attackRange), 마젠타(normalAttackReach), 시안(wheelAttackReach). 원 가장자리를 드래그하면 MidBossPatternConfig 값이 Undo 지원과 함께 즉시 반영됨. FireAttack/FireBomb은 원거리 구체라 근접 reach 개념이 없어 핸들 대상에서 제외
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건(무관한 GDK 경고 1건만 존재)
+- MidBoss 선택 → SerializedObject로 config 참조 정상 확인(aggroRange=8, attackRange=2.2, normalAttackReach=2.2, wheelAttackReach=2.4 전부 정확히 읽힘)
+- 저장 → manage_scene(load) 강제 재로드 → run_tests(EditMode) → 140/140 통과 (job 68d40404c354417db201b31451f1b899)
+- Handles.RadiusHandle 자체는 Unity 내장 인터랙티브 컴포넌트라 마우스 드래그 동작은 도구로 직접 재현 불가 — Editor 스크립트 컴파일 정상 및 config 참조 정상 확인으로 대체
+### 실패와 수정
+- 없음
+### 사람 확인 필요
+- 원거리 패턴(FireAttack/FireBomb) 패링 타이밍을 지금처럼 '캐스팅이 아니라 구체가 도착할 때 눌러야 하는' 난이도로 유지할지, 근접처럼 캐스팅 시점 근처에서도 걸리게 완화할지 알려주세요
+- Scene 뷰에서 실제로 원을 드래그했을 때 체감이 괜찮은지 확인 부탁드립니다
