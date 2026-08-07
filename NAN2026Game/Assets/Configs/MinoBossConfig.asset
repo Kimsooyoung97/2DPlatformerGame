@@ -14,20 +14,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NAN2026.MinoBossConfig
   maxHp: 30
   aggroX: 9
-  attackRange: 2.6
-  hitReach: 3.4
+  attackRange: 3.3799996
+  hitReach: 4.42
   walkSpeed: 2.2
   damage: 1
-  attackDuration: 1.1
-  hitFracStart: 0.5
-  hitFracEnd: 0.75
+  attackDuration: 1.5
+  hitFracStart: 0.62
+  hitFracEnd: 0.82
   attackCooldown: 1.6
   fpsIdle: 10
   fpsWalk: 12
-  fpsAtk: 14
+  fpsAtk: 10.7
   fpsHit: 14
   fpsDeath: 12
-  barOffsetY: 3.1
+  barOffsetY: 4.0299997
   barUnder: {fileID: 21300000, guid: 6e56a6c15e54bbf44a62fdcdff80e3c5, type: 3}
   barProgress: {fileID: 21300000, guid: 87c8d36c3d4eb584f9d908df57748686, type: 3}
   barOver: {fileID: 21300000, guid: 30667c31bcffce343b89a8ad2dc9bb93, type: 3}
