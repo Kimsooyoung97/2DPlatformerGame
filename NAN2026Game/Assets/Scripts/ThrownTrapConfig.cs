@@ -13,6 +13,8 @@ namespace NAN2026
         public float lifeTime = 6f;
         public float ballSpin = 360f;      // 스파이크볼 회전
         public float reflectSpeed = 9f;    // 패링 반사(발사기 파괴)
+        public float homingSpeed = 10f;    // 조준 돌진 속도
+        [Range(0f, 1f)] public float twinChance = 0.35f; // 2발 동시 확률
         [Header("발광")]
         public float glowIntensity = 2.2f;
         public float glowRadius = 2.4f;

@@ -16,7 +16,7 @@ MonoBehaviour:
   launchMultiplier: 1.1
   visionRadiusFallback: 4.5
   blinkHz: 5
-  launchSpeed: 13
+  launchSpeed: 10
   spinDegPerSec: 540
   damage: 1
   deflectSpeed: 9
@@ -25,6 +25,9 @@ MonoBehaviour:
   clashLines: 8
   clashRadius: 1.3
   clashHitstop: 0.08
+  clashRecoilEnabled: 1
+  clashRecoilAmp: 0.06
+  clashRecoilTime: 0.1
   clashSound: {fileID: 8300000, guid: 9a02538bd0d00dc409112d096db1e733, type: 3}
   clashVolume: 0.9
   clashSoundStartMs: 0

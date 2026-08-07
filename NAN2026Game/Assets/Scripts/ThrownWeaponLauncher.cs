@@ -14,7 +14,8 @@ namespace NAN2026
         public bool dropFromCeiling = true; // 천장 낙하 모드
         private Transform player;
         private float nextReady;
-        private static bool globalBusy; // 맵 전체에서 한 번에 하나만
+        private static int waveBudget; // 이번 파도 허용 발수(1~2)
+        private static int reserved;   // 전조 중 예약 수
         private AudioSource src;
 
         private void Start()
@@ -28,12 +29,14 @@ namespace NAN2026
         private void Update()
         {
             if (config == null || player == null || Time.time < nextReady) return;
-            if (globalBusy || ThrownProjectile.Alive > 0) return; // 이미 하나가 날고 있으면 대기
+            int inFlight = ThrownProjectile.Alive + reserved;
+            if (inFlight == 0) waveBudget = Random.value < config.twinChance ? 2 : 1; // 새 파도 예산 추첨
+            if (inFlight >= waveBudget) return;
             if (Mathf.Abs(player.position.x - transform.position.x) > config.aggroX) return;
             if (dropFromCeiling && player.position.y > transform.position.y) return; // 위층 통행 중엔 미가동
             float cd = kind == ThrownKind.Arrow ? config.arrowCooldown : kind == ThrownKind.Shuriken ? config.shurikenCooldown : config.axeCooldown;
             nextReady = Time.time + cd;
-            globalBusy = true;
+            reserved++;
             StartCoroutine(FireSeq());
         }
 
@@ -41,7 +44,7 @@ namespace NAN2026
         {
             yield return new WaitForSeconds(config.telegraphTime);
             Fire();
-            globalBusy = false;
+            reserved--;
         }
 
         private void Fire()
@@ -61,8 +64,9 @@ namespace NAN2026
             lt.color = config.glowColor;
             var pr = go.AddComponent<ThrownProjectile>();
             pr.config = config; pr.kind = kind; pr.launcher = gameObject;
-            float sp = kind == ThrownKind.Arrow ? config.arrowSpeed : kind == ThrownKind.Shuriken ? config.shurikenSpeed : config.axeSpeed;
-            pr.Launch(dropFromCeiling ? new Vector2(0f, -sp) : new Vector2(dir * sp, 0f));
+            // 유도형: 발사 순간 플레이어를 조준해 돌진 (기존 돌진 트랩과 동일 문법)
+            Vector2 aim = player != null ? ((Vector2)player.position - (Vector2)go.transform.position).normalized : Vector2.down;
+            pr.Launch(aim * config.homingSpeed);
         }
     }
 }

@@ -19,6 +19,8 @@ MonoBehaviour:
   lifeTime: 6
   ballSpin: 360
   reflectSpeed: 9
+  homingSpeed: 10
+  twinChance: 0.35
   glowIntensity: 2.2
   glowRadius: 2.4
   glowColor: {r: 1, g: 0.92, b: 0.6, a: 1}
