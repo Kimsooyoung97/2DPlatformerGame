@@ -84,6 +84,18 @@ namespace NAN2026
             { atkT = -1f; cooldownUntil = Time.time + config.attackCooldown; Play("MidBoss_Idle"); }
         }
 
+        // 씬 뷰 시각화: 노랑=감지 / 빨강=공격개시 / 자홍=타격리치
+        void OnDrawGizmosSelected()
+        {
+            if (config == null) return;
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(transform.position, config.aggroRange);
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(transform.position, config.attackRange);
+            Gizmos.color = Color.magenta;
+            Gizmos.DrawWireSphere(transform.position, config.hitReach);
+        }
+
         void Face() { if (sr != null) sr.flipX = player.position.x < transform.position.x; }
         void Play(string s2) { if (state == s2 || anim == null) return; state = s2; anim.Play(s2, 0, 0f); }
     }

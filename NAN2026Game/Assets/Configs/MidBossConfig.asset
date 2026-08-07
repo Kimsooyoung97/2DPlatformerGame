@@ -13,12 +13,12 @@ MonoBehaviour:
   m_Name: MidBossConfig
   m_EditorClassIdentifier: Assembly-CSharp::NAN2026.MidBossConfig
   aggroRange: 8
-  attackRange: 1.8
+  attackRange: 3
   walkSpeed: 2.2
   attackDuration: 1.5
-  hitFrac: 0.5
-  hitFracEnd: 0.72
-  hitReach: 2.2
+  hitFrac: 0.62
+  hitFracEnd: 0.82
+  hitReach: 3.4
   damage: 1
   attackCooldown: 1.2
   clashConfig: {fileID: 11400000, guid: 31b4bd26897983b4fb8fcb4703f841b5, type: 2}
