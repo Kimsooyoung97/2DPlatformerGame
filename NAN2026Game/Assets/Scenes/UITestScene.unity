@@ -236,7 +236,10 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 211668207571173223, guid: 5ad81ff710d97324ca0d5a0f9d1de8cf, type: 3}
       insertIndex: -1
       addedObject: {fileID: 705587936}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 2922922235120252855, guid: 5ad81ff710d97324ca0d5a0f9d1de8cf, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2120893803}
   m_SourcePrefab: {fileID: 100100000, guid: 5ad81ff710d97324ca0d5a0f9d1de8cf, type: 3}
 --- !u!224 &971277 stripped
 RectTransform:
@@ -634,6 +637,17 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 735461850}
   m_CullTransparentMesh: 1
+--- !u!114 &828910158 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7977614564059179325, guid: 83312ceca3b821d4a9fb92fa4cc2168e, type: 3}
+  m_PrefabInstance: {fileID: 873355950}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6eb634c988deac4a97cd1794f5f573d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerProgression
 --- !u!1001 &873355950
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1277,6 +1291,38 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2086801735}
   m_CullTransparentMesh: 1
+--- !u!1 &2120893798 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2922922235120252855, guid: 5ad81ff710d97324ca0d5a0f9d1de8cf, type: 3}
+  m_PrefabInstance: {fileID: 971276}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2120893803
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2120893798}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8dbc4e41478953b448ee78665b701688, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LevelUpSkillManager
+  playerProgression: {fileID: 828910158}
+  panel: {fileID: 971285}
+  titleText: {fileID: 971284}
+  cardBackgrounds:
+  - {fileID: 971283}
+  - {fileID: 971280}
+  - {fileID: 971278}
+  choiceButtons:
+  - {fileID: 971282}
+  - {fileID: 1239086814}
+  - {fileID: 705587937}
+  choiceTexts:
+  - {fileID: 971281}
+  - {fileID: 735461852}
+  - {fileID: 2086801737}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

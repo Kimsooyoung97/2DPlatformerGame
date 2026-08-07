@@ -3542,3 +3542,20 @@ Warp될 때 화면이 까맣게 fadein 되었다가 워프 완료되면 fadeout�
 - 재생 모드 실측: AddXp(1000)로 레벨 1→19 유도 → panel 활성화, 제목 "Level UP! Lv.19" 정상 표시, Time.timeScale=0 확인. 버튼 텍스트에 등급+설명(예: "[SILVER] 공격 데미지 +2") 정상 표시. btn0.onClick.Invoke()로 실제 클릭 재현 → DamageBonus가 0→2로 정확히 적용됨과 IsChoosingAugment가 다음 레벨 선택으로 이어지는 것 확인. 남은 17회를 반복 소진시켜 최종적으로 panel 비활성화 + Time.timeScale=1로 정상 복귀함을 확인
 ### 실패와 수정
 - 없음
+
+## [수정] 레벨업 UI를 이벤트 기반으로 분리(PlayerProgression ↔ LevelUpSkillManager) — 2026-08-05
+### 프롬프트
+구조를 레벨업 스킬 매니저 스크립트를 따로 두고 플레이어가 레벨업하면 이벤트를 발생시켜서 canvas를 띄우는 형식으로 바꿔줘
+### 조작 내역
+- PlayerProgression.cs에서 UI 관련 필드(panel/titleText/cardBackgrounds/choiceButtons/choiceTexts)와 RefreshUI/DescribeAugment를 전부 제거. 순수 데이터·로직 계층으로 축소(XP/레벨 추적, 증강 굴림, 효과 적용만 담당)
+- 이벤트 2개 신규: OnAugmentChoiceReady(AugmentType[], int[], int level) — 선택창이 떠야 할 때 발행, 여러 레벨을 한번에 오르면 매 선택이 끝날 때마다 다음 선택을 위해 다시 발행됨. OnAllAugmentChoicesComplete — 대기 중이던 선택이 전부 끝났을 때 발행
+- AugmentConfig를 외부에서 조회할 수 있게 public getter(AugmentConfig 프로퍼티) 추가(설명 텍스트 생성용)
+- LevelUpSkillManager.cs 신규: PlayerProgression의 두 이벤트를 OnEnable/OnDisable로 구독. OnAugmentChoiceReady 수신 시 Time.timeScale=0 + UI 갱신(제목/버튼 텍스트/카드 색) + 패널 활성화. 버튼 클릭 시 playerProgression.ChooseAugment(인덱스) 호출. OnAllAugmentChoicesComplete 수신 시 Time.timeScale=1 + 패널 비활성화. RefreshUI/DescribeAugment 로직을 PlayerProgression에서 그대로 이관
+- LevelUpCanvas에 LevelUpSkillManager 부착, playerProgression=Player의 PlayerProgression, panel/titleText/cardBackgrounds[3]/choiceButtons[3]/choiceTexts[3] 전부 재연결(기존 PlayerProgression에 있던 참조를 그대로 이 컴포넌트로 이동)
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- 저장 → manage_scene(load) 강제 재로드 → LevelUpSkillManager의 참조 6개 전부 유지 확인
+- run_tests(EditMode) → 133/133 통과 (job bf86a91de9ff4a86bbdf36ca5afbc6a5)
+- 재생 모드 실측: AddXp로 레벨업 유도 → 이벤트가 정상 전파되어 매니저가 패널을 켜고 제목·버튼을 채움을 확인. 정확히 1레벨만 오르도록 XP를 딱 맞춰 지급한 뒤 리플렉션으로 실제 offeredTypes[0]=DamageUp(Bronze)임을 먼저 확정하고 버튼0 클릭 → DamageBonus가 0→1(Bronze 기대값과 정확히 일치)로 반영, 선택 완료 후 패널 자동 비활성화 + Time.timeScale=1 복귀까지 확인
+### 실패와 수정
+- 검증 중 여러 레벨이 연속으로 올라가는 상황에서 버튼 인덱스별 증강 종류가 매 라운드 다시 랜덤 배정된다는 걸 놓치고 잠깐 '효과가 안 먹히나' 혼동함 → 리플렉션으로 실제 offeredTypes를 먼저 확인하는 방식으로 재검증해 해결(코드 문제 아니었음)
