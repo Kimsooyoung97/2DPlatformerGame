@@ -22,6 +22,19 @@ namespace NAN2026
         public float deflectSpeed = 9f;
         public float respawnDelay = 3f;
 
+        [Header("격돌 이펙트(할로우나이트식)")]
+        public float clashDuration = 0.16f;
+        public int clashLines = 8;
+        public float clashRadius = 1.3f;
+        public float clashHitstop = 0.08f;
+        public bool clashRecoilEnabled = true;   // 해제 반동 켜기/끄기
+        public float clashRecoilAmp = 0.06f;     // 반동 진폭(유닛)
+        public float clashRecoilTime = 0.1f;     // 반동 시간(초)
+        public AudioClip clashSound;
+        [Range(0f,1f)] public float clashVolume = 0.9f;
+        public float clashSoundStartMs = 0f;   // 재생 시작(ms)
+        public float clashSoundEndMs = 864f;  // 재생 끝(ms, 이 구간만 사용)
+
         [Header("팝업")]
         public float popupRise = 1.2f;
         public float popupLife = 0.9f;

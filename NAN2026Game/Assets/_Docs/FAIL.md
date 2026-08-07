@@ -95,3 +95,10 @@
 - **원인**: 씬에 EventSystem 오브젝트가 아예 없었음. uGUI의 Button/GraphicRaycaster 클릭 파이프라인은 EventSystem이 있어야 마우스/터치 입력을 UI로 라우팅한다 — 리스너가 아무리 정확히 등록돼 있어도 EventSystem이 없으면 그 리스너까지 도달하는 경로 자체가 없다
 - **주의**: onClick.Invoke()로 직접 호출해서 '작동한다'고 검증하면 이 문제를 못 잡는다. Invoke()는 EventSystem/GraphicRaycaster 경로를 건너뛰고 리스너를 바로 실행하기 때문. 실제 클릭 경로까지 검증하려면 UnityEngine.EventSystems.ExecuteEvents.Execute(button.gameObject, pointerEventData, ExecuteEvents.pointerClickHandler)로 재현해야 한다
 - **방지 규칙**: uGUI(Canvas/Button)를 쓰는 씬을 새로 만들거나 넘겨받으면 EventSystem 존재 여부를 가장 먼저 확인한다. 버튼 클릭 검증은 onClick.Invoke()가 아니라 ExecuteEvents.pointerClickHandler로 한다
+- #17 입력 분기 부분 replace 시 기존 else 가지를 덮어써 기능 소실 위험 → 다분기 블록은 중괄호 매칭으로 통째 재작성하고 EditMode로 회귀 확인
+
+- #18 큐 소비형 공격을 코드로 캔슬할 때 attackTimer만 0으로 하면 같은 프레임 attacking 로컬이 true로 남아 CanAttack 게이트가 새 큐를 막음 → attacking도 함께 false. 추측 3회보다 Debug.Log 실측이 빨랐음
+
+- #19 진화한 파일에 기억 기준 주입 → 중복 선언. 클래스 수정 전 현재 필드·시그니처 실독 필수
+
+- #20 재생 중 컴파일=반낡은 어셈블리 오동작 가능(패링 오인) → 증상 확인은 완전 정지→재생 / #21 UnityEngine.Object에 ?? 연산자 무효(가짜 null) → 명시적 null 체크

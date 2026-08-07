@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eebd593045a879f4782b1835da3dc93f, type: 3}
+  m_Name: MidBossConfig
+  m_EditorClassIdentifier: Assembly-CSharp::NAN2026.MidBossConfig
+  aggroRange: 8
+  attackRange: 5.59375
+  walkSpeed: 2.2
+  attackDuration: 1.5
+  hitFrac: 0.62
+  hitFracEnd: 0.82
+  hitReach: 6.29375
+  damage: 1
+  attackCooldown: 1.2
+  showRangesInGame: 1
+  clashConfig: {fileID: 11400000, guid: 31b4bd26897983b4fb8fcb4703f841b5, type: 2}
