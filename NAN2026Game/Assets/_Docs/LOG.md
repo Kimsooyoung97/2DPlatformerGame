@@ -5147,3 +5147,15 @@ AdventureScene_Test 1에 맵을 작성할거야. AdventureScene_Test에서 내�
 - 해당 없음
 ### 실패와 수정
 없음
+
+
+## [구현] Test→Test1 소품 이식 — 2026-08-07 22:15
+### 프롬프트
+AdventureScene_Test에 있는 나무들이랑 Props 들도 AdventureScene_Test1에 옮겨줘
+### 조작 내역
+- Test 수집(Stage_Props 자식+루트 SR, BG·카메라·플레이어 제외) 101건 → Test1 Stage_Props로 동좌표 이식 101건 (프리팹 인스턴스/일반 스프라이트 양쪽 지원, flipX·order·스케일 보존)
+- 밧줄 2건: RopeZone 재구성 + Test1 Player 클라이머 배선 
+### 검증
+- 저장 True. 배치 미관은 사용자 (좌표 원본 유지 — 던전 구조와 겹치면 조정 필요)
+### 실패와 수정
+없음
