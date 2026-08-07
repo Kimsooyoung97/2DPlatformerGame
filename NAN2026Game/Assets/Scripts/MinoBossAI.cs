@@ -17,7 +17,8 @@ namespace NAN2026
         private float animT, stateT, nextAtk;
         private Sprite[] cur;
         private float curFps;
-        private bool atkIs1, dealtThisSwing;
+        private bool atkIs1, dealtThisSwing, holdDone;
+        private float holdT;
         private Transform barFill;
         private float barFullW;
 
@@ -71,7 +72,7 @@ namespace NAN2026
 
         private void SetState(int s)
         {
-            state = s; animT = 0f; stateT = 0f; dealtThisSwing = false;
+            state = s; animT = 0f; stateT = 0f; dealtThisSwing = false; holdDone = false; holdT = 0f;
             cur = s == 0 ? idleF : s == 1 ? walkF : s == 2 ? (atkIs1 ? atk1F : atk2F) : s == 3 ? hitF : deathF;
             curFps = s == 0 ? config.fpsIdle : s == 1 ? config.fpsWalk : s == 2 ? config.fpsAtk : s == 3 ? config.fpsHit : config.fpsDeath;
         }
@@ -88,8 +89,18 @@ namespace NAN2026
         private void Update()
         {
             if (config == null || cur == null || cur.Length == 0) return;
-            animT += Time.deltaTime * curFps;
-            stateT += Time.deltaTime;
+            // atk_1 예고 홀드: 지정 프레임에서 잠시 정지 (애니·타격창 시계 동결)
+            bool holding = state == 2 && atkIs1 && !holdDone && (int)animT >= config.atk1HoldFrame;
+            if (holding)
+            {
+                holdT += Time.deltaTime;
+                if (holdT >= config.atk1HoldTime) { holdDone = true; holding = false; }
+            }
+            if (!holding)
+            {
+                animT += Time.deltaTime * curFps;
+                stateT += Time.deltaTime;
+            }
             bool loop = state == 0 || state == 1;
             int idx = loop ? (int)animT % cur.Length : Mathf.Min((int)animT, cur.Length - 1);
             sr.sprite = cur[idx];

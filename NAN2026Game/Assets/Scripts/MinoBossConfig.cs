@@ -16,6 +16,9 @@ namespace NAN2026
         public float hitFracStart = 0.5f;  // 애니 중 타격 유효창
         public float hitFracEnd = 0.75f;
         public float attackCooldown = 1.6f;
+        [Header("atk_1 예고 홀드")]
+        public int atk1HoldFrame = 3;      // 이 프레임에서 멈춤 (치켜든 자세)
+        public float atk1HoldTime = 0.55f; // 멈추는 시간
         [Header("프레임 속도")]
         public float fpsIdle = 10f;
         public float fpsWalk = 12f;
