@@ -213,7 +213,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2922922235120252855, guid: 5ad81ff710d97324ca0d5a0f9d1de8cf, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5315394512745783901, guid: 5ad81ff710d97324ca0d5a0f9d1de8cf, type: 3}
       propertyPath: m_fontAsset
@@ -783,6 +783,10 @@ PrefabInstance:
       propertyPath: panel
       value: 
       objectReference: {fileID: 971285}
+    - target: {fileID: 7977614564059179325, guid: 83312ceca3b821d4a9fb92fa4cc2168e, type: 3}
+      propertyPath: canvas
+      value: 
+      objectReference: {fileID: 2120893798}
     - target: {fileID: 7977614564059179325, guid: 83312ceca3b821d4a9fb92fa4cc2168e, type: 3}
       propertyPath: titleText
       value: 

@@ -13,7 +13,7 @@ public sealed class PlayerProgression : MonoBehaviour
 {
     [SerializeField] private LevelProgressionConfig levelConfig;
     [SerializeField] private AugmentConfig augmentConfig;
-
+    [SerializeField] private GameObject canvas;
     private PlayerHealth health;
 
     private int level = 1;
@@ -63,7 +63,11 @@ public sealed class PlayerProgression : MonoBehaviour
         {
             pendingAugmentChoices += newLevel - levelBefore;
             level = newLevel;
-            if (!choosing) BeginAugmentChoice();
+            if (!choosing)
+            {
+                canvas.SetActive(true);
+                BeginAugmentChoice();
+            }
         }
     }
 
