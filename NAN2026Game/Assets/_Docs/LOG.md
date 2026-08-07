@@ -4774,3 +4774,14 @@ Game뷰에는 반원 표시가 안되었는데 문제 없어?
 - 저장 True. 브러시 작업은 사용자
 ### 실패와 수정
 없음
+
+
+## [수정] 에셋 쇼룸 창에 medieval 타일셋 등록 — 2026-08-07 18:23
+### 프롬프트
+에셋 쇼룸에 우리가 추가한 맵 파일도 추가해라니깐 (스크린샷: 커스텀 TileShowroomWindow)
+### 조작 내역
+- TileShowroomWindow.cs: SearchRoots에 Assets/Map/Showroom/Medieval 추가, TileFamilyOf에 medieval 규칙(FloorTilesN/OtherTilesN_x_y → 'medieval — 시트명' 4패밀리), PropExclude에 TP_(팔레트 프리팹 제외)
+### 검증
+- 컴파일 0. 창 드롭다운에 medieval — FloorTiles1/2·OtherTiles1/2 노출은 사용자 확인(새로고침 버튼)
+### 실패와 수정
+없음
