@@ -54,18 +54,6 @@ namespace NAN2026
         [Header("근접 히트박스 공통")]
         [Tooltip("판정용 콜라이더 오브젝트가 생성되어 있는 시간(초) — 그 동안 겹치면 맞는다")]
         public float meleeHitboxLifetime = 0.15f;
-        [Tooltip("중간보스 공격 콜라이더의 가로, 세로")]
-        public float midBossNormalAttackHitboxWidth = 2.5f;
-        public float midBossNormalAttackHitboxHeight = 2.3f;
-        public float midBossFireAttackHitboxWidth = 2.5f;
-        public float midBossFireAttackHitboxHeight = 2.3f;
-        public float midBossFireBombHitboxWidth = 5f;
-        public float midBossFireBombHitboxHeight = 5f;
-        public float midBossWheelAttackHitboxWidth = 3.3f;
-        public float midBossWheelAttackHitboxHeight = 3.3f;
-
-        //[Tooltip("Tmp")]
-        //public float midBossNormalAttackHitboxHeight = 3f;
-
+        
     }
 }

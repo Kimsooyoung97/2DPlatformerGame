@@ -19,8 +19,8 @@ MonoBehaviour:
   wheelAttackAnimLength: 1
   jumpAnimLength: 1.666667
   aggroRange: 8
-  attackRange: 2.2
-  chaseSpeed: 2.2
+  attackRange: 3.5
+  chaseSpeed: 1.1
   jumpYThreshold: 1.2
   jumpVelocity: 8
   minPatternGap: 0.6
@@ -41,4 +41,3 @@ MonoBehaviour:
   wheelAttackCooldown: 6
   wheelAttackReach: 2.4
   meleeHitboxLifetime: 0.15
-  meleeHitboxHeight: 3

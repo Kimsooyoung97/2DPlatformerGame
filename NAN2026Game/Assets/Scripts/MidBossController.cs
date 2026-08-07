@@ -1,4 +1,5 @@
 using System.Collections;
+using UnityEditor.Tilemaps;
 using UnityEngine;
 
 namespace NAN2026
@@ -22,7 +23,7 @@ namespace NAN2026
         [SerializeField] private GameObject fireHitboxObject;
         [SerializeField] private GameObject wheelHitboxObject;
         [SerializeField] private GameObject bombHitboxObject;
-
+        [SerializeField] private Transform[] childObjects;
         private Animator anim;
         private SpriteRenderer sr;
         private NHNDemo.MonsterHealth health;
@@ -80,7 +81,10 @@ namespace NAN2026
             float dx = player.position.x - transform.position.x;
             float dist = Mathf.Abs(dx);
 
-            if (sr != null) sr.flipX = dx < 0f;
+            if (sr != null)
+            {
+                sr.flipX = dx < 0f;
+            }
 
             // 점프 추격: 플레이어가 임계 높이 이상 위에 '유지'되고 있을 때만 점프로 취급한다.
             bool aboveNow = (player.position.y - transform.position.y) >= config.jumpYThreshold;
@@ -105,6 +109,15 @@ namespace NAN2026
             }
         }
 
+        private void FlipHitBox()
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                Vector3 childPos = childObjects[i].localPosition;
+                childPos.x *= -1;
+                childObjects[i].localPosition = childPos;
+            }
+        }
         private IEnumerator DoJump()
         {
             busy = true;
