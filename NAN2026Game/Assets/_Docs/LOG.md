@@ -5334,3 +5334,16 @@ AdventureScene1에 적용된 Player 적용 요소를 AdventureScene2에도 적�
 - 저장 True. 체감은 사용자
 ### 실패와 수정
 없음
+
+
+## [구현] Scene2 플레이어 전투 키트 이식 — 2026-08-08 04:22
+### 프롬프트
+내 말은 패링이나 1번 2번 등 스킬 적용등을 적용시켜달라는거야. → ㄱ
+### 조작 내역
+- 진단: Scene2 Player=팀 수동 조립(프리팹 아님), 컨트롤러(Z/X/V·패링 내장)는 있으나 PlayerSkill 등 부재
+- 우리 프리팹 루트 대조 이식(CopySerialized, 팀의 사운드·정렬 보존): 추가[PlayerSkill ] 기존[PlayerController2D PlayerHealth PlayerProgression ]
+- 프리팹 내부 자식 참조는 씬 동명 자식으로 재배선. 미해결: 없음
+### 검증
+- 저장 True. 1·2·3·4 스킬·패링 발동은 사용자 재생
+### 실패와 수정
+- SceneManager 네임스페이스 오타 1회
