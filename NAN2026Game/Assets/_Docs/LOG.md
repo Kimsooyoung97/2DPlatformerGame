@@ -4752,3 +4752,14 @@ Game뷰에는 반원 표시가 안되었는데 문제 없어?
 - 씬 저장 True. 재생 체감(지형 밟힘·배경)은 사용자
 ### 실패와 수정
 - GridPalette 타입 수색 1회(UnityEngine→UnityEditor 네임스페이스) / 380타일 생성 중 타임아웃 2회(작업은 완료됨 — 재조회로 확인)
+
+
+## [수정] AdventureScene_Test 카메라 추종 — 2026-08-07 18:14
+### 프롬프트
+카메라가 캐릭터 따라서 이동하도록 만들어줘
+### 조작 내역
+- CM3 Follow를 공개 프로퍼티로 직접 배선(직전 m_Follow 경로 불발 원인), CinemachineFollow 컴포넌트(오프셋 y2.5,-10)·Brain 보장, 렌즈 6.75. Follow=Player CinemachineFollow(오프셋 y2.5) 
+### 검증
+- 저장 True. 추종 체감은 사용자 재생
+### 실패와 수정
+- 시리얼라이즈 경로 대신 리플렉션 프로퍼티로 전환
