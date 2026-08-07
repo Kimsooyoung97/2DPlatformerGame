@@ -5243,3 +5243,15 @@ Tile Palette를 좀 고쳐줘. 아니면 Tile Palette에 있는 모든 것들을
 - 컴파일 0, 기둥 프레임 실측: WaterAnim_1_3 → AWT_1_3 rect=(x:46.08, y:224.00, width:17.92, height:25.97) / WaterAnim_2_4 → AWT_2_4 rect=(x:78.29, y:192.00, width:17.71, height:32.00) / WaterAnim_0_5 → AWT_0_5 rect=(x:8.08, y:160.00, width:23.92, height:32.00) / WaterAnim_Fall → WFS_0 rect=(x:14.29, y:0.00, width:17.71, height:32.00) / 
 ### 실패와 수정
 없음
+
+
+## [구현] 배 탑승·항해 — 2026-08-08 01:44
+### 프롬프트
+배 위에 올라탈 수 있게 해주고 배에 올라타면 오른쪽 물 끝까지 이동하게 만들어줘
+### 조작 내역
+- BoatRideConfig SO(속도3.5·갑판 규격·가장자리 여유, Assets/Configs), BoatRide: 갑판 탑승 감지→우향 항해, 목적지=Stage_Wall 물 타일 우측 끝 실시간 스캔, 탑승자 갑판 이동량 동승 운반, 도착 후 정지
+- Test1 Boat: 갑판 BoxCollider(2.4x0.35 @y0.85)+BoatRide 배선. 갑판 콜라이더 BoatRide 
+### 검증
+- 컴파일 0, 저장 True. 탑승·항해·물끝 정지·동승 운반은 사용자 재생
+### 실패와 수정
+없음
