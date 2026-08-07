@@ -278,6 +278,9 @@ TextureImporter:
   - first:
       213: -6700789434484638479
     second: Decor_91
+  - first:
+      213: -860183753245864206
+    second: Decor_40_b
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -1284,8 +1287,8 @@ TextureImporter:
         serializedVersion: 2
         x: 0
         y: 416
-        width: 194
-        height: 75
+        width: 95
+        height: 71
       alignment: 7
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -1850,6 +1853,28 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: Decor_40_b
+      rect:
+        serializedVersion: 2
+        x: 97
+        y: 416
+        width: 94
+        height: 71
+      alignment: 7
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2fec7321f630014f0800000000000000
+      internalID: -860183753245864206
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     customData: 
     physicsShape: []
@@ -1900,6 +1925,7 @@ TextureImporter:
       Decor_39: -933470041020961179
       Decor_4: -8502563662169142480
       Decor_40: -4336383471466243096
+      Decor_40_b: -860183753245864206
       Decor_41: -4805805668124148689
       Decor_42: 2569401401197613589
       Decor_43: -7413064677276684382
