@@ -21,8 +21,8 @@ namespace NAN2026
             rb = GetComponent<Rigidbody2D>();
             controller = GetComponent("PlayerController2D") as Behaviour;
             myCol = GetComponent<Collider2D>();
-            var wall = GameObject.Find("Stage_Wall");
-            wallCols = wall != null ? wall.GetComponents<Collider2D>() : new Collider2D[0];
+            if (myCol == null) myCol = GetComponentInChildren<Collider2D>();
+            wallCols = CollectStageCols();
         }
 
         private void OnTriggerEnter2D(Collider2D other)
@@ -53,6 +53,17 @@ namespace NAN2026
             transform.position = new Vector3(Mathf.Lerp(transform.position.x, tx, config.snapLerp * Time.deltaTime * 10f), transform.position.y, transform.position.z);
         }
 
+        private Collider2D[] CollectStageCols()
+        {
+            var list = new System.Collections.Generic.List<Collider2D>();
+            foreach (var nm in new[] { "Stage_Wall", "Stage_Ground" })
+            {
+                var go = GameObject.Find(nm);
+                if (go != null) list.AddRange(go.GetComponentsInChildren<Collider2D>());
+            }
+            return list.ToArray();
+        }
+
         private void StartClimb()
         {
             climbing = true;
@@ -60,8 +71,7 @@ namespace NAN2026
             rb.gravityScale = 0f;
             rb.linearVelocity = Vector2.zero;
             if (controller != null) controller.enabled = false;
-            var wall = GameObject.Find("Stage_Wall");
-            if (wall != null) wallCols = wall.GetComponents<Collider2D>();
+            wallCols = CollectStageCols();
             if (myCol != null) foreach (var w in wallCols) if (w != null) Physics2D.IgnoreCollision(myCol, w, true);
         }
 
