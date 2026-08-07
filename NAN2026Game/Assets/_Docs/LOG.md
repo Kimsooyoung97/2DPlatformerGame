@@ -5255,3 +5255,15 @@ Tile Palette를 좀 고쳐줘. 아니면 Tile Palette에 있는 모든 것들을
 - 컴파일 0, 저장 True. 탑승·항해·물끝 정지·동승 운반은 사용자 재생
 ### 실패와 수정
 없음
+
+
+## [수정] 발판 정석 조합 전환 — 푹꺼짐 해소 — 2026-08-08 01:48
+### 프롬프트
+바닥으로 생성한 타일맵에 발판 효과가 없어서 아래로 푹꺼지거든. 그거 고쳐줄래?
+### 조작 내역
+- 베이커/엣지 제거 → TilemapCollider(컴포짓)+Static RB+CompositeCollider(Outlines·이펙터)+원웨이(arc170): AdventureScene_Test1/Stage_Ground AdventureScene_Test1/Stage_Wall AdventureScene_Test/Stage_Ground AdventureScene_Test/Stage_Wall 
+- 물 타일 colliderType None → 자동 무충돌 유지. 하향점프는 Collider2D 범용이라 그대로 호환
+### 검증
+- 저장 완료. 착지·밑점프 통과·↓점프 하강·물 통과는 사용자 재생
+### 실패와 수정
+- 베이커 방식 실전 배신 — 정석 조합으로 회귀 (FAIL 등재)
