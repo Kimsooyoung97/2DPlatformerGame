@@ -3522,3 +3522,23 @@ Warp될 때 화면이 까맣게 fadein 되었다가 워프 완료되면 fadeout�
 - 없음(수정 자체는 정상 적용됐다고 판단하나, 선행 조건인 지형 문제 때문에 최종 확인이 막혀있음)
 ### 사람 확인 필요
 - WarpZone 아래 실제 바닥이 있는지 아직 확인을 못 받았습니다. 이게 해결돼야 카메라 스냅 수정도 제대로 눈으로 확인하실 수 있을 것 같습니다
+
+## [구현] 레벨업 증강 선택 UI를 OnGUI에서 LevelUpCanvas로 전환 — 2026-08-05
+### 프롬프트
+현재 플레이어 캐릭터가 레벨업 했을 때 능력 선택창을 PlayerProgression에서 직접 만드는데 현재 씬에 나와있는 LevelUICanvas를 띄워주면서 그 안의 버튼을 클릭하면 능력치를 선택할 수 있도록 변경해줘
+### 조사
+활성 씬이 UITestScene으로 바뀌어 있었음(사용자가 이 기능 테스트용으로 전환한 것으로 추정). 'LevelUICanvas'가 아니라 'LevelUpCanvas'로 존재(오타로 추정). 구조: LevelUpCanvas > LevelUpPanel(Image) > LevelUpTxt(제목 TMP) + Text(부제 TMP, 고정) + Skill1/Skill1(1)/Skill1(2)(각각 Image 배경 + 자식 Button(Image+Button+Text(TMP))). 이 씬의 Player에는 이미 PlayerProgression과 두 Config가 연결되어 있었음
+### 조작 내역
+- PlayerProgression.cs를 OnGUI 방식에서 Canvas 참조 방식으로 전면 교체: panel/titleText/cardBackgrounds[3]/choiceButtons[3]/choiceTexts[3] 직렬화 필드 추가
+- Awake에서 panel을 기본 비활성화
+- BeginAugmentChoice에서 RefreshUI(count) 호출 후 panel 활성화 — 제목에 레벨 표시, 각 버튼 텍스트에 [등급]+설명, 카드 배경색을 등급별로 틴트, Button.onClick.RemoveAllListeners 후 AddListener(() => ChooseAugment(캡처된 인덱스))로 재바인딩(레벨업마다 새로 뽑히므로 매번 리스너 재설정 필요)
+- 제시 개수보다 버튼이 많으면 남는 버튼은 비활성화
+- ChooseAugment에서 선택 소진 시 panel 비활성화 + Time.timeScale 복구는 기존 로직 그대로 유지
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- UITestScene의 Player에 panel/titleText/cardBackgrounds[3]/choiceButtons[3]/choiceTexts[3] 전부 연결
+- 저장 → manage_scene(load) 강제 재로드 → 연결 유지 확인
+- run_tests(EditMode) → 133/133 통과 (job 524f9854ace34594bcfec91d6eb4c0d7, 기존 128 + 신규 5는 별도 테스트 파일에서 온 것으로 이번 작업과 무관)
+- 재생 모드 실측: AddXp(1000)로 레벨 1→19 유도 → panel 활성화, 제목 "Level UP! Lv.19" 정상 표시, Time.timeScale=0 확인. 버튼 텍스트에 등급+설명(예: "[SILVER] 공격 데미지 +2") 정상 표시. btn0.onClick.Invoke()로 실제 클릭 재현 → DamageBonus가 0→2로 정확히 적용됨과 IsChoosingAugment가 다음 레벨 선택으로 이어지는 것 확인. 남은 17회를 반복 소진시켜 최종적으로 panel 비활성화 + Time.timeScale=1로 정상 복귀함을 확인
+### 실패와 수정
+- 없음
