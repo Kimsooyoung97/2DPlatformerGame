@@ -3523,6 +3523,74 @@ Warp될 때 화면이 까맣게 fadein 되었다가 워프 완료되면 fadeout�
 ### 사람 확인 필요
 - WarpZone 아래 실제 바닥이 있는지 아직 확인을 못 받았습니다. 이게 해결돼야 카메라 스냅 수정도 제대로 눈으로 확인하실 수 있을 것 같습니다
 
+## [구현] 레벨업 증강 선택 UI를 OnGUI에서 LevelUpCanvas로 전환 — 2026-08-05
+### 프롬프트
+현재 플레이어 캐릭터가 레벨업 했을 때 능력 선택창을 PlayerProgression에서 직접 만드는데 현재 씬에 나와있는 LevelUICanvas를 띄워주면서 그 안의 버튼을 클릭하면 능력치를 선택할 수 있도록 변경해줘
+### 조사
+활성 씬이 UITestScene으로 바뀌어 있었음(사용자가 이 기능 테스트용으로 전환한 것으로 추정). 'LevelUICanvas'가 아니라 'LevelUpCanvas'로 존재(오타로 추정). 구조: LevelUpCanvas > LevelUpPanel(Image) > LevelUpTxt(제목 TMP) + Text(부제 TMP, 고정) + Skill1/Skill1(1)/Skill1(2)(각각 Image 배경 + 자식 Button(Image+Button+Text(TMP))). 이 씬의 Player에는 이미 PlayerProgression과 두 Config가 연결되어 있었음
+### 조작 내역
+- PlayerProgression.cs를 OnGUI 방식에서 Canvas 참조 방식으로 전면 교체: panel/titleText/cardBackgrounds[3]/choiceButtons[3]/choiceTexts[3] 직렬화 필드 추가
+- Awake에서 panel을 기본 비활성화
+- BeginAugmentChoice에서 RefreshUI(count) 호출 후 panel 활성화 — 제목에 레벨 표시, 각 버튼 텍스트에 [등급]+설명, 카드 배경색을 등급별로 틴트, Button.onClick.RemoveAllListeners 후 AddListener(() => ChooseAugment(캡처된 인덱스))로 재바인딩(레벨업마다 새로 뽑히므로 매번 리스너 재설정 필요)
+- 제시 개수보다 버튼이 많으면 남는 버튼은 비활성화
+- ChooseAugment에서 선택 소진 시 panel 비활성화 + Time.timeScale 복구는 기존 로직 그대로 유지
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- UITestScene의 Player에 panel/titleText/cardBackgrounds[3]/choiceButtons[3]/choiceTexts[3] 전부 연결
+- 저장 → manage_scene(load) 강제 재로드 → 연결 유지 확인
+- run_tests(EditMode) → 133/133 통과 (job 524f9854ace34594bcfec91d6eb4c0d7, 기존 128 + 신규 5는 별도 테스트 파일에서 온 것으로 이번 작업과 무관)
+- 재생 모드 실측: AddXp(1000)로 레벨 1→19 유도 → panel 활성화, 제목 "Level UP! Lv.19" 정상 표시, Time.timeScale=0 확인. 버튼 텍스트에 등급+설명(예: "[SILVER] 공격 데미지 +2") 정상 표시. btn0.onClick.Invoke()로 실제 클릭 재현 → DamageBonus가 0→2로 정확히 적용됨과 IsChoosingAugment가 다음 레벨 선택으로 이어지는 것 확인. 남은 17회를 반복 소진시켜 최종적으로 panel 비활성화 + Time.timeScale=1로 정상 복귀함을 확인
+### 실패와 수정
+- 없음
+
+## [수정] 레벨업 UI를 이벤트 기반으로 분리(PlayerProgression ↔ LevelUpSkillManager) — 2026-08-05
+### 프롬프트
+구조를 레벨업 스킬 매니저 스크립트를 따로 두고 플레이어가 레벨업하면 이벤트를 발생시켜서 canvas를 띄우는 형식으로 바꿔줘
+### 조작 내역
+- PlayerProgression.cs에서 UI 관련 필드(panel/titleText/cardBackgrounds/choiceButtons/choiceTexts)와 RefreshUI/DescribeAugment를 전부 제거. 순수 데이터·로직 계층으로 축소(XP/레벨 추적, 증강 굴림, 효과 적용만 담당)
+- 이벤트 2개 신규: OnAugmentChoiceReady(AugmentType[], int[], int level) — 선택창이 떠야 할 때 발행, 여러 레벨을 한번에 오르면 매 선택이 끝날 때마다 다음 선택을 위해 다시 발행됨. OnAllAugmentChoicesComplete — 대기 중이던 선택이 전부 끝났을 때 발행
+- AugmentConfig를 외부에서 조회할 수 있게 public getter(AugmentConfig 프로퍼티) 추가(설명 텍스트 생성용)
+- LevelUpSkillManager.cs 신규: PlayerProgression의 두 이벤트를 OnEnable/OnDisable로 구독. OnAugmentChoiceReady 수신 시 Time.timeScale=0 + UI 갱신(제목/버튼 텍스트/카드 색) + 패널 활성화. 버튼 클릭 시 playerProgression.ChooseAugment(인덱스) 호출. OnAllAugmentChoicesComplete 수신 시 Time.timeScale=1 + 패널 비활성화. RefreshUI/DescribeAugment 로직을 PlayerProgression에서 그대로 이관
+- LevelUpCanvas에 LevelUpSkillManager 부착, playerProgression=Player의 PlayerProgression, panel/titleText/cardBackgrounds[3]/choiceButtons[3]/choiceTexts[3] 전부 재연결(기존 PlayerProgression에 있던 참조를 그대로 이 컴포넌트로 이동)
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- 저장 → manage_scene(load) 강제 재로드 → LevelUpSkillManager의 참조 6개 전부 유지 확인
+- run_tests(EditMode) → 133/133 통과 (job bf86a91de9ff4a86bbdf36ca5afbc6a5)
+- 재생 모드 실측: AddXp로 레벨업 유도 → 이벤트가 정상 전파되어 매니저가 패널을 켜고 제목·버튼을 채움을 확인. 정확히 1레벨만 오르도록 XP를 딱 맞춰 지급한 뒤 리플렉션으로 실제 offeredTypes[0]=DamageUp(Bronze)임을 먼저 확정하고 버튼0 클릭 → DamageBonus가 0→1(Bronze 기대값과 정확히 일치)로 반영, 선택 완료 후 패널 자동 비활성화 + Time.timeScale=1 복귀까지 확인
+### 실패와 수정
+- 검증 중 여러 레벨이 연속으로 올라가는 상황에서 버튼 인덱스별 증강 종류가 매 라운드 다시 랜덤 배정된다는 걸 놓치고 잠깐 '효과가 안 먹히나' 혼동함 → 리플렉션으로 실제 offeredTypes를 먼저 확인하는 방식으로 재검증해 해결(코드 문제 아니었음)
+
+## [수정] LevelUpCanvas 버튼 클릭이 반응 안 하던 문제 수정 — EventSystem 부재 — 2026-08-05
+### 프롬프트
+지금 LevelUpskillManager에 있는 choiceButtons[i].onClick.AddListener(() => playerProgression.ChooseAugment(captured)); 이 부분이 정상 작동 되지 않는 것 같다 직접 확인해보면 버튼에 onclick 이벤트가 추가 되지 않는다
+### 조사
+UITestScene에 EventSystem 오브젝트가 아예 없었음. uGUI 클릭 파이프라인은 EventSystem이 있어야 마우스 입력을 UI로 라우팅하는데, 이게 없으면 AddListener로 리스너를 아무리 정확히 등록해도 실제 클릭이 그 리스너까지 도달할 방법이 없음. 지난번 검증 때 onClick.Invoke()로 직접 호출해 '작동한다'고 확인했었는데, 이 방식은 EventSystem/GraphicRaycaster 경로를 건너뛰기 때문에 이 문제를 못 잡아냈던 것으로 판단(FAIL.md #17로 기록)
+### 조작 내역
+- UITestScene에 EventSystem 오브젝트 신규 생성, EventSystem + InputSystemUIInputModule(New Input System, 프로젝트 전반 사용 방식과 일치) 부착
+- LevelUpCanvas의 GraphicRaycaster는 이미 정상 존재·활성화 상태였음을 확인(별도 조치 불필요)
+### 검증
+- 저장 → manage_scene(load) 강제 재로드 → EventSystem 유지 확인
+- run_tests(EditMode) → 133/133 통과 (job 8aff7af5818744af9be5f338594ba987)
+- 재생 모드 실측: 정확히 1레벨만 오르도록 XP 지급 → 리플렉션으로 offeredTypes[0]=ParryDurationUp(Gold) 사전 확정 → 이번엔 onClick.Invoke() 대신 UnityEngine.EventSystems.ExecuteEvents.Execute(btn0.gameObject, pointerEventData, ExecuteEvents.pointerClickHandler)로 실제 클릭 파이프라인 재현 → ParryDurationBonus가 0→0.2(Gold 기대값과 정확히 일치)로 반영됨을 확인, IsChoosingAugment도 정상적으로 False
+### 실패와 수정
+- 지난 턴에서 onClick.Invoke()로 검증하고 '정상 작동'이라고 결론 낸 것이 실수 — EventSystem 경로를 안 타는 검증 방식이라 이 버그를 못 잡았음. FAIL.md #17로 기록, 앞으로 uGUI 버튼 클릭 검증은 ExecuteEvents로 할 것
+
+## [구현] 좌측 상단에 HP 바 UI 추가 — 2026-08-05
+### 프롬프트
+현재 체력이 우측 상단에 5/5 로 나오는데 좌측 상단에 HP bar 형태로 UI 추가해줘
+### 조사
+기존 "HP 5/5" 표기는 PlayerHealth.OnGUI()에서 우측 상단에 OnGUI로 그리고 있었음(Canvas 아님). 일관성과 위험도를 고려해 새 UI도 같은 OnGUI 방식으로 좌측 상단에 추가하기로 함(Canvas 요소를 새로 찾거나 만들 필요 없이 같은 파일 안에서 처리)
+### 조작 내역
+- PlayerHealth.cs에 DrawHealthBarTopLeft() 추가, OnGUI() 시작 부분에서 호출
+- 검은 배경 + 비율만큼 채워지는 막대(currentHealth/MaxHealth), 남은 비율에 따라 초록(50%+)/노랑(25~50%)/빨강(25% 이하) 색상 전환, 막대 위에 숫자(N/M)도 같이 표시
+- 위치: 좌측 상단(margin 16px), 크기 220x26
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- 저장 → manage_scene(load) 강제 재로드 → run_tests(EditMode) → 133/133 통과 (job 11c783f5e90a4b7ea65cbbdd0647ba64)
+- 재생 모드 실측: OnGUI 실행 중 콘솔 에러/경고 0건 확인. TakeDamage(2) 호출 후 currentHealth/MaxHealth 값이 바 채움 비율 계산에 정확히 반영됨을 확인(1/5 → 채움비율 0.20 → 빨강 색상 구간과 일치). 테스트 후 Heal로 HP 원상복구
+### 실패와 수정
+- 없음
+=======
 
 ## [조사] SecondScene_1 방 확장 타당성 — 2026-08-06 02:41
 ### 프롬프트

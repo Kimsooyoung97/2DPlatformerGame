@@ -240,8 +240,8 @@ public class PlayerHealth : MonoBehaviour
         };
 
         const float width = 170f;
-        GUI.Box(new Rect(Screen.width - width - 16f, 14f, width, 32f),
-            "HP   " + currentHealth + "/" + MaxHealth, style);
+        //GUI.Box(new Rect(Screen.width - width - 16f, 14f, width, 32f),
+        //    "HP   " + currentHealth + "/" + MaxHealth, style);
         GUI.Box(new Rect(Screen.width - width - 16f, 50f, width, 28f),
             "DEATHS   " + deaths, style);
 
@@ -257,4 +257,5 @@ public class PlayerHealth : MonoBehaviour
         GUI.Label(new Rect(Screen.width - width - 16f, 118f, width, 22f),
             "   F2 invincible · F3 reset traps");
     }
+
 }
