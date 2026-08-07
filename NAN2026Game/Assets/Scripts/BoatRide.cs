@@ -10,7 +10,6 @@ namespace NAN2026
         private Transform player;
         private Tilemap water;
         private float targetX;
-        private bool sailing, arrived;
 
         private void Start()
         {
@@ -46,15 +45,13 @@ namespace NAN2026
 
         private void FixedUpdate()
         {
-            if (config == null || arrived && !sailing) { }
-            bool rider = RiderOnDeck();
-            if (!sailing && !arrived && rider) sailing = true;
-            if (!sailing) return;
+            if (config == null) return;
+            if (!RiderOnDeck()) return; // 밟고 있는 동안만 항해
             float nx = Mathf.MoveTowards(transform.position.x, targetX, config.sailSpeed * Time.fixedDeltaTime);
             float dx = nx - transform.position.x;
+            if (dx == 0f) return;
             transform.position = new Vector3(nx, transform.position.y, transform.position.z);
-            if (rider && dx != 0f) player.position += new Vector3(dx, 0f, 0f);
-            if (Mathf.Approximately(nx, targetX)) { sailing = false; arrived = true; }
+            player.position += new Vector3(dx, 0f, 0f);
         }
     }
 }
