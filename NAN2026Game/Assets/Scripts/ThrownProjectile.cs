@@ -78,6 +78,8 @@ namespace NAN2026
 
         private void OnParried()
         {
+            if (config.clashConfig != null && player != null)
+                ParryClashFx.Play((transform.position + player.position) * 0.5f + Vector3.up * 0.8f, config.clashConfig);
             int mp = kind == ThrownKind.Arrow ? config.arrowMp : kind == ThrownKind.Shuriken ? config.shurikenMp : config.axeMp;
             if (player != null) player.SendMessage("AddMp", mp, SendMessageOptions.DontRequireReceiver);
             if (kind == ThrownKind.Axe && launcher != null)

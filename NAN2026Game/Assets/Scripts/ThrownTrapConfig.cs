@@ -30,6 +30,8 @@ namespace NAN2026
         public int arrowMp = 8;
         public int shurikenMp = 6;
         public int axeMp = 15;
+        [Header("패링 클래시 (기존 구체와 동일 연출)")]
+        public SpikeBallConfig clashConfig;
         [Header("사운드 (발사음만)")]
         public AudioClip sndFire;
         public AudioClip sndLauncherBreak;
