@@ -138,6 +138,20 @@ namespace NAN2026
             var c = sr.color; c.a = a; sr.color = c;
         }
 
+        public static void ShowAt(Vector3 pos, string msg, Color col, SpikeBallConfig cfg)
+        {
+            var go = new GameObject("ParryJudgePopup");
+            go.transform.position = pos;
+            var tm = go.AddComponent<TextMesh>();
+            tm.text = msg;
+            tm.fontSize = cfg != null ? cfg.popupFontSize : 48;
+            tm.characterSize = cfg != null ? cfg.popupCharSize : 0.08f;
+            tm.anchor = TextAnchor.MiddleCenter;
+            tm.color = col;
+            go.GetComponent<MeshRenderer>().sortingOrder = 900;
+            go.AddComponent<PopupFloater>().Init(cfg != null ? cfg.popupRise : 1.2f, cfg != null ? cfg.popupLife : 0.7f);
+        }
+
         void Popup(string msg, Color col)
         {
             var go = new GameObject("ParryJudgePopup");
