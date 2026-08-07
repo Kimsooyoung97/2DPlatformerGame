@@ -31,6 +31,14 @@ namespace NAN2026
                 if (mb.GetType().Name == "CinemachineCamera") { cmCam = mb; followProp = mb.GetType().GetProperty("Follow"); break; }
             SpikeParryEvents.OnParry += HandleParry;
             BuildPips();
+            if (config != null && config.debugSkipToBoss)
+            {
+                count = config.parryGoal; done = true;
+                RefreshPips();
+                if (player != null && boss != null)
+                    player.position = boss.position + new Vector3(-config.debugSpawnOffsetX, 0.5f, 0f);
+                StartCoroutine(Brighten());
+            }
         }
 
         private void OnDestroy() { SpikeParryEvents.OnParry -= HandleParry; }
