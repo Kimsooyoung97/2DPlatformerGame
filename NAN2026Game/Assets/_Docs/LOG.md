@@ -5331,3 +5331,27 @@ fireattack이랑 firebomb이 원거리 구체라고?
 ### 참고
 - 사용자가 추가해둔 스킬별 히트박스 크기 Config 필드(midBossNormalAttackHitboxWidth 등)는 이제 코드에서 안 쓰입니다 — 대신 각 자식 오브젝트(Normal/Fire/Wheel/Bomb)에 이미 배치해두신 콜라이더 크기가 그대로 판정에 쓰입니다. 필요 없으면 나중에 정리하셔도 됩니다
 - MidBossControllerEditor(마우스 드래그 사거리 편집)의 normalAttackReach/fireAttackReach/fireBombReach/wheelAttackReach 핸들은 이제 실제 판정 위치와 무관해졌습니다(참고용 표시만 됨) — 실제 판정 범위를 조절하시려면 Normal/Fire/Wheel/Bomb 오브젝트의 콜라이더를 직접 씬에서 편집하시면 됩니다
+
+## [수정] 조작키 재배치(Z/X/C/Space) + 레벨업 증강으로 얻는 스킬 시스템 구현 — 2026-08-08
+### 프롬프트
+조작키를 바꿀거야 현재 v 키에 존재하던 공격이 z가 되고 x키를 스킬 사용, c키를 가지고 있는 스킬 중 다음 스킬로 변경, 스페이스바- 패링 , 그리고 스킬은 레벨업 할 때 고르는 증강에서 얻을 수 있도록 바꿀 것이고 원래 존재하던 z키, x키 모두 스킬로 이전돼 첫 스킬을 얻으면 바로UI Canvas의 SkillImage sprite를 첫 스킬 이름을 통해 Resources.Load<Sprite> () 해서 스프라이트를 바꿔주고 C 키를 누르면 다음 이미지로 바뀌게 해야해
+### 조사
+현재 키 배치 확인: Z=Slash(기본공격), X=Combo2(구 K, 스킬공격), V=2단 콤보(ComboV1/2, 이펙트 없음), C=패링(+패링-연계 콤보, VFX 스폰 포함). LevelUpSkillManager에 이미 skillIcon[]·Resources.Load("Skill1"/"Skill2") 패턴이 부분적으로 작업 중이었으나 기존 6개 수치 증강 전부에 잘못 뒤섞여 배정되어 있었음(모든 카드가 "Skill1/Skill2 획득"으로만 표시). Resources 폴더에 Skill1/2/3.jpeg 이미 존재, UI Canvas에 SkillImage·LevelUpPanel/Skill1~3 카드 구조 이미 준비됨
+### 조작 내역
+- PlayerController2D.cs: Z키에 기존 V키의 2단 콤보 로직(ComboV1/ComboV2, comboVStage 등 상태 그대로) 이전, V키 블록 완전 제거. X키는 UseSelectedSkill() 호출로 교체. C키는 CycleSkill() 호출로 교체. 기존 C키의 패링 전체 블록(패링-연계 콤보, VFX 스폰 포함)을 그대로 spaceKey로 이전
+- 스킬 관리 신규: ownedSkills(List<string>)·selectedSkillIndex 필드, AddSkill(id)(중복 방지, 첫 스킬이면 자동 선택+SkillImage 갱신)·GetSkillAttackParams(id)(Skill1→Slash/slashDuration/slashLungeSpeed, Skill2→Combo2/combo2Duration/combo2LungeSpeed)·UseSelectedSkill()·CycleSkill()·UpdateSkillImage()(Resources.Load<Sprite>(스킬id)) 추가. skillImageUI(Image) 직렬화 필드로 UI Canvas/SkillImage 연결
+- AugmentConfig.cs: AugmentType에 UnlockSkill1(구 Z=Slash)·UnlockSkill2(구 X=Combo2) 추가, GetMagnitude에 고정값(등급 무관) 처리 추가
+- PlayerProgression.cs: PlayerController2D 참조 추가(Awake에서 GetComponent), ApplyAugment에 UnlockSkill1/2 케이스 추가 — controller.AddSkill("Skill1"/"Skill2") 호출
+- LevelUpSkillManager.cs: DescribeAugment 재작성 — 기존 6개 수치 증강은 원래의 정확한 설명 텍스트로 복원(잘못 섞여있던 'Skill1/2 획득' 표시 제거), UnlockSkill1/2만 skillIcon 아이콘 교체 + 배열 범위·null 체크 추가(인덱스 초과 위험 제거)
+### 검증
+- 매 파일 수정 직후 refresh_unity(compile=force) + read_console(types=error) → 전부 0건
+- 씬에서 PlayerController2D.skillImageUI를 UI Canvas/SkillImage로 연결, 저장 → manage_scene(load) 강제 재로드로 유지 확인
+- run_tests(EditMode) → 144/144 통과 (job 7e654a2a0f0e4f349c00dc604972edba)
+- **재생 모드 진입 전 사용자에게 명시적 허락을 구함**(직전 세션에서 무한 루프로 에디터가 멈췄던 사고 직후라 신중하게 진행)
+- 재생 모드 실측: img.sprite를 NULL로 초기화하고 ownedSkills를 리플렉션으로 비운 뒤 AddSkill("Skill1") 호출 → SkillImage.sprite가 정확히 NULL→Skill1로 갱신됨을 확인(첫 스킬 자동 반영). AddSkill("Skill2") 추가 후 selectedSkillIndex는 0(Skill1) 그대로 유지됨을 확인(자동 선택은 '첫 스킬'에만 적용됨이 맞음). CycleSkill()을 2회 호출해 index/sprite가 0(Skill1)→1(Skill2)→0(Skill1)으로 정확히 순환함을 확인. UseSelectedSkill() 호출 시 queuedAttack이 정확히 "Slash"(Skill1의 매핑)로 큐잉됨을 확인. Z/Space는 인라인 로직이라 리플렉션 직접 호출 불가 — 기존에 검증됐던 로직을 키만 바꿔 그대로 옮긴 것이라 컴파일 통과로 갈음
+- 재생 모드 전체 구간에서 콘솔 에러/경고 0건, 응답 지연·멈춤 없음 확인
+### 실패와 수정
+- 없음
+### 눈으로 확인 필요
+- 실제 키보드로 Z(콤보)·Space(패링+연계)가 체감상 자연스러운지(리플렉션으로는 인라인 로직을 직접 못 눌러봄)
+- LevelUpPanel에서 실제로 UnlockSkill1/UnlockSkill2 카드가 뽑혔을 때 아이콘·설명이 올바르게 나오는지

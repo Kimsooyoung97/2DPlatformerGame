@@ -86,30 +86,29 @@ public sealed class LevelUpSkillManager : MonoBehaviour
                 if (choiceButtons[i] != null) choiceButtons[i].gameObject.SetActive(false);
     }
 
-    private string DescribeAugment(AugmentType type, int tier,int idx)
+    private string DescribeAugment(AugmentType type, int tier, int idx)
     {
         if (playerProgression == null || playerProgression.AugmentConfig == null) return string.Empty;
         float m = playerProgression.AugmentConfig.GetMagnitude(type, tier);
+
+        // 스킬 획득 타입만 카드 아이콘을 스킬 스프라이트로 바꾼다(그 외 6종은 원래 아이콘 유지).
+        if ((type == AugmentType.UnlockSkill1 || type == AugmentType.UnlockSkill2)
+            && skillIcon != null && idx >= 0 && idx < skillIcon.Length && skillIcon[idx] != null)
+        {
+            string skillId = type == AugmentType.UnlockSkill1 ? "Skill1" : "Skill2";
+            skillIcon[idx].sprite = Resources.Load<Sprite>(skillId);
+        }
+
         switch (type)
         {
-            case AugmentType.ParryCooldownDown:
-                skillIcon[idx].sprite = Resources.Load<Sprite>($"Skill1");
-                return "Skill1 획득";
-            case AugmentType.ParryDurationUp:
-                skillIcon[idx].sprite = Resources.Load<Sprite>($"Skill1");
-                return "Skill1 획득";
-            case AugmentType.DamageUp:
-                skillIcon[idx].sprite = Resources.Load<Sprite>($"Skill1");
-                return "Skill1 획득";
-            case AugmentType.Heal:
-                skillIcon[idx].sprite = Resources.Load<Sprite>($"Skill2");
-                return "Skill2 획득";
-            case AugmentType.MaxHealthUp: 
-                skillIcon[idx].sprite = Resources.Load<Sprite>($"Skill2");
-                return "Skill2 획득";
-            case AugmentType.AttackRangeUp:
-                skillIcon[idx].sprite = Resources.Load<Sprite>($"Skill2");
-                return "Skill2 획득";
+            case AugmentType.ParryCooldownDown: return "패링 쿨타임\n-" + m + "초";
+            case AugmentType.ParryDurationUp: return "패링 지속시간\n+" + m + "초";
+            case AugmentType.DamageUp: return "공격 데미지\n+" + m;
+            case AugmentType.Heal: return "체력 회복\n+" + m;
+            case AugmentType.MaxHealthUp: return "최대 체력\n+" + m;
+            case AugmentType.AttackRangeUp: return "공격 사거리\n+" + Mathf.RoundToInt(m * 100f) + "%";
+            case AugmentType.UnlockSkill1: return "Skill1 획득";
+            case AugmentType.UnlockSkill2: return "Skill2 획득";
             default: return string.Empty;
         }
     }
