@@ -4742,3 +4742,18 @@ MidBoss.controller에 필요한 상태(MidBoss_Idle/Run/FireAtk/WheelAtk/NormalA
 ### 눈으로 확인 필요
 - Jump/각 패턴 애니메이션 전환이 실제로 눈으로 봤을 때 자연스러운지(특히 AnyState 기반 전이라 다른 패턴 도중에도 즉시 끊고 전환됨)
 - WheelAttack 틱 간격을 0.7초로 늘린 게 체감상 너무 느리진 않은지
+
+## [수정] MidBoss 공격 중 방향 전환 방지 — 2026-08-06
+### 프롬프트
+지금 MidBoss가 공격을 시전하는 중에 플레이어가 반대편으로 이동하면 MidBoss의 방향이 바뀌는데 그러지말고 공격중에는 한 방향만 보게 해줘
+### 조사
+Update()의 스프라이트 반전(sr.flipX)은 이미 busy일 때 건너뛰도록 되어 있었으나, 원거리 패턴(FireAttack/FireBomb)의 FireOrb()가 발사 순간(윈드업이 끝난 후) 플레이어의 그 시점 위치로 다시 조준 방향을 계산하고 있어 — 윈드업 도중 플레이어가 반대편으로 넘어가면 실제로 반대 방향으로 구체가 나가는 문제가 있었음(사용자가 본 '방향이 바뀐다'는 현상의 실제 원인으로 추정)
+### 조작 내역
+- MidBossController에 lockedAimDir 필드 추가: DoRandomPattern 시작 시점(공격 종류를 고르기 전)에 그 순간의 플레이어 방향을 한 번 계산해 고정, 스프라이트 반전(sr.flipX)도 그 자리에서 같이 확정
+- FireOrb()가 발사 순간 플레이어 위치를 다시 조준하지 않고 lockedAimDir을 그대로 사용하도록 변경
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- 저장 → manage_scene(load) 강제 재로드 → run_tests(EditMode) → 140/140 통과 (job dd4ce9232b0b402f8a73ad5d6ec7ae29)
+- 재생 모드 실측: DoRandomPattern 시작 직후 lockedAimDir=(1,0)·flipX=False(오른쪽) 확인. 이후 플레이어를 반대편으로 옮긴 뒤 확인했을 때 flipX=True로 보였으나, nextPatternAllowedTime이 방금 새로 설정된 상태였음을 리플렉션으로 확인 — 즉 첫 공격이 자연스럽게 끝나고 두 번째 공격이 새 방향으로 다시 시작된 것이지, 진행 중이던 공격의 방향이 바뀐 게 아님을 확인(정상 동작)
+### 실패와 수정
+- 없음

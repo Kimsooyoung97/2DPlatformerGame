@@ -29,6 +29,9 @@ namespace NAN2026
         private float nextPatternAllowedTime;
         private float heightGapTimer;
         private const float JumpConfirmDuration = 0.15f;
+        // 공격 시작 순간의 조준 방향을 고정한다 — 윈드업 도중 플레이어가 반대편으로
+        // 넘어가도 이미 시작된 공격은 처음 방향 그대로 나가야 자연스럽다.
+        private Vector2 lockedAimDir = Vector2.right;
 
         private void Awake()
         {
@@ -110,6 +113,14 @@ namespace NAN2026
         {
             busy = true;
 
+            // 공격 시작 시점의 방향을 고정: 스프라이트 반전과 원거리 조준 모두 이 값을 쓴다.
+            if (player != null)
+            {
+                Vector2 toPlayer = (Vector2)player.position - (Vector2)transform.position;
+                lockedAimDir = toPlayer.sqrMagnitude > 0.0001f ? toPlayer.normalized : Vector2.right;
+                if (sr != null) sr.flipX = lockedAimDir.x < 0f;
+            }
+
             var choices = new System.Collections.Generic.List<int> { 0 }; // NormalAttack은 항상 가능
             if (Time.time >= nextFireAttackTime) choices.Add(1);
             if (Time.time >= nextFireBombTime) choices.Add(2);
@@ -178,7 +189,8 @@ namespace NAN2026
         {
             if (player == null) return;
             Vector3 spawnPos = transform.position + Vector3.up * spawnHeight;
-            Vector2 dir = ((Vector2)player.position - (Vector2)spawnPos).normalized;
+            // 발사 순간 플레이어 위치를 다시 조준하지 않고, 공격 시작 시 고정해둔 방향을 쓴다.
+            Vector2 dir = lockedAimDir;
             GameObject go = new GameObject("MidBossOrb");
             go.transform.position = spawnPos;
             SpikeProjectile proj = go.AddComponent<SpikeProjectile>();
