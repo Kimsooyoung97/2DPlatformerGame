@@ -3574,3 +3574,19 @@ UITestScene에 EventSystem 오브젝트가 아예 없었음. uGUI 클릭 파이�
 - 재생 모드 실측: 정확히 1레벨만 오르도록 XP 지급 → 리플렉션으로 offeredTypes[0]=ParryDurationUp(Gold) 사전 확정 → 이번엔 onClick.Invoke() 대신 UnityEngine.EventSystems.ExecuteEvents.Execute(btn0.gameObject, pointerEventData, ExecuteEvents.pointerClickHandler)로 실제 클릭 파이프라인 재현 → ParryDurationBonus가 0→0.2(Gold 기대값과 정확히 일치)로 반영됨을 확인, IsChoosingAugment도 정상적으로 False
 ### 실패와 수정
 - 지난 턴에서 onClick.Invoke()로 검증하고 '정상 작동'이라고 결론 낸 것이 실수 — EventSystem 경로를 안 타는 검증 방식이라 이 버그를 못 잡았음. FAIL.md #17로 기록, 앞으로 uGUI 버튼 클릭 검증은 ExecuteEvents로 할 것
+
+## [구현] 좌측 상단에 HP 바 UI 추가 — 2026-08-05
+### 프롬프트
+현재 체력이 우측 상단에 5/5 로 나오는데 좌측 상단에 HP bar 형태로 UI 추가해줘
+### 조사
+기존 "HP 5/5" 표기는 PlayerHealth.OnGUI()에서 우측 상단에 OnGUI로 그리고 있었음(Canvas 아님). 일관성과 위험도를 고려해 새 UI도 같은 OnGUI 방식으로 좌측 상단에 추가하기로 함(Canvas 요소를 새로 찾거나 만들 필요 없이 같은 파일 안에서 처리)
+### 조작 내역
+- PlayerHealth.cs에 DrawHealthBarTopLeft() 추가, OnGUI() 시작 부분에서 호출
+- 검은 배경 + 비율만큼 채워지는 막대(currentHealth/MaxHealth), 남은 비율에 따라 초록(50%+)/노랑(25~50%)/빨강(25% 이하) 색상 전환, 막대 위에 숫자(N/M)도 같이 표시
+- 위치: 좌측 상단(margin 16px), 크기 220x26
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- 저장 → manage_scene(load) 강제 재로드 → run_tests(EditMode) → 133/133 통과 (job 11c783f5e90a4b7ea65cbbdd0647ba64)
+- 재생 모드 실측: OnGUI 실행 중 콘솔 에러/경고 0건 확인. TakeDamage(2) 호출 후 currentHealth/MaxHealth 값이 바 채움 비율 계산에 정확히 반영됨을 확인(1/5 → 채움비율 0.20 → 빨강 색상 구간과 일치). 테스트 후 Heal로 HP 원상복구
+### 실패와 수정
+- 없음
