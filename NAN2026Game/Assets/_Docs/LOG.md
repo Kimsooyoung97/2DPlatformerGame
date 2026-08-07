@@ -4540,3 +4540,17 @@ C눌렀을때 2번이 콤보 공격처럼 연달아서 나올 수 있게 해주�
 - 컴파일 0, EditMode 133/133. 체감은 사용자 재생 (C 단독=패링만 / C-C=패링→가로베기 / 구체 상대 판정)
 ### 실패와 수정
 - 문자열 치환 3회 공회전(CRLF·중복매칭) — 괄호 잔액 실측+행 삽입으로 종결. FAIL#17 계열 재확인
+
+
+## [구현] 준보스 행동 — 걷기·sp_atk·패링 연동 — 2026-08-07 09:04
+### 프롬프트
+[구현]...08_sp_atk 모드로 공격하게 해주고 걷기도 구현해줘. 패링할 수 있게 물리법칙도 적용해줘.
+### 조작 내역
+- run 8F·sp_atk 18F 반입(PPU31·피벗 idle 기준), MidBoss_run(0.8s 루프)/sp_atk(1.5s) 클립+상태
+- Core MidBossLogic(Phase/HitMomentPassed)+테스트 4종. MidBossConfig SO(감지8/공격1.8/속도2.2/타격55%/리치2.2/쿨1.2, clashConfig=SpikeBallConfig)
+- MidBossAI: 대기→추격(run, 좌우 추적)→sp_atk, 타격 순간(55%) 리치 내 TryParry 리플렉션 — 성공=격돌FX+사운드 / 실패=TakeDamage. 키네마틱 RB+박스 트리거(0.9x1.4)
+- 씬 배선(config·player) 저장
+### 검증
+- 컴파일 0, EditMode 137/137(신규 4 포함). 체감은 사용자 재생 (접근→추격→공격, 타격 순간 C)
+### 실패와 수정
+없음
