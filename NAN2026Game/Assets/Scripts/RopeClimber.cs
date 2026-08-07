@@ -43,7 +43,9 @@ namespace NAN2026
             if (kb == null || config == null) return;
             if (!climbing)
             {
-                if (zone != null && (kb.upArrowKey.isPressed || kb.downArrowKey.isPressed)) StartClimb();
+                bool grabKey = kb.upArrowKey.wasPressedThisFrame || kb.downArrowKey.wasPressedThisFrame;
+                bool moving = kb.leftArrowKey.isPressed || kb.rightArrowKey.isPressed;
+                if (zone != null && grabKey && !moving) StartClimb();
                 return;
             }
             if (kb.spaceKey.wasPressedThisFrame) { StopClimb(true); return; }
