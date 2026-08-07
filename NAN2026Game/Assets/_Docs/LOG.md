@@ -5420,3 +5420,16 @@ AdventureScene2에만 적용되는 패링 범위를 늘려줄 수 있나? 패링
 - 임포트 완료. 발사기 구현 시 배선 예정
 ### 실패와 수정
 없음
+
+
+## [구현] 투척 함정 3종 (화살·수리검·도끼) — 2026-08-08 05:22
+### 프롬프트
+3종 전부 진행
+### 조작 내역
+- 스프라이트 3종 PPU 보정 반입(화살1.3u/수리검0.9u/도끼1.2u)
+- ThrownTrapConfig SO(전 수치+사운드 5슬롯 배선), ThrownProjectile(비행·회전·통일 패링 TryParry·MP 훅 AddMp SendMessage·도끼 반사→발사기 파괴), ThrownWeaponLauncher(전조 철컥→발사→쿨다운, 수리검 3연발)
+- 프리팹 3종: ArrowLauncher ShurikenLauncher AxeLauncher  / Scene2 배치 4기 (x22 화살→45 수리검→68 도끼→90 화살, y4.1)
+### 검증
+- 컴파일 0, 저장 True. 발사·패링·MP훅·도끼 반사는 사용자 재생
+### 실패와 수정
+- MP 시스템 본체 미확인 — AddMp SendMessage 훅만 (팀 MP 구현 시 자동 연결)
