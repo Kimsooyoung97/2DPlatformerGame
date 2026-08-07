@@ -4810,3 +4810,15 @@ Decor와 나무 Ores등의 꾸미는 것들은 커스텀 에디터 창 소품 �
 - 컴파일 0, 씬 저장 True. 버튼 체감은 사용자
 ### 실패와 수정
 없음
+
+
+## [수정] 테스트 씬 표준 이름 정렬 — 구간복사 붙여넣기 활성 — 2026-08-07 18:45
+### 프롬프트
+소품을 구간복사해서 숲 데모에 붙여넣기가 안돼
+### 조작 내역
+- 원인: PasteRegion이 Stage_Ground 이름 요구 — 테스트 씬은 Ground라 가드 거절
+- AdventureScene_Test: Ground→Stage_Ground 개명, Stage_Wall(order5)·Stage_Props 신설 — 프로젝트 표준 구조 정렬. Ground→Stage_Ground Stage_Wall 신설 Stage_Props 신설 
+### 검증
+- 저장 True. 구간복사 붙여넣기 체감은 사용자
+### 실패와 수정
+없음
