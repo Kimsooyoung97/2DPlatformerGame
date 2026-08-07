@@ -5322,3 +5322,15 @@ AdventureScene_Test1에 BG에 있는 layer1,2,3,4,5 다 넣어줄래?
 - 컴파일 0. 반전 칠 체감은 사용자
 ### 실패와 수정
 없음
+
+
+## [구현] AdventureScene2 플레이어 요소 이식 — 2026-08-08 04:14
+### 프롬프트
+AdventureScene1에 적용된 Player 적용 요소를 AdventureScene2에도 적용시켜줘.
+### 조작 내역
+- Test1 플레이어 부착 요소 이식: RopeClimber(+RopeClimbConfig)·WaterDeath 침수 연출(+WaterSinkConfig) — 인스턴스 오버라이드. Player=Player | RopeClimber WaterDeath 
+- 두 컴포넌트는 씬에 Stage_Wall/RopeZone 없으면 자동 휴면(무해)
+### 검증
+- 저장 True. 체감은 사용자
+### 실패와 수정
+없음

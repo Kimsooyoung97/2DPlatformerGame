@@ -62137,6 +62137,8 @@ GameObject:
   - component: {fileID: 1739690753}
   - component: {fileID: 1739690752}
   - component: {fileID: 1739690763}
+  - component: {fileID: 1739690765}
+  - component: {fileID: 1739690764}
   m_Layer: 7
   m_Name: Player
   m_TagString: Player
@@ -62606,6 +62608,32 @@ SortingGroup:
   m_SortingOrder: 500
   m_SortAtRoot: 0
   m_Sort3DAs2D: 0
+--- !u!114 &1739690764
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1739690751}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b04142efc651b5449986d115e15d5d25, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NAN2026.WaterDeath
+  config: {fileID: 11400000, guid: 486cf5e85dc6ca148bacf7d7f77cfb0c, type: 2}
+--- !u!114 &1739690765
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1739690751}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ccf1be18ceca354eba2a2a2dff8d0fa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NAN2026.RopeClimber
+  config: {fileID: 11400000, guid: 65a2f16e02858d142870c22dc8905d3d, type: 2}
 --- !u!1001 &1752112388
 PrefabInstance:
   m_ObjectHideFlags: 0
