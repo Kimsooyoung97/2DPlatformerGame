@@ -5383,3 +5383,16 @@ AdventureScene2 빼고는 다 이펙트 잘나와. 지금 다시 확인해보니
 - 저장 True. C/X/V/1/2 이펙트 발현은 사용자 재생
 ### 실패와 수정
 - '빈 참조'와 '빈 배열'은 다르다 — 대조 수술 시 배열 크기까지 검사 (교훈)
+
+
+## [구현] Scene2 전용 패링 범위 확대 + 씬 뷰 시각화 — 2026-08-08 04:59
+### 프롬프트
+AdventureScene2에만 적용되는 패링 범위를 늘려줄 수 있나? 패링 범위를 내가 눈으로 볼 수 있나? SCENE에서
+### 조작 내역
+- 패링 거리=MovementConfig.parryReachX(1.5) 확인 — 공유 SO 직접 수정 대신 씬 전용 오버라이드
+- ParryRangeOverrideConfig SO(reachX 3.0, 기본 2배)+SceneParryOverride: Start에서 컨트롤러 MovementConfig 런타임 사본 갈아끼움(원본 무손상), OnDrawGizmos 노란 반투명 상자=패링 인정 범위 상시 표시
+- Scene2 Player 배선(Scene2ParryConfig)
+### 검증
+- 컴파일 0, 저장 True. 씬 뷰 상자·체감 범위는 사용자
+### 실패와 수정
+- PC2D 경로 오추정 1회(전수 수색으로 정정)
