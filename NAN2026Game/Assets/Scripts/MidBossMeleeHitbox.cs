@@ -40,16 +40,22 @@ namespace NAN2026
             if (!other.CompareTag("Player")) return;
 
             PlayerController2D pc = other.GetComponentInParent<PlayerController2D>();
-            if (pc != null && pc.TryParry(bossObject))
+            float timer = 0f;
+            float targetTime = 0.5f;
+            while((timer < targetTime) && pc!= null)
             {
-                hasResolved = true; // 패링당하면 판정 종료(피해 없음)
-                return;
+                if (pc.TryParry(bossObject))
+                {
+                    hasResolved = true; // 패링당하면 판정 종료(피해 없음)
+                    Debug.Log("패링 성공");
+                    return;
+                }
             }
-
             PlayerHealth ph = other.GetComponentInParent<PlayerHealth>();
             if (ph != null)
             {
                 ph.TakeDamage(damage);
+                Debug.Log("패링 실패");
                 hasResolved = true;
             }
         }

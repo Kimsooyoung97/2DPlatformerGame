@@ -53,7 +53,10 @@ namespace NAN2026
 
         [Header("근접 히트박스 공통")]
         [Tooltip("판정용 콜라이더 오브젝트가 생성되어 있는 시간(초) — 그 동안 겹치면 맞는다")]
-        public float meleeHitboxLifetime = 0.15f;
-        
+        public float NormalAttackHitboxLifetime = 0.917f;
+        public float FireAttackHitboxLifetime = 1.5f;
+        public float FireBombHitboxLifetime = 0.75f;
+        public float WheelAttackHitboxLifetime = 1f;
+
     }
 }

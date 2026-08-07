@@ -1,5 +1,4 @@
 using System.Collections;
-using UnityEditor.Tilemaps;
 using UnityEngine;
 
 namespace NAN2026
@@ -65,6 +64,17 @@ namespace NAN2026
             if (anim != null) anim.SetTrigger("Death");
         }
 
+        /// <summary>sr.flipX를 실제로 바꿀 때만 이 경로로 설정한다 — 값이 그대로면
+        /// 아무것도 안 하고, 실제로 바뀔 때만 FlipHitBox()를 호출한다(값이 안 바뀌는데도
+        /// 매 프레임 히트박스를 뒤집으면 위치가 계속 왔다갔다 하므로 반드시 변화 시에만).</summary>
+        private void SetFacing(bool flipX)
+        {
+            if (sr == null) return;
+            if (sr.flipX == flipX) return;
+            sr.flipX = flipX;
+            FlipHitBox();
+        }
+
         public bool TryParry(GameObject attacker)
         {
             // 이 보스 자체는 패링 판정을 직접 소유하지 않는다(플레이어 쪽에서 판정).
@@ -81,10 +91,7 @@ namespace NAN2026
             float dx = player.position.x - transform.position.x;
             float dist = Mathf.Abs(dx);
 
-            if (sr != null)
-            {
-                sr.flipX = dx < 0f;
-            }
+            SetFacing(dx < 0f);
 
             // 점프 추격: 플레이어가 임계 높이 이상 위에 '유지'되고 있을 때만 점프로 취급한다.
             bool aboveNow = (player.position.y - transform.position.y) >= config.jumpYThreshold;
@@ -124,7 +131,7 @@ namespace NAN2026
             if (player != null && sr != null)
             {
                 float dx = player.position.x - transform.position.x;
-                sr.flipX = dx < 0f;
+                SetFacing(dx < 0f);
             }
             if (anim != null) anim.SetTrigger("Jump");
             Rigidbody2D rb = GetComponent<Rigidbody2D>();
@@ -142,7 +149,7 @@ namespace NAN2026
             {
                 Vector2 toPlayer = (Vector2)player.position - (Vector2)transform.position;
                 lockedAimDir = toPlayer.sqrMagnitude > 0.0001f ? toPlayer.normalized : Vector2.right;
-                if (sr != null) sr.flipX = lockedAimDir.x < 0f;
+                SetFacing(lockedAimDir.x < 0f);
             }
 
             var choices = new System.Collections.Generic.List<int> { 0 }; // NormalAttack은 항상 가능
@@ -216,21 +223,47 @@ namespace NAN2026
         // 컴포넌트만 떼어낸다 — 오브젝트 자체(콜라이더 배치)는 그대로 남아 재사용된다.
         private void SpawnMeleeHitbox(int damage, int skillnum)
         {
-            GameObject target = null;
-            switch (skillnum)
-            {
-                case 0: target = normalHitboxObject; break;
-                case 1: target = fireHitboxObject; break;
-                case 2: target = bombHitboxObject; break;
-                case 3: target = wheelHitboxObject; break;
-            }
-            if (target == null) return;
-
-            MidBossMeleeHitbox hitbox = target.AddComponent<MidBossMeleeHitbox>();
-            hitbox.Init(damage, gameObject);
-
-            Destroy(hitbox, config.meleeHitboxLifetime);
+            StartCoroutine(SpawnMeleeHitboxRoutine(damage, skillnum));
         }
 
+        private IEnumerator SpawnMeleeHitboxRoutine(int damage, int skillnum)
+        {
+            GameObject target = null;
+            float lifeTime = 0f;
+            switch (skillnum)
+            {
+                case 0:
+                    target = normalHitboxObject;
+                    lifeTime = config.NormalAttackHitboxLifetime/6;
+                    break;
+                case 1: 
+                    target = fireHitboxObject;
+                    lifeTime = config.FireAttackHitboxLifetime /6;
+                    break;
+                case 2: 
+                    target = bombHitboxObject;
+                    lifeTime = config.FireBombHitboxLifetime/6;
+                    break;
+                case 3: 
+                    target = wheelHitboxObject;
+                    lifeTime = config.WheelAttackHitboxLifetime/6;
+                    break;
+            }
+            if (target == null) yield break;
+
+
+
+            // 2. 대기 후 컴포넌트 추가 및 Init 실행
+            // (대기하는 동안 target 오브젝트가 파괴되었을 수도 있으므로 파괴 여부 체크)
+            if (target != null)
+            {
+                MidBossMeleeHitbox hitbox = target.AddComponent<MidBossMeleeHitbox>();
+                hitbox.Init(damage, gameObject);
+
+                // ※ 필요 시 일정 시간 후 파괴하는 코드도 추가 가능합니다.
+                Destroy(hitbox, lifeTime);
+            }
+
+        }
     }
 }

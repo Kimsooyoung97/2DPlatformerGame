@@ -35,9 +35,12 @@ MonoBehaviour:
   fireBombDamage: 4
   fireBombCooldown: 8
   fireBombReach: 2.6
-  wheelAttackWindup: 0.4
+  wheelAttackWindup: 0.1
   wheelAttackDamagePerTick: 3
   wheelAttackTickInterval: 0.7
   wheelAttackCooldown: 6
   wheelAttackReach: 2.4
-  meleeHitboxLifetime: 0.15
+  NormalAttackHitboxLifetime: 0.917
+  FireAttackHitboxLifetime: 1.5
+  FireBombHitboxLifetime: 0.75
+  WheelAttackHitboxLifetime: 1
