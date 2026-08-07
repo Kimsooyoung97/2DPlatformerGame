@@ -118,6 +118,7 @@ namespace NAN2026
                 }
                 if (ok) ParryClashFx.Play((transform.position + player.position) * 0.5f + UnityEngine.Vector3.up * 0.8f, config);
                 Popup(ok ? "패링 성공!" : "패링 실패!", ok ? new Color(0.35f, 1f, 0.45f) : new Color(1f, 0.3f, 0.25f));
+            if (ok) SpikeParryEvents.Report();
                 if (ok) { NAN2026.Showroom.ParryMeter.ReportSpike(); dir = new Vector2(-dir.x, Mathf.Abs(dir.y)); Invoke("BreakSilent", 0.5f); }
                 else { player.SendMessage("TakeDamage", config.damage, SendMessageOptions.DontRequireReceiver); Break(false); }
             }

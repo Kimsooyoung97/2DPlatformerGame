@@ -78,6 +78,7 @@ namespace NAN2026
 
         private void OnParried()
         {
+            SpikeParryEvents.Report();
             if (config.clashConfig != null && player != null)
             {
                 ParryClashFx.Play((transform.position + player.position) * 0.5f + Vector3.up * 0.8f, config.clashConfig);
