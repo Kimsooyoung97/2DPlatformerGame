@@ -79,7 +79,10 @@ namespace NHNDemo
             if (patrol != null)
                 patrol.enabled = false;
 
-            animation.Die();
+            // MonsterAnimation(PixelFantasy 패키지)이 없는 몬스터도 있어(MidBoss 등
+            // 커스텀 애니메이터를 직접 쓰는 경우) 널 체크 후에만 호출한다. 그런 몬스터는
+            // 자기 스크립트에서 OnDied 이벤트를 구독해 직접 사망 애니메이션을 튼다.
+            if (animation != null) animation.Die();
 
             //foreach (Collider2D item in GetComponentsInChildren<Collider2D>())
             //    item.enabled = false;

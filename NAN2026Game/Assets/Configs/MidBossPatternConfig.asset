@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 050c196a0fe6b484fb25454cb82bb70c, type: 3}
+  m_Name: MidBossPatternConfig
+  m_EditorClassIdentifier: Assembly-CSharp::NAN2026.MidBossPatternConfig
+  maxHealth: 30
+  normalAttackAnimLength: 0.9166666
+  fireAttackAnimLength: 1.5
+  fireBombAnimLength: 0.75
+  wheelAttackAnimLength: 1
+  jumpAnimLength: 1.666667
+  aggroRange: 8
+  attackRange: 3.5
+  chaseSpeed: 1.1
+  jumpYThreshold: 1.2
+  jumpVelocity: 8
+  minPatternGap: 0.6
+  normalAttackWindup: 0.35
+  normalAttackDamage: 1
+  normalAttackReach: 2.2
+  fireAttackWindup: 0.5
+  fireAttackDamage: 2
+  fireAttackCooldown: 4
+  fireAttackReach: 2.4
+  fireBombWindup: 0.7
+  fireBombDamage: 4
+  fireBombCooldown: 8
+  fireBombReach: 2.6
+  wheelAttackWindup: 0.1
+  wheelAttackDamagePerTick: 3
+  wheelAttackTickInterval: 0.7
+  wheelAttackCooldown: 6
+  wheelAttackReach: 2.4
+  NormalAttackHitboxLifetime: 0.917
+  FireAttackHitboxLifetime: 1.5
+  FireBombHitboxLifetime: 0.75
+  WheelAttackHitboxLifetime: 1

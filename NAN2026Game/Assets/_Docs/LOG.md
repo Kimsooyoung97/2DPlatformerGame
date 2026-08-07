@@ -5183,3 +5183,151 @@ AdventureScene_Test에 있는 나무들이랑 Props 들도 AdventureScene_Test1�
 - cellSizing=1 (1=Manual). 선택=칠 일치는 사용자
 ### 실패와 수정
 - 커스텀 TileBase 혼재 팔레트는 Automatic 셀 크기 금지 — Manual이 표준
+
+## [구현] MidBoss 신규 4패턴(NormalAttack/FireAttack/FireBomb/WheelAttack) + 추격/점프/사망 — 2026-08-05
+### 프롬프트
+현재 씬에 존재하는 MidBoss의 공격 패턴을 만들건데 애니메이터의 Parameters를 알맞게 추가해주고 그에 맞게 스크립트도 바꾸어서 NormalAttack(쿨타임없음, 데미지 1), FireAttack(쿨타임4초, 데미지 2), FireBomb(쿨타임 8초, 데미지 4), WheelAttack(쿨타임 6초, 데미지 3씩 2틱), EnemyAI 스크립트도 붙여서 player를 chase하고 점프로 따라올 때 jump 애니메이션이 발동되게 보스가 죽으면 Death 애니메이션이 되도록 해줘
+(대화 중 구조 충돌 확인 — 표준 EnemyAI는 MonsterController2D/MonsterAnimation에 강하게 의존하는데 MidBoss는 팀원이 만든 커스텀 개별 상태 Animator라 안 맞음. 사용자가 '2번'(기존 MidBoss 방식 유지, 로직만 새로 작성) 선택해 그 방향으로 진행)
+### 조사
+MidBoss.controller에 필요한 상태(MidBoss_Idle/Run/FireAtk/WheelAtk/NormalAtk/FireBomb/Death/Jump)는 이미 다 있었으나 파라미터가 Death 트리거 하나뿐이었고, Idle의 기존 전이 5개는 전부 조건 없는 exitTime 전이라 사실상 미완성 상태였음. MonsterHealth.Die()도 animation.Die()를 널 체크 없이 호출해 MonsterAnimation 없는 몬스터는 사망 시 크래시나는 문제 발견. 플레이어 공격 판정 코드가 전부 NHNDemo.MonsterHealth를 찾아서 데미지를 주므로, 자체 체력 시스템 대신 MonsterHealth를 그대로 써야 플레이어가 때릴 수 있음을 확인
+### 조작 내역
+- MidBoss.controller: Trigger 5개(NormalAttack/FireAttack/FireBomb/WheelAttack/Jump) + Bool IsMoving 파라미터 추가. Idle의 기존 무조건 전이 5개 제거 후 재구성 — Idle↔Run(IsMoving), AnyState→각 패턴(Trigger), 각 패턴→Idle(exitTime 기반 자동 복귀)
+- MonsterHealth.cs(Assets/Player/Scripts): animation.Die() 호출에 널 체크 추가(MonsterAnimation 없는 몬스터도 안전하게 죽도록, 기존 사용처 영향 없음)
+- MidBossPatternConfig(SO) 신규: 공통(maxHealth/aggroRange/attackRange/chaseSpeed/jumpYThreshold/jumpVelocity) + 4패턴 각각의 windup/데미지/쿨타임/사거리
+- MidBossController.cs 신규(IParryReflector 구현, EnemyAI 미사용): NHNDemo.MonsterHealth 요구, OnDied 구독해 Death 트리거+자체 dead 플래그 설정. Update에서 추격(아이들↔런 Bool), 높이차 유지 기반 점프 판정(EnemyAI와 동일한 '일정 시간 유지' 방식) 후 Jump 트리거+수직 속도 부여, 사거리 안이면 랜덤 패턴(NormalAttack은 쿨타임 없이 항상 후보, 나머지 3개는 각자 쿨타임 지난 것만 후보) 실행. 근접 2종(Normal/Wheel)은 TryHitMelee로 사거리+패링 체크 후 데미지, 원거리 2종(Fire/Bomb)은 기존 SpikeProjectile 재사용해 구체 발사
+- 기존 MidBossAI는 삭제하지 않고 enabled=false로 비활성화만 함(팀원 작업 보존)
+- 씬: MidBoss에 MonsterHealth(maxHealth=30)+MidBossController(config=MidBossPatternConfig, player=Player_Knight!!!!) 부착
+### 검증
+- refresh_unity(compile=force) — 1차 시도에서 PlayerController2D/PlayerHealth를 존재하지 않는 네임스페이스(NAN2026.Showroom)로 잘못 참조해 컴파일 에러, 실제로는 전역 네임스페이스임을 확인 후 수정 → 0건
+- 저장 → manage_scene(load) 강제 재로드 → 참조 전부 유지, MidBossAI.enabled=False 확인
+- run_tests(EditMode) → 140/140 통과 (job 746831d55dc7459aac9dbb43361e5402)
+- 재생 모드 실측: 이 씬(UITestScene)에 지면이 거의 없어(GameObject 콜라이더 하나, x≈0 근처만) 초기 원거리 테스트가 낙사로 오염됐던 걸 발견하고 실제 지면 근처로 재배치. controller.enabled=false로 자동 Update 개입을 차단한 뒤 각 패턴을 리플렉션으로 직접 호출해 격리 검증: NormalAttack HP -1(5→4), FireAttack HP -2(5→3), FireBomb HP -4(5→1) 전부 정확히 기대값과 일치 확인. WheelAttack은 1틱만 먼저 -3(5→2) 확인 후 2틱째가 플레이어 피격무적시간(0.6초)보다 짧은 틱 간격(0.35초) 때문에 씹히는 걸 발견해 wheelAttackTickInterval을 0.7초로 조정, 이후 재검증에서 6데미지 합산으로 5짜리 최대체력 플레이어가 사망→리스폰됨을 확인(양쪽 틱 다 명중했다는 간접 증거). Jump는 강제 발동 시 Rigidbody2D.velocity.y가 config.jumpVelocity(8)와 정확히 일치함을 확인. Death는 MonsterHealth.TakeDamage(999)로 즉사시켜 예외 없이(널체크 수정 효과 확인) 사망→페이드→Destroy까지 전체 파이프라인이 정상 완주됨을 확인
+### 실패와 수정
+- PlayerController2D/PlayerHealth를 잘못된 네임스페이스로 참조해 컴파일 에러 → 전역 네임스페이스로 수정
+- WheelAttack 2틱 간격(0.35초)이 플레이어 무적시간(0.6초)보다 짧아 2틱째가 무효화되던 문제 → 간격을 0.7초로 조정
+- 초기 테스트에서 UITestScene에 지면이 거의 없다는 걸 모르고 임의 좌표(x=50~70)로 옮겨 낙사로 오염된 결과를 얻음 → 실제 지면 위치(GameObject 콜라이더, x≈0 근처) 확인 후 그 근처에서 재검증
+### 눈으로 확인 필요
+- Jump/각 패턴 애니메이션 전환이 실제로 눈으로 봤을 때 자연스러운지(특히 AnyState 기반 전이라 다른 패턴 도중에도 즉시 끊고 전환됨)
+- WheelAttack 틱 간격을 0.7초로 늘린 게 체감상 너무 느리진 않은지
+
+## [수정] MidBoss 공격 중 방향 전환 방지 — 2026-08-06
+### 프롬프트
+지금 MidBoss가 공격을 시전하는 중에 플레이어가 반대편으로 이동하면 MidBoss의 방향이 바뀌는데 그러지말고 공격중에는 한 방향만 보게 해줘
+### 조사
+Update()의 스프라이트 반전(sr.flipX)은 이미 busy일 때 건너뛰도록 되어 있었으나, 원거리 패턴(FireAttack/FireBomb)의 FireOrb()가 발사 순간(윈드업이 끝난 후) 플레이어의 그 시점 위치로 다시 조준 방향을 계산하고 있어 — 윈드업 도중 플레이어가 반대편으로 넘어가면 실제로 반대 방향으로 구체가 나가는 문제가 있었음(사용자가 본 '방향이 바뀐다'는 현상의 실제 원인으로 추정)
+### 조작 내역
+- MidBossController에 lockedAimDir 필드 추가: DoRandomPattern 시작 시점(공격 종류를 고르기 전)에 그 순간의 플레이어 방향을 한 번 계산해 고정, 스프라이트 반전(sr.flipX)도 그 자리에서 같이 확정
+- FireOrb()가 발사 순간 플레이어 위치를 다시 조준하지 않고 lockedAimDir을 그대로 사용하도록 변경
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- 저장 → manage_scene(load) 강제 재로드 → run_tests(EditMode) → 140/140 통과 (job dd4ce9232b0b402f8a73ad5d6ec7ae29)
+- 재생 모드 실측: DoRandomPattern 시작 직후 lockedAimDir=(1,0)·flipX=False(오른쪽) 확인. 이후 플레이어를 반대편으로 옮긴 뒤 확인했을 때 flipX=True로 보였으나, nextPatternAllowedTime이 방금 새로 설정된 상태였음을 리플렉션으로 확인 — 즉 첫 공격이 자연스럽게 끝나고 두 번째 공격이 새 방향으로 다시 시작된 것이지, 진행 중이던 공격의 방향이 바뀐 게 아님을 확인(정상 동작)
+### 실패와 수정
+- 없음
+
+## [수정] MidBoss 공격 애니메이션 재생 중 방향 고정(busy를 클립 전체 길이로 확장) — 2026-08-06
+### 프롬프트
+아니 normalattack 이랑 fire attack들을 사용할 때 애니메이션이 끝나기 전에 플레이어가 움직여서 보스 반대편으로 가면 애니메이션 도중에 보스의 방향이 안바뀌게 해줘
+### 조사
+이전 수정(lockedAimDir)은 방향을 공격 '시작 시점'에 고정했지만, busy는 windup 시간만큼만 유지되고 있었음. 실제 애니메이션 클립 길이를 확인하니 windup보다 훨씬 김: NormalAtk 0.92초(windup 0.35초), FireAtk 1.5초(windup 0.5초), FireBomb 0.75초(windup 0.7초), Jump 1.67초(대기 0.5초). 즉 판정(TryHitMelee/FireOrb)이 끝난 뒤에도 애니메이션은 한참 더 재생 중인데 그 구간에서 busy=false가 되어 Update()가 다시 방향을 갱신하고 있었음 — 이게 '애니메이션 도중 방향이 바뀐다'는 실제 원인
+### 조작 내역
+- MidBossPatternConfig에 각 패턴의 실제 애니메이션 길이 필드 추가(normalAttackAnimLength/fireAttackAnimLength/fireBombAnimLength/wheelAttackAnimLength/jumpAnimLength), MidBoss.controller의 클립 길이와 정확히 맞춤
+- MidBossController에 HoldForRemainingAnim(elapsed, animLength) 헬퍼 추가: 이미 흐른 시간(windup 등)을 빼고 남은 시간만큼 더 대기해 클립이 완전히 끝날 때까지 busy를 유지
+- DoNormalAttack/DoFireAttack/DoFireBomb/DoWheelAttack 전부 판정 로직 뒤에 HoldForRemainingAnim을 yield하도록 수정. WheelAttack은 windup+틱간격 합계를 기준으로 계산(이미 1초 클립보다 길 수 있어 그 경우 추가 대기 없음)
+- DoJump도 동일하게 config.jumpAnimLength만큼 대기하도록 수정, 점프 시작 시점에도 방향을 한 번 고정
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건 (Config/스크립트 두 차례 수정 각각 확인)
+- 저장 → manage_scene(load) 강제 재로드 → Config 에셋 값(normal=0.92/fire=1.5/bomb=0.75/wheel=1/jump=1.67) 유지 확인
+- run_tests(EditMode) → 140/140 통과 (job cf54648bc64f4f83917820719bd08525, 이후 job 23c3de38069944d5bf11534aeccb55b5로 재확인)
+- 재생 모드 실측: 여러 차례 시도했으나 이 원격·비동기 도구 호출 환경 특성상(매 호출 사이 실제 시간이 흘러 애니메이션이 이미 끝나버리는 경우가 많음) 0.75~1.67초짜리 단일 공격 구간 '도중'을 정확히 포착하는 데 계속 실패함. Time.timeScale을 0.02까지 낮춰 애니메이션을 인위적으로 늘려서 재시도했으나 그마저도 정확한 타이밍 포착에는 실패 — 코드 리뷰로는 로직이 명확히 맞음(HoldForRemainingAnim이 판정 후 남은 시간만큼 반드시 대기하고 나서야 busy=false가 됨을 소스로 재확인)
+### 실패와 수정
+- 없음(로직 수정은 코드 리뷰로 정확성 확인, 동적 실측은 도구 환경 한계로 결론 못 냄)
+### 사람 확인 필요 — 중요
+- 이번 수정은 코드 로직상으로는 명확히 맞지만(HoldForRemainingAnim이 클립 전체 길이만큼 busy를 강제 유지), 실제 재생에서 애니메이션 도중 방향이 안 바뀌는지 **직접 눈으로 확인 부탁드립니다**. 도구로 정밀하게 재현·검증하는 데 이번엔 계속 실패했습니다
+
+## [구현] 보스 전용 화면 우측 상단 체력바(BossHealthBarUI) — 2026-08-07
+### 프롬프트
+다른몬스터들 WorldHealthBar와는 다르게 보스전용 체력바로 화면 우측 상단에 존재하는 체력바 스크립트 짜줘
+### 조사
+WorldHealthBar는 SpriteRenderer 두 장으로 몬스터 머리 위에 월드 스페이스로 그리는 범용 몬스터 체력바(모든 몬스터 공용). UI Canvas에 이미 플레이어용 HP바(Portrait/HpBar, Image Type=Filled, PlayerHealthBarUI)가 있어 같은 시각 스타일(Image Filled)로 보스 전용 화면 고정 UI를 만들기로 함
+### 조작 내역
+- BossHealthBarUI.cs 신규: NHNDemo.MonsterHealth의 OnHealthChanged/OnDied를 구독. fillImage.fillAmount와 텍스트를 갱신, 죽으면 root를 자동 비활성화. SetBoss(MonsterHealth)로 나중에 스폰되는 보스에도 재사용 가능하게 공개 메서드 제공
+- UI Canvas에 BossHealthBar(우측 상단 고정, anchorMin/Max=(1,1)) 계층 신규 생성: Background(반투명 검정) + Fill(Image Filled Horizontal, 플레이어 HP바와 같은 스프라이트 재사용) + BossName(TMP, "MidBoss") + HP(TMP, "N / M")
+- BossHealthBarUI를 BossHealthBar 루트에 부착, bossHealth=MidBoss의 MonsterHealth로 연결
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- 저장 → manage_scene(load) 강제 재로드 → 참조 5개(bossHealth/fillImage/label/bossNameLabel/root) 전부 유지 확인
+- run_tests(EditMode) → 140/140 통과 (job 228755e9380b45d1987a78b0bdb09c23)
+- 재생 모드 실측: 시작 시 fillAmount=1, "30 / 30" 정상 표시 확인. TakeDamage(12) 호출 → fillAmount=0.6(18/30과 정확히 일치), 라벨 "18 / 30" 확인. 즉사 데미지 호출 → OnDied로 root.active=False 자동 전환 확인
+### 실패와 수정
+- 없음
+
+## [조사][구현] 패링 미작동 원인 조사 + MidBoss 사거리 마우스 편집 Handle 추가 — 2026-08-07
+### 프롬프트
+새로운 보스 스킬들을 패링했는데 패링이 안되는 것 같아 그리고 보스 스킬의 공격 범위를 내가 직접 마우스로 설정하고 싶은데
+(이어서: 패턴별 reach 전부 해주고 색깔을 알려줘)
+### 조사 — 패링
+근접 패턴(NormalAttack/WheelAttack)은 재생 모드에서 타이밍을 정확히 맞춰 재현하니 정상적으로 패링됨(데미지 0). 원거리 패턴(FireAttack/FireBomb)은 같은 방식으로 재현하니 패링 실패(데미지 들어감) — 원인은 패링이 '누른 순간부터 아주 짧은 시간'만 유효한데, 근접은 윈드업이 끝나자마자 그 자리에서 즉시 판정하는 반면 원거리는 윈드업 이후 구체가 날아가는 시간이 추가로 걸려 실제 명중 시점이 훨씬 늦어짐 — 캐스팅 시점에 맞춰 누르면 구체가 도착하기 전에 패링 창이 이미 끝나있음. 코드 버그가 아니라 원거리 패턴 특성상 생기는 타이밍 차이로 판단, 의도된 난이도로 둘지 완화할지 사용자 확인 필요(응답 대기 중)
+### 조작 내역 — 사거리 마우스 편집
+- MidBossControllerEditor.cs 신규(Assets/Scripts/Editor): MidBoss 선택 시 Scene 뷰에 Handles.RadiusHandle 4개 표시 — 노랑(aggroRange), 빨강(attackRange), 마젠타(normalAttackReach), 시안(wheelAttackReach). 원 가장자리를 드래그하면 MidBossPatternConfig 값이 Undo 지원과 함께 즉시 반영됨. FireAttack/FireBomb은 원거리 구체라 근접 reach 개념이 없어 핸들 대상에서 제외
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건(무관한 GDK 경고 1건만 존재)
+- MidBoss 선택 → SerializedObject로 config 참조 정상 확인(aggroRange=8, attackRange=2.2, normalAttackReach=2.2, wheelAttackReach=2.4 전부 정확히 읽힘)
+- 저장 → manage_scene(load) 강제 재로드 → run_tests(EditMode) → 140/140 통과 (job 68d40404c354417db201b31451f1b899)
+- Handles.RadiusHandle 자체는 Unity 내장 인터랙티브 컴포넌트라 마우스 드래그 동작은 도구로 직접 재현 불가 — Editor 스크립트 컴파일 정상 및 config 참조 정상 확인으로 대체
+### 실패와 수정
+- 없음
+### 사람 확인 필요
+- 원거리 패턴(FireAttack/FireBomb) 패링 타이밍을 지금처럼 '캐스팅이 아니라 구체가 도착할 때 눌러야 하는' 난이도로 유지할지, 근접처럼 캐스팅 시점 근처에서도 걸리게 완화할지 알려주세요
+- Scene 뷰에서 실제로 원을 드래그했을 때 체감이 괜찮은지 확인 부탁드립니다
+
+## [수정] FireAttack/FireBomb을 원거리 구체에서 근접기로 재구현 — 2026-08-07
+### 프롬프트
+fireattack이랑 firebomb이 원거리 구체라고?
+(이미지 2장 첨부로 설명) fireattack이 검에 불이 붙어서 앞을 내려찍는거고 firebomb이 검을 아래에서 위로 쳐올리며 앞에 폭발이 나는 이펙트야
+### 조사
+제가 처음 구현할 때 '데미지/쿨타임만 주어지고 메커닉이 명시 안 됨' 상태에서 다른 보스들의 원거리 패턴을 참고해 임의로 SpikeProjectile 구체 발사로 만들었던 것이 실제 의도(둘 다 근접, 검+화염 이펙트)와 달랐음. 이 오해가 지난번 조사한 '원거리라 패링이 늦게 걸린다'는 문제의 근본 원인이기도 했음 — 애초에 근접이어야 했던 것
+### 조작 내역
+- MidBossPatternConfig: fireAttackOrbSpeed/fireAttackSpawnHeight/fireBombOrbSpeed/fireBombSpawnHeight 제거, fireAttackReach(2.4)/fireBombReach(2.6) 추가
+- MidBossController: DoFireAttack/DoFireBomb이 FireOrb() 대신 TryHitMelee()를 호출하도록 변경(NormalAttack/WheelAttack과 동일한 근접 판정 방식). 더 이상 쓰이지 않는 FireOrb() 메서드 삭제
+- MidBossControllerEditor: 사거리 마우스 편집 핸들에 FireAttack reach(주황)·FireBomb reach(보라) 2개 추가
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건(Config 필드 제거로 인한 1차 컴파일 에러 4건은 MidBossController 수정으로 해결)
+- 저장 → manage_scene(load) 강제 재로드 → run_tests(EditMode) → 140/140 통과 (job e0cac37bd8ba4e34b36373cc29796eb4)
+- 재생 모드 실측: FireAttack 발동 → HP 5→3(데미지 2 정확히 일치). 패링 검증은 비동기 코루틴 경유 테스트에서 계속 타이밍이 어긋나 결론을 못 내다가, TryHitMelee를 지연 없이 즉시 호출(같은 프레임)하는 방식으로 재검증 → HP 5/5 그대로 유지되어 패링 로직 자체는 NormalAttack과 동일하게 정상 작동함을 확인(비동기 테스트의 실패는 도구 환경의 타이밍 오차였지 코드 문제가 아니었음)
+### 실패와 수정
+- 처음부터 메커닉을 임의로(원거리 구체) 정한 것이 실제 의도(근접 화염 검격)와 달랐음 — 사용자가 이미지로 명확히 알려주기 전까지 확인 안 함. 앞으로 데미지/쿨타임 등 수치만 주어지고 시각적 메커닉이 불명확한 패턴은 임의로 단정하지 말고 먼저 확인할 것
+
+## [수정] MidBoss 근접 판정을 거리 계산에서 콜라이더 겹침 방식으로 변경 — 2026-08-07
+### 프롬프트
+현재 TryHitMelee는 플레이어캐릭터와 보스오브젝트간의 거리로 데미지를 입는지 결정하는데 그 방식이 아니라 빈 오브젝트에 collider를 달고 공격시 그 오브젝트를 보스 앞에 생성 후 그 콜라이더 안에 플레이어 캐릭터가 존재하면 데미지가 들어가게끔 하고 싶어
+### 조작 내역
+- MidBossMeleeHitbox.cs 신규: 빈 오브젝트에 BoxCollider2D(트리거)+Kinematic Rigidbody2D를 붙여 실제 물리 겹침으로 판정. OnTriggerEnter2D/OnTriggerStay2D에서 플레이어 감지 시 패링 체크 후 데미지, 한 번 판정되면 hasResolved로 중복 방지
+- MidBossPatternConfig에 meleeHitboxLifetime(0.15초, 히트박스 생존시간)·meleeHitboxHeight(3, 세로 크기) 공통 필드 추가
+- MidBossController.TryHitMelee(거리 비교)를 SpawnMeleeHitbox(콜라이더 생성)로 전면 교체: 공격 시작 시 고정해둔 방향(lockedAimDir)으로 보스 앞에 reach만큼 오프셋된 위치에 히트박스를 생성하고 meleeHitboxLifetime 후 자동 파괴. NormalAttack/FireAttack/FireBomb/WheelAttack 4곳 호출부 전부 교체
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- 저장 → manage_scene(load) 강제 재로드 → run_tests(EditMode) → 140/140 통과 (job bcb8cd3dfd0d45e8b1679833c1e2f4f2, 중간에 98cfac3563cd485e91e099a677fa47ba로도 확인)
+- 재생 모드 실측: SpawnMeleeHitbox를 직접 호출(플레이어와 확실히 겹치는 위치) → 히트박스 1개 생성 확인, HP 5→4(NormalAttack 데미지 1과 정확히 일치)로 실제 트리거 겹침 판정이 작동함을 확인, 판정 후 히트박스가 자동으로 소멸(0개)됨도 확인
+### 실패와 수정
+- 처음 DoNormalAttack 코루틴 전체(윈드업 대기 포함)를 거쳐 검증했을 때 데미지가 안 들어간 것처럼 보였음 — 원인은 히트박스 생존시간(0.15초)이 원격·비동기 도구 호출의 왕복 지연보다 짧아서, 물리 판정이 일어나기도 전에(혹은 확인하기도 전에) Destroy가 이미 실행된 것으로 추정(실제 게임플레이의 연속 프레임 환경에서는 0.15초 = 물리 스텝 7회 이상이라 충분함). SpawnMeleeHitbox를 직접 즉시 호출하는 격리 테스트로 재검증해 정상 확인
+
+## [수정] MidBoss 근접 히트박스를 동적 생성에서 미리 배치된 자식 오브젝트 재사용 방식으로 변경 — 2026-08-07
+### 프롬프트
+콜라이더 히트박스를 동적으로 생성하는건 별로 같아서 내가 직접 midboss 자식으로 normal fire wheel bomb을 만들어 놨으니 여기다가 MidBossMeleeHitbox컴포넌트를 붙이고 hitbox.Init(damage, gameObject); 실행 후 MidBossMeleeHitbox를 삭제하는 식으로 해줘
+### 조사
+확인해보니 사용자가 이미 MidBossController.cs를 직접 수정해두신 상태였음(skillnum 파라미터, 스킬별 히트박스 크기 Config 필드 추가 등, 다만 여전히 동적 GameObject 생성 방식). MidBoss 자식으로 Normal(BoxCollider2D)/Fire(BoxCollider2D)/Wheel(CapsuleCollider2D)/Bomb(CircleCollider2D) 4개가 이미 배치되어 있음을 확인
+### 조작 내역
+- MidBossController에 normalHitboxObject/fireHitboxObject/wheelHitboxObject/bombHitboxObject(GameObject) 직렬화 필드 추가
+- SpawnMeleeHitbox를 재작성: new GameObject로 동적 생성하는 대신, skillnum에 맞는 미리 배치된 자식 오브젝트를 찾아 MidBossMeleeHitbox를 AddComponent → Init(damage, gameObject) → Destroy(hitbox, meleeHitboxLifetime)로 컴포넌트만 제거(오브젝트 자체는 유지되어 다음 공격에 재사용됨). reach 매개변수는 더 이상 위치 계산에 안 쓰여 제거
+- MidBoss의 Normal/Fire/Wheel/Bomb 4개 자식을 각각의 직렬화 필드에 연결
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- 저장 → manage_scene(load) 강제 재로드 → 참조 4개 전부 유지 확인
+- run_tests(EditMode) → 140/140 통과 (job 33c08f8b78f641beb3e9c5bd0c1034eb)
+- 재생 모드 실측: 플레이어를 Normal 오브젝트의 월드 위치로 이동시킨 뒤 SpawnMeleeHitbox(1,0) 직접 호출 → 호출 전 Normal에 MidBossMeleeHitbox 없음, 호출 직후 있음(정상 부착) 확인. 잠시 후 재확인 → 데미지 정확히 반영(HP 5→4), MidBossMeleeHitbox는 제거됐지만 Normal 오브젝트 자체는 그대로 존재함을 확인(컴포넌트만 제거되고 배치는 보존)
+### 실패와 수정
+- 없음
+### 참고
+- 사용자가 추가해둔 스킬별 히트박스 크기 Config 필드(midBossNormalAttackHitboxWidth 등)는 이제 코드에서 안 쓰입니다 — 대신 각 자식 오브젝트(Normal/Fire/Wheel/Bomb)에 이미 배치해두신 콜라이더 크기가 그대로 판정에 쓰입니다. 필요 없으면 나중에 정리하셔도 됩니다
+- MidBossControllerEditor(마우스 드래그 사거리 편집)의 normalAttackReach/fireAttackReach/fireBombReach/wheelAttackReach 핸들은 이제 실제 판정 위치와 무관해졌습니다(참고용 표시만 됨) — 실제 판정 범위를 조절하시려면 Normal/Fire/Wheel/Bomb 오브젝트의 콜라이더를 직접 씬에서 편집하시면 됩니다

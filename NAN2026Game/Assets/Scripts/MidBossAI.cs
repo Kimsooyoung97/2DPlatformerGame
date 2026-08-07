@@ -30,7 +30,7 @@ namespace NAN2026
         void Update()
         {
             if (config == null || player == null) return;
-            if (atkT >= 0f) { RunAttack(); return; }
+            if (atkT >= 0f) { FireAttack(); return; }
             float dist = Mathf.Abs(transform.position.x - player.position.x);
             int phase = MidBossLogic.Phase(dist, config.aggroRange, config.attackRange);
             if (phase == 2 && Time.time >= cooldownUntil)
@@ -48,7 +48,7 @@ namespace NAN2026
             else Play("MidBoss_Idle");
         }
 
-        void RunAttack()
+        void FireAttack()
         {
             atkT += Time.deltaTime;
             bool inStrike = MidBossLogic.InStrikeInterval(atkT, config.attackDuration, config.hitFrac, config.hitFracEnd);
