@@ -21,6 +21,8 @@ MonoBehaviour:
   attackDuration: 1.5
   hitFracStart: 0.42
   hitFracEnd: 0.62
+  hit2FracStart: 0.62
+  hit2FracEnd: 0.82
   attackCooldown: 1.6
   atk1HoldFrame: 3
   atk1HoldTime: 0.55
@@ -29,6 +31,7 @@ MonoBehaviour:
   fpsAtk: 10.7
   fpsHit: 14
   fpsDeath: 12
+  showParryDebug: 1
   groggyNeed: 5
   groggyTime: 3
   groggyFxOffsetY: 3.4

@@ -13,8 +13,10 @@ namespace NAN2026
         public float walkSpeed = 2.2f;
         public int damage = 1;
         public float attackDuration = 1.1f;
-        public float hitFracStart = 0.5f;  // 애니 중 타격 유효창
-        public float hitFracEnd = 0.75f;
+        public float hitFracStart = 0.42f;  // atk_1 창 (홀드 풀린 직후)
+        public float hitFracEnd = 0.62f;
+        public float hit2FracStart = 0.62f; // atk_2 창 (MidBoss 감각)
+        public float hit2FracEnd = 0.82f;
         public float attackCooldown = 1.6f;
         [Header("atk_1 예고 홀드")]
         public int atk1HoldFrame = 3;      // 이 프레임에서 멈춤 (치켜든 자세)

@@ -152,7 +152,9 @@ namespace NAN2026
             else if (state == 2)
             {
                 float frac = stateT / config.attackDuration;
-                if (!dealtThisSwing && frac >= config.hitFracStart && frac <= config.hitFracEnd && dx <= config.hitReach)
+                float wS = atkIs1 ? config.hitFracStart : config.hit2FracStart;
+                float wE = atkIs1 ? config.hitFracEnd : config.hit2FracEnd;
+                if (!dealtThisSwing && frac >= wS && frac <= wE && dx <= config.hitReach)
                 {
                     dealtThisSwing = true;
                     bool parried = false;
