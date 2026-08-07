@@ -409,6 +409,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
                     FloatingText.Spawn(transform.position + Vector3.up * 1.1f,
                         judge == 0 ? "PERFECT" : "GOOD",
                         judge == 0 ? Color.yellow : Color.white);
+                    orb.SendMessage("OnParried", SendMessageOptions.DontRequireReceiver);
                     Destroy(orb.gameObject);
                 }
             }
