@@ -5171,3 +5171,15 @@ AdventureScene_Test에 있는 나무들이랑 Props 들도 AdventureScene_Test1�
 - 사용자: 팔레트 재열기 후 선택=칠 일치 확인
 ### 실패와 수정
 - 수제 팔레트 프리팹은 창 호환 불충분 — 공식 유틸 경유가 표준
+
+
+## [수정] 팔레트 셀 크기 Manual 고정 — 2026-08-07 22:47
+### 프롬프트
+여전히 눌러도 누른 타일이 안나옴 (스크린샷: 타일이 격자 2x2에 걸침)
+### 조작 내역
+- 원인: cellSizing=Automatic이 sprite 필드 없는 AnimWaterTile 때문에 셀을 0.5로 오산 → 타일이 2x2 걸침·클릭 칸 어긋남
+- GridPalette cellSizing=Manual, Grid cellSize=(1,1,1)·스케일 1 고정, 강제 재임포트·창 정리
+### 검증
+- cellSizing=1 (1=Manual). 선택=칠 일치는 사용자
+### 실패와 수정
+- 커스텀 TileBase 혼재 팔레트는 Automatic 셀 크기 금지 — Manual이 표준
