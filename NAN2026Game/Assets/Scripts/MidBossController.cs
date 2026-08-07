@@ -157,7 +157,7 @@ namespace NAN2026
         {
             if (anim != null) anim.SetTrigger("NormalAttack");
             yield return new WaitForSeconds(config.normalAttackWindup);
-            TryHitMelee(config.normalAttackDamage, config.normalAttackReach);
+            SpawnMeleeHitbox(config.normalAttackDamage, config.normalAttackReach);
             yield return HoldForRemainingAnim(config.normalAttackWindup, config.normalAttackAnimLength);
         }
 
@@ -166,7 +166,7 @@ namespace NAN2026
             // 검에 불 붙여 앞을 내려찍는 근접기 — 원거리 구체 아님.
             if (anim != null) anim.SetTrigger("FireAttack");
             yield return new WaitForSeconds(config.fireAttackWindup);
-            TryHitMelee(config.fireAttackDamage, config.fireAttackReach);
+            SpawnMeleeHitbox(config.fireAttackDamage, config.fireAttackReach);
             nextFireAttackTime = Time.time + config.fireAttackCooldown;
             yield return HoldForRemainingAnim(config.fireAttackWindup, config.fireAttackAnimLength);
         }
@@ -176,7 +176,7 @@ namespace NAN2026
             // 검을 아래에서 위로 쳐올리며 앞에 폭발 이펙트가 나는 근접기 — 원거리 구체 아님.
             if (anim != null) anim.SetTrigger("FireBomb");
             yield return new WaitForSeconds(config.fireBombWindup);
-            TryHitMelee(config.fireBombDamage, config.fireBombReach);
+            SpawnMeleeHitbox(config.fireBombDamage, config.fireBombReach);
             nextFireBombTime = Time.time + config.fireBombCooldown;
             yield return HoldForRemainingAnim(config.fireBombWindup, config.fireBombAnimLength);
         }
@@ -185,24 +185,33 @@ namespace NAN2026
         {
             if (anim != null) anim.SetTrigger("WheelAttack");
             yield return new WaitForSeconds(config.wheelAttackWindup);
-            TryHitMelee(config.wheelAttackDamagePerTick, config.wheelAttackReach);
+            SpawnMeleeHitbox(config.wheelAttackDamagePerTick, config.wheelAttackReach);
             yield return new WaitForSeconds(config.wheelAttackTickInterval);
-            TryHitMelee(config.wheelAttackDamagePerTick, config.wheelAttackReach);
+            SpawnMeleeHitbox(config.wheelAttackDamagePerTick, config.wheelAttackReach);
             nextWheelAttackTime = Time.time + config.wheelAttackCooldown;
             yield return HoldForRemainingAnim(config.wheelAttackWindup + config.wheelAttackTickInterval, config.wheelAttackAnimLength);
         }
 
-        private void TryHitMelee(int damage, float reach)
+        // 거리 계산이 아니라 실제 콜라이더를 보스 앞에 생성해 겹침으로 판정한다.
+        // MidBossMeleeHitbox가 트리거 안에 플레이어가 있을 때 패링 체크 후 데미지를 준다.
+        private void SpawnMeleeHitbox(int damage, float reach)
         {
             if (player == null) return;
-            float dist = Mathf.Abs(player.position.x - transform.position.x);
-            if (dist > reach) return;
 
-            PlayerController2D pc = player.GetComponentInParent<PlayerController2D>();
-            if (pc != null && pc.TryParry(gameObject)) return; // 패링당하면 피해 없음
+            Vector2 dir = lockedAimDir.sqrMagnitude > 0.0001f ? lockedAimDir.normalized : Vector2.right;
+            Vector3 center = transform.position + (Vector3)(dir * (reach * 0.5f));
 
-            PlayerHealth ph = player.GetComponentInParent<PlayerHealth>();
-            if (ph != null) ph.TakeDamage(damage);
+            GameObject go = new GameObject("MidBossMeleeHitbox");
+            go.transform.position = center;
+
+            BoxCollider2D col = go.AddComponent<BoxCollider2D>();
+            col.isTrigger = true;
+            col.size = new Vector2(reach, config.meleeHitboxHeight);
+
+            MidBossMeleeHitbox hitbox = go.AddComponent<MidBossMeleeHitbox>();
+            hitbox.Init(damage, gameObject);
+
+            Destroy(go, config.meleeHitboxLifetime);
         }
 
     }

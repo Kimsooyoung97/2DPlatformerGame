@@ -50,5 +50,11 @@ namespace NAN2026
         public float wheelAttackTickInterval = 0.35f;
         public float wheelAttackCooldown = 6f;
         public float wheelAttackReach = 2.4f;
+
+        [Header("근접 히트박스 공통")]
+        [Tooltip("판정용 콜라이더 오브젝트가 생성되어 있는 시간(초) — 그 동안 겹치면 맞는다")]
+        public float meleeHitboxLifetime = 0.15f;
+        [Tooltip("판정용 콜라이더의 세로 높이")]
+        public float meleeHitboxHeight = 3f;
     }
 }

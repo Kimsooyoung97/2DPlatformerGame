@@ -4830,3 +4830,17 @@ fireattack이랑 firebomb이 원거리 구체라고?
 - 재생 모드 실측: FireAttack 발동 → HP 5→3(데미지 2 정확히 일치). 패링 검증은 비동기 코루틴 경유 테스트에서 계속 타이밍이 어긋나 결론을 못 내다가, TryHitMelee를 지연 없이 즉시 호출(같은 프레임)하는 방식으로 재검증 → HP 5/5 그대로 유지되어 패링 로직 자체는 NormalAttack과 동일하게 정상 작동함을 확인(비동기 테스트의 실패는 도구 환경의 타이밍 오차였지 코드 문제가 아니었음)
 ### 실패와 수정
 - 처음부터 메커닉을 임의로(원거리 구체) 정한 것이 실제 의도(근접 화염 검격)와 달랐음 — 사용자가 이미지로 명확히 알려주기 전까지 확인 안 함. 앞으로 데미지/쿨타임 등 수치만 주어지고 시각적 메커닉이 불명확한 패턴은 임의로 단정하지 말고 먼저 확인할 것
+
+## [수정] MidBoss 근접 판정을 거리 계산에서 콜라이더 겹침 방식으로 변경 — 2026-08-07
+### 프롬프트
+현재 TryHitMelee는 플레이어캐릭터와 보스오브젝트간의 거리로 데미지를 입는지 결정하는데 그 방식이 아니라 빈 오브젝트에 collider를 달고 공격시 그 오브젝트를 보스 앞에 생성 후 그 콜라이더 안에 플레이어 캐릭터가 존재하면 데미지가 들어가게끔 하고 싶어
+### 조작 내역
+- MidBossMeleeHitbox.cs 신규: 빈 오브젝트에 BoxCollider2D(트리거)+Kinematic Rigidbody2D를 붙여 실제 물리 겹침으로 판정. OnTriggerEnter2D/OnTriggerStay2D에서 플레이어 감지 시 패링 체크 후 데미지, 한 번 판정되면 hasResolved로 중복 방지
+- MidBossPatternConfig에 meleeHitboxLifetime(0.15초, 히트박스 생존시간)·meleeHitboxHeight(3, 세로 크기) 공통 필드 추가
+- MidBossController.TryHitMelee(거리 비교)를 SpawnMeleeHitbox(콜라이더 생성)로 전면 교체: 공격 시작 시 고정해둔 방향(lockedAimDir)으로 보스 앞에 reach만큼 오프셋된 위치에 히트박스를 생성하고 meleeHitboxLifetime 후 자동 파괴. NormalAttack/FireAttack/FireBomb/WheelAttack 4곳 호출부 전부 교체
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- 저장 → manage_scene(load) 강제 재로드 → run_tests(EditMode) → 140/140 통과 (job bcb8cd3dfd0d45e8b1679833c1e2f4f2, 중간에 98cfac3563cd485e91e099a677fa47ba로도 확인)
+- 재생 모드 실측: SpawnMeleeHitbox를 직접 호출(플레이어와 확실히 겹치는 위치) → 히트박스 1개 생성 확인, HP 5→4(NormalAttack 데미지 1과 정확히 일치)로 실제 트리거 겹침 판정이 작동함을 확인, 판정 후 히트박스가 자동으로 소멸(0개)됨도 확인
+### 실패와 수정
+- 처음 DoNormalAttack 코루틴 전체(윈드업 대기 포함)를 거쳐 검증했을 때 데미지가 안 들어간 것처럼 보였음 — 원인은 히트박스 생존시간(0.15초)이 원격·비동기 도구 호출의 왕복 지연보다 짧아서, 물리 판정이 일어나기도 전에(혹은 확인하기도 전에) Destroy가 이미 실행된 것으로 추정(실제 게임플레이의 연속 프레임 환경에서는 0.15초 = 물리 스텝 7회 이상이라 충분함). SpawnMeleeHitbox를 직접 즉시 호출하는 격리 테스트로 재검증해 정상 확인
