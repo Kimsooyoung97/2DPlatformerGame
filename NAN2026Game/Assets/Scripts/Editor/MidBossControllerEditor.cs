@@ -16,6 +16,8 @@ namespace NAN2026
         private static readonly Color AttackColor = new Color(1f, 0.25f, 0.25f, 0.9f);
         private static readonly Color NormalReachColor = new Color(1f, 0.3f, 1f, 0.9f);
         private static readonly Color WheelReachColor = new Color(0.3f, 0.95f, 1f, 0.9f);
+        private static readonly Color FireAttackReachColor = new Color(1f, 0.55f, 0.1f, 0.9f);
+        private static readonly Color FireBombReachColor = new Color(0.55f, 0.25f, 0.85f, 0.9f);
 
         private void OnSceneGUI()
         {
@@ -35,6 +37,10 @@ namespace NAN2026
                 v => config.normalAttackReach = v);
             DrawRangeHandle(config, pos, WheelReachColor, "WheelAttack reach", config.wheelAttackReach,
                 v => config.wheelAttackReach = v);
+            DrawRangeHandle(config, pos, FireAttackReachColor, "FireAttack reach", config.fireAttackReach,
+                v => config.fireAttackReach = v);
+            DrawRangeHandle(config, pos, FireBombReachColor, "FireBomb reach", config.fireBombReach,
+                v => config.fireBombReach = v);
         }
 
         private void DrawRangeHandle(MidBossPatternConfig config, Vector3 center, Color color,

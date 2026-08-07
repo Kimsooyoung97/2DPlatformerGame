@@ -4813,3 +4813,20 @@ WorldHealthBar는 SpriteRenderer 두 장으로 몬스터 머리 위에 월드 �
 ### 사람 확인 필요
 - 원거리 패턴(FireAttack/FireBomb) 패링 타이밍을 지금처럼 '캐스팅이 아니라 구체가 도착할 때 눌러야 하는' 난이도로 유지할지, 근접처럼 캐스팅 시점 근처에서도 걸리게 완화할지 알려주세요
 - Scene 뷰에서 실제로 원을 드래그했을 때 체감이 괜찮은지 확인 부탁드립니다
+
+## [수정] FireAttack/FireBomb을 원거리 구체에서 근접기로 재구현 — 2026-08-07
+### 프롬프트
+fireattack이랑 firebomb이 원거리 구체라고?
+(이미지 2장 첨부로 설명) fireattack이 검에 불이 붙어서 앞을 내려찍는거고 firebomb이 검을 아래에서 위로 쳐올리며 앞에 폭발이 나는 이펙트야
+### 조사
+제가 처음 구현할 때 '데미지/쿨타임만 주어지고 메커닉이 명시 안 됨' 상태에서 다른 보스들의 원거리 패턴을 참고해 임의로 SpikeProjectile 구체 발사로 만들었던 것이 실제 의도(둘 다 근접, 검+화염 이펙트)와 달랐음. 이 오해가 지난번 조사한 '원거리라 패링이 늦게 걸린다'는 문제의 근본 원인이기도 했음 — 애초에 근접이어야 했던 것
+### 조작 내역
+- MidBossPatternConfig: fireAttackOrbSpeed/fireAttackSpawnHeight/fireBombOrbSpeed/fireBombSpawnHeight 제거, fireAttackReach(2.4)/fireBombReach(2.6) 추가
+- MidBossController: DoFireAttack/DoFireBomb이 FireOrb() 대신 TryHitMelee()를 호출하도록 변경(NormalAttack/WheelAttack과 동일한 근접 판정 방식). 더 이상 쓰이지 않는 FireOrb() 메서드 삭제
+- MidBossControllerEditor: 사거리 마우스 편집 핸들에 FireAttack reach(주황)·FireBomb reach(보라) 2개 추가
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건(Config 필드 제거로 인한 1차 컴파일 에러 4건은 MidBossController 수정으로 해결)
+- 저장 → manage_scene(load) 강제 재로드 → run_tests(EditMode) → 140/140 통과 (job e0cac37bd8ba4e34b36373cc29796eb4)
+- 재생 모드 실측: FireAttack 발동 → HP 5→3(데미지 2 정확히 일치). 패링 검증은 비동기 코루틴 경유 테스트에서 계속 타이밍이 어긋나 결론을 못 내다가, TryHitMelee를 지연 없이 즉시 호출(같은 프레임)하는 방식으로 재검증 → HP 5/5 그대로 유지되어 패링 로직 자체는 NormalAttack과 동일하게 정상 작동함을 확인(비동기 테스트의 실패는 도구 환경의 타이밍 오차였지 코드 문제가 아니었음)
+### 실패와 수정
+- 처음부터 메커닉을 임의로(원거리 구체) 정한 것이 실제 의도(근접 화염 검격)와 달랐음 — 사용자가 이미지로 명확히 알려주기 전까지 확인 안 함. 앞으로 데미지/쿨타임 등 수치만 주어지고 시각적 메커닉이 불명확한 패턴은 임의로 단정하지 말고 먼저 확인할 것

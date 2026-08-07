@@ -32,19 +32,17 @@ namespace NAN2026
         public int normalAttackDamage = 1;
         public float normalAttackReach = 2.2f;
 
-        [Header("FireAttack (쿨타임 4초, 원거리 구체 1개)")]
+        [Header("FireAttack (쿨타임 4초, 검에 불 붙여 앞을 내려찍는 근접기)")]
         public float fireAttackWindup = 0.5f;
         public int fireAttackDamage = 2;
         public float fireAttackCooldown = 4f;
-        public float fireAttackOrbSpeed = 7f;
-        public float fireAttackSpawnHeight = 1f;
+        public float fireAttackReach = 2.4f;
 
-        [Header("FireBomb (쿨타임 8초, 원거리 강력한 한 방)")]
+        [Header("FireBomb (쿨타임 8초, 검을 쳐올리며 앞에 폭발 이펙트가 나는 근접기)")]
         public float fireBombWindup = 0.7f;
         public int fireBombDamage = 4;
         public float fireBombCooldown = 8f;
-        public float fireBombOrbSpeed = 5f;
-        public float fireBombSpawnHeight = 1f;
+        public float fireBombReach = 2.6f;
 
         [Header("WheelAttack (쿨타임 6초, 근접 2틱)")]
         public float wheelAttackWindup = 0.4f;

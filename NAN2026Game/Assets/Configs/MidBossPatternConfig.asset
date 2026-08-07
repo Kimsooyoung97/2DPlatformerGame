@@ -30,13 +30,11 @@ MonoBehaviour:
   fireAttackWindup: 0.5
   fireAttackDamage: 2
   fireAttackCooldown: 4
-  fireAttackOrbSpeed: 7
-  fireAttackSpawnHeight: 1
+  fireAttackReach: 2.4
   fireBombWindup: 0.7
   fireBombDamage: 4
   fireBombCooldown: 8
-  fireBombOrbSpeed: 5
-  fireBombSpawnHeight: 1
+  fireBombReach: 2.6
   wheelAttackWindup: 0.4
   wheelAttackDamagePerTick: 3
   wheelAttackTickInterval: 0.7

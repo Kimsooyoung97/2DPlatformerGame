@@ -163,18 +163,20 @@ namespace NAN2026
 
         private IEnumerator DoFireAttack()
         {
+            // 검에 불 붙여 앞을 내려찍는 근접기 — 원거리 구체 아님.
             if (anim != null) anim.SetTrigger("FireAttack");
             yield return new WaitForSeconds(config.fireAttackWindup);
-            FireOrb(config.fireAttackDamage, config.fireAttackOrbSpeed, config.fireAttackSpawnHeight);
+            TryHitMelee(config.fireAttackDamage, config.fireAttackReach);
             nextFireAttackTime = Time.time + config.fireAttackCooldown;
             yield return HoldForRemainingAnim(config.fireAttackWindup, config.fireAttackAnimLength);
         }
 
         private IEnumerator DoFireBomb()
         {
+            // 검을 아래에서 위로 쳐올리며 앞에 폭발 이펙트가 나는 근접기 — 원거리 구체 아님.
             if (anim != null) anim.SetTrigger("FireBomb");
             yield return new WaitForSeconds(config.fireBombWindup);
-            FireOrb(config.fireBombDamage, config.fireBombOrbSpeed, config.fireBombSpawnHeight);
+            TryHitMelee(config.fireBombDamage, config.fireBombReach);
             nextFireBombTime = Time.time + config.fireBombCooldown;
             yield return HoldForRemainingAnim(config.fireBombWindup, config.fireBombAnimLength);
         }
@@ -203,16 +205,5 @@ namespace NAN2026
             if (ph != null) ph.TakeDamage(damage);
         }
 
-        private void FireOrb(int damage, float speed, float spawnHeight)
-        {
-            if (player == null) return;
-            Vector3 spawnPos = transform.position + Vector3.up * spawnHeight;
-            // 발사 순간 플레이어 위치를 다시 조준하지 않고, 공격 시작 시 고정해둔 방향을 쓴다.
-            Vector2 dir = lockedAimDir;
-            GameObject go = new GameObject("MidBossOrb");
-            go.transform.position = spawnPos;
-            SpikeProjectile proj = go.AddComponent<SpikeProjectile>();
-            proj.Init(dir, speed, damage, health);
-        }
     }
 }
