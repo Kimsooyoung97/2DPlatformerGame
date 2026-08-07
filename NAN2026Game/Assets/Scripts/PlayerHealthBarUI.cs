@@ -40,6 +40,14 @@ public sealed class PlayerHealthBarUI : MonoBehaviour
         current = Mathf.Clamp(current, 0, 999);
 
         int existing = parentObject.transform.childCount;
+        if (existing == current) return;
+
+        // GridLayoutGroup 등 레이아웃 컴포넌트가 같은 오브젝트에 있으면, 반복문 안에서
+        // Instantiate/Destroy를 연달아 호출할 때마다 레이아웃을 즉시 재계산하려다 걸리는
+        // 경우가 있다(사용자 재현: 여러 개를 한꺼번에 지울 때 에디터가 멈춤). 변경하는
+        // 동안은 레이아웃 컴포넌트를 꺼뒀다가, 다 끝난 뒤 한 번만 다시 켠다.
+        LayoutGroup layoutGroup = parentObject.GetComponent<LayoutGroup>();
+        if (layoutGroup != null) layoutGroup.enabled = false;
 
         if (existing < current)
         {
@@ -48,13 +56,16 @@ public sealed class PlayerHealthBarUI : MonoBehaviour
                 Instantiate(prefab, parentObject.transform);
             }
         }
-        else if (existing > current)
+        else
         {
             for (int i = existing - 1; i >= current; i--)
             {
                 Transform child = parentObject.transform.GetChild(i);
+                child.gameObject.SetActive(false); // 비활성화하면 즉시 화면·레이아웃 계산에서 빠짐
                 Destroy(child.gameObject);
             }
         }
+
+        if (layoutGroup != null) layoutGroup.enabled = true;
     }
 }
