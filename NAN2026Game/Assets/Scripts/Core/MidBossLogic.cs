@@ -9,6 +9,14 @@ namespace NAN2026.Core
             if (dist <= aggroRange) return 1;
             return 0;
         }
+        // 보스가 바라보는 쪽 반원에 대상이 있는가 (flipX=true는 왼쪽 응시)
+        public static bool InFacingHalf(float bossX, float targetX, bool bossFlipX)
+        {
+            float side = targetX - bossX;
+            if (side == 0f) return true;
+            return bossFlipX ? side < 0f : side > 0f;
+        }
+
         // 타격 구간 [a,b] 안인가 (통일 패링: 구간 접촉)
         public static bool InStrikeInterval(float elapsed, float duration, float a, float b)
         {

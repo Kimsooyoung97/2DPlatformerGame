@@ -53,8 +53,9 @@ namespace NAN2026
             atkT += Time.deltaTime;
             bool inStrike = MidBossLogic.InStrikeInterval(atkT, config.attackDuration, config.hitFrac, config.hitFracEnd);
             float dist = Vector2.Distance(transform.position, player.position);
+            bool dirOk = sr != null && MidBossLogic.InFacingHalf(transform.position.x, player.position.x, sr.flipX); // 바라보는 반원만
             // 통일 패링: 구간 내 리치 접촉 + 창 활성이면 언제든 성공
-            if (!hitDone && inStrike && dist <= config.hitReach && controller != null && tryParry != null)
+            if (!hitDone && inStrike && dirOk && dist <= config.hitReach && controller != null && tryParry != null)
             {
                 object r = tryParry.Invoke(controller, new object[] { gameObject });
                 if (r is bool && (bool)r)
@@ -74,7 +75,7 @@ namespace NAN2026
             if (!hitDone && atkT / Mathf.Max(0.01f, config.attackDuration) > config.hitFracEnd)
             {
                 hitDone = true;
-                if (dist <= config.hitReach)
+                if (dirOk && dist <= config.hitReach)
                 {
                     SpikeBallTrap.ShowAt(player.position + Vector3.up * 1.4f, "패링 실패!", new Color(1f, 0.3f, 0.25f), config.clashConfig);
                     player.SendMessage("TakeDamage", config.damage, SendMessageOptions.DontRequireReceiver);
