@@ -80,3 +80,5 @@
 - Sprites_AI/MidBoss/idle_1~8.png — Elementals: Fire Knight FREE v1.1 (chierit) | 라이선스: 배포 페이지 확인 요
 
 - Map/Showroom/Medieval/* — GandalfHardcore FREE Pixel Art Sidescroller Asset Pack 32x32 Overworld (itch.io) | 라이선스: 상업·비상업 게임 사용/수정 허용, 재배포·AI학습·NFT 금지 (READ ME.txt 동봉 확인) | 사용: 타일 380·배경 5레이어·나무 3종
+
+- Map/Showroom/Medieval/(장식류: 나무·텐트·조각상·분재·광석 등) — GandalfHardcore FREE Platformer Assets 동일 팩 | 동일 라이선스
