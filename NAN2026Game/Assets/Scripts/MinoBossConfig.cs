@@ -15,6 +15,11 @@ namespace NAN2026
         public float attackDuration = 1.1f;
         public float hitFracStart = 0.42f;  // atk_1 창 (홀드 풀린 직후)
         public float hitFracEnd = 0.62f;
+        [Header("atk_1 프레임 판정창 (이단 베기)")]
+        public int atk1Win1Start = 5;
+        public int atk1Win1End = 8;
+        public int atk1Win2Start = 11;
+        public int atk1Win2End = 14;
         public float hit2FracStart = 0.62f; // atk_2 창 (MidBoss 감각)
         public float hit2FracEnd = 0.82f;
         public float attackCooldown = 1.6f;

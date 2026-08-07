@@ -20,6 +20,7 @@ namespace NAN2026
         private float curFps;
         private bool atkIs1, dealtThisSwing, holdDone;
         private int parryCount;
+        private bool[] swingResolved = new bool[2];
         private Transform barFill;
         private float barFullW;
         private GameObject groggyFx;
@@ -77,6 +78,7 @@ namespace NAN2026
         private void SetState(int s)
         {
             state = s; animT = 0f; stateT = 0f; dealtThisSwing = false; holdDone = false; holdT = 0f;
+            swingResolved[0] = false; swingResolved[1] = false;
             cur = s == 0 ? idleF : s == 1 ? walkF : s == 2 ? (atkIs1 ? atk1F : atk2F) : s == 3 ? hitF : s == 5 ? hitF : deathF;
             curFps = s == 0 ? config.fpsIdle : s == 1 ? config.fpsWalk : s == 2 ? config.fpsAtk : config.fpsHit;
             if (s == 4) curFps = config.fpsDeath;
@@ -149,11 +151,47 @@ namespace NAN2026
                 if (dx <= config.attackRange && Time.time >= nextAtk) BeginAttack();
                 else if (dx > config.aggroX) SetState(0);
             }
+            else if (state == 2 && atkIs1)
+            {
+                // 이단 베기: 프레임 창(5~8, 11~14) 안에서 C를 누르면 즉시 패링 성공
+                for (int w = 0; w < 2; w++)
+                {
+                    int ws = w == 0 ? config.atk1Win1Start : config.atk1Win2Start;
+                    int we = w == 0 ? config.atk1Win1End : config.atk1Win2End;
+                    if (swingResolved[w]) continue;
+                    bool inWin = idx >= ws && idx <= we;
+                    if (inWin && kb != null && kb.cKey.wasPressedThisFrame)
+                    {
+                        swingResolved[w] = true;
+                        if (config.clashConfig != null)
+                            ParryClashFx.Play((transform.position + player.position) * 0.5f + Vector3.up * 0.8f, config.clashConfig);
+                        player.SendMessage("AddMp", config.damage * 10, SendMessageOptions.DontRequireReceiver);
+                        if (config.showParryDebug) DebugPopup("패링 OK", new Color(0.3f, 1f, 0.4f));
+                        parryCount++;
+                        if (parryCount >= config.groggyNeed) { parryCount = 0; SetState(5); return; }
+                    }
+                    else if (!inWin && idx > we)
+                    {
+                        swingResolved[w] = true; // 창 종료 — 미패링이면 피해
+                        if (dx <= config.hitReach)
+                        {
+                            player.SendMessage("TakeDamage", config.damage, SendMessageOptions.DontRequireReceiver);
+                            if (config.showParryDebug)
+                            {
+                                float since = Time.time - lastParryPress;
+                                DebugPopup(since > 3f ? "패링 입력 없음" : "창 밖 " + since.ToString("F2") + "초 전 입력", new Color(1f, 0.35f, 0.3f));
+                            }
+                        }
+                    }
+                }
+                float frac1 = stateT / config.attackDuration;
+                if (frac1 >= 1f) { nextAtk = Time.time + config.attackCooldown; SetState(0); }
+            }
             else if (state == 2)
             {
                 float frac = stateT / config.attackDuration;
-                float wS = atkIs1 ? config.hitFracStart : config.hit2FracStart;
-                float wE = atkIs1 ? config.hitFracEnd : config.hit2FracEnd;
+                float wS = config.hit2FracStart;
+                float wE = config.hit2FracEnd;
                 if (!dealtThisSwing && frac >= wS && frac <= wE && dx <= config.hitReach)
                 {
                     dealtThisSwing = true;
