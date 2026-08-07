@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6811615b9dd6d9d45b96740685880bc6, type: 3}
+  m_Name: WaterAnim_1_4
+  m_EditorClassIdentifier: Assembly-CSharp::NAN2026.AnimWaterTile
+  frames:
+  - {fileID: 3373194429219989414, guid: b390385a95006634e8acaf76b118af0b, type: 3}
+  - {fileID: -4818671493009214752, guid: b390385a95006634e8acaf76b118af0b, type: 3}
+  - {fileID: 8685355003372333355, guid: b390385a95006634e8acaf76b118af0b, type: 3}
+  - {fileID: -7319114937276673614, guid: b390385a95006634e8acaf76b118af0b, type: 3}
+  speed: 6
+  collider: 0

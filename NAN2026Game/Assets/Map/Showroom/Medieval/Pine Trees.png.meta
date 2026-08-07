@@ -1,0 +1,647 @@
+fileFormatVersion: 2
+guid: 4f076ed218e65604c9e69cf9b64a223f
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -7665787015533154284
+    second: Pine Trees_0
+  - first:
+      213: -7100042730744461359
+    second: Pine Trees_1
+  - first:
+      213: -2962935169020359479
+    second: Pine Trees_2
+  - first:
+      213: 7294593487510015700
+    second: Pine Trees_3
+  - first:
+      213: 8768472924301788233
+    second: Pine Trees_4
+  - first:
+      213: -5347860931785312161
+    second: Pine Trees_5
+  - first:
+      213: -4309432742788166856
+    second: Pine Trees_6
+  - first:
+      213: 8635375554722442687
+    second: Pine Trees_7
+  - first:
+      213: -2996154736891377824
+    second: Pine Trees_8
+  - first:
+      213: -5265680274069023162
+    second: Pine_0
+  - first:
+      213: -7743467011714361862
+    second: Pine_1
+  - first:
+      213: 8597169530912069336
+    second: Pine_2
+  - first:
+      213: -5266522045472817086
+    second: Pine_3
+  - first:
+      213: 2008354730931198054
+    second: Pine_4
+  - first:
+      213: 459575006551184890
+    second: Pine_5
+  - first:
+      213: -2436204277729614453
+    second: Pine_6
+  - first:
+      213: -7197797491976244750
+    second: Pine_7
+  - first:
+      213: -7313151426895044334
+    second: Pine_8
+  - first:
+      213: -9062738472348889048
+    second: Pine_9
+  - first:
+      213: 8984141440583038215
+    second: Pine_10
+  - first:
+      213: 3853829055292901516
+    second: Pine_11
+  - first:
+      213: 3263533092064014665
+    second: Pine_12
+  - first:
+      213: -609100404090433940
+    second: Pine_13
+  - first:
+      213: 8010090452818045609
+    second: Pine_14
+  - first:
+      213: 5184868886786191431
+    second: Pine_15
+  - first:
+      213: 7040702501202282234
+    second: Pine_16
+  - first:
+      213: 5962533907624543670
+    second: Pine_17
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 32
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Pine_0
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 0
+        width: 93
+        height: 61
+      alignment: 7
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 646955380bb8ce6b0800000000000000
+      internalID: -5265680274069023162
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pine_1
+      rect:
+        serializedVersion: 2
+        x: 2
+        y: 61
+        width: 83
+        height: 131
+      alignment: 7
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: af55fcc87cda98490800000000000000
+      internalID: -7743467011714361862
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pine_2
+      rect:
+        serializedVersion: 2
+        x: 2
+        y: 128
+        width: 27
+        height: 41
+      alignment: 7
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8d653db73284f4770800000000000000
+      internalID: 8597169530912069336
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pine_3
+      rect:
+        serializedVersion: 2
+        x: 74
+        y: 128
+        width: 11
+        height: 64
+      alignment: 7
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 24044d55a1e89e6b0800000000000000
+      internalID: -5266522045472817086
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pine_4
+      rect:
+        serializedVersion: 2
+        x: 97
+        y: 0
+        width: 93
+        height: 61
+      alignment: 7
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6681120bcfb1fdb10800000000000000
+      internalID: 2008354730931198054
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pine_5
+      rect:
+        serializedVersion: 2
+        x: 97
+        y: 61
+        width: 78
+        height: 131
+      alignment: 7
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: af59125980db06600800000000000000
+      internalID: 459575006551184890
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pine_6
+      rect:
+        serializedVersion: 2
+        x: 97
+        y: 128
+        width: 29
+        height: 64
+      alignment: 7
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b85a3a1fd1dd03ed0800000000000000
+      internalID: -2436204277729614453
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pine_7
+      rect:
+        serializedVersion: 2
+        x: 194
+        y: 160
+        width: 27
+        height: 24
+      alignment: 7
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2f1fe8d01594c1c90800000000000000
+      internalID: -7197797491976244750
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pine_8
+      rect:
+        serializedVersion: 2
+        x: 194
+        y: 64
+        width: 28
+        height: 88
+      alignment: 7
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 211a7432687728a90800000000000000
+      internalID: -7313151426895044334
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pine_9
+      rect:
+        serializedVersion: 2
+        x: 225
+        y: 0
+        width: 93
+        height: 192
+      alignment: 7
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 820d067306faa3280800000000000000
+      internalID: -9062738472348889048
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pine_10
+      rect:
+        serializedVersion: 2
+        x: 321
+        y: 0
+        width: 93
+        height: 61
+      alignment: 7
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 70571d94a051eac70800000000000000
+      internalID: 8984141440583038215
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pine_11
+      rect:
+        serializedVersion: 2
+        x: 321
+        y: 61
+        width: 78
+        height: 131
+      alignment: 7
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c8800d97b1d8b7530800000000000000
+      internalID: 3853829055292901516
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pine_12
+      rect:
+        serializedVersion: 2
+        x: 321
+        y: 128
+        width: 29
+        height: 64
+      alignment: 7
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 94135396e066a4d20800000000000000
+      internalID: 3263533092064014665
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pine_13
+      rect:
+        serializedVersion: 2
+        x: 418
+        y: 64
+        width: 28
+        height: 88
+      alignment: 7
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c6e84add86a0c87f0800000000000000
+      internalID: -609100404090433940
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pine_14
+      rect:
+        serializedVersion: 2
+        x: 449
+        y: 128
+        width: 29
+        height: 64
+      alignment: 7
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9aaa7fad3de892f60800000000000000
+      internalID: 8010090452818045609
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pine_15
+      rect:
+        serializedVersion: 2
+        x: 449
+        y: 0
+        width: 93
+        height: 61
+      alignment: 7
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 740bddb28ca54f740800000000000000
+      internalID: 5184868886786191431
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pine_16
+      rect:
+        serializedVersion: 2
+        x: 449
+        y: 61
+        width: 78
+        height: 131
+      alignment: 7
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: af6cd512f9995b160800000000000000
+      internalID: 7040702501202282234
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pine_17
+      rect:
+        serializedVersion: 2
+        x: 546
+        y: 64
+        width: 28
+        height: 88
+      alignment: 7
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6b5ce258ffc2fb250800000000000000
+      internalID: 5962533907624543670
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Pine Trees_0: -7665787015533154284
+      Pine Trees_1: -7100042730744461359
+      Pine Trees_2: -2962935169020359479
+      Pine Trees_3: 7294593487510015700
+      Pine Trees_4: 8768472924301788233
+      Pine Trees_5: -5347860931785312161
+      Pine Trees_6: -4309432742788166856
+      Pine Trees_7: 8635375554722442687
+      Pine Trees_8: -2996154736891377824
+      Pine_0: -5265680274069023162
+      Pine_1: -7743467011714361862
+      Pine_10: 8984141440583038215
+      Pine_11: 3853829055292901516
+      Pine_12: 3263533092064014665
+      Pine_13: -609100404090433940
+      Pine_14: 8010090452818045609
+      Pine_15: 5184868886786191431
+      Pine_16: 7040702501202282234
+      Pine_17: 5962533907624543670
+      Pine_2: 8597169530912069336
+      Pine_3: -5266522045472817086
+      Pine_4: 2008354730931198054
+      Pine_5: 459575006551184890
+      Pine_6: -2436204277729614453
+      Pine_7: -7197797491976244750
+      Pine_8: -7313151426895044334
+      Pine_9: -9062738472348889048
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
