@@ -79,7 +79,19 @@ namespace NAN2026
         private void OnParried()
         {
             if (config.clashConfig != null && player != null)
+            {
                 ParryClashFx.Play((transform.position + player.position) * 0.5f + Vector3.up * 0.8f, config.clashConfig);
+                var pop = new GameObject("ParryJudgePopup");
+                pop.transform.position = player.position + Vector3.up * 1.4f;
+                var tmx = pop.AddComponent<TextMesh>();
+                tmx.text = "패링 성공!";
+                tmx.fontSize = config.clashConfig.popupFontSize;
+                tmx.characterSize = config.clashConfig.popupCharSize;
+                tmx.anchor = TextAnchor.MiddleCenter;
+                tmx.color = new Color(0.35f, 1f, 0.45f);
+                pop.GetComponent<MeshRenderer>().sortingOrder = 900;
+                pop.AddComponent<PopupFloater>().Init(config.clashConfig.popupRise, config.clashConfig.popupLife);
+            }
             int mp = kind == ThrownKind.Arrow ? config.arrowMp : kind == ThrownKind.Shuriken ? config.shurikenMp : config.axeMp;
             if (player != null) player.SendMessage("AddMp", mp, SendMessageOptions.DontRequireReceiver);
             if (kind == ThrownKind.Axe && launcher != null)

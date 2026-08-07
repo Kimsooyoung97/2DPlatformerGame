@@ -5496,3 +5496,14 @@ AdventureScene2에만 적용되는 패링 범위를 늘려줄 수 있나? 패링
 - 컴파일 0. 클래시 소리·섬광은 사용자 재생
 ### 실패와 수정
 없음
+
+
+## [수정] 신규 구체 패링 성공 팝업 — 2026-08-08 05:54
+### 프롬프트
+기존처럼 맞으면 패링 성공 글자를 띄워줘
+### 조작 내역
+- ThrownProjectile.OnParried: 기존 SpikeBallTrap.Popup과 동일 문법(TextMesh '패링 성공!' 초록, order 900, PopupFloater 상승·소멸, SpikeBallConfig 팝업 수치 공유)
+### 검증
+- 컴파일 0. 팝업 표시는 사용자 재생
+### 실패와 수정
+없음
