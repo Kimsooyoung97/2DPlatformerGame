@@ -5,7 +5,7 @@ using System.Reflection;
 namespace NAN2026
 {
     // 미노: idle/walk/atk(홀드·패링)/take_hit(항상)/groggy(패링 5회)/death(10타)
-    public class NanMinoBoss : MonoBehaviour
+    public class SecondSceneBoss : MonoBehaviour
     {
         public MinoBossConfig config;
         public Sprite[] idleF, walkF, atk1F, atk2F, hitF, deathF;

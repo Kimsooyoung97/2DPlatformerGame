@@ -5344,3 +5344,14 @@ fireattack이랑 firebomb이 원거리 구체라고?
 - 컴파일 0, 우리 5종·팀 4종 타입 공존 확인, Scene2 MinoBoss의 NanMinoBoss 컴포넌트 GUID 생존(MISSING 0)
 ### 실패와 수정
 없음
+
+
+## [수정] 미노 보스 재개명 SecondSceneBoss — 2026-08-08 08:40
+### 프롬프트
+이름 헷갈릴수도있으니깐 SecondSceneBoss로 바꾸는게 좋을거 같은데
+### 조작 내역
+- NanMinoBoss→SecondSceneBoss 개명(클래스·파일 GUID 승계, 폴백 3파일 참조 교체) — 씬-보스 명명 일치
+### 검증
+- 컴파일 0, 타입 생존, Scene2 MinoBoss의 SecondSceneBoss 컴포넌트 GUID 유지(MISSING 0)
+### 실패와 수정
+없음
