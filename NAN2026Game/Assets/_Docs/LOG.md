@@ -5183,3 +5183,15 @@ AdventureScene_Test에 있는 나무들이랑 Props 들도 AdventureScene_Test1�
 - cellSizing=1 (1=Manual). 선택=칠 일치는 사용자
 ### 실패와 수정
 - 커스텀 TileBase 혼재 팔레트는 Automatic 셀 크기 금지 — Manual이 표준
+
+
+## [구현] DungeonShowroom 신설 — 2026-08-08 00:31
+### 프롬프트
+던전 소품 Showroom 추가해서 만들어줄래?
+### 조작 내역
+- Cainos 던전 프리팹 324종 수집(TP·팔레트 제외) → Assets/Map/Showroom/DungeonShowroom.unity 폭 62u 줄바꿈 전시, 던전풍 카메라
+- 쇼룸 창 '던전 소품' 버튼 + 시점 포커스
+### 검증
+- 컴파일 0, 저장 True
+### 실패와 수정
+없음
