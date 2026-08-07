@@ -114,6 +114,9 @@ public class PlayerHealth : MonoBehaviour
     /// 체력이 0 이하가 되면 기존 Kill()/Respawn() 경로를 그대로 탄다 (죽으면 체크포인트에서 재시작).</summary>
     public void TakeDamage(float damage)
     {
+        var __bs = GetComponent<PlayerController2D>();
+        if (__bs != null && __bs.IsBackstepInvincible) return; // 백스텝 무적
+
         if (dying || invincible || Time.time < graceUntil || Time.time < damageInvulnerableUntil || Time.time < rollInvulnerableUntil)
             return;
 

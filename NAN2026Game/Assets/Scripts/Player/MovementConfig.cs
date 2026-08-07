@@ -30,7 +30,7 @@ namespace NAN2026
         public float combo3Duration = 0.55f;
 
         [Header("패링")]
-        public float parryWindow = 0.18f;
+        public float parryWindow = 0.35f; // 통일 패링: 후한 활성 창
         public float parryEndDuration = 0.22f;
         public Vector2 parryBoxSize = new Vector2(1.0f, 1.4f);
         public float parryBoxOffsetX = 0.6f;
@@ -42,5 +42,36 @@ namespace NAN2026
         public float slashLungeSpeed = 1.5f;
         public float combo2LungeSpeed = 3.5f;
         public float combo3LungeSpeed = 0f;
-    }
+    
+    [Header("백스텝")]
+    public float backstepDuration = 0.35f;
+    public float backstepSpeed = 12f;
+    public float backstepCooldown = 0.15f;
+    public float backstepHopSpeed = 1.6f; // 소도약 상향 속도
+    [Range(0f,1f)] public float backstepMoveStartFrac = 0.30f; // 3프레임부터 이동
+    [Range(0f,1f)] public float backstepMoveEndFrac = 0.85f;   // 4프레임까지 이동, 이후 정지
+    [Range(0f,1f)] public float backstepIFrameStartFrac = 0.333f; // 3프레임 시작
+    [Range(0f,1f)] public float backstepIFrameEndFrac = 0.833f;   // 5프레임 끝
+
+    [Header("V 2단 콤보")]
+    public float comboVWindow = 0.6f;
+    [Range(0f,1f)] public float comboVCancelFrac = 0.6f;
+    public float comboB1Duration = 0.6f;
+    public Color comboB1FxTint = Color.white; // 원본색 그대로
+
+    public float comboVFxFps = 18f;
+    public float comboVFxScale = 1.7f;
+    public float comboVFxOffsetX = 1.2f; // 캐릭터 궤적 너머 전방 이격
+    public float comboVFxOffsetY = 0.35f;
+    [Range(0f,1f)] public float comboVFxAlpha = 0.85f;
+    [Header("패링 이펙트")]
+    public float parryFxFps = 22f;
+    public float parryFxScale = 4f;
+    public float parryFxOffsetX = 0.8f;
+    public float parryFxOffsetY = 0.5f;
+    public float parryReachX = 1.5f;
+    public float parryFollowupDelay = 0.5f; // C 후 이 창 안에 C 재입력 시 가로베기 연계
+ // 전방 이 거리 안 위협은 접촉 전 조기 패링
+    [Range(0f,1f)] public float parryFxAlpha = 0.85f; // 1타 이 비율 경과 후 2타 캔슬 허용(3/5프레임) // 2단 입력 유효창
+}
 }

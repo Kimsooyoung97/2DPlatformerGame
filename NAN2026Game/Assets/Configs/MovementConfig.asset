@@ -30,7 +30,7 @@ MonoBehaviour:
   slashDuration: 0.4
   combo2Duration: 0.4
   combo3Duration: 0.55
-  parryWindow: 0.18
+  parryWindow: 0.35
   parryEndDuration: 0.22
   parryBoxSize: {x: 0.5, y: 0.7}
   parryBoxOffsetX: 0.3
@@ -40,3 +40,27 @@ MonoBehaviour:
   slashLungeSpeed: 1
   combo2LungeSpeed: 2
   combo3LungeSpeed: 0
+  backstepDuration: 0.35
+  backstepSpeed: 12
+  backstepCooldown: 0.15
+  backstepHopSpeed: 1.6
+  backstepMoveStartFrac: 0.3
+  backstepMoveEndFrac: 0.85
+  backstepIFrameStartFrac: 0.333
+  backstepIFrameEndFrac: 0.833
+  comboVWindow: 0.6
+  comboVCancelFrac: 0.6
+  comboB1Duration: 0.6
+  comboB1FxTint: {r: 1, g: 1, b: 1, a: 1}
+  comboVFxFps: 8.79
+  comboVFxScale: 4
+  comboVFxOffsetX: 0.53
+  comboVFxOffsetY: 0.5
+  comboVFxAlpha: 0.66847926
+  parryFxFps: 22
+  parryFxScale: 4
+  parryFxOffsetX: 0.8
+  parryFxOffsetY: 2.66
+  parryReachX: 1.5
+  parryFollowupDelay: 0.5
+  parryFxAlpha: 0.85

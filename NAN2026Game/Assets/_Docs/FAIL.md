@@ -89,3 +89,11 @@
 - **증상**: 몬스터-플레이어 IgnoreCollision을 확인하면 True인데도 실제 플레이에서는 여전히 '막힌다'고 느껴짐
 - **원인**: PlayerController2D의 벽 감지(WallInDirection, Collider2D.Cast 기반)는 IgnoreCollision 설정과 무관하게 동작한다 — IgnoreCollision은 물리 시뮬레이션의 충돌 반응(밀림)만 억제할 뿐, Cast/Raycast 같은 쿼리 API의 히트 결과에는 전혀 영향을 주지 않는다. 즉 두 콜라이더가 서로 안 밀려도 캐스트로는 여전히 '보인다'
 - **방지 규칙**: '몬스터/오브젝트를 안 막히게 해달라'는 요청은 IgnoreCollision 확인만으로 끝내지 말고, 이동을 제어하는 캐스트/레이캐스트 기반 로직(벽 감지, 지면 판정 등)에서도 해당 오브젝트를 제외하고 있는지 함께 확인한다. 컴포넌트(MonsterHealth 등) 또는 레이어 기반으로 캐스트 필터링에서 명시적으로 제외해야 한다
+
+- #17 입력 분기 부분 replace 시 기존 else 가지를 덮어써 기능 소실 위험 → 다분기 블록은 중괄호 매칭으로 통째 재작성하고 EditMode로 회귀 확인
+
+- #18 큐 소비형 공격을 코드로 캔슬할 때 attackTimer만 0으로 하면 같은 프레임 attacking 로컬이 true로 남아 CanAttack 게이트가 새 큐를 막음 → attacking도 함께 false. 추측 3회보다 Debug.Log 실측이 빨랐음
+
+- #19 진화한 파일에 기억 기준 주입 → 중복 선언. 클래스 수정 전 현재 필드·시그니처 실독 필수
+
+- #20 재생 중 컴파일=반낡은 어셈블리 오동작 가능(패링 오인) → 증상 확인은 완전 정지→재생 / #21 UnityEngine.Object에 ?? 연산자 무효(가짜 null) → 명시적 null 체크

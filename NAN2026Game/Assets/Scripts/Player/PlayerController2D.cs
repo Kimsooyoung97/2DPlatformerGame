@@ -13,6 +13,26 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
     [SerializeField] private Sprite[] poweredEffectFrames;
 
     [Header("Roll")]
+    private float backstepStartTime = -999f;
+    private float backstepReadyTime = 0f;
+    private bool backstepHopped = false;
+    public bool IsBackstepInvincible
+    {
+        get
+        {
+            float e = Time.time - backstepStartTime;
+            return e >= config.backstepDuration * config.backstepIFrameStartFrac
+                && e <  config.backstepDuration * config.backstepIFrameEndFrac;
+        }
+    }
+    [SerializeField] private UnityEngine.Sprite[] parryFx; // C 패링 슬래시
+    [SerializeField] private UnityEngine.Sprite[] comboB1Fx; // 2키 흰 슬래시
+    [SerializeField] private UnityEngine.Sprite[] comboV1Fx; // V 1타 슬래시(1~5)
+    [SerializeField] private UnityEngine.Sprite[] comboV2Fx; // V 2타 슬래시(6~9)
+    private float parryChainWindowEnd = 0f; // C-C 연계 창
+    private int comboVStage = 0;
+    private float comboVWindowEnd = 0f;
+    private bool comboVBuffered = false;
     [SerializeField] private float rollDuration = 0.75f;
     [SerializeField] private float rollSpeed = 4f;
 
@@ -202,16 +222,63 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
             if (kb.zKey.wasPressedThisFrame) QueueAttack("Slash", config.slashDuration, config.slashLungeSpeed);
             // 스킬 공격(구 K) → X
             if (kb.xKey.wasPressedThisFrame) QueueAttack("Combo2", config.combo2Duration, config.combo2LungeSpeed);
+            // V 2단 콤보 (이펙트 없음): 1타 Slash모션 → 창 내 재입력 시 2타 Combo2모션
+            if (kb.vKey.wasPressedThisFrame)
+            {
+                if (comboVStage == 1)
+                {
+                    // 1타 진행/직후 어느 시점이든 2타를 예약 → 프레임 경합 제거
+                    comboVBuffered = true;
+                }
+                else if (attackTimer <= 0f)
+                {
+                    QueueAttack("ComboV1", config.slashDuration, config.slashLungeSpeed);
+                    comboVStage = 1; comboVWindowEnd = 0f; comboVBuffered = false;
+                }
+            }
+            // 2/3/4 숫자키 = testParry 3동작 개별 발동
+            if (kb.digit2Key.wasPressedThisFrame) QueueAttack("ComboB1", config.comboB1Duration, config.slashLungeSpeed);
+            if (kb.digit3Key.wasPressedThisFrame) QueueAttack("ComboB2", config.combo2Duration, config.combo2LungeSpeed);
+            if (kb.digit4Key.wasPressedThisFrame) QueueAttack("ComboB3", config.combo2Duration, config.combo2LungeSpeed);
             if (kb.lKey.wasPressedThisFrame) QueueAttack("Combo3", config.combo3Duration, config.combo3LungeSpeed);
             // 구르기: G키 제거, Ctrl(좌/우)만 사용. 공중에서는 사용할 수 없다(접지 중에만).
             if (grounded && (kb.leftCtrlKey.wasPressedThisFrame || kb.rightCtrlKey.wasPressedThisFrame))
-                QueueAttack("Roll", rollDuration, rollSpeed);
+            {
+                bool dirHeld = kb.leftArrowKey.isPressed || kb.rightArrowKey.isPressed;
+                if (dirHeld)
+                {
+                    QueueAttack("Roll", rollDuration, rollSpeed);
+                }
+                else if (Time.time >= backstepReadyTime)
+                {
+                    // 방향키 없는 Ctrl = 백스텝 (뒤로 회피, 음수 런지)
+                    QueueAttack("Backstep", config.backstepDuration, 0f); // 이동은 자체 창에서
+                    backstepStartTime = Time.time;
+                    backstepHopped = false;
+                    backstepReadyTime = Time.time + config.backstepDuration + config.backstepCooldown;
+                }
+            }
             // 패링: 마우스 휠클릭 → C
             if (kb.cKey.wasPressedThisFrame && attackTimer <= 0f && Time.time >= parryReadyTime)
             {
+                if (Time.time <= parryChainWindowEnd)
+                {
+                    parryChainWindowEnd = 0f;
+                    QueueAttack("ComboB1", config.comboB1Duration, config.slashLungeSpeed); // C-C 연계: 가로베기
+                }
+                else
+                {
                 parryHeld = true;
+                parryChainWindowEnd = Time.time + config.parryFollowupDelay; // 연계 창 개시
+                // 패링 이펙트 스폰
+                {
+                    float pfDir = PlayerLocomotionLogic.EffectDirection(sr.flipX);
+                    Vector3 pfPos = transform.position + new Vector3(config.parryFxOffsetX * pfDir, config.parryFxOffsetY, 0f);
+                    VSlashFx.Play(pfPos, parryFx, config.parryFxFps, pfDir < 0f, config.parryFxScale, config.parryFxAlpha, transform); // 점프 중에도 추종
+                }
                 parryPressTime = Time.time;
                 parryReadyTime = Time.time + EffectiveParryCooldown();
+                } // else(신규 패링) 닫힘
             }
             if (kb.cKey.wasReleasedThisFrame && parryHeld)
             {
@@ -235,6 +302,21 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
 
     private void SpawnAttackEffect(string attackName)
     {
+        if (attackName == "ComboB1")
+        {
+            float bDir = PlayerLocomotionLogic.EffectDirection(sr.flipX);
+            Vector3 bPos = transform.position + new Vector3(config.comboVFxOffsetX * bDir, config.comboVFxOffsetY, 0f);
+            VSlashFx.Play(bPos, comboB1Fx, config.comboVFxFps, bDir < 0f, config.comboVFxScale, config.comboVFxAlpha, transform, config.comboB1FxTint); // 추종+하늘 틴트
+            return;
+        }
+        if (attackName == "ComboV1" || attackName == "ComboV2")
+        {
+            var fxFrames = attackName == "ComboV1" ? comboV1Fx : comboV2Fx;
+            float fxDir = PlayerLocomotionLogic.EffectDirection(sr.flipX);
+            Vector3 fxPos = transform.position + new Vector3(config.comboVFxOffsetX * fxDir, config.comboVFxOffsetY, 0f);
+            VSlashFx.Play(fxPos, fxFrames, config.comboVFxFps, fxDir < 0f, config.comboVFxScale, config.comboVFxAlpha);
+            return;
+        }
         GameObject prefab = null;
         Sprite[] frames = null;
         float speed = 0f;
@@ -266,6 +348,8 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
 
     private void FixedUpdate()
     {
+
+
         // 점프존 슈퍼점프 비행 중에는 물리 궤적(포물선)에 전부 맡기고 평소 이동/공격
         // 로직을 건너뛴다. 벽 클램프·중력 오버라이드 등과 충돌하면 목표 지점에
         // 정확히 도착하지 못할 수 있기 때문이다.
@@ -334,7 +418,25 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
         if (attacking)
         {
             attackTimer -= Time.fixedDeltaTime;
-            if (attackTimer <= 0f) activeAttack = null;
+            // 1타 캔슬 구간 진입 + 2타 예약됨 → 즉시 2타 발동(반응성)
+            if (comboVStage == 1 && comboVBuffered && activeAttack == "ComboV1"
+                && attackTimer <= config.slashDuration * (1f - config.comboVCancelFrac))
+            {
+                activeAttack = null; attackTimer = 0f; attacking = false; // attacking도 내려 같은 프레임 2타 소비 허용
+                QueueAttack("ComboV2", config.combo2Duration, config.combo2LungeSpeed);
+                comboVStage = 0; comboVBuffered = false;
+            }
+            if (attackTimer <= 0f)
+            {
+                activeAttack = null;
+                if (comboVStage == 1)
+                {
+                    comboVWindowEnd = Time.time + config.comboVWindow; // 1타 종료 순간부터 0.6초 창 개시
+                    if (comboVBuffered)
+                    { QueueAttack("ComboV2", config.combo2Duration, config.combo2LungeSpeed); comboVStage = 0; }
+                }
+                comboVBuffered = false;
+            }
         }
 
         if (queuedAttack != null)
@@ -352,6 +454,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
             queuedAttack = null;
         }
 
+        if (comboVStage == 1 && comboVWindowEnd > 0f && Time.time > comboVWindowEnd) comboVStage = 0; // comboVStage 만료
         bool parrying = parryHeld || parryEndTimer > 0f;
         float vx = parrying && grounded ? 0f
             : attacking
@@ -395,6 +498,19 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
         }
         rb.linearVelocity = new Vector2(vx, vy);
     
+    
+        // 백스텝 이동창 (말미 배치 — 모든 속도 기록 이후 최종 적용)
+        // 백스텝 이동창: 3~4프레임 후진, 창 밖 순간정지 (미끄러짐 종결)
+        float __bsE = Time.time - backstepStartTime;
+        if (__bsE >= 0f && __bsE < config.backstepDuration)
+        {
+            bool __win = __bsE >= config.backstepDuration * config.backstepMoveStartFrac
+                      && __bsE <  config.backstepDuration * config.backstepMoveEndFrac;
+            float __vx = __win ? (sr.flipX ? 1f : -1f) * config.backstepSpeed : 0f; // 바라보는 반대로
+            float __vy = rb.linearVelocity.y;
+            if (__win && !backstepHopped) { backstepHopped = true; __vy = config.backstepHopSpeed; } // 소도약 1회
+            rb.linearVelocity = new Vector2(__vx, __vy);
+        }
     }
 
     // 접지 캐스트: 트리거 무시 — 실지형만 인정

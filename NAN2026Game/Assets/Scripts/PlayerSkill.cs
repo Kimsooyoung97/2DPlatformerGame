@@ -87,10 +87,20 @@ namespace NAN2026
             {
                 if (hit.collider == null || hit.collider.isTrigger) continue;
                 if (!(hit.collider is UnityEngine.Tilemaps.TilemapCollider2D) && !(hit.collider is CompositeCollider2D)) continue;
-                groundY = hit.point.y;
+                { if (hit.collider.isTrigger || hit.collider.transform.root == transform.root) continue; groundY = hit.point.y; break; } // 최근접 표면(공중 발판 포함)
                 break;
             }
-            if (float.IsNaN(groundY)) return;
+            // 폴백: 전방 지점이 좁은 발판을 벗어난 경우 발밑 x 재캐스트
+        float feetY = transform.position.y;
+        if (float.IsNaN(groundY) || groundY < feetY - config.platformMissTolerance)
+        {
+            var o2 = new Vector2(transform.position.x, transform.position.y + 0.5f);
+            float g2 = float.NaN;
+            foreach (var hit in Physics2D.RaycastAll(o2, Vector2.down, config.groundSnapDepth))
+            { if (hit.collider.isTrigger || hit.collider.transform.root == transform.root) continue; g2 = hit.point.y; break; }
+            if (!float.IsNaN(g2)) { groundY = g2; pos.x = transform.position.x; }
+        }
+        if (float.IsNaN(groundY)) { groundY = feetY; pos.x = transform.position.x; } // 최후: 발 높이 시전
             var go = new GameObject("SkillSlash_Effect");
             pos.y = groundY;
             if (effectSprites != null && effectSprites.Length > 0)
