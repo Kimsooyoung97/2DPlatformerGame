@@ -1,9 +1,10 @@
 using UnityEngine;
 using System.Collections;
+using UnityEngine.Rendering.Universal;
 
 namespace NAN2026
 {
-    // 투척 발사기: 대기→전조(철컥)→발사→쿨다운. dir은 스프라이트 좌우로 결정(-1=왼쪽 발사)
+    // 투척 발사기: 접근 시 가로로 하나씩 발사. 전조음 없음(발사음만), 투사체는 발광
     public class ThrownWeaponLauncher : MonoBehaviour
     {
         public ThrownTrapConfig config;
@@ -19,7 +20,7 @@ namespace NAN2026
             var p = GameObject.Find("Player");
             if (p != null) player = p.transform;
             src = gameObject.AddComponent<AudioSource>();
-            src.spatialBlend = 0f; src.volume = 0.8f;
+            src.spatialBlend = 0f; src.volume = 0.85f;
         }
 
         private void Update()
@@ -33,30 +34,29 @@ namespace NAN2026
 
         private IEnumerator FireSeq()
         {
-            if (config.sndTelegraph != null) src.PlayOneShot(config.sndTelegraph);
             yield return new WaitForSeconds(config.telegraphTime);
-            int shots = kind == ThrownKind.Shuriken ? config.shurikenBurst : 1;
-            for (int i = 0; i < shots; i++)
-            {
-                Fire();
-                if (i < shots - 1) yield return new WaitForSeconds(config.shurikenInterval);
-            }
+            Fire();
         }
 
         private void Fire()
         {
+            if (config.sndFire != null) src.PlayOneShot(config.sndFire);
             var go = new GameObject(kind + "_투사체");
-            var sr = go.AddComponent<SpriteRenderer>(); sr.sharedMaterial = NAN2026.FxUnlit.Mat;
+            var sr = go.AddComponent<SpriteRenderer>();
             sr.sprite = projectileSprite;
+            sr.sharedMaterial = NAN2026.FxUnlit.Mat;
+            sr.color = config.glowColor;
             sr.sortingOrder = 45;
-            go.transform.position = transform.position + new Vector3(dir * 0.5f, 0.35f, 0f);
+            go.transform.position = transform.position + new Vector3(dir * 0.6f, 0.3f, 0f);
+            var lt = go.AddComponent<Light2D>();
+            lt.lightType = Light2D.LightType.Point;
+            lt.intensity = config.glowIntensity;
+            lt.pointLightOuterRadius = config.glowRadius;
+            lt.color = config.glowColor;
             var pr = go.AddComponent<ThrownProjectile>();
             pr.config = config; pr.kind = kind; pr.launcher = gameObject;
-            Vector2 v;
-            if (kind == ThrownKind.Arrow) { v = new Vector2(dir * config.arrowSpeed, 0f); if (config.sndArrow != null) src.PlayOneShot(config.sndArrow); }
-            else if (kind == ThrownKind.Shuriken) v = new Vector2(dir * config.shurikenSpeed, 0f);
-            else v = new Vector2(dir * config.axeSpeed, config.axeUpVel);
-            pr.Launch(v);
+            float sp = kind == ThrownKind.Arrow ? config.arrowSpeed : kind == ThrownKind.Shuriken ? config.shurikenSpeed : config.axeSpeed;
+            pr.Launch(new Vector2(dir * sp, 0f));
         }
     }
 }

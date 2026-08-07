@@ -17,25 +17,19 @@ MonoBehaviour:
   damage: 1
   parryReach: 1.6
   lifeTime: 6
+  ballSpin: 360
+  reflectSpeed: 9
+  glowIntensity: 2.2
+  glowRadius: 2.4
+  glowColor: {r: 1, g: 0.92, b: 0.6, a: 1}
   arrowSpeed: 9
   arrowCooldown: 2.4
-  arrowMp: 8
   shurikenSpeed: 6.5
-  shurikenBurst: 3
-  shurikenInterval: 0.28
   shurikenCooldown: 3.6
-  shurikenSpin: 720
-  shurikenMp: 6
   axeSpeed: 5.5
-  axeUpVel: 6.5
-  axeGravity: 1.6
   axeCooldown: 4.5
-  axeSpin: 420
+  arrowMp: 8
+  shurikenMp: 6
   axeMp: 15
-  axeMpPerfect: 30
-  axeReflectSpeed: 9
-  sndTelegraph: {fileID: 8300000, guid: 68ceff9be3c099d4d8bb739ba8527fe4, type: 3}
-  sndArrow: {fileID: 8300000, guid: 98fae0364889a5647bb7eeb04ecf5149, type: 3}
-  sndSpin: {fileID: 8300000, guid: 64f7adc0c5f243943a89be09969f2d6a, type: 3}
-  sndAxeImpact: {fileID: 8300000, guid: 1b96e0e0d27c03b49b5b8043789ff0d3, type: 3}
+  sndFire: {fileID: 8300000, guid: 98fae0364889a5647bb7eeb04ecf5149, type: 3}
   sndLauncherBreak: {fileID: 8300000, guid: 54e816a56e08d5a4bbbd8894cfa723d1, type: 3}
