@@ -89,3 +89,9 @@
 - **증상**: 몬스터-플레이어 IgnoreCollision을 확인하면 True인데도 실제 플레이에서는 여전히 '막힌다'고 느껴짐
 - **원인**: PlayerController2D의 벽 감지(WallInDirection, Collider2D.Cast 기반)는 IgnoreCollision 설정과 무관하게 동작한다 — IgnoreCollision은 물리 시뮬레이션의 충돌 반응(밀림)만 억제할 뿐, Cast/Raycast 같은 쿼리 API의 히트 결과에는 전혀 영향을 주지 않는다. 즉 두 콜라이더가 서로 안 밀려도 캐스트로는 여전히 '보인다'
 - **방지 규칙**: '몬스터/오브젝트를 안 막히게 해달라'는 요청은 IgnoreCollision 확인만으로 끝내지 말고, 이동을 제어하는 캐스트/레이캐스트 기반 로직(벽 감지, 지면 판정 등)에서도 해당 오브젝트를 제외하고 있는지 함께 확인한다. 컴포넌트(MonsterHealth 등) 또는 레이어 기반으로 캐스트 필터링에서 명시적으로 제외해야 한다
+
+## 17. uGUI 버튼 onClick.AddListener가 씬에 EventSystem이 없으면 절대 발동 안 함
+- **증상**: LevelUpSkillManager에서 Button.onClick.AddListener로 리스너를 정상적으로 붙였는데도(RemoveAllListeners 후 재등록 확인됨) 실제 클릭이 전혀 반응 안 함
+- **원인**: 씬에 EventSystem 오브젝트가 아예 없었음. uGUI의 Button/GraphicRaycaster 클릭 파이프라인은 EventSystem이 있어야 마우스/터치 입력을 UI로 라우팅한다 — 리스너가 아무리 정확히 등록돼 있어도 EventSystem이 없으면 그 리스너까지 도달하는 경로 자체가 없다
+- **주의**: onClick.Invoke()로 직접 호출해서 '작동한다'고 검증하면 이 문제를 못 잡는다. Invoke()는 EventSystem/GraphicRaycaster 경로를 건너뛰고 리스너를 바로 실행하기 때문. 실제 클릭 경로까지 검증하려면 UnityEngine.EventSystems.ExecuteEvents.Execute(button.gameObject, pointerEventData, ExecuteEvents.pointerClickHandler)로 재현해야 한다
+- **방지 규칙**: uGUI(Canvas/Button)를 쓰는 씬을 새로 만들거나 넘겨받으면 EventSystem 존재 여부를 가장 먼저 확인한다. 버튼 클릭 검증은 onClick.Invoke()가 아니라 ExecuteEvents.pointerClickHandler로 한다

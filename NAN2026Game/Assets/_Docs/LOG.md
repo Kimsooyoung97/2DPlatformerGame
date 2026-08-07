@@ -3559,3 +3559,18 @@ Warp될 때 화면이 까맣게 fadein 되었다가 워프 완료되면 fadeout�
 - 재생 모드 실측: AddXp로 레벨업 유도 → 이벤트가 정상 전파되어 매니저가 패널을 켜고 제목·버튼을 채움을 확인. 정확히 1레벨만 오르도록 XP를 딱 맞춰 지급한 뒤 리플렉션으로 실제 offeredTypes[0]=DamageUp(Bronze)임을 먼저 확정하고 버튼0 클릭 → DamageBonus가 0→1(Bronze 기대값과 정확히 일치)로 반영, 선택 완료 후 패널 자동 비활성화 + Time.timeScale=1 복귀까지 확인
 ### 실패와 수정
 - 검증 중 여러 레벨이 연속으로 올라가는 상황에서 버튼 인덱스별 증강 종류가 매 라운드 다시 랜덤 배정된다는 걸 놓치고 잠깐 '효과가 안 먹히나' 혼동함 → 리플렉션으로 실제 offeredTypes를 먼저 확인하는 방식으로 재검증해 해결(코드 문제 아니었음)
+
+## [수정] LevelUpCanvas 버튼 클릭이 반응 안 하던 문제 수정 — EventSystem 부재 — 2026-08-05
+### 프롬프트
+지금 LevelUpskillManager에 있는 choiceButtons[i].onClick.AddListener(() => playerProgression.ChooseAugment(captured)); 이 부분이 정상 작동 되지 않는 것 같다 직접 확인해보면 버튼에 onclick 이벤트가 추가 되지 않는다
+### 조사
+UITestScene에 EventSystem 오브젝트가 아예 없었음. uGUI 클릭 파이프라인은 EventSystem이 있어야 마우스 입력을 UI로 라우팅하는데, 이게 없으면 AddListener로 리스너를 아무리 정확히 등록해도 실제 클릭이 그 리스너까지 도달할 방법이 없음. 지난번 검증 때 onClick.Invoke()로 직접 호출해 '작동한다'고 확인했었는데, 이 방식은 EventSystem/GraphicRaycaster 경로를 건너뛰기 때문에 이 문제를 못 잡아냈던 것으로 판단(FAIL.md #17로 기록)
+### 조작 내역
+- UITestScene에 EventSystem 오브젝트 신규 생성, EventSystem + InputSystemUIInputModule(New Input System, 프로젝트 전반 사용 방식과 일치) 부착
+- LevelUpCanvas의 GraphicRaycaster는 이미 정상 존재·활성화 상태였음을 확인(별도 조치 불필요)
+### 검증
+- 저장 → manage_scene(load) 강제 재로드 → EventSystem 유지 확인
+- run_tests(EditMode) → 133/133 통과 (job 8aff7af5818744af9be5f338594ba987)
+- 재생 모드 실측: 정확히 1레벨만 오르도록 XP 지급 → 리플렉션으로 offeredTypes[0]=ParryDurationUp(Gold) 사전 확정 → 이번엔 onClick.Invoke() 대신 UnityEngine.EventSystems.ExecuteEvents.Execute(btn0.gameObject, pointerEventData, ExecuteEvents.pointerClickHandler)로 실제 클릭 파이프라인 재현 → ParryDurationBonus가 0→0.2(Gold 기대값과 정확히 일치)로 반영됨을 확인, IsChoosingAugment도 정상적으로 False
+### 실패와 수정
+- 지난 턴에서 onClick.Invoke()로 검증하고 '정상 작동'이라고 결론 낸 것이 실수 — EventSystem 경로를 안 타는 검증 방식이라 이 버그를 못 잡았음. FAIL.md #17로 기록, 앞으로 uGUI 버튼 클릭 검증은 ExecuteEvents로 할 것
