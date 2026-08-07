@@ -8,6 +8,7 @@ namespace NAN2026
     // 투척 투사체: 가로 직선 비행, 자체 발광, 통일 패링(TryParry) 판정
     public class ThrownProjectile : MonoBehaviour
     {
+        public static int Alive; // 맵 전체 동시 생존 수
         public ThrownTrapConfig config;
         public ThrownKind kind;
         public GameObject launcher;
@@ -17,6 +18,9 @@ namespace NAN2026
         private Component controller;
         private MethodInfo tryParry;
         private bool reflected;
+
+        private void Awake() { Alive++; }
+        private void OnDestroy() { Alive--; }
 
         public void Launch(Vector2 v)
         {
@@ -33,7 +37,12 @@ namespace NAN2026
             }
             spin = kind == ThrownKind.Arrow ? 0f : config.ballSpin;
             if (kind == ThrownKind.Arrow)
-                transform.rotation = Quaternion.Euler(0f, 0f, vel.x >= 0f ? -90f : 90f); // 세로 화살 그림을 진행방향으로
+            {
+                if (Mathf.Abs(vel.y) > Mathf.Abs(vel.x))
+                    transform.rotation = Quaternion.Euler(0f, 0f, vel.y < 0f ? 180f : 0f); // 낙하=촉이 아래
+                else
+                    transform.rotation = Quaternion.Euler(0f, 0f, vel.x >= 0f ? -90f : 90f);
+            }
         }
 
         private void Update()

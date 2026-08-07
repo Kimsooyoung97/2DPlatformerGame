@@ -11,8 +11,10 @@ namespace NAN2026
         public ThrownKind kind;
         public Sprite projectileSprite;
         public int dir = -1;
+        public bool dropFromCeiling = true; // 천장 낙하 모드
         private Transform player;
         private float nextReady;
+        private static bool globalBusy; // 맵 전체에서 한 번에 하나만
         private AudioSource src;
 
         private void Start()
@@ -26,9 +28,12 @@ namespace NAN2026
         private void Update()
         {
             if (config == null || player == null || Time.time < nextReady) return;
+            if (globalBusy || ThrownProjectile.Alive > 0) return; // 이미 하나가 날고 있으면 대기
             if (Mathf.Abs(player.position.x - transform.position.x) > config.aggroX) return;
+            if (dropFromCeiling && player.position.y > transform.position.y) return; // 위층 통행 중엔 미가동
             float cd = kind == ThrownKind.Arrow ? config.arrowCooldown : kind == ThrownKind.Shuriken ? config.shurikenCooldown : config.axeCooldown;
             nextReady = Time.time + cd;
+            globalBusy = true;
             StartCoroutine(FireSeq());
         }
 
@@ -36,6 +41,7 @@ namespace NAN2026
         {
             yield return new WaitForSeconds(config.telegraphTime);
             Fire();
+            globalBusy = false;
         }
 
         private void Fire()
@@ -47,7 +53,7 @@ namespace NAN2026
             sr.sharedMaterial = NAN2026.FxUnlit.Mat;
             sr.color = config.glowColor;
             sr.sortingOrder = 45;
-            go.transform.position = transform.position + new Vector3(dir * 0.6f, 0.3f, 0f);
+            go.transform.position = transform.position + (dropFromCeiling ? new Vector3(0f, -0.7f, 0f) : new Vector3(dir * 0.6f, 0.3f, 0f));
             var lt = go.AddComponent<Light2D>();
             lt.lightType = Light2D.LightType.Point;
             lt.intensity = config.glowIntensity;
@@ -56,7 +62,7 @@ namespace NAN2026
             var pr = go.AddComponent<ThrownProjectile>();
             pr.config = config; pr.kind = kind; pr.launcher = gameObject;
             float sp = kind == ThrownKind.Arrow ? config.arrowSpeed : kind == ThrownKind.Shuriken ? config.shurikenSpeed : config.axeSpeed;
-            pr.Launch(new Vector2(dir * sp, 0f));
+            pr.Launch(dropFromCeiling ? new Vector2(0f, -sp) : new Vector2(dir * sp, 0f));
         }
     }
 }
