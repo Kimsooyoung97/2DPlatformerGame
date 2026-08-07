@@ -4739,3 +4739,16 @@ Game뷰에는 반원 표시가 안되었는데 문제 없어?
 해당 없음
 ### 커밋
 해당 없음(무수정)
+
+
+## [구현] medieval 팔레트 + AdventureScene_Test 조립 — 2026-08-07 18:12
+### 프롬프트
+[구현] 팔레트 준비하고 AdventureScene_Test 씬을 하나 만들어서 맵을 제작해서 조립해봐.
+### 조작 내역
+- 체크포인트 후 Floor1/2·Other1/2 반입, 32px 슬라이스(빈칸 제외 380칸, PPU32), Tile 에셋 380개
+- TP_Medieval.prefab 팔레트(시트 배열 재현) + GridPalette 서브에셋(UnityEditor.GridPalette @ TilemapModule 리플렉션)
+- Normal BG 5레이어·나무 3종 반입. AdventureScene_Test.unity 신설: 배경 5겹x3장(order -100~-60), Ground 타일맵(콜라이더, 폭60 지면+언덕 x20~26), 나무 4그루, Player 프리팹 @(3,1.5), MainCamera+CinemachineCamera 추종
+### 검증
+- 씬 저장 True. 재생 체감(지형 밟힘·배경)은 사용자
+### 실패와 수정
+- GridPalette 타입 수색 1회(UnityEngine→UnityEditor 네임스페이스) / 380타일 생성 중 타임아웃 2회(작업은 완료됨 — 재조회로 확인)

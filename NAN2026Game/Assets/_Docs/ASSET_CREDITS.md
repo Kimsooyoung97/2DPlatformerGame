@@ -78,3 +78,5 @@
 - Sprites_AI/FX/SlashFX_White456.png — SlashFX FREE v1.2 (7.13.23) GameEndeavor 흰색 프레임 합성 | 라이선스: 팩 동봉 문서 확인 요
 
 - Sprites_AI/MidBoss/idle_1~8.png — Elementals: Fire Knight FREE v1.1 (chierit) | 라이선스: 배포 페이지 확인 요
+
+- Map/Showroom/Medieval/* — GandalfHardcore FREE Pixel Art Sidescroller Asset Pack 32x32 Overworld (itch.io) | 라이선스: 상업·비상업 게임 사용/수정 허용, 재배포·AI학습·NFT 금지 (READ ME.txt 동봉 확인) | 사용: 타일 380·배경 5레이어·나무 3종
