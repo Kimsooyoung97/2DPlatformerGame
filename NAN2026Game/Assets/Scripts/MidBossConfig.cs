@@ -16,6 +16,8 @@ namespace NAN2026
         public float hitReach = 2.2f;      // 타격 순간 이 거리 안이면 명중
         public int damage = 1;
         public float attackCooldown = 1.2f;
+        [Header("디버그")]
+        public bool showRangesInGame = false; // 게임 뷰에 범위 링 표시 (제출 전 끄기)
         [Header("패링 연동")]
         public SpikeBallConfig clashConfig; // 성공 시 격돌 FX·사운드 재사용
     }

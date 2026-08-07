@@ -84,6 +84,45 @@ namespace NAN2026
             { atkT = -1f; cooldownUntil = Time.time + config.attackCooldown; Play("MidBoss_Idle"); }
         }
 
+        LineRenderer[] rangeRings;
+        void LateUpdate()
+        {
+            if (config == null) return;
+            if (config.showRangesInGame && rangeRings == null)
+            {
+                rangeRings = new LineRenderer[3];
+                var cols = new[] { new Color(1f, 0.9f, 0.2f, 0.5f), new Color(1f, 0.25f, 0.25f, 0.6f), new Color(1f, 0.3f, 1f, 0.6f) };
+                for (int r = 0; r < 3; r++)
+                {
+                    var go = new GameObject("RangeRing" + r);
+                    go.transform.SetParent(transform, false);
+                    var lr = go.AddComponent<LineRenderer>();
+                    lr.useWorldSpace = false; lr.loop = true; lr.positionCount = 48;
+                    lr.startWidth = 0.05f; lr.endWidth = 0.05f;
+                    lr.material = new Material(Shader.Find("Sprites/Default"));
+                    lr.startColor = cols[r]; lr.endColor = cols[r];
+                    lr.sortingOrder = 850;
+                    rangeRings[r] = lr;
+                }
+            }
+            if (rangeRings != null)
+            {
+                if (!config.showRangesInGame)
+                { foreach (var lr in rangeRings) if (lr != null) Destroy(lr.gameObject); rangeRings = null; return; }
+                float[] rad = { config.aggroRange, config.attackRange, config.hitReach };
+                float inv = transform.localScale.x != 0f ? 1f / Mathf.Abs(transform.localScale.x) : 1f; // 부모 스케일 상쇄
+                for (int r = 0; r < 3; r++)
+                {
+                    var lr = rangeRings[r];
+                    for (int i = 0; i < 48; i++)
+                    {
+                        float a = i / 48f * Mathf.PI * 2f;
+                        lr.SetPosition(i, new Vector3(Mathf.Cos(a) * rad[r] * inv, Mathf.Sin(a) * rad[r] * inv, 0f));
+                    }
+                }
+            }
+        }
+
         // 씬 뷰 시각화: 노랑=감지 / 빨강=공격개시 / 자홍=타격리치
         void OnDrawGizmosSelected()
         {
