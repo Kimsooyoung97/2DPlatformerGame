@@ -236,11 +236,9 @@ public class PlayerHealth : MonoBehaviour
             fontStyle = FontStyle.Bold
         };
 
-        DrawHealthBarTopLeft();
-
         const float width = 170f;
-        GUI.Box(new Rect(Screen.width - width - 16f, 14f, width, 32f),
-            "HP   " + currentHealth + "/" + MaxHealth, style);
+        //GUI.Box(new Rect(Screen.width - width - 16f, 14f, width, 32f),
+        //    "HP   " + currentHealth + "/" + MaxHealth, style);
         GUI.Box(new Rect(Screen.width - width - 16f, 50f, width, 28f),
             "DEATHS   " + deaths, style);
 
@@ -257,39 +255,4 @@ public class PlayerHealth : MonoBehaviour
             "   F2 invincible · F3 reset traps");
     }
 
-    /// <summary>좌측 상단에 채워지는 막대 형태 체력 UI를 그린다(우측 상단의 숫자 표기와는
-    /// 별개로, 한눈에 비율을 보여주기 위한 용도).</summary>
-    private void DrawHealthBarTopLeft()
-    {
-        const float barWidth = 220f;
-        const float barHeight = 26f;
-        const float margin = 16f;
-
-        Rect outline = new Rect(margin, margin, barWidth, barHeight);
-        Color previousColor = GUI.color;
-
-        GUI.color = new Color(0.08f, 0.08f, 0.08f, 0.85f);
-        GUI.DrawTexture(outline, Texture2D.whiteTexture);
-
-        float ratio = MaxHealth > 0 ? Mathf.Clamp01((float)currentHealth / MaxHealth) : 0f;
-        float fillPadding = 3f;
-        Rect fillArea = new Rect(outline.x + fillPadding, outline.y + fillPadding,
-            (outline.width - fillPadding * 2f) * ratio, outline.height - fillPadding * 2f);
-
-        GUI.color = ratio > 0.5f ? new Color(0.3f, 0.85f, 0.35f)
-            : ratio > 0.25f ? new Color(0.95f, 0.75f, 0.2f)
-            : new Color(0.9f, 0.25f, 0.25f);
-        GUI.DrawTexture(fillArea, Texture2D.whiteTexture);
-
-        GUI.color = previousColor;
-
-        GUIStyle barLabelStyle = new GUIStyle(GUI.skin.label)
-        {
-            fontSize = 14,
-            alignment = TextAnchor.MiddleCenter,
-            fontStyle = FontStyle.Bold
-        };
-        barLabelStyle.normal.textColor = Color.white;
-        GUI.Label(outline, currentHealth + " / " + MaxHealth, barLabelStyle);
-    }
 }
