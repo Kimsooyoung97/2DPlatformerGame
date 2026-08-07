@@ -5371,3 +5371,15 @@ AdventureScene2 빼고는 다 이펙트 잘나와
 - 컴파일 0. Scene2에서 Z/C/1/2 발광 확인은 사용자
 ### 실패와 수정
 없음
+
+
+## [수정] Scene2 이펙트 미출력 원인 확정·해소 — 빈 FX 배열 이식 — 2026-08-08 04:55
+### 프롬프트
+AdventureScene2 빼고는 다 이펙트 잘나와. 지금 다시 확인해보니 이펙트가 전혀 없다. → ㄹ진행
+### 조작 내역
+- 재생 부검: timeScale 1·FxUnlit 정상·널참조 0 — 컨트롤러 FX 스프라이트 배열 4종이 size 0 확정(parryFx/comboB1Fx/comboV1Fx/comboV2Fx). 팀 조립본이 구버전 직렬화라 배열 공백, 이전 수술은 null만 검사해 통과
+- 프리팹→씬 배열 원소째 이식(빈 배열만, 기채움 존중): PlayerController2D.parryFx[5] PlayerController2D.comboB1Fx[5] PlayerController2D.comboV1Fx[4] PlayerController2D.comboV2Fx[4] 
+### 검증
+- 저장 True. C/X/V/1/2 이펙트 발현은 사용자 재생
+### 실패와 수정
+- '빈 참조'와 '빈 배열'은 다르다 — 대조 수술 시 배열 크기까지 검사 (교훈)
