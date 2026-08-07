@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 using System.Reflection;
 
 namespace NAN2026
@@ -22,6 +23,7 @@ namespace NAN2026
         private Transform barFill;
         private float barFullW;
         private GameObject groggyFx;
+        private float lastParryPress = -999f;
 
         private void Start()
         {
@@ -112,6 +114,8 @@ namespace NAN2026
         private void Update()
         {
             if (config == null || cur == null || cur.Length == 0) return;
+            var kb = Keyboard.current;
+            if (kb != null && kb.cKey.wasPressedThisFrame) lastParryPress = Time.time;
             bool holding = state == 2 && atkIs1 && !holdDone && (int)animT >= config.atk1HoldFrame;
             if (holding)
             {
@@ -162,10 +166,19 @@ namespace NAN2026
                         if (config.clashConfig != null)
                             ParryClashFx.Play((transform.position + player.position) * 0.5f + Vector3.up * 0.8f, config.clashConfig);
                         player.SendMessage("AddMp", config.damage * 10, SendMessageOptions.DontRequireReceiver);
+                        if (config.showParryDebug) DebugPopup("패링 OK", new Color(0.3f, 1f, 0.4f));
                         parryCount++;
                         if (parryCount >= config.groggyNeed) { parryCount = 0; SetState(5); return; }
                     }
-                    else player.SendMessage("TakeDamage", config.damage, SendMessageOptions.DontRequireReceiver);
+                    else
+                    {
+                        player.SendMessage("TakeDamage", config.damage, SendMessageOptions.DontRequireReceiver);
+                        if (config.showParryDebug)
+                        {
+                            float since = Time.time - lastParryPress;
+                            DebugPopup(since > 3f ? "패링 입력 없음" : "너무 빨랐다 " + since.ToString("F2") + "초 일찍", new Color(1f, 0.35f, 0.3f));
+                        }
+                    }
                 }
                 if (frac >= 1f) { nextAtk = Time.time + config.attackCooldown; SetState(0); }
             }
@@ -177,6 +190,17 @@ namespace NAN2026
             {
                 if (stateT >= config.groggyTime) { nextAtk = Time.time + config.attackCooldown; SetState(0); }
             }
+        }
+
+        private void DebugPopup(string msg, Color col)
+        {
+            var go = new GameObject("ParryDebug");
+            go.transform.position = player.position + Vector3.up * 2.2f;
+            var tm = go.AddComponent<TextMesh>();
+            tm.text = msg; tm.fontSize = 44; tm.characterSize = 0.07f;
+            tm.anchor = TextAnchor.MiddleCenter; tm.color = col;
+            go.GetComponent<MeshRenderer>().sortingOrder = 950;
+            go.AddComponent<PopupFloater>().Init(1.2f, 1.1f);
         }
 
         private void BeginAttack()

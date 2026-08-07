@@ -75,3 +75,5 @@
 - 경험치/레벨/증강(브론즈·실버·골드, 6종) 시스템 구현 완료. PlayerProgression 컴포넌트가 Player에 부착됨
 
 - [제출 전 필수] Scene2DirectorConfig.debugSkipToBoss = false 로 끌 것 (보스전 테스트 스위치)
+
+- [제출 전 필수] MinoBossConfig.showParryDebug = false (패링 디버그 팝업)

@@ -25,6 +25,8 @@ namespace NAN2026
         public float fpsAtk = 14f;
         public float fpsHit = 14f;
         public float fpsDeath = 12f;
+        [Header("디버그")]
+        public bool showParryDebug = true; // 패링 판정 텔레메트리 (제출 전 OFF)
         [Header("그로기")]
         public int groggyNeed = 5;        // 패링 몇 회에 그로기
         public float groggyTime = 3.0f;   // 무방비 시간
