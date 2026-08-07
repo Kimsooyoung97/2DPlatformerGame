@@ -17,6 +17,7 @@ public sealed class LevelUpSkillManager : MonoBehaviour
     [SerializeField] private Image[] cardBackgrounds;
     [SerializeField] private Button[] choiceButtons;
     [SerializeField] private TMP_Text[] choiceTexts;
+    [SerializeField] private Image[] skillIcon;
 
     private void Awake()
     {
@@ -62,7 +63,7 @@ public sealed class LevelUpSkillManager : MonoBehaviour
         {
             int captured = i; // 클로저 캡처용 지역 변수
             string tierName = tiers[i] == 2 ? "GOLD" : tiers[i] == 1 ? "SILVER" : "BRONZE";
-            string desc = DescribeAugment(types[i], tiers[i]);
+            string desc = DescribeAugment(types[i], tiers[i], i);
 
             if (choiceTexts != null && i < choiceTexts.Length && choiceTexts[i] != null)
                 choiceTexts[i].text = "[" + tierName + "]\n" + desc;
@@ -85,18 +86,30 @@ public sealed class LevelUpSkillManager : MonoBehaviour
                 if (choiceButtons[i] != null) choiceButtons[i].gameObject.SetActive(false);
     }
 
-    private string DescribeAugment(AugmentType type, int tier)
+    private string DescribeAugment(AugmentType type, int tier,int idx)
     {
         if (playerProgression == null || playerProgression.AugmentConfig == null) return string.Empty;
         float m = playerProgression.AugmentConfig.GetMagnitude(type, tier);
         switch (type)
         {
-            case AugmentType.ParryCooldownDown: return "패링 쿨타임\n-" + m + "초";
-            case AugmentType.ParryDurationUp: return "패링 지속시간\n+" + m + "초";
-            case AugmentType.DamageUp: return "공격 데미지\n+" + m;
-            case AugmentType.Heal: return "체력 회복\n+" + m;
-            case AugmentType.MaxHealthUp: return "최대 체력\n+" + m;
-            case AugmentType.AttackRangeUp: return "공격 사거리\n+" + Mathf.RoundToInt(m * 100f) + "%";
+            case AugmentType.ParryCooldownDown:
+                skillIcon[idx].sprite = Resources.Load<Sprite>($"Skill1");
+                return "Skill1 획득";
+            case AugmentType.ParryDurationUp:
+                skillIcon[idx].sprite = Resources.Load<Sprite>($"Skill1");
+                return "Skill1 획득";
+            case AugmentType.DamageUp:
+                skillIcon[idx].sprite = Resources.Load<Sprite>($"Skill1");
+                return "Skill1 획득";
+            case AugmentType.Heal:
+                skillIcon[idx].sprite = Resources.Load<Sprite>($"Skill2");
+                return "Skill2 획득";
+            case AugmentType.MaxHealthUp: 
+                skillIcon[idx].sprite = Resources.Load<Sprite>($"Skill2");
+                return "Skill2 획득";
+            case AugmentType.AttackRangeUp:
+                skillIcon[idx].sprite = Resources.Load<Sprite>($"Skill2");
+                return "Skill2 획득";
             default: return string.Empty;
         }
     }

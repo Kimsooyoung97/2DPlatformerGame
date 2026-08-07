@@ -10,8 +10,8 @@ public sealed class PlayerHealthBarUI : MonoBehaviour
 {
     [SerializeField] private PlayerHealth playerHealth;
     [Tooltip("Image Type=Filled(가로/Horizontal)로 설정된 체력 채움 이미지")]
-    [SerializeField] private Image fillImage;
-    [SerializeField] private TMP_Text label;
+    [SerializeField] private GameObject prefab;
+    [SerializeField] private GameObject parentObject;
 
     private void OnEnable()
     {
@@ -30,7 +30,7 @@ public sealed class PlayerHealthBarUI : MonoBehaviour
 
     private void HandleHealthChanged(int current, int max)
     {
-        if (fillImage != null) fillImage.fillAmount = max > 0 ? (float)current / max : 0f;
-        if (label != null) label.text = current + " / " + max;
+        if (playerHealth != null) ;
+        
     }
 }
