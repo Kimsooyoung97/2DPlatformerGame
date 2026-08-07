@@ -5358,3 +5358,16 @@ AdventureScene1에 적용된 Player 적용 요소를 AdventureScene2에도 적�
 - 저장 True. Z/C/1/2/3/4 이펙트는 사용자 재생
 ### 실패와 수정
 없음
+
+
+## [수정] 전투 이펙트 무조명 재질 — 암흑 씬 가시화 — 2026-08-08 04:47
+### 프롬프트
+AdventureScene2 빼고는 다 이펙트 잘나와
+### 조작 내역
+- 원인 확정: Scene2 전역광 0.03(촛불 던전) — 조명 영향 기본 재질의 FX가 어둠에 먹힘
+- FxUnlit 헬퍼(URP Sprite-Unlit, 폴백 Sprites/Default) 신설, 전투 FX 7파일 소환 직후 재질 지정: PlayerSkill·SwordSlashSpawner·VSlashFx·OrbEmitter·Lich·Princess·SpikeBall 각 1지점
+- 팀의 암흑 연출 무손상 — FX만 자체 발광 (밝은 씬은 시각 변화 없음)
+### 검증
+- 컴파일 0. Scene2에서 Z/C/1/2 발광 확인은 사용자
+### 실패와 수정
+없음

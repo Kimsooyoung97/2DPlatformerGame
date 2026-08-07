@@ -53,7 +53,7 @@ public sealed class LichAttackPattern : MonoBehaviour, IEnemyAttackOverride
             go.transform.position = spawnPos;
             if (orbSprite != null)
             {
-                SpriteRenderer sr = go.AddComponent<SpriteRenderer>();
+                SpriteRenderer sr = go.AddComponent<SpriteRenderer>(); sr.sharedMaterial = NAN2026.FxUnlit.Mat;
                 sr.sprite = orbSprite;
                 sr.sortingOrder = orbSortingOrder;
             }

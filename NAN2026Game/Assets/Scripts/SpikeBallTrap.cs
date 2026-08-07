@@ -218,7 +218,7 @@ namespace NAN2026
                 tx2.Apply();
                 dot = Sprite.Create(tx2, new Rect(0, 0, 4, 4), new Vector2(0.5f, 0.5f), 4f);
             }
-            flash = gameObject.AddComponent<SpriteRenderer>();
+            flash = gameObject.AddComponent<SpriteRenderer>(); flash.sharedMaterial = NAN2026.FxUnlit.Mat;
             flash.sprite = dot; flash.color = Color.white; flash.sortingOrder = 950;
             rays = new LineRenderer[lines];
             for (int i = 0; i < lines; i++)

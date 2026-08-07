@@ -102,7 +102,7 @@ namespace NAN2026.Showroom
                                        Vector3.up * heightOffset;
             slash.transform.localScale = Vector3.one * scale;
 
-            SpriteRenderer renderer = slash.AddComponent<SpriteRenderer>();
+            SpriteRenderer renderer = slash.AddComponent<SpriteRenderer>(); renderer.sharedMaterial = NAN2026.FxUnlit.Mat;
             renderer.sprite = frames[0];
             renderer.sortingOrder = sortingOrder;
 
