@@ -4962,3 +4962,16 @@ medieval_물에 적용이 안되는데 물 스프라이트가 몇개 없는데?
 - 컴파일 0. 창 새로고침 후 물 75+1종 표시·재생 폭포 흐름은 사용자
 ### 실패와 수정
 없음
+
+
+## [구현] 준보스 프리팹화 — 2026-08-07 20:06
+### 프롬프트
+진행해 (프리팹 'ㄱ' 대기분)
+### 조작 내역
+- 발견: SecondScene_1 소멸 — 팀 정리로 AdventureScene4로 개편(MidBoss 포함 확인). STATE 인식 갱신 필요
+- AdventureScene4의 MidBoss → Assets/Prefabs/MidBoss_FireKnight.prefab 추출·연결
+- 팀 사용법: 씬 드래그 → MidBossAI.Player 슬롯만 연결
+### 검증
+- 생성 True, 저장 True
+### 실패와 수정
+- 구경로(SecondScene_1) 사망 — 수색으로 신경로 확정
