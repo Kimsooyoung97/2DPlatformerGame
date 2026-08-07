@@ -4716,3 +4716,29 @@ Game뷰에는 반원 표시가 안되었는데 문제 없어?
 - 컴파일 0. 반호가 보스 방향 따라 뒤집히는지는 사용자 재생
 ### 실패와 수정
 없음
+
+## [구현] MidBoss 신규 4패턴(NormalAttack/FireAttack/FireBomb/WheelAttack) + 추격/점프/사망 — 2026-08-05
+### 프롬프트
+현재 씬에 존재하는 MidBoss의 공격 패턴을 만들건데 애니메이터의 Parameters를 알맞게 추가해주고 그에 맞게 스크립트도 바꾸어서 NormalAttack(쿨타임없음, 데미지 1), FireAttack(쿨타임4초, 데미지 2), FireBomb(쿨타임 8초, 데미지 4), WheelAttack(쿨타임 6초, 데미지 3씩 2틱), EnemyAI 스크립트도 붙여서 player를 chase하고 점프로 따라올 때 jump 애니메이션이 발동되게 보스가 죽으면 Death 애니메이션이 되도록 해줘
+(대화 중 구조 충돌 확인 — 표준 EnemyAI는 MonsterController2D/MonsterAnimation에 강하게 의존하는데 MidBoss는 팀원이 만든 커스텀 개별 상태 Animator라 안 맞음. 사용자가 '2번'(기존 MidBoss 방식 유지, 로직만 새로 작성) 선택해 그 방향으로 진행)
+### 조사
+MidBoss.controller에 필요한 상태(MidBoss_Idle/Run/FireAtk/WheelAtk/NormalAtk/FireBomb/Death/Jump)는 이미 다 있었으나 파라미터가 Death 트리거 하나뿐이었고, Idle의 기존 전이 5개는 전부 조건 없는 exitTime 전이라 사실상 미완성 상태였음. MonsterHealth.Die()도 animation.Die()를 널 체크 없이 호출해 MonsterAnimation 없는 몬스터는 사망 시 크래시나는 문제 발견. 플레이어 공격 판정 코드가 전부 NHNDemo.MonsterHealth를 찾아서 데미지를 주므로, 자체 체력 시스템 대신 MonsterHealth를 그대로 써야 플레이어가 때릴 수 있음을 확인
+### 조작 내역
+- MidBoss.controller: Trigger 5개(NormalAttack/FireAttack/FireBomb/WheelAttack/Jump) + Bool IsMoving 파라미터 추가. Idle의 기존 무조건 전이 5개 제거 후 재구성 — Idle↔Run(IsMoving), AnyState→각 패턴(Trigger), 각 패턴→Idle(exitTime 기반 자동 복귀)
+- MonsterHealth.cs(Assets/Player/Scripts): animation.Die() 호출에 널 체크 추가(MonsterAnimation 없는 몬스터도 안전하게 죽도록, 기존 사용처 영향 없음)
+- MidBossPatternConfig(SO) 신규: 공통(maxHealth/aggroRange/attackRange/chaseSpeed/jumpYThreshold/jumpVelocity) + 4패턴 각각의 windup/데미지/쿨타임/사거리
+- MidBossController.cs 신규(IParryReflector 구현, EnemyAI 미사용): NHNDemo.MonsterHealth 요구, OnDied 구독해 Death 트리거+자체 dead 플래그 설정. Update에서 추격(아이들↔런 Bool), 높이차 유지 기반 점프 판정(EnemyAI와 동일한 '일정 시간 유지' 방식) 후 Jump 트리거+수직 속도 부여, 사거리 안이면 랜덤 패턴(NormalAttack은 쿨타임 없이 항상 후보, 나머지 3개는 각자 쿨타임 지난 것만 후보) 실행. 근접 2종(Normal/Wheel)은 TryHitMelee로 사거리+패링 체크 후 데미지, 원거리 2종(Fire/Bomb)은 기존 SpikeProjectile 재사용해 구체 발사
+- 기존 MidBossAI는 삭제하지 않고 enabled=false로 비활성화만 함(팀원 작업 보존)
+- 씬: MidBoss에 MonsterHealth(maxHealth=30)+MidBossController(config=MidBossPatternConfig, player=Player_Knight!!!!) 부착
+### 검증
+- refresh_unity(compile=force) — 1차 시도에서 PlayerController2D/PlayerHealth를 존재하지 않는 네임스페이스(NAN2026.Showroom)로 잘못 참조해 컴파일 에러, 실제로는 전역 네임스페이스임을 확인 후 수정 → 0건
+- 저장 → manage_scene(load) 강제 재로드 → 참조 전부 유지, MidBossAI.enabled=False 확인
+- run_tests(EditMode) → 140/140 통과 (job 746831d55dc7459aac9dbb43361e5402)
+- 재생 모드 실측: 이 씬(UITestScene)에 지면이 거의 없어(GameObject 콜라이더 하나, x≈0 근처만) 초기 원거리 테스트가 낙사로 오염됐던 걸 발견하고 실제 지면 근처로 재배치. controller.enabled=false로 자동 Update 개입을 차단한 뒤 각 패턴을 리플렉션으로 직접 호출해 격리 검증: NormalAttack HP -1(5→4), FireAttack HP -2(5→3), FireBomb HP -4(5→1) 전부 정확히 기대값과 일치 확인. WheelAttack은 1틱만 먼저 -3(5→2) 확인 후 2틱째가 플레이어 피격무적시간(0.6초)보다 짧은 틱 간격(0.35초) 때문에 씹히는 걸 발견해 wheelAttackTickInterval을 0.7초로 조정, 이후 재검증에서 6데미지 합산으로 5짜리 최대체력 플레이어가 사망→리스폰됨을 확인(양쪽 틱 다 명중했다는 간접 증거). Jump는 강제 발동 시 Rigidbody2D.velocity.y가 config.jumpVelocity(8)와 정확히 일치함을 확인. Death는 MonsterHealth.TakeDamage(999)로 즉사시켜 예외 없이(널체크 수정 효과 확인) 사망→페이드→Destroy까지 전체 파이프라인이 정상 완주됨을 확인
+### 실패와 수정
+- PlayerController2D/PlayerHealth를 잘못된 네임스페이스로 참조해 컴파일 에러 → 전역 네임스페이스로 수정
+- WheelAttack 2틱 간격(0.35초)이 플레이어 무적시간(0.6초)보다 짧아 2틱째가 무효화되던 문제 → 간격을 0.7초로 조정
+- 초기 테스트에서 UITestScene에 지면이 거의 없다는 걸 모르고 임의 좌표(x=50~70)로 옮겨 낙사로 오염된 결과를 얻음 → 실제 지면 위치(GameObject 콜라이더, x≈0 근처) 확인 후 그 근처에서 재검증
+### 눈으로 확인 필요
+- Jump/각 패턴 애니메이션 전환이 실제로 눈으로 봤을 때 자연스러운지(특히 AnyState 기반 전이라 다른 패턴 도중에도 즉시 끊고 전환됨)
+- WheelAttack 틱 간격을 0.7초로 늘린 게 체감상 너무 느리진 않은지
