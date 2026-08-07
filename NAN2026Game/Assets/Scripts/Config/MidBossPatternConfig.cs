@@ -11,6 +11,13 @@ namespace NAN2026
     {
         [Header("공통")]
         public int maxHealth = 30;
+        [Header("애니메이션 클립 실제 길이(초) — 이 시간이 끝날 때까지는 방향을\n" +
+            "바꾸지 않는다(busy 유지). MidBoss.controller의 각 클립 길이와 맞춰둘 것")]
+        public float normalAttackAnimLength = 0.92f;
+        public float fireAttackAnimLength = 1.5f;
+        public float fireBombAnimLength = 0.75f;
+        public float wheelAttackAnimLength = 1f;
+        public float jumpAnimLength = 1.67f;
         public float aggroRange = 8f;
         public float attackRange = 2.2f;
         public float chaseSpeed = 2.2f;

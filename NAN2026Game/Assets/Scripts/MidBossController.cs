@@ -102,10 +102,15 @@ namespace NAN2026
         private IEnumerator DoJump()
         {
             busy = true;
+            if (player != null && sr != null)
+            {
+                float dx = player.position.x - transform.position.x;
+                sr.flipX = dx < 0f;
+            }
             if (anim != null) anim.SetTrigger("Jump");
             Rigidbody2D rb = GetComponent<Rigidbody2D>();
             if (rb != null) rb.linearVelocity = new Vector2(rb.linearVelocity.x, config.jumpVelocity);
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSeconds(config.jumpAnimLength);
             busy = false;
         }
 
@@ -139,11 +144,21 @@ namespace NAN2026
             busy = false;
         }
 
+        // 애니메이션 클립이 windup(혹은 windup+틱)보다 길면, 그 차이만큼 더 기다려서
+        // 클립이 완전히 끝날 때까지 busy(=방향 고정)를 유지한다. 안 그러면 판정은
+        // 끝났는데 애니메이션은 아직 재생 중인 구간에서 방향이 바뀌어 보인다.
+        private IEnumerator HoldForRemainingAnim(float elapsed, float animLength)
+        {
+            float remaining = animLength - elapsed;
+            if (remaining > 0f) yield return new WaitForSeconds(remaining);
+        }
+
         private IEnumerator DoNormalAttack()
         {
             if (anim != null) anim.SetTrigger("NormalAttack");
             yield return new WaitForSeconds(config.normalAttackWindup);
             TryHitMelee(config.normalAttackDamage, config.normalAttackReach);
+            yield return HoldForRemainingAnim(config.normalAttackWindup, config.normalAttackAnimLength);
         }
 
         private IEnumerator DoFireAttack()
@@ -152,6 +167,7 @@ namespace NAN2026
             yield return new WaitForSeconds(config.fireAttackWindup);
             FireOrb(config.fireAttackDamage, config.fireAttackOrbSpeed, config.fireAttackSpawnHeight);
             nextFireAttackTime = Time.time + config.fireAttackCooldown;
+            yield return HoldForRemainingAnim(config.fireAttackWindup, config.fireAttackAnimLength);
         }
 
         private IEnumerator DoFireBomb()
@@ -160,6 +176,7 @@ namespace NAN2026
             yield return new WaitForSeconds(config.fireBombWindup);
             FireOrb(config.fireBombDamage, config.fireBombOrbSpeed, config.fireBombSpawnHeight);
             nextFireBombTime = Time.time + config.fireBombCooldown;
+            yield return HoldForRemainingAnim(config.fireBombWindup, config.fireBombAnimLength);
         }
 
         private IEnumerator DoWheelAttack()
@@ -170,6 +187,7 @@ namespace NAN2026
             yield return new WaitForSeconds(config.wheelAttackTickInterval);
             TryHitMelee(config.wheelAttackDamagePerTick, config.wheelAttackReach);
             nextWheelAttackTime = Time.time + config.wheelAttackCooldown;
+            yield return HoldForRemainingAnim(config.wheelAttackWindup + config.wheelAttackTickInterval, config.wheelAttackAnimLength);
         }
 
         private void TryHitMelee(int damage, float reach)

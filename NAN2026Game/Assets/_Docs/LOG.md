@@ -4757,3 +4757,23 @@ Update()의 스프라이트 반전(sr.flipX)은 이미 busy일 때 건너뛰도�
 - 재생 모드 실측: DoRandomPattern 시작 직후 lockedAimDir=(1,0)·flipX=False(오른쪽) 확인. 이후 플레이어를 반대편으로 옮긴 뒤 확인했을 때 flipX=True로 보였으나, nextPatternAllowedTime이 방금 새로 설정된 상태였음을 리플렉션으로 확인 — 즉 첫 공격이 자연스럽게 끝나고 두 번째 공격이 새 방향으로 다시 시작된 것이지, 진행 중이던 공격의 방향이 바뀐 게 아님을 확인(정상 동작)
 ### 실패와 수정
 - 없음
+
+## [수정] MidBoss 공격 애니메이션 재생 중 방향 고정(busy를 클립 전체 길이로 확장) — 2026-08-06
+### 프롬프트
+아니 normalattack 이랑 fire attack들을 사용할 때 애니메이션이 끝나기 전에 플레이어가 움직여서 보스 반대편으로 가면 애니메이션 도중에 보스의 방향이 안바뀌게 해줘
+### 조사
+이전 수정(lockedAimDir)은 방향을 공격 '시작 시점'에 고정했지만, busy는 windup 시간만큼만 유지되고 있었음. 실제 애니메이션 클립 길이를 확인하니 windup보다 훨씬 김: NormalAtk 0.92초(windup 0.35초), FireAtk 1.5초(windup 0.5초), FireBomb 0.75초(windup 0.7초), Jump 1.67초(대기 0.5초). 즉 판정(TryHitMelee/FireOrb)이 끝난 뒤에도 애니메이션은 한참 더 재생 중인데 그 구간에서 busy=false가 되어 Update()가 다시 방향을 갱신하고 있었음 — 이게 '애니메이션 도중 방향이 바뀐다'는 실제 원인
+### 조작 내역
+- MidBossPatternConfig에 각 패턴의 실제 애니메이션 길이 필드 추가(normalAttackAnimLength/fireAttackAnimLength/fireBombAnimLength/wheelAttackAnimLength/jumpAnimLength), MidBoss.controller의 클립 길이와 정확히 맞춤
+- MidBossController에 HoldForRemainingAnim(elapsed, animLength) 헬퍼 추가: 이미 흐른 시간(windup 등)을 빼고 남은 시간만큼 더 대기해 클립이 완전히 끝날 때까지 busy를 유지
+- DoNormalAttack/DoFireAttack/DoFireBomb/DoWheelAttack 전부 판정 로직 뒤에 HoldForRemainingAnim을 yield하도록 수정. WheelAttack은 windup+틱간격 합계를 기준으로 계산(이미 1초 클립보다 길 수 있어 그 경우 추가 대기 없음)
+- DoJump도 동일하게 config.jumpAnimLength만큼 대기하도록 수정, 점프 시작 시점에도 방향을 한 번 고정
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건 (Config/스크립트 두 차례 수정 각각 확인)
+- 저장 → manage_scene(load) 강제 재로드 → Config 에셋 값(normal=0.92/fire=1.5/bomb=0.75/wheel=1/jump=1.67) 유지 확인
+- run_tests(EditMode) → 140/140 통과 (job cf54648bc64f4f83917820719bd08525, 이후 job 23c3de38069944d5bf11534aeccb55b5로 재확인)
+- 재생 모드 실측: 여러 차례 시도했으나 이 원격·비동기 도구 호출 환경 특성상(매 호출 사이 실제 시간이 흘러 애니메이션이 이미 끝나버리는 경우가 많음) 0.75~1.67초짜리 단일 공격 구간 '도중'을 정확히 포착하는 데 계속 실패함. Time.timeScale을 0.02까지 낮춰 애니메이션을 인위적으로 늘려서 재시도했으나 그마저도 정확한 타이밍 포착에는 실패 — 코드 리뷰로는 로직이 명확히 맞음(HoldForRemainingAnim이 판정 후 남은 시간만큼 반드시 대기하고 나서야 busy=false가 됨을 소스로 재확인)
+### 실패와 수정
+- 없음(로직 수정은 코드 리뷰로 정확성 확인, 동적 실측은 도구 환경 한계로 결론 못 냄)
+### 사람 확인 필요 — 중요
+- 이번 수정은 코드 로직상으로는 명확히 맞지만(HoldForRemainingAnim이 클립 전체 길이만큼 busy를 강제 유지), 실제 재생에서 애니메이션 도중 방향이 안 바뀌는지 **직접 눈으로 확인 부탁드립니다**. 도구로 정밀하게 재현·검증하는 데 이번엔 계속 실패했습니다

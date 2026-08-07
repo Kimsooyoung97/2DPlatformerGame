@@ -13,6 +13,11 @@ MonoBehaviour:
   m_Name: MidBossPatternConfig
   m_EditorClassIdentifier: Assembly-CSharp::NAN2026.MidBossPatternConfig
   maxHealth: 30
+  normalAttackAnimLength: 0.9166666
+  fireAttackAnimLength: 1.5
+  fireBombAnimLength: 0.75
+  wheelAttackAnimLength: 1
+  jumpAnimLength: 1.666667
   aggroRange: 8
   attackRange: 2.2
   chaseSpeed: 2.2
