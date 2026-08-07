@@ -30,7 +30,7 @@ MonoBehaviour:
   slashDuration: 0.4
   combo2Duration: 0.4
   combo3Duration: 0.55
-  parryWindow: 0.18
+  parryWindow: 0.35
   parryEndDuration: 0.22
   parryBoxSize: {x: 0.5, y: 0.7}
   parryBoxOffsetX: 0.3
@@ -62,4 +62,5 @@ MonoBehaviour:
   parryFxOffsetX: 0.8
   parryFxOffsetY: 2.66
   parryReachX: 1.5
+  parryFollowupDelay: 0.5
   parryFxAlpha: 0.85

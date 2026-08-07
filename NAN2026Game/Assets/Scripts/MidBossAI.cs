@@ -51,30 +51,33 @@ namespace NAN2026
         void RunAttack()
         {
             atkT += Time.deltaTime;
-            if (!hitDone && MidBossLogic.HitMomentPassed(atkT, config.attackDuration, config.hitFrac))
+            bool inStrike = MidBossLogic.InStrikeInterval(atkT, config.attackDuration, config.hitFrac, config.hitFracEnd);
+            float dist = Vector2.Distance(transform.position, player.position);
+            // 통일 패링: 구간 내 리치 접촉 + 창 활성이면 언제든 성공
+            if (!hitDone && inStrike && dist <= config.hitReach && controller != null && tryParry != null)
+            {
+                object r = tryParry.Invoke(controller, new object[] { gameObject });
+                if (r is bool && (bool)r)
+                {
+                    hitDone = true;
+                    SpikeBallTrap.ShowAt(player.position + Vector3.up * 1.4f, "패링 성공!", new Color(0.35f, 1f, 0.45f), config.clashConfig);
+                    Vector3 mid = (transform.position + player.position) * 0.5f + Vector3.up * 0.8f;
+                    if (config.clashConfig != null)
+                    {
+                        ParryClashFx.Play(mid, config.clashConfig);
+                        if (config.clashConfig.clashSound != null)
+                            ClashSfx.PlaySegment(config.clashConfig.clashSound, config.clashConfig.clashVolume, config.clashConfig.clashSoundStartMs, config.clashConfig.clashSoundEndMs);
+                    }
+                }
+            }
+            // 구간 종료 순간: 못 쳐냈고 리치 안이면 피해
+            if (!hitDone && atkT / Mathf.Max(0.01f, config.attackDuration) > config.hitFracEnd)
             {
                 hitDone = true;
-                float dist = Vector2.Distance(transform.position, player.position);
                 if (dist <= config.hitReach)
                 {
-                    bool ok = false;
-                    if (controller != null && tryParry != null)
-                    {
-                        object r = tryParry.Invoke(controller, new object[] { gameObject });
-                        ok = r is bool && (bool)r;
-                    }
-                    SpikeBallTrap.ShowAt(player.position + Vector3.up * 1.4f, ok ? "패링 성공!" : "패링 실패!", ok ? new Color(0.35f, 1f, 0.45f) : new Color(1f, 0.3f, 0.25f), config.clashConfig);
-                    if (ok)
-                    {
-                        Vector3 mid = (transform.position + player.position) * 0.5f + Vector3.up * 0.8f;
-                        if (config.clashConfig != null)
-                        {
-                            ParryClashFx.Play(mid, config.clashConfig);
-                            if (config.clashConfig.clashSound != null)
-                                ClashSfx.PlaySegment(config.clashConfig.clashSound, config.clashConfig.clashVolume, config.clashConfig.clashSoundStartMs, config.clashConfig.clashSoundEndMs);
-                        }
-                    }
-                    else player.SendMessage("TakeDamage", config.damage, SendMessageOptions.DontRequireReceiver);
+                    SpikeBallTrap.ShowAt(player.position + Vector3.up * 1.4f, "패링 실패!", new Color(1f, 0.3f, 0.25f), config.clashConfig);
+                    player.SendMessage("TakeDamage", config.damage, SendMessageOptions.DontRequireReceiver);
                 }
             }
             if (atkT >= config.attackDuration)

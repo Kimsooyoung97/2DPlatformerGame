@@ -11,7 +11,8 @@ namespace NAN2026
         public float walkSpeed = 2.2f;
         [Header("공격 sp_atk")]
         public float attackDuration = 1.5f;
-        [Range(0f,1f)] public float hitFrac = 0.55f; // 타격 판정 순간(진행률)
+        [Range(0f,1f)] public float hitFrac = 0.5f;    // 타격 구간 시작(진행률)
+        [Range(0f,1f)] public float hitFracEnd = 0.72f; // 타격 구간 끝 — 이 사이 접촉이면 패링 가능
         public float hitReach = 2.2f;      // 타격 순간 이 거리 안이면 명중
         public int damage = 1;
         public float attackCooldown = 1.2f;

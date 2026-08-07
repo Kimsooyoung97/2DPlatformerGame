@@ -16,7 +16,8 @@ MonoBehaviour:
   attackRange: 1.8
   walkSpeed: 2.2
   attackDuration: 1.5
-  hitFrac: 0.55
+  hitFrac: 0.5
+  hitFracEnd: 0.72
   hitReach: 2.2
   damage: 1
   attackCooldown: 1.2

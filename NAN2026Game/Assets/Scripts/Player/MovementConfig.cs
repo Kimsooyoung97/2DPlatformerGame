@@ -30,7 +30,7 @@ namespace NAN2026
         public float combo3Duration = 0.55f;
 
         [Header("패링")]
-        public float parryWindow = 0.18f;
+        public float parryWindow = 0.35f; // 통일 패링: 후한 활성 창
         public float parryEndDuration = 0.22f;
         public Vector2 parryBoxSize = new Vector2(1.0f, 1.4f);
         public float parryBoxOffsetX = 0.6f;
