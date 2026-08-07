@@ -50,6 +50,7 @@ public sealed class LevelUpSkillManager : MonoBehaviour
     {
         Time.timeScale = 1f;
         if (panel != null) panel.SetActive(false);
+
     }
 
     private void RefreshUI(AugmentType[] types, int[] tiers, int level)

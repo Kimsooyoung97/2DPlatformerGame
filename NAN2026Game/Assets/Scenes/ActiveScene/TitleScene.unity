@@ -1083,7 +1083,7 @@ MonoBehaviour:
   minAlpha: 0.2
   maxAlpha: 1
   bgmSource: {fileID: 2110993680}
-  nextSceneName: Opening
+  nextSceneName: OpeningScene
   fadeOutBeforeLoad: 0
 --- !u!82 &2110993680
 AudioSource:

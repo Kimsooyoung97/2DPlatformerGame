@@ -60360,6 +60360,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: UI Canvas
       objectReference: {fileID: 0}
+    - target: {fileID: 3018950181126178775, guid: 5ad81ff710d97324ca0d5a0f9d1de8cf, type: 3}
+      propertyPath: playerHealth
+      value: 
+      objectReference: {fileID: 1739690756}
+    - target: {fileID: 5780081829624620208, guid: 5ad81ff710d97324ca0d5a0f9d1de8cf, type: 3}
+      propertyPath: playerProgression
+      value: 
+      objectReference: {fileID: 1739690755}
     - target: {fileID: 8013161428270901802, guid: 5ad81ff710d97324ca0d5a0f9d1de8cf, type: 3}
       propertyPath: m_IsActive
       value: 0
@@ -60476,7 +60484,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 684cda547a48f5249a4247c918b5ecb7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NAN2026.PortalUpKey
-  nextSceneName: SecondScene
+  nextSceneName: AdventureScene3
 --- !u!114 &1510970156
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -60489,7 +60497,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 192af8e772cd8be4eb5e53b9783aeccc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Portal
-  nextSceneName: SecondScene
+  nextSceneName: AdventureScene3
 --- !u!61 &1510970157
 BoxCollider2D:
   m_ObjectHideFlags: 0

@@ -375,7 +375,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8dbc4e41478953b448ee78665b701688, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LevelUpSkillManager
-  playerProgression: {fileID: 0}
+  playerProgression: {fileID: 7977614564059179325, guid: 83312ceca3b821d4a9fb92fa4cc2168e, type: 3}
   panel: {fileID: 8013161428270901802}
   titleText: {fileID: 8379777946969645137}
   cardBackgrounds:
@@ -742,7 +742,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &3022427445042097332
 RectTransform:
   m_ObjectHideFlags: 0
@@ -955,7 +955,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &6192413488682014888
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1396,7 +1396,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &211668207571173223
 RectTransform:
   m_ObjectHideFlags: 0

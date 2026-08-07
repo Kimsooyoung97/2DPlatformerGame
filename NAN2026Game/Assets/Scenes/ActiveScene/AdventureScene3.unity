@@ -3545,6 +3545,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: UI Canvas
       objectReference: {fileID: 0}
+    - target: {fileID: 3018950181126178775, guid: 5ad81ff710d97324ca0d5a0f9d1de8cf, type: 3}
+      propertyPath: playerHealth
+      value: 
+      objectReference: {fileID: 1139261257}
+    - target: {fileID: 5780081829624620208, guid: 5ad81ff710d97324ca0d5a0f9d1de8cf, type: 3}
+      propertyPath: playerProgression
+      value: 
+      objectReference: {fileID: 1139261256}
     - target: {fileID: 8013161428270901802, guid: 5ad81ff710d97324ca0d5a0f9d1de8cf, type: 3}
       propertyPath: m_IsActive
       value: 0
@@ -10527,6 +10535,28 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 3086483477089436676, guid: e1c63970810f83842815a18438855f12, type: 3}
   m_PrefabInstance: {fileID: 1139261254}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1139261256 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 965549846879581559, guid: e1c63970810f83842815a18438855f12, type: 3}
+  m_PrefabInstance: {fileID: 1139261254}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 652522152}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6eb634c988deac4a97cd1794f5f573d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerProgression
+--- !u!114 &1139261257 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3808806000288232274, guid: e1c63970810f83842815a18438855f12, type: 3}
+  m_PrefabInstance: {fileID: 1139261254}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 652522152}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70dc81c5dcf02c547bf6157b1a734021, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
 --- !u!82 &1139261264
 AudioSource:
   m_ObjectHideFlags: 0
@@ -82303,7 +82333,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3239608976979937095, guid: 18c0c7e958b92354e9ead93fb079b391, type: 3}
       propertyPath: nextSceneName
-      value: SecondScene_1
+      value: AdventureScene4
       objectReference: {fileID: 0}
     - target: {fileID: 5032740689770044419, guid: 18c0c7e958b92354e9ead93fb079b391, type: 3}
       propertyPath: m_LocalPosition.x

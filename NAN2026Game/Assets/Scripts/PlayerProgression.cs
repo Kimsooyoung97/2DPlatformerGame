@@ -94,6 +94,7 @@ public sealed class PlayerProgression : MonoBehaviour
 
         choosing = true;
         OnAugmentChoiceReady?.Invoke(offeredTypes, offeredTiers, level);
+
     }
 
     /// <summary>LevelUpSkillManager 등 UI 쪽에서 사용자가 고른 선택지 인덱스를 전달한다.</summary>
