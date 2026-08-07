@@ -5507,3 +5507,16 @@ AdventureScene2에만 적용되는 패링 범위를 늘려줄 수 있나? 패링
 - 컴파일 0. 팝업 표시는 사용자 재생
 ### 실패와 수정
 없음
+
+
+## [수정] Scene2 보스 미노타우르스 교체 — 2026-08-08 07:45
+### 프롬프트
+[수정]AdventureScene2 보스를 mino_v1.1_full로 변경. atk_1/atk_2/death/idle/take_hit/walk 사용, 공격판정+패링, 체력바, 사망 death, 평소 idle, 피격 take_hit
+### 조작 내역
+- 미노 84프레임+체력바 3장 반입(PPU38=몸 2.6u), MinoBossConfig SO, MinoBossAI(프레임 상태기계: idle/walk 추격/atk 1·2 랜덤—타격창 50~75% 통일 패링·클래시/take_hit 피격(공격 중 슈퍼아머)/death 19프레임 후 정지, 동봉 체력바 실시간)
+- 플레이어 공격 명중: Slash·Effect·Spike(반사) 3계 MonsterHealth 폴백에 MinoBossAI.TakeDamage 주입
+- Executioner_Boss → 비활성 보존 개명, 동좌표(188,3.05) 미노 투입
+### 검증
+- 컴파일 0(캐스팅 1회 수정), 저장 True. 전투 사이클 전체는 사용자 재생
+### 실패와 수정
+- SpikeProjectile damage float→int 캐스팅

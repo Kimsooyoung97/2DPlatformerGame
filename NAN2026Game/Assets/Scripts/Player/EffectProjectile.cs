@@ -71,6 +71,8 @@ namespace NAN2026
             var exec = other.GetComponentInParent<NAN2026.Showroom.ExecutionerBoss>();
             if (exec != null) { exec.TakeHit(damage, dir); return; }
 
+            var minoHit0 = other.GetComponentInParent<NAN2026.MinoBossAI>();
+            if (minoHit0 != null) { minoHit0.TakeDamage(damage); return; }
             NHNDemo.MonsterHealth monster = other.GetComponentInParent<NHNDemo.MonsterHealth>();
             if (monster == null)
                 return;

@@ -1,0 +1,33 @@
+using UnityEngine;
+
+namespace NAN2026
+{
+    [CreateAssetMenu(fileName = "MinoBossConfig", menuName = "NAN2026/MinoBossConfig")]
+    public class MinoBossConfig : ScriptableObject
+    {
+        [Header("전투")]
+        public int maxHp = 30;
+        public float aggroX = 9f;
+        public float attackRange = 2.6f;
+        public float hitReach = 3.4f;      // 공격 명중 인정 거리
+        public float walkSpeed = 2.2f;
+        public int damage = 1;
+        public float attackDuration = 1.1f;
+        public float hitFracStart = 0.5f;  // 애니 중 타격 유효창
+        public float hitFracEnd = 0.75f;
+        public float attackCooldown = 1.6f;
+        [Header("프레임 속도")]
+        public float fpsIdle = 10f;
+        public float fpsWalk = 12f;
+        public float fpsAtk = 14f;
+        public float fpsHit = 14f;
+        public float fpsDeath = 12f;
+        [Header("체력바")]
+        public float barOffsetY = 3.1f;
+        public Sprite barUnder;
+        public Sprite barProgress;
+        public Sprite barOver;
+        [Header("클래시")]
+        public SpikeBallConfig clashConfig;
+    }
+}
