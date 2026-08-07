@@ -93,7 +93,7 @@ namespace NAN2026
             bool loop = state == 0 || state == 1;
             int idx = loop ? (int)animT % cur.Length : Mathf.Min((int)animT, cur.Length - 1);
             sr.sprite = cur[idx];
-            if (player != null && state != 4) sr.flipX = player.position.x < transform.position.x;
+            if (player != null && state != 4 && state != 2) sr.flipX = player.position.x > transform.position.x;
 
             if (state == 4) { if ((int)animT >= cur.Length - 1) enabled = false; return; }
             if (player == null) return;
@@ -142,6 +142,7 @@ namespace NAN2026
         private void BeginAttack()
         {
             atkIs1 = Random.value < 0.5f;
+            if (player != null) sr.flipX = player.position.x > transform.position.x; // 공격 시작 순간 방향 고정
             SetState(2);
         }
     }
