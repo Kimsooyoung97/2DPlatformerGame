@@ -5122,3 +5122,17 @@ Deco40, Furnace는 서로 에셋들이 붙어 있어
 - 사용자 육안
 ### 실패와 수정
 - 팩 원본이 일체형 — 분리 요구는 원본 재작업 영역
+
+
+## [구현] AdventureScene_Test1 — 엑셀 도면 던전 시공 — 2026-08-07 22:00
+### 프롬프트
+AdventureScene_Test 1에 맵을 작성할거야. AdventureScene_Test에서 내가 작성한 맵 구조를 살펴보고 참고해. 엑셀 시트로 레벨 디자인을 했는데, 이를 바탕으로 던전 맵을 디자인 해줘 (G바닥/C채우기/P벽/W물, x플레이어 S배 o상자 B보스 Y버섯 N포탈)
+### 조작 내역
+- 레벨디자인.xlsx 52x258 격자 해독 → AdventureScene_Test1.unity 신설, 타일 5778칸
+- 겹: Stage_Ground(원웨이 베이커+하향점프), Stage_Solid(P벽 완전충돌 신설), Stage_Wall(물 애니, 위W=속/아니면 수면), Stage_Fill(BGDirt 무충돌 -450), Stage_Props
+- 오브젝트: Player@(13,30), 배(Boat), 보스(MidBoss_FireKnight, Player 슬롯 배선 시도), 상자x3(Cainos Chest 01), 포탈(Portal 프리팹), 버섯=자리표시 빈 오브젝트(에셋 부재)
+- 카메라: CM3 추종 리그, 던전 어두운 배경색
+### 검증
+- 저장 True. 동선 주파·물·보스 작동은 사용자 재생
+### 실패와 수정
+- 버섯 프리팹 프로젝트 내 부재 — 자리표시로 대체(스프라이트 확보 시 교체)
