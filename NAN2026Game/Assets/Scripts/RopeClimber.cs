@@ -13,11 +13,16 @@ namespace NAN2026
         private RopeZone zone;
         private bool climbing;
         private float savedGravity;
+        private Collider2D[] wallCols;
+        private Collider2D myCol;
 
         private void Awake()
         {
             rb = GetComponent<Rigidbody2D>();
             controller = GetComponent("PlayerController2D") as Behaviour;
+            myCol = GetComponent<Collider2D>();
+            var wall = GameObject.Find("Stage_Wall");
+            wallCols = wall != null ? wall.GetComponents<Collider2D>() : new Collider2D[0];
         }
 
         private void OnTriggerEnter2D(Collider2D other)
@@ -55,6 +60,9 @@ namespace NAN2026
             rb.gravityScale = 0f;
             rb.linearVelocity = Vector2.zero;
             if (controller != null) controller.enabled = false;
+            var wall = GameObject.Find("Stage_Wall");
+            if (wall != null) wallCols = wall.GetComponents<Collider2D>();
+            if (myCol != null) foreach (var w in wallCols) if (w != null) Physics2D.IgnoreCollision(myCol, w, true);
         }
 
         private void StopClimb(bool jump)
@@ -63,6 +71,7 @@ namespace NAN2026
             rb.gravityScale = savedGravity;
             if (jump) rb.linearVelocity = new Vector2(rb.linearVelocity.x, config.exitJumpVelocity);
             if (controller != null) controller.enabled = true;
+            if (myCol != null && wallCols != null) foreach (var w in wallCols) if (w != null) Physics2D.IgnoreCollision(myCol, w, false);
         }
     }
 }

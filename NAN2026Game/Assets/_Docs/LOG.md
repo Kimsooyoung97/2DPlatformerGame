@@ -5044,3 +5044,15 @@ Decor_6 (1) 캐릭터가 밧줄 범위에 닿인 상태에서 위 방향키 누�
 - 컴파일 0, EditMode 테스트는 아래 실행 기록. 등반 체감은 사용자 재생
 ### 실패와 수정
 없음
+
+
+## [수정] 발판 SecondScene_1 방식 전환 + 등반 관통 — 2026-08-07 20:41
+### 프롬프트
+올라가다가 발판 아래 벽면에 부딪혀서 못올라가는 거 같다. 이거 해결하고 메이플 식으로 우리 SecondScene_1에서 했던 방식으로 모든 발판 다 적용 바람
+### 조작 내역
+- Stage_Wall: TilemapCollider2D 제거 → OneWayTopEdgeBaker(윗면 엣지만·물 colliderType None 제외 패치)+OneWayDropThrough(↓점프 통과)+PlatformEffector 유지 — 옆·밑면 충돌 원천 소멸
+- RopeClimber: 등반 중 Stage_Wall 콜라이더 IgnoreCollision(밧줄이 발판 상하 관통, 이탈 시 복원)
+### 검증
+- 컴파일 0, 저장 True. 타일맵콜라이더 제거 베이커 하향점프  재생 확인은 사용자 (엣지는 재생 시 베이크)
+### 실패와 수정
+없음

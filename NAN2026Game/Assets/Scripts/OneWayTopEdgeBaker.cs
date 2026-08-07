@@ -30,6 +30,7 @@ namespace NAN2026
                 {
                     bool top = x < b.xMax
                         && tm.GetTile(new Vector3Int(x, y, 0)) != null
+                        && tm.GetColliderType(new Vector3Int(x, y, 0)) != Tile.ColliderType.None
                         && tm.GetTile(new Vector3Int(x, y + 1, 0)) == null;
                     if (top && runStart == int.MinValue) runStart = x;
                     if (!top && runStart != int.MinValue)
