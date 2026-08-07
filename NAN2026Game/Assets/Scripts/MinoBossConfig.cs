@@ -25,7 +25,12 @@ namespace NAN2026
         public float fpsAtk = 14f;
         public float fpsHit = 14f;
         public float fpsDeath = 12f;
+        [Header("그로기")]
+        public int groggyNeed = 5;        // 패링 몇 회에 그로기
+        public float groggyTime = 3.0f;   // 무방비 시간
+        public float groggyFxOffsetY = 3.4f;
         [Header("체력바")]
+        public float barScale = 1.8f;      // 견본(sample_100) 크기감
         public float barOffsetY = 3.1f;
         public Sprite barUnder;
         public Sprite barProgress;

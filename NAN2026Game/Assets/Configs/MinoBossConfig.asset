@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70990f24a40562d49b119c1a486b285d, type: 3}
   m_Name: MinoBossConfig
   m_EditorClassIdentifier: Assembly-CSharp::NAN2026.MinoBossConfig
-  maxHp: 30
+  maxHp: 10
   aggroX: 9
   attackRange: 3.3799996
   hitReach: 4.42
@@ -22,11 +22,17 @@ MonoBehaviour:
   hitFracStart: 0.62
   hitFracEnd: 0.82
   attackCooldown: 1.6
+  atk1HoldFrame: 3
+  atk1HoldTime: 0.55
   fpsIdle: 10
   fpsWalk: 12
   fpsAtk: 10.7
   fpsHit: 14
   fpsDeath: 12
+  groggyNeed: 5
+  groggyTime: 3
+  groggyFxOffsetY: 3.4
+  barScale: 1.8
   barOffsetY: 4.0299997
   barUnder: {fileID: 21300000, guid: 6e56a6c15e54bbf44a62fdcdff80e3c5, type: 3}
   barProgress: {fileID: 21300000, guid: 87c8d36c3d4eb584f9d908df57748686, type: 3}
