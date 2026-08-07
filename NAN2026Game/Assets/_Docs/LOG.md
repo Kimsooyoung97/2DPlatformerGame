@@ -5231,3 +5231,15 @@ Tile Palette를 좀 고쳐줘. 아니면 Tile Palette에 있는 모든 것들을
 - 컴파일 0. 그림=장전 일치 확인은 사용자
 ### 실패와 수정
 - ReadPixels 좌표계 실수 자인 — 미리보기는 텍스코드 직결이 표준
+
+
+## [수정] 커스텀 타일 텍스코드 직행 — 2026-08-08 01:31
+### 프롬프트
+이렇게 하면 좋긴한데 수직 물줄기 그림이 안보여 (스크린샷: 일부 칸 공백)
+### 조작 내역
+- 원인: AssetPreview가 커스텀 TileBase 일부에 '빈 그림'을 성공 반환 — 텍스코드 폴백 미도달
+- GetTilePreview: 커스텀 타일(Tile 아님)은 무조건 null 반환 → 텍스코드 직행
+### 검증
+- 컴파일 0, 기둥 프레임 실측: WaterAnim_1_3 → AWT_1_3 rect=(x:46.08, y:224.00, width:17.92, height:25.97) / WaterAnim_2_4 → AWT_2_4 rect=(x:78.29, y:192.00, width:17.71, height:32.00) / WaterAnim_0_5 → AWT_0_5 rect=(x:8.08, y:160.00, width:23.92, height:32.00) / WaterAnim_Fall → WFS_0 rect=(x:14.29, y:0.00, width:17.71, height:32.00) / 
+### 실패와 수정
+없음
