@@ -5331,3 +5331,16 @@ fireattack이랑 firebomb이 원거리 구체라고?
 ### 참고
 - 사용자가 추가해둔 스킬별 히트박스 크기 Config 필드(midBossNormalAttackHitboxWidth 등)는 이제 코드에서 안 쓰입니다 — 대신 각 자식 오브젝트(Normal/Fire/Wheel/Bomb)에 이미 배치해두신 콜라이더 크기가 그대로 판정에 쓰입니다. 필요 없으면 나중에 정리하셔도 됩니다
 - MidBossControllerEditor(마우스 드래그 사거리 편집)의 normalAttackReach/fireAttackReach/fireBombReach/wheelAttackReach 핸들은 이제 실제 판정 위치와 무관해졌습니다(참고용 표시만 됨) — 실제 판정 범위를 조절하시려면 Normal/Fire/Wheel/Bomb 오브젝트의 콜라이더를 직접 씬에서 편집하시면 됩니다
+
+
+## [수정] 병합 후 미노 개명·충돌 정리 — 2026-08-08 08:38
+### 프롬프트
+우리 미노 보스 이름을 바꾸고 MonsterHealth.cs에 관해서 수정한거 다 되돌리자 (+ 팀 26커밋 병합)
+### 조작 내역
+- 팀 원격 26커밋 병합 완료(충돌: LOG=팀 채택, Test1.meta=우리 채택). 팀 유입: 데몬/미드보스 확장·UI Toolkit·MonsterHealth 수정
+- 우리 MinoBossAI→NanMinoBoss 개명(클래스·파일, GUID 승계로 씬 참조 보존), 폴백 3파일(Slash/Spike/Effect) 참조 교체
+- MonsterHealth: 우리 수정 이력 없음 확인 → 되돌릴 것 없음(status M은 전부 팀 변경)
+### 검증
+- 컴파일 0, 우리 5종·팀 4종 타입 공존 확인, Scene2 MinoBoss의 NanMinoBoss 컴포넌트 GUID 생존(MISSING 0)
+### 실패와 수정
+없음

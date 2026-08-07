@@ -81,7 +81,7 @@ namespace NAN2026.Showroom
             if (other.GetComponentInParent<PlayerHealth>() != null)
                 return;
 
-            var minoHit0 = other.GetComponentInParent<NAN2026.MinoBossAI>();
+            var minoHit0 = other.GetComponentInParent<NAN2026.NanMinoBoss>();
             if (minoHit0 != null) { minoHit0.TakeDamage(damage); return; }
             NHNDemo.MonsterHealth monster = other.GetComponentInParent<NHNDemo.MonsterHealth>();
             if (monster != null)
