@@ -4857,3 +4857,14 @@ Decor,Boat,bird,Garden Decoration,Furnace and sawmill등은 왜 소품 타일에
 - 컴파일 0. 버튼 체감은 사용자
 ### 실패와 수정
 없음
+
+
+## [수정] MedievalShowroom 소품 전시 확장 배치 — 2026-08-07 19:04
+### 프롬프트
+아니 MedievalShowroom에 배치해라구
+### 조작 내역
+- PropsShowcase에 신규 프리팹 97종 추가 배치(기존 28 유지, 폭 62u 줄바꿈, 행간 7u)
+### 검증
+- 저장 True
+### 실패와 수정
+없음
