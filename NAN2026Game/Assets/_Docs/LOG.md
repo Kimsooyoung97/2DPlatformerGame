@@ -4777,3 +4777,20 @@ Update()의 스프라이트 반전(sr.flipX)은 이미 busy일 때 건너뛰도�
 - 없음(로직 수정은 코드 리뷰로 정확성 확인, 동적 실측은 도구 환경 한계로 결론 못 냄)
 ### 사람 확인 필요 — 중요
 - 이번 수정은 코드 로직상으로는 명확히 맞지만(HoldForRemainingAnim이 클립 전체 길이만큼 busy를 강제 유지), 실제 재생에서 애니메이션 도중 방향이 안 바뀌는지 **직접 눈으로 확인 부탁드립니다**. 도구로 정밀하게 재현·검증하는 데 이번엔 계속 실패했습니다
+
+## [구현] 보스 전용 화면 우측 상단 체력바(BossHealthBarUI) — 2026-08-07
+### 프롬프트
+다른몬스터들 WorldHealthBar와는 다르게 보스전용 체력바로 화면 우측 상단에 존재하는 체력바 스크립트 짜줘
+### 조사
+WorldHealthBar는 SpriteRenderer 두 장으로 몬스터 머리 위에 월드 스페이스로 그리는 범용 몬스터 체력바(모든 몬스터 공용). UI Canvas에 이미 플레이어용 HP바(Portrait/HpBar, Image Type=Filled, PlayerHealthBarUI)가 있어 같은 시각 스타일(Image Filled)로 보스 전용 화면 고정 UI를 만들기로 함
+### 조작 내역
+- BossHealthBarUI.cs 신규: NHNDemo.MonsterHealth의 OnHealthChanged/OnDied를 구독. fillImage.fillAmount와 텍스트를 갱신, 죽으면 root를 자동 비활성화. SetBoss(MonsterHealth)로 나중에 스폰되는 보스에도 재사용 가능하게 공개 메서드 제공
+- UI Canvas에 BossHealthBar(우측 상단 고정, anchorMin/Max=(1,1)) 계층 신규 생성: Background(반투명 검정) + Fill(Image Filled Horizontal, 플레이어 HP바와 같은 스프라이트 재사용) + BossName(TMP, "MidBoss") + HP(TMP, "N / M")
+- BossHealthBarUI를 BossHealthBar 루트에 부착, bossHealth=MidBoss의 MonsterHealth로 연결
+### 검증
+- refresh_unity(compile=force) 후 read_console(types=error) → 0건
+- 저장 → manage_scene(load) 강제 재로드 → 참조 5개(bossHealth/fillImage/label/bossNameLabel/root) 전부 유지 확인
+- run_tests(EditMode) → 140/140 통과 (job 228755e9380b45d1987a78b0bdb09c23)
+- 재생 모드 실측: 시작 시 fillAmount=1, "30 / 30" 정상 표시 확인. TakeDamage(12) 호출 → fillAmount=0.6(18/30과 정확히 일치), 라벨 "18 / 30" 확인. 즉사 데미지 호출 → OnDied로 root.active=False 자동 전환 확인
+### 실패와 수정
+- 없음
