@@ -5871,3 +5871,16 @@ Decor_40, Furnace 보면 서로 붙어 있어. 이거 떼어서 쓸 수 있게 �
 - 실제 통과·착지 감각은 사용자 재생
 ### 실패와 수정
 없음
+
+
+## [수정] 발판 아랫면 접지 버그 — 2026-08-09 00:51
+### 프롬프트
+발판에서 빨간색 바닥면도 밟을 수 있게 되어있는데 이러면 안돼 (도해 첨부)
+### 조작 내역
+- 추적: 타일맵 셋업 정상(TilemapCol usedByComposite=True·Composite usedByEffector=True·Effector oneWay arc170), 컴포지트 형상도 정상 사각형(top y38/bottom y37). Platform_ 접두 오브젝트 0개 → 원웨이는 전적으로 효과기 담당
+- 진범: PlayerController2D의 접지 산출이 `grounded = !ignoringGround && CastGroundNoTriggers() > 0`로 덮어써져 있고, 이 함수가 **법선 검사 없이** Cast 히트 수만 셈 → 원웨이 발판의 아랫면·통과 중 겹침(거리0)까지 접지로 인정 (위쪽 경로엔 IsGroundNormal 검사가 있는데 여기서 무효화)
+- 수정: CastGroundNoTriggers가 IsGroundNormal(config.groundNormalMinY) 통과 히트만 카운트 — 윗면만 접지 인정
+### 검증
+- 컴파일 0. 발판 밑면 착지 불가·정상 착지 유지는 사용자 재생
+### 실패와 수정
+없음
