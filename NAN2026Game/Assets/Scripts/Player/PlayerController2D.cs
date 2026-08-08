@@ -61,6 +61,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
     private float queuedAttackLunge;
     private string activeAttack;
     private float activeAttackLunge;
+    public static float AttackSpeedMul = 1f; // 그로기 버스트 공속 배율(평시 1)
     private float attackTimer;
     private bool parryHeld;
     private float parryEndTimer;
@@ -497,7 +498,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
         bool attacking = attackTimer > 0f;
         if (attacking)
         {
-            attackTimer -= Time.fixedDeltaTime;
+            attackTimer -= Time.fixedDeltaTime * AttackSpeedMul;
             // 1타 캔슬 구간 진입 + 2타 예약됨 → 즉시 2타 발동(반응성)
             if (comboVStage == 1 && comboVBuffered && activeAttack == "ComboV1"
                 && attackTimer <= config.slashDuration * (1f - config.comboVCancelFrac))

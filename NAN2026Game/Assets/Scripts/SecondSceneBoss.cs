@@ -24,6 +24,9 @@ namespace NAN2026
         private Transform barFill;
         private float barFullW;
         private GameObject groggyFx;
+        private GameObject burstMsg;
+        private Coroutine sparkleCo, dashCo;
+        private SpriteRenderer playerSr;
         private float lastParryPress = -999f;
         private float lastConsumed = -999f;
         private bool ParryBuffered()
@@ -90,7 +93,74 @@ namespace NAN2026
             cur = s == 0 ? idleF : s == 1 ? walkF : s == 2 ? (atkIs1 ? atk1F : atk2F) : s == 3 ? hitF : s == 5 ? hitF : deathF;
             curFps = s == 0 ? config.fpsIdle : s == 1 ? config.fpsWalk : s == 2 ? config.fpsAtk : config.fpsHit;
             if (s == 4) curFps = config.fpsDeath;
-            if (s == 5) BeginGroggyFx(); else EndGroggyFx();
+            if (s == 5) { BeginGroggyFx(); BeginBurst(); } else { EndGroggyFx(); EndBurst(); }
+        }
+
+        private void BeginBurst()
+        {
+            PlayerController2D.AttackSpeedMul = config.burstAtkSpeedMul;
+            // 안내 문구 (그로기 동안 유지)
+            burstMsg = new GameObject("BurstMsg");
+            burstMsg.transform.position = (player != null ? player.position : transform.position) + Vector3.up * 2.6f;
+            var tm = burstMsg.AddComponent<TextMesh>();
+            tm.text = "Z 연타! 공격 찬스!";
+            tm.fontSize = 52; tm.characterSize = 0.08f;
+            tm.anchor = TextAnchor.MiddleCenter;
+            tm.color = new Color(1f, 0.85f, 0.2f);
+            burstMsg.GetComponent<MeshRenderer>().sortingOrder = 950;
+            if (player != null) playerSr = player.GetComponent<SpriteRenderer>();
+            sparkleCo = StartCoroutine(SparkleLoop());
+        }
+
+        private void EndBurst()
+        {
+            PlayerController2D.AttackSpeedMul = 1f;
+            if (burstMsg != null) Destroy(burstMsg);
+            if (sparkleCo != null) StopCoroutine(sparkleCo);
+            if (playerSr != null) playerSr.color = Color.white;
+        }
+
+        private System.Collections.IEnumerator SparkleLoop()
+        {
+            float t0 = Time.time;
+            while (state == 5)
+            {
+                if (playerSr != null)
+                {
+                    float g = 0.75f + 0.25f * Mathf.Sin((Time.time - t0) * 10f);
+                    playerSr.color = new Color(1f, g, 0.55f + 0.45f * g);
+                }
+                var star = new GameObject("BurstStar");
+                star.transform.position = (player != null ? player.position : transform.position)
+                    + new Vector3(Random.Range(-0.6f, 0.6f), Random.Range(0.2f, 1.6f), 0f);
+                var st = star.AddComponent<TextMesh>();
+                st.text = "\u2726";
+                st.fontSize = 36; st.characterSize = 0.06f;
+                st.anchor = TextAnchor.MiddleCenter;
+                st.color = new Color(1f, 0.95f, 0.4f);
+                star.GetComponent<MeshRenderer>().sortingOrder = 940;
+                star.AddComponent<PopupFloater>().Init(0.9f, 0.55f);
+                yield return new WaitForSeconds(config.sparkleInterval);
+            }
+        }
+
+        private System.Collections.IEnumerator DashToBoss()
+        {
+            // Z 자동 대시: 컨트롤러 잠깐 끄고 보스 앞까지 고속 이동
+            var pcComp = player != null ? player.GetComponent<PlayerController2D>() : null;
+            if (pcComp != null) pcComp.enabled = false;
+            var rb = player != null ? player.GetComponent<Rigidbody2D>() : null;
+            float side = player.position.x < transform.position.x ? -1f : 1f;
+            Vector3 target = transform.position + new Vector3(side * config.burstDashStopX, 0f, 0f);
+            target.y = player.position.y;
+            while (state == 5 && Vector2.Distance(player.position, target) > 0.08f)
+            {
+                player.position = Vector3.MoveTowards(player.position, target, config.burstDashSpeed * Time.deltaTime);
+                if (rb != null) rb.linearVelocity = Vector2.zero;
+                yield return null;
+            }
+            if (pcComp != null) pcComp.enabled = true;
+            dashCo = null;
         }
 
         private void BeginGroggyFx()
@@ -238,6 +308,10 @@ namespace NAN2026
             }
             else if (state == 5)
             {
+                if (burstMsg != null && player != null)
+                    burstMsg.transform.position = player.position + Vector3.up * 2.6f;
+                if (kb != null && kb.zKey.wasPressedThisFrame && dashCo == null && dx > config.burstDashStopX + 0.5f)
+                    dashCo = StartCoroutine(DashToBoss());
                 if (stateT >= config.groggyTime) { nextAtk = Time.time + config.attackCooldown; SetState(0); }
             }
         }

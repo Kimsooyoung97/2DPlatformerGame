@@ -5444,3 +5444,16 @@ fireattack이랑 firebomb이 원거리 구체라고?
 해당 없음
 ### 커밋
 해당 없음(무수정)
+
+
+## [구현] 그로기 버스트 (Z연타 안내·자동대시·공속2배·반짝) — 2026-08-08 19:08
+### 프롬프트
+[구현]그로기 버스트 진행하자
+### 조작 내역
+- PlayerController2D 최소 패치: static AttackSpeedMul(평시 1) — attackTimer 감소 배율 1줄
+- MinoBossConfig: burstAtkSpeedMul 2·dashSpeed 20·dashStopX 1.7·sparkleInterval 0.22
+- SecondSceneBoss: 그로기 진입 시 'Z 연타! 공격 찬스!' 문구(플레이어 추적)+공속 2배+금빛 펄스·✦ 반짝 루프 / Z 첫입력 시 보스 앞 1.7u까지 자동 대시(컨트롤러 임시 비활성→복귀) / 그로기 종료 시 전부 원상복구
+### 검증
+- 컴파일 0, 타입 반영 ✓. 버스트 체감은 사용자 재생
+### 실패와 수정
+없음
