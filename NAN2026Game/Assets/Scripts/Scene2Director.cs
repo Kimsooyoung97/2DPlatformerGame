@@ -84,8 +84,21 @@ namespace NAN2026
 
         private bool doneFocusHoldExtended() { return false; }
 
+        private void SetPlayerControl(bool on)
+        {
+            if (player == null) return;
+            foreach (var mb in player.GetComponents<MonoBehaviour>())
+            {
+                string n = mb.GetType().Name;
+                if (n == "PlayerController2D" || n == "PlayerSkill") ((Behaviour)mb).enabled = on;
+            }
+            var rb = player.GetComponent<Rigidbody2D>();
+            if (rb != null && !on) rb.linearVelocity = Vector2.zero;
+        }
+
         private IEnumerator Brighten()
         {
+            SetPlayerControl(false); // 컷신 락: 밝아지는 동안 캐릭터 정지·입력 무시
             // 스파이크 전면 정지
             foreach (var l in FindObjectsByType<ThrownWeaponLauncher>(FindObjectsSortMode.None)) l.enabled = false;
             foreach (var pr in FindObjectsByType<ThrownProjectile>(FindObjectsSortMode.None)) Destroy(pr.gameObject);
@@ -104,6 +117,8 @@ namespace NAN2026
                 yield return null;
             }
             global.intensity = config.brightenTarget;
+            yield return new WaitForSeconds(config.brightenHold);
+            SetPlayerControl(true); // 연출 종료 → 조작 복귀
         }
     }
 }

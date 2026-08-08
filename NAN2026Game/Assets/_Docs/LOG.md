@@ -5380,3 +5380,15 @@ SecondScene2에서 보스와 패링할때 0.2초 정도 빨리해도 다 되도�
 해당 없음
 ### 커밋
 해당 없음(무수정)
+
+
+## [구현] 밝아짐 연출 입력 락 (A방안) — 2026-08-08 16:44
+### 프롬프트
+[구현]A방안으로 진행하자 (아무 키 눌러도 계속 재생·캐릭터는 안 움직임)
+### 조작 내역
+- Scene2Director.Brighten: 시작 시 SetPlayerControl(false)=PlayerController2D·PlayerSkill 비활성+속도0(입력 무시·정지), 밝아짐 1.8s+여유 brightenHold 0.6s 후 복귀
+- Scene2DirectorConfig.brightenHold 0.6 신설
+### 검증
+- 컴파일 0. 락·복귀는 사용자 재생
+### 실패와 수정
+없음
