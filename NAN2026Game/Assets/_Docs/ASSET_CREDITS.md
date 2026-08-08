@@ -48,18 +48,16 @@
 - Assets/Cainos/ (Pixel Art Platformer - Village Props, Interactive Pixel Water 등): 유니티 에셋 스토어, 표준 라이선스 (사용자 다운로드)
 - Assets/Sprites_AI/Map_Castle/: 사용자 생성 AI 산출물 (성 안뜰 구간용)
 
-<<<<<<< HEAD
 - Effect_Vol.3 (에셋 팩, Assets/Effect_Vol.3): Effect_1.png 9프레임을 플레이어 스킬 내려찍기 이펙트로 사용. 라이선스: 팀 도입 팩(확인 필요 시 팀 문의)
 - 기사_스킬대기.png (생성형 AI 산출물, Assets/Map): 플레이어 스킬 모션용. 생성 프롬프트 미제공 — 불투명 배경으로 슬라이싱 보류 중
 
 - Forest Platformer Pixel Art Tileset (sanctum pixel, Assets/sanctum_pixel/forest_side_pack): 에셋스토어 구매. 재배포 불가 — gitignore 등재, 각 팀원 개별 임포트 필요. 숲 타일 27종·패럴랙스 배경
-=======
+
 ## sanctum_pixel/forest_side_pack (2026-08-02)
 - 파일: Assets/sanctum_pixel/forest_side_pack/** (Sprites/Background/{sky,sky_cloud,cloud,mountain,pine1,pine2}.png, Sprites/Tileset/forest_tileset.png + Palette 27종, Sprites/Props/{Bush,Pine,Pine_dead,Rock,Tree,Tree_dead,Upper_grass,Flower(5색)}
 - 출처: 프로젝트에 기존 임포트되어 있던 에셋(누가/언제 추가했는지 이번 세션에서는 확인 불가). 사용자 승인 하에 FirstScene 배경(Ground/Platforms/Backdrop/Decoration)에 신규 사용
 - 라이선스: 미확인 (두 Biome 팩과 동일하게 라이선스 확인 전까지 git 커밋에서 제외함)
 - 생성 프롬프트: 해당 없음 (기성 에셋, AI 생성 아님)
->>>>>>> 707c9ff87baa8d651e7b4c541f07bd73fdeaf1c4
 
 - 기사_스킬대기.png·기사_패링(Knight_Parry).png 수정본 교체(2026-08-03): 동일 그림, 생성 단계에서 배경 세심 제거 — 재조립·재분할로 반영
 
