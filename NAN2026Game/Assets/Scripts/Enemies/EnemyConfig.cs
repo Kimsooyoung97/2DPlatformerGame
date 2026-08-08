@@ -16,6 +16,11 @@ namespace NAN2026
         public float walkSpeed = 1.6f;
         public float attackCooldown = 1.6f;
 
+        [Header("군집 제어")]
+        public float stopDistance = 1.4f;    // 이 안쪽으로는 파고들지 않는다
+        public float separation = 1.0f;      // 진행 방향 앞 동료와의 최소 간격
+        public float fireStagger = 0.8f;     // 최초 공격 준비까지 랜덤 지연 상한
+        public float cooldownJitter = 0.6f;  // 쿨다운 ± 편차(동기화 방지)
         [Header("공격")]
         public float attackDur = 0.75f;
         public float hitWinS = 0.45f;      // 타격 시간창 시작(진행률)

@@ -19,6 +19,10 @@ MonoBehaviour:
   attackRange: 10
   walkSpeed: 1.2
   attackCooldown: 2
+  stopDistance: 6
+  separation: 1.6
+  fireStagger: 1.6
+  cooldownJitter: 1.2
   attackDur: 0.92
   hitWinS: 0.45
   hitWinE: 0.65

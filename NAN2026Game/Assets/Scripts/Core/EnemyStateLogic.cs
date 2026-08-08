@@ -19,6 +19,49 @@ namespace NAN2026.Core
             return Idle;
         }
 
+        /// 정지-대기형 판단. 사거리 안이면 쿨다운이 끝났을 때만 공격하고,
+        /// 쿨다운 중에는 **더 다가가지 않고 대기(Idle)** 한다.
+        /// 기존 Decide 는 쿨다운 중 Walk 를 반환해 적이 플레이어를 관통해 지나갔다(다수 배치 시 한 점에 겹침).
+        public static int DecideWithHold(float distX, float aggroRange, float attackRange, bool attackReady)
+        {
+            if (distX <= attackRange) return attackReady ? Attack : Idle;
+            if (distX <= aggroRange) return Walk;
+            return Idle;
+        }
+
+        /// 이번 프레임에 허용되는 접근 거리. stopDistance 안쪽으로는 파고들지 않는다.
+        public static float MoveStep(float distX, float stopDistance, float speed, float dt)
+        {
+            if (speed <= 0f || dt <= 0f) return 0f;
+            float room = distX - stopDistance;
+            if (room <= 0f) return 0f;
+            float step = speed * dt;
+            return step > room ? room : step;
+        }
+
+        /// 진행 방향 앞쪽 separation 안에 동료가 있으면 멈춘다(겹침 방지).
+        public static bool BlockedByNeighbor(float selfX, float neighborX, float moveSign, float separation)
+        {
+            if (separation <= 0f) return false;
+            float d = (neighborX - selfX) * moveSign;   // 양수면 진행 방향 앞
+            return d > 0f && d < separation;
+        }
+
+        /// 쿨다운에 편차를 준다. rand01 은 0~1. 동일 쿨다운으로 인한 영구 동기화를 깬다.
+        public static float JitteredCooldown(float baseCooldown, float jitter, float rand01)
+        {
+            if (jitter <= 0f) return baseCooldown;
+            float v = baseCooldown + (rand01 - 0.5f) * jitter;
+            return v < 0f ? 0f : v;
+        }
+
+        /// 최초 공격 준비까지의 랜덤 지연. 동시 진입 시 첫 발이 겹치는 것을 막는다.
+        public static float InitialDelay(float stagger, float rand01)
+        {
+            if (stagger <= 0f) return 0f;
+            return rand01 * stagger;
+        }
+
         /// 누적 피격 수가 사망 기준에 도달했는가.
         public static bool IsDead(int hitsTaken, int hitsToDie)
         {

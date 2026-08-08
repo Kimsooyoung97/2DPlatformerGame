@@ -18,6 +18,11 @@ namespace NAN2026
         protected SpriteRenderer sr;
         protected Transform player;
         private Coroutine flashCo;
+        private float spawnY;              // 배치 높이를 접지 기준으로 (config.groundY 고정 시 다층 배치 불가)
+        private static readonly System.Collections.Generic.List<EnemyBase> All = new System.Collections.Generic.List<EnemyBase>();
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetStaticsOnPlay() { All.Clear(); }   // DisableDomainReload 대응
 
         protected virtual void Start()
         {
@@ -27,8 +32,13 @@ namespace NAN2026
             var rb = GetComponent<Rigidbody2D>();
             if (rb != null) rb.useFullKinematicContacts = true; // FAIL#6
             player = PlayerLocator.FindTransform();
+            spawnY = transform.position.y;
+            nextAtk = Time.time + EnemyStateLogic.InitialDelay(config.fireStagger, Random.value); // 첫 발 산개
+            if (!All.Contains(this)) All.Add(this);
             SetState(EnemyStateLogic.Idle);
         }
+
+        protected virtual void OnDestroy() { All.Remove(this); }
 
         protected virtual void Update()
         {
@@ -37,7 +47,7 @@ namespace NAN2026
             if (config.snapToGround)
             {
                 var p = transform.position;
-                if (!Mathf.Approximately(p.y, config.groundY)) transform.position = new Vector3(p.x, config.groundY, p.z);
+                if (!Mathf.Approximately(p.y, spawnY)) transform.position = new Vector3(p.x, spawnY, p.z);
             }
 
             if (state == EnemyStateLogic.Death)
@@ -60,15 +70,39 @@ namespace NAN2026
 
             if (state == EnemyStateLogic.Attack) { DoAttack(dx, face); return; }
 
-            int want = EnemyStateLogic.Decide(dx, config.aggroRange, config.attackRange, Time.time >= nextAtk);
+            int want = EnemyStateLogic.DecideWithHold(dx, config.aggroRange, config.attackRange, Time.time >= nextAtk);
             if (want == EnemyStateLogic.Attack) { SetState(EnemyStateLogic.Attack); return; }
-            if (want == EnemyStateLogic.Walk)
+            if (want == EnemyStateLogic.Walk && !BlockedAhead(face))
             {
-                transform.position += new Vector3(face * config.walkSpeed * Time.deltaTime, 0f, 0f);
-                Anim(walkFrames, true);
-                return;
+                float step = EnemyStateLogic.MoveStep(dx, config.stopDistance, config.walkSpeed, Time.deltaTime);
+                if (step > 0f)
+                {
+                    transform.position += new Vector3(face * step, 0f, 0f);
+                    Anim(walkFrames, true);
+                    return;
+                }
             }
             Anim(idleFrames, true);
+        }
+
+        /// 진행 방향 앞에 같은 종류의 동료가 separation 안에 있으면 멈춘다(겹침 방지).
+        protected bool BlockedAhead(float moveSign)
+        {
+            for (int i = 0; i < All.Count; i++)
+            {
+                var o = All[i];
+                if (o == null || o == this) continue;
+                if (o.state == EnemyStateLogic.Death) continue;
+                if (EnemyStateLogic.BlockedByNeighbor(transform.position.x, o.transform.position.x, moveSign, config.separation))
+                    return true;
+            }
+            return false;
+        }
+
+        /// 다음 공격까지의 대기. 쿨다운에 편차를 줘 개체 간 동기화를 깬다.
+        protected float NextAttackAt()
+        {
+            return Time.time + EnemyStateLogic.JitteredCooldown(config.attackCooldown, config.cooldownJitter, Random.value);
         }
 
         /// 시트 기본 바라보는 방향에 따라 반전 규칙이 다르다.
@@ -85,7 +119,7 @@ namespace NAN2026
                 dealtThisSwing = true;
                 player.SendMessage("TakeDamage", (float)config.damage, SendMessageOptions.DontRequireReceiver);
             }
-            if (frac >= 1f) { nextAtk = Time.time + config.attackCooldown; SetState(EnemyStateLogic.Idle); }
+            if (frac >= 1f) { nextAtk = NextAttackAt(); SetState(EnemyStateLogic.Idle); }
         }
 
         public void TakeDamage(int amount)

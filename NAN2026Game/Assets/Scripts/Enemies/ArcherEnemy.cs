@@ -23,7 +23,7 @@ namespace NAN2026
                 firedThisDraw = true;
                 Fire(face);
             }
-            if (frac >= 1f) { nextAtk = Time.time + config.attackCooldown; SetState(EnemyStateLogic.Idle); }
+            if (frac >= 1f) { nextAtk = NextAttackAt(); SetState(EnemyStateLogic.Idle); }
         }
 
         private void Fire(float face)

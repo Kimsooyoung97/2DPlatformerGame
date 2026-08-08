@@ -6553,3 +6553,41 @@ PlayerFxConfig.enableDebugKeys (5·6 미리보기)
 - 어제 [구현] 시 잡몹을 1마리씩만 배치해 다중 개체 문제를 검증하지 않았다. 분리·정지거리 없는 추적은 다수 배치 시 반드시 겹친다 — 설계 단계에서 걸렀어야 함
 ### 커밋
 해당 없음(무수정)
+
+
+## [구현] 잡몹 증원 12마리 + 군집 제어 + 무적 0.6초 복귀 — 2026-08-09 07:53
+### 프롬프트
+[구현]앞서 조사한것을 바탕으로 진행하자.Knight 정지거리, 간격, 상태 너가 조사를 통해 권고사항 수치를 적용하자. Archor 상태 또한 랜덤으로 공격할 수 있도록 진행하고 적군을 늘리는 만큼 무적시간을 0.6초로 늘리고 너무 몰리지 않도록 너가 권장한 수치로 배치하자.
+### 조작 내역
+**순수 로직 NAN2026.Core/EnemyStateLogic 확장 (+5 함수)**
+- `DecideWithHold` — 사거리 안이면 쿨다운 완료 시에만 Attack, **쿨다운 중에는 Idle**. 기존 Decide 는 Walk 를 반환해 적이 플레이어를 관통·중첩했다(실측: Decide(1.5,10,2,false)=1 Walk → DecideWithHold=0 Idle)
+- `MoveStep` — stopDistance 안쪽으로 파고들지 못하게 이번 프레임 이동량을 남은 여유로 클램프
+- `BlockedByNeighbor` — 진행 방향 앞 separation 안에 동료가 있으면 정지
+- `JitteredCooldown` / `InitialDelay` — 쿨다운 편차와 최초 랜덤 지연. 난수를 인자로 받아 순수 함수 유지(테스트 가능)
+**EnemyConfig +4 필드**: stopDistance / separation / fireStagger / cooldownJitter
+**EnemyBase 변경**
+- 판단을 DecideWithHold 로 교체, 이동을 MoveStep + BlockedAhead 로 게이트
+- 정적 All 리스트로 개체 간 분리 판정 (RuntimeInitializeOnLoadMethod 리셋 동봉 — DisableDomainReload 대응)
+- Start 에서 `nextAtk = Time.time + InitialDelay(fireStagger, Random.value)` → 첫 공격 산개
+- 공격 종료 시 `NextAttackAt()` 으로 지터 쿨다운 적용 (근접·원거리 공통)
+- **접지 기준을 config.groundY → 인스턴스 spawnY 로 변경**. Config 는 단일 값이라 다층 배치(y=0.04/2.04/3.04)가 불가능했다
+**수치**
+- Knight: stopDistance 1.4 / separation 1.0 / fireStagger 0.8 / cooldownJitter 0.6
+- Archer: stopDistance 6.0(원거리는 붙지 않는다) / separation 1.6 / fireStagger 1.6 / cooldownJitter 1.2
+- 무적 0.45 → **0.6** (PlayerCombatConfig.hitInvulnerabilityDuration), FeelConfig.invincibilityDuration·hitFlashDuration 도 0.6 으로 동기화(깜빡임=무적 길이 규칙 유지)
+**배치 — Scene3, 각 6마리 (기존 2마리 제거 후 재배치)**
+- Knight x = 12 / 22 / 31 / 40 / 47 (y=0.04), 55 (y=2.04)
+- Archer x = 17 / 26 / 35 / 44 (y=0.04), 58 (y=2.04), 67 (y=3.04)
+- 근접·원거리를 교대 배치. 인접 간격 3~9u, 카메라 가시폭 24u(orthoSize 6.75, 16:9) 기준 **한 화면 최대 4마리** 수준
+### 검증
+- 컴파일 0, read_console error/exception 0건
+- EditMode 217/217 통과 (EnemyStateLogicTests 10개 신규, 실패 0)
+- 리플렉션 실행 검증: DecideWithHold(1.5,10,2,false)=0(Idle) vs Decide=1(Walk) / MoveStep(1.45,1.4,2,0.1)=0.05 / BlockedByNeighbor(10,10.5,+1,1.0)=True / JitteredCooldown(2,0.6,0)=1.7·(2,0.6,1)=2.3
+- Config 재읽기: Knight stop1.4 sep1.0 stagger0.8 jitter0.6 / Archer stop6.0 sep1.6 stagger1.6 jitter1.2 / 무적 0.6 / flashDuration 0.6
+- 씬 재로드 검증: 12마리(Knight 6 / Archer 6) 전원 생존, config 배선·스프라이트 배열 전수 정상, 배치 y 가 각 지점 바닥(0.04/2.04/3.04)과 일치
+- 테스트 후 씬 생존 재확인: dirty=False, 적 12마리
+- **사용자 눈 판정 필요**: (1) Knight 들이 겹치지 않고 1.4u 앞에서 멈추는지 (2) 쿨다운 중 파고들지 않고 대기하는지 (3) Archer 화살이 동시에 안 날아오는지 (4) 한 화면에 너무 많이 보이지 않는지 (5) 무적 0.6초 체감
+### 실패와 수정
+- 없음
+### 미결
+- hitsToDie 는 5 유지. 조사에서 3 을 권고했으나 이번 명령에 포함되지 않아 임의 변경하지 않았다. 12마리 x 5대 = 60타가 3~5분 플레이에 과하면 조정 필요

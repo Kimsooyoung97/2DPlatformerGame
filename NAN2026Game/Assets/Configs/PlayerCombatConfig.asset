@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: PlayerCombatConfig
   m_EditorClassIdentifier: Assembly-CSharp::PlayerCombatConfig
   maxHealth: 10
-  hitInvulnerabilityDuration: 0.45
+  hitInvulnerabilityDuration: 0.6
   knockbackDistance: 0.25
   parryCounterDamage: 2
   rollInvincibilityDuration: 0.25
