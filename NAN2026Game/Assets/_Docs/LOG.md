@@ -5647,3 +5647,23 @@ boss_demon_final 시트로 데몬보스: 플레이어 7배, 투사체 3배, tran
 - 컴파일 0, 재검증 통과. 변신 인트로 기동은 사용자 재생
 ### 실패와 수정
 - 첫 배선 시 검증 읽기 생략 자인 — 배선 후 재읽기 검증을 표준 수순으로
+
+
+## [조사] STATE 인계 요약 기준 현재 상태·잔여 우선순위 — 2026-08-08 21:21
+### 프롬프트
+[조사] STATE.md 인계 요약 기준으로 현재 상태 파악하고, 남은 작업 우선순위 확인해줘
+### 조사 결과
+- git: main, 워킹트리 청결, origin/main 대비 ahead 22 (푸시 미실행 — 사람 몫). 리모트 origin=NAN2026Game1(포크), upstream=NoImpMe/NAN2026Game
+- 빌드 타깃 이미 WebGL. 빌드 씬 6개: TitleScene/OpeningScene/AdventureScene1~4 (Builds 폴더 없음 = 빌드 리허설 미실행)
+- **[치명] 씬 전이 사슬 단절**: AdventureScene3.nextSceneName = "SecondScene_1" — 프로젝트에 존재하지 않는 씬. AS3 클리어 시 런타임 예외. 또한 AdventureScene4(데몬 보스)로 들어오는 포탈이 없어 고아 씬이며, AS4 이후 엔딩 전이도 없음(Ending1/2는 빌드 목록 밖)
+- 디버그 플래그 현황: Scene2DirectorConfig.debugSkipToBoss=False(OK) / MinoBossConfig.showParryDebug=True(**미해제**) / MidBossConfig.showRangesInGame=True(**미해제**, 팀 소유 config)
+- STATE '즉시 미결 1(SecondScene_extra를 빌드 목록에 추가)'은 씬 재편(ActiveScene/AdventureSceneN)으로 무효화됨 — STATE 08-05 절이 낡음
+- STATE 'WebGL 지뢰 4(SlashProjectile→gitignored NHNDemo.MonsterHealth)'는 **이미 해소**. NAN2026Game/Assets/Player/Scripts/MonsterHealth.cs 추적 중(git ls-files 확인), check-ignore 무매치. NHNDemo 참조 파일 18개 전부 추적 폴더 내
+- 씬 전이는 전부 직렬화 문자열 필드(Portal/PortalUpKey/CutsceneDirector/TitleScreen/VideoCutsceneDirector) — 문자열 오타가 컴파일로 안 잡힘. PauseMenu 기본값 "FirstTitle", CutsceneDirector 기본값 "ThirdScene"도 빌드 목록 밖(인스턴스 오버라이드 여부 별도 확인 필요)
+- 에디터: isPlaying=False, isCompiling=False, 활성 씬 AdventureScene4(dirty=False)
+### 검증
+해당 없음
+### 실패와 수정
+없음
+### 커밋
+해당 없음(무수정)
