@@ -42,6 +42,8 @@ namespace NAN2026
         {
             sr = GetComponent<SpriteRenderer>();
             hp = config.maxHp;
+            var rbSelf = GetComponent<Rigidbody2D>();
+            if (rbSelf != null) rbSelf.useFullKinematicContacts = true; // Kinematic끼리 트리거 이벤트 보장 (FAIL#트리거)
             var p = GameObject.Find("Player");
             if (p != null)
             {

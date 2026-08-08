@@ -5586,3 +5586,15 @@ mino_health_UI_sample_100 쓴거 지워버리고 공격당하면 take_hit+피 �
 - 컴파일 0. 점멸·팝업·death는 사용자 재생
 ### 실패와 수정
 없음
+
+
+## [수정] 미노 피격 무반응 — Kinematic 트리거 스위치 — 2026-08-08 20:20
+### 프롬프트
+Z로 공격해도 아무런 피격모션도 안뜨고 피 까이는 UI도 안보여
+### 조작 내역
+- 진단: 폴백·레이어 무죄 → Z 히트박스(Kinematic RB)와 미노(Kinematic RB) 양쪽 모두 useFullKinematicContacts=false → 트리거 이벤트 무발생 (기존 FAIL 항목 재범 — 구보스는 Dynamic이라 무사했음)
+- 미노 씬 RB useFullKinematicContacts=true + SecondSceneBoss.Start 방어 세팅
+### 검증
+- 컴파일 0, 씬 저장. Z 타격→경직·점멸·HP 팝업은 사용자 재생
+### 실패와 수정
+- FAIL 기재 함정 재범 자인 — 보스 생성 시 체크리스트에 반영
