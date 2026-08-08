@@ -66,7 +66,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 309.26175
+  spritePixelsToUnits: 309.23407
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -144,12 +144,12 @@ TextureImporter:
       name: Player_Death_0
       rect:
         serializedVersion: 2
-        x: 0
+        x: 66
         y: 681
-        width: 350
+        width: 210
         height: 288
       alignment: 9
-      pivot: {x: 0.5, y: 0}
+      pivot: {x: 0.48839453, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -166,12 +166,12 @@ TextureImporter:
       name: Player_Death_1
       rect:
         serializedVersion: 2
-        x: 355
+        x: 396
         y: 681
-        width: 350
-        height: 288
+        width: 269
+        height: 277
       alignment: 9
-      pivot: {x: 0.5, y: 0}
+      pivot: {x: 0.6581001, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -188,12 +188,12 @@ TextureImporter:
       name: Player_Death_2
       rect:
         serializedVersion: 2
-        x: 0
+        x: 28
         y: 359
-        width: 350
-        height: 288
+        width: 266
+        height: 285
       alignment: 9
-      pivot: {x: 0.5, y: 0}
+      pivot: {x: 0.7052652, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -210,12 +210,12 @@ TextureImporter:
       name: Player_Death_3
       rect:
         serializedVersion: 2
-        x: 383
+        x: 397
         y: 321
-        width: 350
-        height: 288
+        width: 322
+        height: 197
       alignment: 9
-      pivot: {x: 0.5, y: 0}
+      pivot: {x: 0.5768607, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -232,12 +232,12 @@ TextureImporter:
       name: Player_Death_4
       rect:
         serializedVersion: 2
-        x: 17
+        x: 22
         y: 55
-        width: 350
-        height: 288
+        width: 341
+        height: 160
       alignment: 9
-      pivot: {x: 0.5, y: 0}
+      pivot: {x: 0.53875154, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -257,9 +257,9 @@ TextureImporter:
         x: 384
         y: 88
         width: 350
-        height: 288
+        height: 113
       alignment: 9
-      pivot: {x: 0.5, y: 0}
+      pivot: {x: 0.4844805, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
