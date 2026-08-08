@@ -35,15 +35,20 @@ MonoBehaviour:
   smashBothSides: 1
   castDur: 0.9
   castFireFrac: 0.55
-  castCount: 5
+  castCount: 20
   castBaseDeg: -70
-  castSpreadDeg: 70
+  castSpreadDeg: 360
   castPerShotDelay: 0
-  projScale: 1.466
+  projScale: 2.2
   handOffset: {x: 6.85, y: -2.04}
   projSpeed: 9
   projLife: 6
   projDamage: 1
+  cleaveWindup: 0.25
+  smashWindup: 0.3
+  castWindup: 0.35
+  windupFlashColor: {r: 1, g: 0.35, b: 0.35, a: 1}
+  windupFlashSpeed: 12
   parryBuffer: 0.2
   groggyNeed: 5
   groggyTime: 3

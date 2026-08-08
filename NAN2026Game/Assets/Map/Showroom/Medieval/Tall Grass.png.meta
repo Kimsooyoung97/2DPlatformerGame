@@ -14,6 +14,15 @@ TextureImporter:
   - first:
       213: -6640666029981939348
     second: TallGrass_2
+  - first:
+      213: 8677558380000790763
+    second: TallGrassAnim_0
+  - first:
+      213: -6581909816642842388
+    second: TallGrassAnim_1
+  - first:
+      213: -458852063902967365
+    second: TallGrassAnim_2
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -200,6 +209,72 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: TallGrassAnim_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 32
+        height: 32
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: be849a5fe51ec6870800000000000000
+      internalID: 8677558380000790763
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: TallGrassAnim_1
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 0
+        width: 32
+        height: 32
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ce0d85be4eb58a4a0800000000000000
+      internalID: -6581909816642842388
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: TallGrassAnim_2
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 0
+        width: 32
+        height: 32
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bb9db9e9a74d1a9f0800000000000000
+      internalID: -458852063902967365
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     customData: 
     physicsShape: []
@@ -215,6 +290,9 @@ TextureImporter:
       entries: []
     nameFileIdTable:
       Tall Grass_0: -6791975913575690700
+      TallGrassAnim_0: 8677558380000790763
+      TallGrassAnim_1: -6581909816642842388
+      TallGrassAnim_2: -458852063902967365
       TallGrass_0: -8215898858632697902
       TallGrass_1: 5999427050079813384
       TallGrass_2: -6640666029981939348

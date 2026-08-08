@@ -103,3 +103,5 @@
 - 라이선스: 팩 동봉 라이선스 준수 — 원 배포처 확인 필요 시 팀 문의
 
 - Assets/Art/Demon/** (130장): boss_demon_final(boss_demon_slime_FULL_v1.0) 유래 — Sprites_AI 폴더(생성형 AI 산출물, 사용자 반입). 데몬 보스 전 동작+투사체. 생성 프롬프트: 사용자 보관분
+
+- Assets/Map/Showroom/Medieval/Pine_16_Tree.png: 기존 Pine Trees.png(중세 팩)에서 큰 소나무 1그루만 픽셀 추출한 파생본. 원본 라이선스 승계, 신규 창작 아님

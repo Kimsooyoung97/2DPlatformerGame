@@ -5803,3 +5803,153 @@ GameOverController.cs 최초 작성 시 [Header("타이틀 씬"))] 괄호 오타
 ### 사람이 확인/연결해야 할 것
 - GameOverPanel(Canvas 하위, 사용자가 이미 배치)에 GameOverController 컴포넌트를 부착하고 playerHealth/gameOverPanel 필드를 인스펙터에서 연결
 - Kill() 후 0.2s 뒤 체크포인트 리스폰이 그대로 실행됨 — GameOverPanel이 화면을 완전히 덮지 않으면 패널 뒤에서 리스폰이 보일 수 있음. 필요 시 별도로 처리 방식(시간 정지 등) 논의 필요
+
+
+## [수정] 플레이어 프리팹 교체 여파 복구 — 카메라 배선 + 이름 의존 탐색 제거 — 2026-08-08 23:59
+### 프롬프트
+그래 너가 적용시켜줘
+(팀 요청: 자기가 만지는 씬의 CM_PlayerCamera Tracking에 플레이어 드래그)
+### 조작 내역
+- 사전 정황: 저장소 재클론(C:/Users/edwin/Dev/NAN2026Game 신규 clone, ProjectVersion.txt 복구 후 6000.5.3f1로 오픈). 오늘 작업 전량 생존 확인
+- **실측으로 드러난 진짜 원인**: 팀이 Player를 RealPlayer.prefab 으로 교체하면서 씬별 오브젝트 이름이 갈라짐
+  · Scene1 이름='Player' 프리팹=Player_Knight!!!!(구형) / Scene2 이름='Player' 프리팹=RealPlayer
+  · Scene3·Scene4·Test1 이름='**RealPlayer**' 프리팹=RealPlayer
+  · 태그는 전 씬 'Player'로 정상 — 팀 코드(EnemyAI·MidBossController·OrkanBoss)가 태그 기반이라 무사했던 이유
+- **우리 코드 10곳이 GameObject.Find("Player") 이름 의존** → Scene3/4/Test1에서 전부 null 반환. 침묵 무력화
+  BoatRide / DemonBoss / DemonProjectile / IntroSequencer / OneWayDropThrough / Scene2Director / SecondSceneBoss / SpikeBallTrap / ThrownProjectile / ThrownWeaponLauncher
+  · **Test1 '보트가 안 움직인다'의 원인이 이것** — player null ⇒ RiderOnDeck() 항상 false ⇒ 항해 불가
+  · Scene4 데몬도 동일 — player null ⇒ 인트로 후 Update가 조기 return
+- 신규 Assets/Scripts/PlayerLocator.cs: 태그('Player') 1순위 → 이름 'Player' → 이름 'RealPlayer' 폴백. 10곳 전부 이 창구로 교체
+- 카메라 배선: Scene3 CM_PlayerCamera / Scene4 CM_PlayerCamera / Test1 CM_Cam 의 Target.TrackingTarget 을 RealPlayer 로 설정 후 각 씬 저장
+### 검증
+- 컴파일 0, read_console error/exception 0건
+- EditMode 179/179 통과, 실패 0
+- 리플렉션 실행 검증: PlayerLocator.Find() = 'RealPlayer' (tag=Player) — Scene3·Scene4·Test1 전부
+- 디스크 재로드 후 TrackingTarget 재읽기: Scene1=Player / Scene2=Player / Scene3=RealPlayer / Scene4=RealPlayer / Test1=RealPlayer (5/5 배선됨)
+- 테스트 후 씬 생존: 3개 씬 dirty=False, DemonBoss pos=(22.50,4.03,0.00) config·배열(cleave15/cast6) 생존, Boat pos=(79.22,27.73,0.00) config 생존
+- **사용자 눈 판정 필요**: (1) 각 씬 재생 시 카메라가 플레이어를 따라가는지 (2) Test1 보트가 갑판 탑승 시 항해하는지 (3) Scene4 데몬이 인트로 후 실제로 행동하는지
+### 실패와 수정
+- 이름 기반 GameObject.Find 를 10곳에 방치한 것이 근본 원인 — FAIL 등재 대상
+### 남은 불일치(수정 안 함, 팀 영역)
+- AdventureScene1 의 Player 만 구형 Player_Knight!!!!.prefab 인스턴스. 다른 씬은 전부 RealPlayer — 팀 확인 필요
+
+
+## [구현] Decor_40·Furnace 스프라이트 분리 — 2026-08-09 00:36
+### 프롬프트
+Decor_40, Furnace 보면 서로 붙어 있어. 이거 떼어서 쓸 수 있게 해줘 (분리 예시 이미지 6장 첨부)
+### 조작 내역
+- 연결성분 분석으로 경계 산출: Furnace 시트=빈 행 y51~60으로 완전 분리 / Decor_40=천막과 소품이 픽셀 접촉 → 행 프로파일로 경계 확정(y31=3px 최소, y32에서 92px 급증=천막 밑변)
+- 스프라이트 신설(레거시 spritesheet API, BottomCenter 피벗): Sawmill(4,3,57x51)·Furnace_Only(10,64,44x58)·Decor_40_Props(0,416,95x32)·Decor_40_Tent(0,448,95x39)
+- Props 프리팹 4종 생성(기존 Furnace.prefab 규격 상속: Default/order -5)
+### 검증
+- 스프라이트 4종 재읽기 확인(44x58/57x51/95x32/95x39), 프리팹 4종 스프라이트 배선 확인
+### 실패와 수정
+- codedom이 UnityEditor.U2D.Sprites 어셈블리 미참조 → 레거시 TextureImporter.spritesheet로 우회
+
+
+## [수정] 쇼룸 프롭 교체 (분리본 반영) — 2026-08-09 00:38
+### 프롬프트
+쇼룸에 있던것도 교체해줘
+### 조작 내역
+- MedievalShowroom/PropsShowcase: 합본 인스턴스 2개(Decor_40·Furnace)를 비활성 보존(_합본(비활성) 개명, 삭제 금지 규약 준수)
+- 분리 프리팹 4종 배치: Decor_40_Tent@2.2·Decor_40_Props@5.6 / Furnace_Only@12.6·Sawmill@15.0 (원 위치 기준 나란히)
+### 검증
+- 씬 저장 ✓, PropsShowcase 자식 확인: 신규 4종 ON / 합본 2종 OFF
+### 실패와 수정
+없음
+
+
+## [수정] 공중 발판 원웨이 통일 — 2026-08-09 00:45
+### 프롬프트
+[수정]x77 ~81 y41 구간 발판은 메이플 식으로 윗면만 밟을 수 있게 잘 되 었는데 나머지는 공중 발판은 아무것도 적용이 안되어서 고쳐
+### 조작 내역
+- 진단: 작동 발판(x77~82 y41)은 Stage_Ground 소속(PlatformEffector2D arc170·oneWay·Composite usedByEffector) / 나머지 공중 발판은 Stage_Solid(효과기 없음 = 전면 solid)
+- Stage_Solid는 대부분 두꺼운 지형(12칸런 59개 등)이라 일괄 적용 불가 → '높이≤2 + 아래 2칸 공백' 조건으로 공중 발판 4클러스터만 선별: x70~73 y32 / x51~57 y34~35 / x64~67 y34 / x70~75 y37
+- 해당 28칸을 타일·행렬 보존한 채 Stage_Ground로 이관(20칸 이동 + Ground 기존칸과 중복 8칸은 Solid측 제거)
+### 검증
+- 라이브 GetTile 확인 → 저장 → **디스크 재로드 후 재검증(FAIL#14 규약)**: 대상 28칸 전부 Ground, Solid 잔여 0. 효과기 arc170/oneWay=True/Composite eff=True
+- 실제 통과·착지 감각은 사용자 재생
+### 실패와 수정
+없음
+
+
+## [수정] 발판 아랫면 접지 버그 — 2026-08-09 00:51
+### 프롬프트
+발판에서 빨간색 바닥면도 밟을 수 있게 되어있는데 이러면 안돼 (도해 첨부)
+### 조작 내역
+- 추적: 타일맵 셋업 정상(TilemapCol usedByComposite=True·Composite usedByEffector=True·Effector oneWay arc170), 컴포지트 형상도 정상 사각형(top y38/bottom y37). Platform_ 접두 오브젝트 0개 → 원웨이는 전적으로 효과기 담당
+- 진범: PlayerController2D의 접지 산출이 `grounded = !ignoringGround && CastGroundNoTriggers() > 0`로 덮어써져 있고, 이 함수가 **법선 검사 없이** Cast 히트 수만 셈 → 원웨이 발판의 아랫면·통과 중 겹침(거리0)까지 접지로 인정 (위쪽 경로엔 IsGroundNormal 검사가 있는데 여기서 무효화)
+- 수정: CastGroundNoTriggers가 IsGroundNormal(config.groundNormalMinY) 통과 히트만 카운트 — 윗면만 접지 인정
+### 검증
+- 컴파일 0. 발판 밑면 착지 불가·정상 착지 유지는 사용자 재생
+### 실패와 수정
+없음
+
+
+## [수정] Pine_15/16 슬라이스 교정 — 2026-08-09 00:57
+### 프롬프트
+Pine_16이랑 Pine_15도 이미지가 이상하게 짤려있어. 나무 부분만 나와야 해
+### 조작 내역
+- 시트 전수 분석: Pine Trees.png(672x192)는 그룹마다 큰나무 93x192 + 작은나무들 구성인데, 대부분 y0~60/y61~191로 가로 절단된 조각으로 슬라이스됨(정상은 Pine_9 하나뿐)
+- 연결성분으로 실제 경계 확인: 큰나무 x449~541 y0~191(6218px), 작은나무 x449~477 y128~191(761px)
+- Pine_16 → (449,0,93x192) 온전한 큰나무 / Pine_15 → (449,128,29x64) 작은나무, 둘 다 피벗 BottomCenter(접지용)
+### 검증
+- 재읽기: Pine_16=93x192@(449,0), Pine_15=29x64@(449,128), 기준 Pine_9=93x192와 동일 규격
+- 외형은 사용자 눈 확인 필요
+### 실패와 수정
+- 없음. 동일 절단 문제가 Pine_0/1, Pine_4/5, Pine_10/11에도 있음(미수정 — 요청 시 동일 방식 적용)
+
+
+## [수정] Pine_16 좌측 이물 제거 (전용 텍스처 추출) — 2026-08-09 01:01
+### 프롬프트
+왼쪽에 작은 나무 기둥이 붙어있어
+### 조작 내역
+- 원인: 시트 패킹상 큰나무 사각형(449,0,93x192)의 좌상단 빈칸에 작은나무(로컬 x0~28 y128~191)가 끼워져 있음. 큰나무가 x0~92 전 열을 실제로 사용(하단 가지)하므로 rect 축소로는 제외 불가
+- 연결성분으로 큰나무 6218px만 추출해 신규 텍스처 Pine_16_Tree.png(93x192, PPU32, Point, 피벗 하단중앙) 생성 — 원본 시트 무수정
+- Pine_16.prefab 교체 + 쇼룸 인스턴스 2개 반영
+### 검증
+- 프리팹 sprite=Pine_16_Tree 93x192 확인, 씬 저장 ✓. 외형은 사용자 눈 확인
+### 실패와 수정
+- 없음. 동일 패킹 문제가 Pine_9 등 다른 큰나무에도 있을 수 있음(요청 시 동일 처리)
+
+
+## [구현] Furnace/Sawmill 애니메이션 적용 — 2026-08-09 01:15
+### 프롬프트
+Furnace_Only, Sawmill 에셋 사이트 보면 애니메이션 효과가 적용된 것 같던데 어떻게 적용해야 하는거야?
+### 조작 내역
+- 시트 재분석: 384x128에 57px 덩어리 6개(간격 64px) = 6프레임 애니메이션. 각 프레임에 제재소(y3~53)·용광로(y62~121) 동시 수록 → 기존엔 1프레임만 잘라 쓰고 있었음
+- 12스프라이트 신설: Sawmill_0~5(x=4+64i,3,57x51)·Furnace_0~5(x=4+64i,62,57x60), 피벗 하단중앙
+- 기존 팀 스크립트 PlatformerShowroomSpriteAnimator 재사용(신규 스크립트 없음): Furnace_Only·Sawmill 프리팹에 부착, frames 6개·8fps 배선
+### 검증
+- 슬라이스 재읽기 6+6 확인, 프리팹 재읽기 6/6프레임 배선 확인, 쇼룸 인스턴스 Furnace_Only=애니O Sawmill=애니O 
+- 실제 움직임은 사용자 재생(unscaledTime 기반이라 에디터 재생 시 확인)
+### 실패와 수정
+없음
+
+
+## [구현] 애니메이션 소품 일괄 적용·전용 진열대 — 2026-08-09 01:19
+### 프롬프트
+애니메이션 효과 적용된 부품 다 적용해주고 하나로 모아줘 쇼룸에 바로 적용할 수 있게. 카메라도 거기를 비춰주고 재생하면
+### 조작 내역
+- 자동 판별 2종(균등폭·균등간격 / 격자형)으로 Medieval 시트 전수 스캔 → Boat.png(10f 80x32)·WaterFallScroll.png(4f 32x32)·Tall Grass.png(3칸)·Furnace and Sawmill(6f, 기적용) 검출. birds3/4는 오탐 제외
+- 슬라이스 후 프리팹 3종 신설(Boat_Anim 8fps·WaterFall_Anim 10fps·TallGrass_Anim 6fps), 재생은 기존 PlatformerShowroomSpriteAnimator 재사용
+- MedievalShowroom에 전용 루트 'AnimatedShowcase' @(0,-140) 신설(기존 진열대 미간섭): 5종 배치 + 한글 헤더·개별 이름표
+- Main Camera를 진열대로 이동(9,-136.5,-10) ortho size 6.5 — 재생 즉시 애니 소품이 화면에 잡히도록
+### 검증
+- 슬라이스 재읽기(10/4/3프레임), 프리팹 frames 배선 확인, 씬 저장 ✓
+- 실제 움직임·구도는 사용자 재생 확인
+### 실패와 수정
+- Tall Grass 3칸은 애니메이션이 아니라 '변형 3종'일 가능성 있음 — 눈 확인 필요 항목으로 보고
+
+
+## [구현] 불꽃 애니 프리팹 + Decor_40_b 분리 — 2026-08-09 01:33
+### 프롬프트
+Fire.png 짤라서 애니메이션 만들어주고 Decor_40_b도 텐트랑 도구가 붙어있어
+### 조작 내역
+- Fire.png(256x48, PPU16) 8프레임 슬라이스(32x48, 피벗 하단중앙) → Flame_Anim.prefab(12fps, sortingOrder 5로 소품 위 렌더) 신설, AnimatedShowcase x21에 배치
+- Decor_40_b(x97,y416,94x71)는 y15~31 빈 행으로 완전 분리 가능 확인 → Decor_40b_Tent(97,448,94x39)·Decor_40b_Props(106,416,79x15) 스프라이트+프리팹 신설, 프롭 진열대 배치, 합본은 비활성 보존
+### 검증
+- Flame 프레임 8/8 수집·프리팹 배선 8/8, 분리 스프라이트 94x39·79x15 재읽기 확인, 씬 저장 ✓
+- 불꽃 재생·구도는 사용자 재생 확인
+### 실패와 수정
+없음

@@ -44,7 +44,7 @@ namespace NAN2026
             hp = config.maxHp;
             var rbSelf = GetComponent<Rigidbody2D>();
             if (rbSelf != null) rbSelf.useFullKinematicContacts = true; // Kinematic끼리 트리거 이벤트 보장 (FAIL#트리거)
-            var p = GameObject.Find("Player");
+            var p = PlayerLocator.Find();
             if (p != null)
             {
                 player = p.transform;

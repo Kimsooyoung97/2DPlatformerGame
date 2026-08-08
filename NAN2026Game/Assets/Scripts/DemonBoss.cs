@@ -5,7 +5,7 @@ using NAN2026.Core;
 namespace NAN2026
 {
     // AdventureScene4 데몬 보스. 입장 시 transform(슬라임→데몬) 인트로 후 전투.
-    // 상태: -1 transform / 0 idle / 1 walk / 2 cleave / 7 smash / 3 cast / 6 hit / 5 groggy / 4 death
+    // 상태: -1 transform / 0 idle / 1 walk / 2 cleave / 7 smash / 3 cast / 6 hit / 5 groggy / 4 death / 8 windup(예열)
     public class DemonBoss : MonoBehaviour
     {
         public DemonBossConfig config;
@@ -13,7 +13,10 @@ namespace NAN2026
         public Sprite[] projFly, projBoom;
 
         private int state = -1;
-        private float stateT, animT, nextAtk;
+        private float stateT, animT;
+        private float nextCleave, nextSmash, nextCast; // 공격별 개별 쿨타임
+        private int pendingAttack;      // windup 종료 후 진입할 실제 공격 state
+        private float curWindupDur;     // 이번 windup의 지속 시간
         private int hp, parryCount;
         private bool dealtThisSwing, castFired;
         private SpriteRenderer sr;
@@ -35,7 +38,8 @@ namespace NAN2026
             hp = config.maxHp;
             var rb = GetComponent<Rigidbody2D>();
             if (rb != null) rb.useFullKinematicContacts = true; // FAIL: Kinematic 트리거
-            var pgo = GameObject.Find("Player");
+
+            var pgo = GameObject.Find("RealPlayer");
             if (pgo != null)
             {
                 player = pgo.transform;
@@ -68,13 +72,18 @@ namespace NAN2026
             if (state == -1)
             {
                 Anim(introFrames, false);
-                if ((int)animT >= introFrames.Length) { nextAtk = Time.time + 1.0f; SetState(0); }
+                if ((int)animT >= introFrames.Length)
+                {
+                    nextCleave = nextSmash = nextCast = Time.time + 1.0f;
+                    SetState(0);
+                }
                 return;
             }
             if (player == null) return;
             float dx = Mathf.Abs(player.position.x - transform.position.x);
             float side = player.position.x < transform.position.x ? -1f : 1f; // 플레이어가 있는 월드 방향(이동용)
-            if (state != 5) sr.flipX = BossFacingLogic.ShouldFlipX(transform.position.x, player.position.x, config.spriteFacesLeft);
+            if (state != 5 && state != 8 && state != 2 && state != 7 && state != 3)
+                sr.flipX = BossFacingLogic.ShouldFlipX(transform.position.x, player.position.x, config.spriteFacesLeft);
 
             if (state == 5)
             {
@@ -82,7 +91,11 @@ namespace NAN2026
                 if (kb != null && kb.zKey.wasPressedThisFrame && dashCo == null && dx > 3.4f)
                     dashCo = StartCoroutine(DashToBoss());
                 Anim(hitFrames, true);
-                if (stateT >= config.groggyTime) { nextAtk = Time.time + config.attackCooldown; SetState(0); }
+                if (stateT >= config.groggyTime)
+                {
+                    nextCleave = nextSmash = nextCast = Time.time + config.attackCooldown;
+                    SetState(0);
+                }
                 return;
             }
             if (state == 6)
@@ -94,19 +107,42 @@ namespace NAN2026
             if (state == 2) { DoCleave(dx); return; }
             if (state == 7) { DoSmash(dx, side); return; }
             if (state == 3) { DoCast(); return; }
+            if (state == 8) { DoWindup(); return; }
 
             // idle/walk 판단
             if (dx > config.aggroX) { Anim(idleFrames, true); return; }
-            if (Time.time >= nextAtk && dx <= config.cleaveReach) { SetState(2); return; }
-            if (Time.time >= nextAtk && dx <= config.aggroX)
-            {
-                float roll = Random.value;
-                if (roll < config.castChance) { SetState(3); return; }
-                if (roll < config.castChance + config.smashChance) { SetState(7); return; }
-            }
+            bool cleaveReady = Time.time >= nextCleave && dx <= config.cleaveReach;
+            bool smashReady = Time.time >= nextSmash && dx <= config.aggroX;
+            bool castReady = Time.time >= nextCast && dx <= config.aggroX;
+            if (cleaveReady) { BeginWindup(2, config.cleaveWindup); return; }
+            if (smashReady) { BeginWindup(7, config.smashWindup); return; }
+            if (castReady) { BeginWindup(3, config.castWindup); return; }
             // 접근
             transform.position += new Vector3(side * config.walkSpeed * Time.deltaTime, 0f, 0f);
             Anim(walkFrames, true);
+        }
+
+        // 공격 예열: idle 프레임 유지한 채 색상 플래시로 경고, 지속 후 실제 공격 state 진입
+        private void BeginWindup(int attackState, float windupDur)
+        {
+            pendingAttack = attackState;
+            curWindupDur = windupDur;
+            SetState(8);
+        }
+
+        private void DoWindup()
+        {
+            Anim(idleFrames, true);
+            if (curWindupDur > 0f)
+            {
+                float pulse = Mathf.PingPong(stateT * config.windupFlashSpeed, 1f);
+                sr.color = Color.Lerp(Color.white, config.windupFlashColor, pulse);
+            }
+            if (stateT >= curWindupDur)
+            {
+                sr.color = Color.white;
+                SetState(pendingAttack);
+            }
         }
 
         private void DoCleave(float dx)
@@ -115,7 +151,7 @@ namespace NAN2026
             float frac = stateT / config.cleaveDur;
             if (!dealtThisSwing && BossRangeLogic.WindowOpen(frac, config.cleaveWinS, config.cleaveWinE) && InHitBand(config.cleaveReach))
                 ResolveHit();
-            if (frac >= 1f) { nextAtk = Time.time + config.attackCooldown; SetState(0); }
+            if (frac >= 1f) { nextCleave = Time.time + config.attackCooldown; SetState(0); }
         }
 
         private void DoSmash(float dx, float side)
@@ -126,7 +162,7 @@ namespace NAN2026
                 transform.position += new Vector3(side * config.smashApproachSpeed * Time.deltaTime, 0f, 0f);
             if (!dealtThisSwing && BossRangeLogic.WindowOpen(frac, config.smashWinS, config.smashWinE) && InSmashBand())
                 ResolveHit();
-            if (frac >= 1f) { nextAtk = Time.time + config.attackCooldown; SetState(0); }
+            if (frac >= 1f) { nextSmash = Time.time + config.attackCooldown; SetState(0); }
         }
 
         private void DoCast()
@@ -143,7 +179,7 @@ namespace NAN2026
                 if (config.castPerShotDelay > 0f) StartCoroutine(FireSpread(face, hand));
                 else for (int i = 0; i < config.castCount; i++) FireOne(i, face, hand);
             }
-            if (frac >= 1f) { nextAtk = Time.time + config.attackCooldown; SetState(0); }
+            if (frac >= 1f) { nextCast = Time.time + config.attackCooldown; SetState(0); }
         }
 
         // 부채꼴 1발. 유도하지 않는다 — 고정 각도라야 회피가 성립한다.
@@ -157,7 +193,7 @@ namespace NAN2026
             go.transform.position = hand;
             go.transform.localScale = Vector3.one * config.projScale; // ParryOrb 크기 기준
             var proj = go.AddComponent<DemonProjectile>();
-            proj.Launch(projFly, projBoom, dir, config.projSpeed, config.fps, config.projDamage, config.projLife, config.clashConfig);
+            proj.Launch(projFly, projBoom, dir, config.projSpeed, config.fps, config.projDamage, config.projLife, config.clashConfig, this);
         }
 
         private System.Collections.IEnumerator FireSpread(float face, Vector3 hand)
@@ -219,12 +255,18 @@ namespace NAN2026
                 if (config.clashConfig != null && player != null)
                     ParryClashFx.Play((transform.position + player.position) * 0.5f + Vector3.up * 2f, config.clashConfig);
                 PlayerMana.RewardParry(player);
-                parryCount++;
-                RefreshGroggyPips();
-                if (parryCount >= config.groggyNeed) { parryCount = 0; RefreshGroggyPips(); SetState(5); }
+                RegisterParrySuccess();
             }
             else if (player != null)
                 player.SendMessage("TakeDamage", (float)config.damage, SendMessageOptions.DontRequireReceiver);
+        }
+
+        // 근접(ResolveHit)이든 투사체 반사(DemonProjectile)든, 패링 성공 시 공통으로 호출 — 그로기 카운터 공유
+        public void RegisterParrySuccess()
+        {
+            parryCount++;
+            RefreshGroggyPips();
+            if (parryCount >= config.groggyNeed) { parryCount = 0; RefreshGroggyPips(); SetState(5); }
         }
 
         public void TakeDamage(int dmg)
@@ -233,7 +275,8 @@ namespace NAN2026
             hp -= 1;
             HitFeedback();
             if (hp <= 0) { SetState(4); return; }
-            if (state != 5) SetState(6);
+            bool attacking = state == 2 || state == 7 || state == 3; // 공격 판정/모션 중엔 경직 없음(안 씹힘)
+            if (state != 5 && !attacking) SetState(6);
         }
 
         private void HitFeedback()
