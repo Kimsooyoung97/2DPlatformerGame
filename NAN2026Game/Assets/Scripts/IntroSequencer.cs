@@ -46,12 +46,48 @@ namespace NAN2026
             Apply(0f);
         }
 
+                private bool introLocked, introLockDone;
+        private System.Collections.Generic.List<AudioSource> mutedSrcs = new System.Collections.Generic.List<AudioSource>();
+        private System.Collections.Generic.List<float> mutedVols = new System.Collections.Generic.List<float>();
+        private void MuteWorldAudio(bool mute)
+        {
+            if (mute)
+            {
+                mutedSrcs.Clear(); mutedVols.Clear();
+                foreach (var src in FindObjectsByType<AudioSource>(FindObjectsSortMode.None))
+                {
+                    if (src == null || src == bgm) continue; // 인트로 BGM은 살림
+                    mutedSrcs.Add(src); mutedVols.Add(src.volume);
+                    src.volume = 0f;
+                }
+            }
+            else
+            {
+                for (int i = 0; i < mutedSrcs.Count; i++)
+                    if (mutedSrcs[i] != null) mutedSrcs[i].volume = mutedVols[i];
+                mutedSrcs.Clear(); mutedVols.Clear();
+            }
+        }
+        private void SetPlayerControl(bool on)
+        {
+            var pgo = GameObject.Find("Player");
+            if (pgo == null) return;
+            foreach (var mb in pgo.GetComponents<MonoBehaviour>())
+            {
+                string n = mb.GetType().Name;
+                if (n == "PlayerController2D" || n == "PlayerSkill") ((Behaviour)mb).enabled = on;
+            }
+            var rb = pgo.GetComponent<Rigidbody2D>();
+            if (rb != null && !on) rb.linearVelocity = Vector2.zero;
+        }
+
         void Update()
         {
             t += Time.deltaTime;
-            bool skip = Keyboard.current != null && Keyboard.current.anyKey.wasPressedThisFrame;
             float total = IntroSequenceLogic.TotalDuration(config.blackSeconds, EffIgnite(), config.expandSeconds);
-            if (skip && t < total) t = total;
+            if (!introLocked && t < total) { introLocked = true; SetPlayerControl(false); MuteWorldAudio(true); } // 연출 중 이동·사운드 잠금
+            if (introLocked && !introLockDone && t >= total) { introLockDone = true; SetPlayerControl(true); MuteWorldAudio(false); } // 완주 → 복귀
+            // 아무키 스킵 제거 — 토치 점화 연출은 항상 완주 (이동키 오발로 캔슬되던 문제 해소)
             Apply(t);
 
             if (bgmStarted && bgm != null)

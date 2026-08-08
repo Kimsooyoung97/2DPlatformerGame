@@ -25,6 +25,14 @@ namespace NAN2026
         private float barFullW;
         private GameObject groggyFx;
         private float lastParryPress = -999f;
+        private float lastConsumed = -999f;
+        private bool ParryBuffered()
+        {
+            // 최근 buffer 내 새 입력이 있고 아직 소비 안 됐으면 성립 (일찍 눌러도 OK)
+            if (Time.time - lastParryPress <= config.parryBuffer && lastParryPress > lastConsumed)
+            { lastConsumed = lastParryPress; return true; }
+            return false;
+        }
 
         private void Start()
         {
@@ -160,7 +168,7 @@ namespace NAN2026
                     int we = w == 0 ? config.atk1Win1End : config.atk1Win2End;
                     if (swingResolved[w]) continue;
                     bool inWin = idx >= ws && idx <= we;
-                    if (inWin && kb != null && kb.cKey.wasPressedThisFrame)
+                    if (inWin && ParryBuffered())
                     {
                         swingResolved[w] = true;
                         if (config.clashConfig != null)
@@ -196,7 +204,9 @@ namespace NAN2026
                 {
                     dealtThisSwing = true;
                     bool parried = false;
-                    if (controller != null && tryParry != null)
+                    // atk2 버퍼 선점: 창 진입 시 최근 0.2초 입력이 있으면 성공 (일찍 눌러도 OK)
+                    if (ParryBuffered()) parried = true;
+                    if (!parried && controller != null && tryParry != null)
                     {
                         object r = tryParry.Invoke(controller, new object[] { gameObject });
                         parried = r is bool && (bool)r;

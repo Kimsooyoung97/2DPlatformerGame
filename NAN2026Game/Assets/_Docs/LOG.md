@@ -5378,3 +5378,19 @@ fireattack이랑 firebomb이 원거리 구체라고?
 ### 눈으로 확인 필요
 - 실제 키보드로 Z(콤보)·Space(패링+연계)가 체감상 자연스러운지(리플렉션으로는 인라인 로직을 직접 못 눌러봄)
 - LevelUpPanel에서 실제로 UnlockSkill1/UnlockSkill2 카드가 뽑혔을 때 아이콘·설명이 올바르게 나오는지
+
+## [수정] X키 스킬 이펙트 미스폰 버그 수정 — 2026-08-08 17:13
+### 프롬프트
+코드 수정 해보고 확인은 내가할게
+### 조작 내역
+- [조사](직전 턴들에서 이어짐): UITestScene Player_Knight!!!! 재생모드에서 리플렉션으로 ownedSkills/selectedSkillIndex/queuedAttack/attackTimer 실시간 추적 → AddSkill·UseSelectedSkill까지는 정상, queuedAttack="Slash"가 세팅된 채 소비되지 않음(EffectProjectile 0개) 확인
+- launching(슈퍼점프) 관련 컴포넌트가 UITestScene에 없어 launching 조기 return 가설 배제
+- Skill1/Skill2 프리팹(EffectProjectile, SpriteRenderer 보유) 정상 확인
+- execute_code로 Assets/Scripts/Player/PlayerController2D.cs FixedUpdate의 큐 소비 블록 수정: CanAttack(attacking) 실패 시에도 무조건 queuedAttack=null로 폐기하던 것을, 소비에 성공했을 때만 비우도록 변경(실패 시 다음 FixedUpdate에서 재시도). FAIL.md #18과 동일 계열 버그로 판단, 주석에 근거 명시
+### 검증
+- refresh_unity(compile=request, force) → 컴파일 성공, read_console(types=error) 0건
+- run_tests(EditMode, NAN2026.Tests.EditMode) → 149/149 통과, 회귀 없음
+- 씬 변경 없음(스크립트만 수정) — 씬 저장 생략
+- 실 재생 확인(스킬 획득 → X 입력 → 이펙트 실제 스폰 여부)은 사용자가 직접 확인 예정
+### 실패와 수정
+없음
