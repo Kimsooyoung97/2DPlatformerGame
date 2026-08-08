@@ -47,6 +47,9 @@ TextureImporter:
   - first:
       213: -1600277247301420504
     second: Sawmill
+  - first:
+      213: -6732738433954383147
+    second: Furnace_Only
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -189,6 +192,50 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: Sawmill
+      rect:
+        serializedVersion: 2
+        x: 4
+        y: 3
+        width: 57
+        height: 51
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 82a757c725caac9e0800000000000000
+      internalID: -1600277247301420504
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Furnace_Only
+      rect:
+        serializedVersion: 2
+        x: 10
+        y: 64
+        width: 44
+        height: 58
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5da778ed0128092a0800000000000000
+      internalID: -6732738433954383147
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     customData: 
     physicsShape: []
@@ -204,6 +251,7 @@ TextureImporter:
       entries: []
     nameFileIdTable:
       Furnace: 5957728970166404150
+      Furnace_Only: -6732738433954383147
       Pixel Art Furnace and Sawmill_0: 2872485219603667635
       Pixel Art Furnace and Sawmill_1: -8300950071754738547
       Pixel Art Furnace and Sawmill_10: -5902698002744979230

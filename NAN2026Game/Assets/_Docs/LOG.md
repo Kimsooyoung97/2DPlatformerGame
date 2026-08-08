@@ -5832,3 +5832,16 @@ GameOverController.cs 최초 작성 시 [Header("타이틀 씬"))] 괄호 오타
 - 이름 기반 GameObject.Find 를 10곳에 방치한 것이 근본 원인 — FAIL 등재 대상
 ### 남은 불일치(수정 안 함, 팀 영역)
 - AdventureScene1 의 Player 만 구형 Player_Knight!!!!.prefab 인스턴스. 다른 씬은 전부 RealPlayer — 팀 확인 필요
+
+
+## [구현] Decor_40·Furnace 스프라이트 분리 — 2026-08-09 00:36
+### 프롬프트
+Decor_40, Furnace 보면 서로 붙어 있어. 이거 떼어서 쓸 수 있게 해줘 (분리 예시 이미지 6장 첨부)
+### 조작 내역
+- 연결성분 분석으로 경계 산출: Furnace 시트=빈 행 y51~60으로 완전 분리 / Decor_40=천막과 소품이 픽셀 접촉 → 행 프로파일로 경계 확정(y31=3px 최소, y32에서 92px 급증=천막 밑변)
+- 스프라이트 신설(레거시 spritesheet API, BottomCenter 피벗): Sawmill(4,3,57x51)·Furnace_Only(10,64,44x58)·Decor_40_Props(0,416,95x32)·Decor_40_Tent(0,448,95x39)
+- Props 프리팹 4종 생성(기존 Furnace.prefab 규격 상속: Default/order -5)
+### 검증
+- 스프라이트 4종 재읽기 확인(44x58/57x51/95x32/95x39), 프리팹 4종 스프라이트 배선 확인
+### 실패와 수정
+- codedom이 UnityEditor.U2D.Sprites 어셈블리 미참조 → 레거시 TextureImporter.spritesheet로 우회

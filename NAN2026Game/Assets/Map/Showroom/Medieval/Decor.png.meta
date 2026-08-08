@@ -281,6 +281,12 @@ TextureImporter:
   - first:
       213: -860183753245864206
     second: Decor_40_b
+  - first:
+      213: 5248361700418712403
+    second: Decor_40_Props
+  - first:
+      213: 3035789406322158688
+    second: Decor_40_Tent
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -1875,6 +1881,50 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: Decor_40_Props
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 416
+        width: 95
+        height: 32
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 353f836d82de5d840800000000000000
+      internalID: 5248361700418712403
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Decor_40_Tent
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 448
+        width: 95
+        height: 39
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 06ce9b8716a412a20800000000000000
+      internalID: 3035789406322158688
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     customData: 
     physicsShape: []
@@ -1925,6 +1975,8 @@ TextureImporter:
       Decor_39: -933470041020961179
       Decor_4: -8502563662169142480
       Decor_40: -4336383471466243096
+      Decor_40_Props: 5248361700418712403
+      Decor_40_Tent: 3035789406322158688
       Decor_40_b: -860183753245864206
       Decor_41: -4805805668124148689
       Decor_42: 2569401401197613589
