@@ -5394,3 +5394,16 @@ fireattack이랑 firebomb이 원거리 구체라고?
 - 실 재생 확인(스킬 획득 → X 입력 → 이펙트 실제 스폰 여부)은 사용자가 직접 확인 예정
 ### 실패와 수정
 없음
+
+
+## [구현] MP 시스템 (총량10·패링+1·파란하트 HUD) — 2026-08-08 18:28
+### 프롬프트
+팀 명세: 마나 총량 10, 패링 성공 시 1씩. Player 프리팹 적용(예외 허가). 16x16 Health Heart Blue 사용. 보류: 싱글톤·스킬변경C·대화엔터
+### 조작 내역
+- ManaConfig SO(maxMp10·parryGain1·하트 스프라이트 _0/_2)·PlayerMana(AddMp 훅 수신—수치 무관 +1 통일, TryUseMp API 대기, 좌상단 파란하트 10개 HUD)
+- Player_Knight!!!! 프리팹 부착(Test/Test1 자동 전파) + Scene2 순수 Player 직접 부착(프리팹 연결 없음 실측)
+- SecondSceneBoss 패링 키 cKey→spaceKey (컨트롤러는 이미 스페이스)
+### 검증
+- 컴파일 0, 저장 True. HUD 표시·패링 +1·스페이스 패링은 사용자 재생. 프리팹 부착 Scene2 직접부착 
+### 실패와 수정
+- 없음. 스킬 MP 소모 연동은 시작값·소모량 팀 결정 대기(TryUseMp만 준비)

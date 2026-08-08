@@ -20,6 +20,7 @@ GameObject:
   - component: {fileID: 9157415798684585464}
   - component: {fileID: 4653275724497099667}
   - component: {fileID: 6536969618987710296}
+  - component: {fileID: 7969053266673571898}
   m_Layer: 7
   m_Name: Player_Knight!!!!
   m_TagString: Player
@@ -523,3 +524,16 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &7969053266673571898
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7771655860647579471}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f453815c6b79d594097e9ac54c22d4c9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NAN2026.PlayerMana
+  config: {fileID: 11400000, guid: 1e8ab3c40df891f4a870bb3cb6e8ccf7, type: 2}

@@ -64059,6 +64059,7 @@ GameObject:
   - component: {fileID: 1739690764}
   - component: {fileID: 1739690766}
   - component: {fileID: 1739690767}
+  - component: {fileID: 1739690768}
   m_Layer: 7
   m_Name: Player
   m_TagString: Player
@@ -64615,6 +64616,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NAN2026.SceneParryOverride
   config: {fileID: 11400000, guid: 8479da873a4274544a13e3baf07d8c6a, type: 2}
+--- !u!114 &1739690768
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1739690751}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f453815c6b79d594097e9ac54c22d4c9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NAN2026.PlayerMana
+  config: {fileID: 0}
 --- !u!1 &1750090626
 GameObject:
   m_ObjectHideFlags: 0

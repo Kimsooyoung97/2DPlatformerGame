@@ -125,7 +125,7 @@ namespace NAN2026
         {
             if (config == null || cur == null || cur.Length == 0) return;
             var kb = Keyboard.current;
-            if (kb != null && kb.cKey.wasPressedThisFrame) lastParryPress = Time.time;
+            if (kb != null && kb.spaceKey.wasPressedThisFrame) lastParryPress = Time.time;
             bool holding = state == 2 && atkIs1 && !holdDone && (int)animT >= config.atk1HoldFrame;
             if (holding)
             {
