@@ -5925,3 +5925,18 @@ Furnace_Only, Sawmill 에셋 사이트 보면 애니메이션 효과가 적용�
 - 실제 움직임은 사용자 재생(unscaledTime 기반이라 에디터 재생 시 확인)
 ### 실패와 수정
 없음
+
+
+## [구현] 애니메이션 소품 일괄 적용·전용 진열대 — 2026-08-09 01:19
+### 프롬프트
+애니메이션 효과 적용된 부품 다 적용해주고 하나로 모아줘 쇼룸에 바로 적용할 수 있게. 카메라도 거기를 비춰주고 재생하면
+### 조작 내역
+- 자동 판별 2종(균등폭·균등간격 / 격자형)으로 Medieval 시트 전수 스캔 → Boat.png(10f 80x32)·WaterFallScroll.png(4f 32x32)·Tall Grass.png(3칸)·Furnace and Sawmill(6f, 기적용) 검출. birds3/4는 오탐 제외
+- 슬라이스 후 프리팹 3종 신설(Boat_Anim 8fps·WaterFall_Anim 10fps·TallGrass_Anim 6fps), 재생은 기존 PlatformerShowroomSpriteAnimator 재사용
+- MedievalShowroom에 전용 루트 'AnimatedShowcase' @(0,-140) 신설(기존 진열대 미간섭): 5종 배치 + 한글 헤더·개별 이름표
+- Main Camera를 진열대로 이동(9,-136.5,-10) ortho size 6.5 — 재생 즉시 애니 소품이 화면에 잡히도록
+### 검증
+- 슬라이스 재읽기(10/4/3프레임), 프리팹 frames 배선 확인, 씬 저장 ✓
+- 실제 움직임·구도는 사용자 재생 확인
+### 실패와 수정
+- Tall Grass 3칸은 애니메이션이 아니라 '변형 3종'일 가능성 있음 — 눈 확인 필요 항목으로 보고
