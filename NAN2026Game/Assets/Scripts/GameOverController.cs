@@ -41,6 +41,7 @@ public class GameOverController : MonoBehaviour
     private void HandlePlayerDied()
     {
         if (gameOverPanel != null) gameOverPanel.SetActive(true);
+        Time.timeScale = 0;
         _waitingForInput = true;
         _acceptInputAt = Time.unscaledTime + inputIgnoreDuration;
     }
