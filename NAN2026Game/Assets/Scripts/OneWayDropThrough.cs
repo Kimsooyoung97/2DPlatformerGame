@@ -18,7 +18,7 @@ namespace NAN2026
         void Start()
         {
             edges = GetComponents<Collider2D>();
-            var p = GameObject.Find("Player");
+            var p = NAN2026.PlayerLocator.Find();
             if (p != null)
             {
                 playerCol = p.GetComponent<Collider2D>();

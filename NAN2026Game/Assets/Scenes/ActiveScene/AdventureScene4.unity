@@ -21128,6 +21128,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70dc81c5dcf02c547bf6157b1a734021, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
+--- !u!4 &1727924082 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2682891980725246841, guid: 28e4a5c9e8c519c4a9d10e303617fbfb, type: 3}
+  m_PrefabInstance: {fileID: 1727924080}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1734449200
 GameObject:
   m_ObjectHideFlags: 0
@@ -21651,7 +21656,7 @@ MonoBehaviour:
   m_StreamingVersion: 20241001
   m_LegacyPriority: 0
   Target:
-    TrackingTarget: {fileID: 0}
+    TrackingTarget: {fileID: 1727924082}
     LookAtTarget: {fileID: 0}
     CustomLookAtTarget: 0
   Lens:

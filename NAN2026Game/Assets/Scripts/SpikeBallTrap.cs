@@ -21,7 +21,7 @@ namespace NAN2026
         {
             sr = GetComponentInChildren<SpriteRenderer>();
             home = transform.position;
-            if (player == null) { var p = GameObject.Find("Player"); if (p != null) player = p.transform; }
+            if (player == null) { var p = PlayerLocator.Find(); if (p != null) player = p.transform; }
             visionR = config != null ? config.visionRadiusFallback : 4.5f;
             if (player != null)
             {

@@ -5803,3 +5803,32 @@ GameOverController.cs 최초 작성 시 [Header("타이틀 씬"))] 괄호 오타
 ### 사람이 확인/연결해야 할 것
 - GameOverPanel(Canvas 하위, 사용자가 이미 배치)에 GameOverController 컴포넌트를 부착하고 playerHealth/gameOverPanel 필드를 인스펙터에서 연결
 - Kill() 후 0.2s 뒤 체크포인트 리스폰이 그대로 실행됨 — GameOverPanel이 화면을 완전히 덮지 않으면 패널 뒤에서 리스폰이 보일 수 있음. 필요 시 별도로 처리 방식(시간 정지 등) 논의 필요
+
+
+## [수정] 플레이어 프리팹 교체 여파 복구 — 카메라 배선 + 이름 의존 탐색 제거 — 2026-08-08 23:59
+### 프롬프트
+그래 너가 적용시켜줘
+(팀 요청: 자기가 만지는 씬의 CM_PlayerCamera Tracking에 플레이어 드래그)
+### 조작 내역
+- 사전 정황: 저장소 재클론(C:/Users/edwin/Dev/NAN2026Game 신규 clone, ProjectVersion.txt 복구 후 6000.5.3f1로 오픈). 오늘 작업 전량 생존 확인
+- **실측으로 드러난 진짜 원인**: 팀이 Player를 RealPlayer.prefab 으로 교체하면서 씬별 오브젝트 이름이 갈라짐
+  · Scene1 이름='Player' 프리팹=Player_Knight!!!!(구형) / Scene2 이름='Player' 프리팹=RealPlayer
+  · Scene3·Scene4·Test1 이름='**RealPlayer**' 프리팹=RealPlayer
+  · 태그는 전 씬 'Player'로 정상 — 팀 코드(EnemyAI·MidBossController·OrkanBoss)가 태그 기반이라 무사했던 이유
+- **우리 코드 10곳이 GameObject.Find("Player") 이름 의존** → Scene3/4/Test1에서 전부 null 반환. 침묵 무력화
+  BoatRide / DemonBoss / DemonProjectile / IntroSequencer / OneWayDropThrough / Scene2Director / SecondSceneBoss / SpikeBallTrap / ThrownProjectile / ThrownWeaponLauncher
+  · **Test1 '보트가 안 움직인다'의 원인이 이것** — player null ⇒ RiderOnDeck() 항상 false ⇒ 항해 불가
+  · Scene4 데몬도 동일 — player null ⇒ 인트로 후 Update가 조기 return
+- 신규 Assets/Scripts/PlayerLocator.cs: 태그('Player') 1순위 → 이름 'Player' → 이름 'RealPlayer' 폴백. 10곳 전부 이 창구로 교체
+- 카메라 배선: Scene3 CM_PlayerCamera / Scene4 CM_PlayerCamera / Test1 CM_Cam 의 Target.TrackingTarget 을 RealPlayer 로 설정 후 각 씬 저장
+### 검증
+- 컴파일 0, read_console error/exception 0건
+- EditMode 179/179 통과, 실패 0
+- 리플렉션 실행 검증: PlayerLocator.Find() = 'RealPlayer' (tag=Player) — Scene3·Scene4·Test1 전부
+- 디스크 재로드 후 TrackingTarget 재읽기: Scene1=Player / Scene2=Player / Scene3=RealPlayer / Scene4=RealPlayer / Test1=RealPlayer (5/5 배선됨)
+- 테스트 후 씬 생존: 3개 씬 dirty=False, DemonBoss pos=(22.50,4.03,0.00) config·배열(cleave15/cast6) 생존, Boat pos=(79.22,27.73,0.00) config 생존
+- **사용자 눈 판정 필요**: (1) 각 씬 재생 시 카메라가 플레이어를 따라가는지 (2) Test1 보트가 갑판 탑승 시 항해하는지 (3) Scene4 데몬이 인트로 후 실제로 행동하는지
+### 실패와 수정
+- 이름 기반 GameObject.Find 를 10곳에 방치한 것이 근본 원인 — FAIL 등재 대상
+### 남은 불일치(수정 안 함, 팀 영역)
+- AdventureScene1 의 Player 만 구형 Player_Knight!!!!.prefab 인스턴스. 다른 씬은 전부 RealPlayer — 팀 확인 필요
