@@ -6089,3 +6089,16 @@ Window 01 A, Break 02 (1), Window 02 B 등등 창문들도 다 빛나
 해당 없음
 ### 커밋
 해당 없음(무수정)
+
+
+## [수정] FogOfWar 복원 (광선 시야) — 2026-08-09 04:56
+### 프롬프트
+[수정] 포그 복원해라
+### 조작 내역
+- FogOfWar.cs: target 미배선 시 PlayerLocator.FindTransform()으로 자동 탐색하도록 보강(씬별 이름 상이로 인한 배선 유실 재발 방지)
+- Scene3 Stage_Fog: target=RealPlayer 명시 배선 + 활성화, config 연결 확인
+### 검증
+- 컴파일 0, 디스크 재로드 후: target=RealPlayer / enabled=True / active=True / config=OK
+- 실제 안개 걷힘·성능은 사용자 재생 (rayCount 360, revealRadius 7)
+### 실패와 수정
+- 없음. WebGL 성능 부담 시 FogOfWarConfig.rayCount 360→120~180 하향 권장
