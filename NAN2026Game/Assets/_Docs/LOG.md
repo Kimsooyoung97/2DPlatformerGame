@@ -5355,3 +5355,15 @@ fireattack이랑 firebomb이 원거리 구체라고?
 - 컴파일 0, 타입 생존, Scene2 MinoBoss의 SecondSceneBoss 컴포넌트 GUID 유지(MISSING 0)
 ### 실패와 수정
 없음
+
+
+## [수정] 보스 패링 선입력 버퍼 0.2s — 2026-08-08 16:39
+### 프롬프트
+SecondScene2에서 보스와 패링할때 0.2초 정도 빨리해도 다 되도록
+### 조작 내역
+- MinoBossConfig.parryBuffer 0.2s / SecondSceneBoss.ParryBuffered(): 최근 0.2s 내 미소비 입력이면 성립
+- atk_1 프레임창: wasPressedThisFrame→ParryBuffered(), atk_2 시간창: 창 진입 시 버퍼 선점 후 TryParry 폴백 — 양 공격 모두 조기 입력 흡수(1회 소비 가드로 중복 방지)
+### 검증
+- 컴파일 0. 조기 패링 관대함은 사용자 재생
+### 실패와 수정
+- WriteAlltext 오타 1회
