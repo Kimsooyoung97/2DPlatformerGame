@@ -15,7 +15,8 @@ namespace NAN2026
         public GameObject[] candleLitNodes;
         public GameObject[] hiddenDuringIgnite; // 촛불 반경 내 이웃 소품 — 확장 전까지 숨김 // 파티클(Flame/Glow) 묶음 — 점화 전 완전 소등용
         public AudioSource bgm;
-        public GameObject introCamera; // 촛불을 비추는 인트로 전용 카메라 — 연출 종료 시 꺼지며 플레이어 카메라로 인계
+        public GameObject introCamera;
+        public GameObject playerVisionLight; // 주인공 시야광 — 인트로 동안 꺼두고 연출 완주 시 점등 // 촛불을 비추는 인트로 전용 카메라 — 연출 종료 시 꺼지며 플레이어 카메라로 인계
 
         float t;
         float bgmT;
@@ -30,6 +31,7 @@ namespace NAN2026
 
         void Awake()
         {
+            if (playerVisionLight != null) playerVisionLight.SetActive(false); // 암전 중 주인공이 보이면 안 된다
             // 왼쪽부터 순차 점화: 라이트·Lit 노드를 x 오름차순 동기 정렬
             if (candleLights != null && candleLitNodes != null && candleLights.Length == candleLitNodes.Length)
                 for (int a = 0; a < candleLights.Length - 1; a++)
@@ -88,7 +90,8 @@ namespace NAN2026
                 introLockDone = true;
                 SetPlayerControl(true);
                 MuteWorldAudio(false);
-                if (introCamera != null) introCamera.SetActive(false); // 카메라 인계: 촛불 → 주인공
+                if (introCamera != null) introCamera.SetActive(false); // 카메라 인계
+                if (playerVisionLight != null) playerVisionLight.SetActive(true); // 주인공 시야광 점등
             }
             // 아무키 스킵 제거 — 토치 점화 연출은 항상 완주 (이동키 오발로 캔슬되던 문제 해소)
             Apply(t);

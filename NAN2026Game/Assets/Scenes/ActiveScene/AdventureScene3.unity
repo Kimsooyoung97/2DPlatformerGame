@@ -5759,6 +5759,11 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 390456860282783827, guid: cef7a77817d865b4bae1d684e2738919, type: 3}
   m_PrefabInstance: {fileID: 946898715}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &630282892 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6114823860119314469, guid: 28e4a5c9e8c519c4a9d10e303617fbfb, type: 3}
+  m_PrefabInstance: {fileID: 668688010}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &631074528
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -21630,11 +21635,11 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.3
-  far clip plane: 1000
-  field of view: 60
+  near clip plane: 0.1
+  far clip plane: 5000
+  field of view: 40
   orthographic: 1
-  orthographic size: 5
+  orthographic size: 6.75
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
@@ -21659,7 +21664,7 @@ Transform:
   m_GameObject: {fileID: 1267239124}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 5.5, y: 6.3, z: -10}
+  m_LocalPosition: {x: 12.072849, y: 4.7499948, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -82120,6 +82125,7 @@ MonoBehaviour:
   - {fileID: 1612915974}
   bgm: {fileID: 1997520080}
   introCamera: {fileID: 1058276253}
+  playerVisionLight: {fileID: 630282892}
 --- !u!4 &1997520082
 Transform:
   m_ObjectHideFlags: 0
