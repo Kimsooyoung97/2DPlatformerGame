@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6154910221089435775}
   - component: {fileID: 1448187832705553320}
+  - component: {fileID: 9009586761496336440}
   m_Layer: 0
   m_Name: Sawmill
   m_TagString: Untagged
@@ -81,7 +82,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: -5
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -1600277247301420504, guid: 4b846607575accc45ba3f9378d80bd3d, type: 3}
+  m_Sprite: {fileID: 8333008143902834016, guid: 4b846607575accc45ba3f9378d80bd3d, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -92,3 +93,23 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &9009586761496336440
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7926971183117682605}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f13cf056b58906a4ebc14466486108ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NAN2026.Showroom.PlatformerShowroomSpriteAnimator
+  frames:
+  - {fileID: 8333008143902834016, guid: 4b846607575accc45ba3f9378d80bd3d, type: 3}
+  - {fileID: 3279212555865662862, guid: 4b846607575accc45ba3f9378d80bd3d, type: 3}
+  - {fileID: 6468348035256863810, guid: 4b846607575accc45ba3f9378d80bd3d, type: 3}
+  - {fileID: 1731031288609824416, guid: 4b846607575accc45ba3f9378d80bd3d, type: 3}
+  - {fileID: 8837394355395978427, guid: 4b846607575accc45ba3f9378d80bd3d, type: 3}
+  - {fileID: -394020223954340959, guid: 4b846607575accc45ba3f9378d80bd3d, type: 3}
+  framesPerSecond: 8

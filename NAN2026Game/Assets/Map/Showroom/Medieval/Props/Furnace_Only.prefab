@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7799162539006884469}
   - component: {fileID: 4495768542158504709}
+  - component: {fileID: 2064029434051103854}
   m_Layer: 0
   m_Name: Furnace_Only
   m_TagString: Untagged
@@ -81,7 +82,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: -5
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -6732738433954383147, guid: 4b846607575accc45ba3f9378d80bd3d, type: 3}
+  m_Sprite: {fileID: 5839503353984351374, guid: 4b846607575accc45ba3f9378d80bd3d, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -92,3 +93,23 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &2064029434051103854
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2697122696971035401}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f13cf056b58906a4ebc14466486108ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NAN2026.Showroom.PlatformerShowroomSpriteAnimator
+  frames:
+  - {fileID: 5839503353984351374, guid: 4b846607575accc45ba3f9378d80bd3d, type: 3}
+  - {fileID: -8706633738452983588, guid: 4b846607575accc45ba3f9378d80bd3d, type: 3}
+  - {fileID: -1350421706350673124, guid: 4b846607575accc45ba3f9378d80bd3d, type: 3}
+  - {fileID: -572955879738025447, guid: 4b846607575accc45ba3f9378d80bd3d, type: 3}
+  - {fileID: 4525321195280033993, guid: 4b846607575accc45ba3f9378d80bd3d, type: 3}
+  - {fileID: -9102194538864976166, guid: 4b846607575accc45ba3f9378d80bd3d, type: 3}
+  framesPerSecond: 8

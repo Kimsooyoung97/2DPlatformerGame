@@ -50,6 +50,42 @@ TextureImporter:
   - first:
       213: -6732738433954383147
     second: Furnace_Only
+  - first:
+      213: 8333008143902834016
+    second: Sawmill_0
+  - first:
+      213: 5839503353984351374
+    second: Furnace_0
+  - first:
+      213: 3279212555865662862
+    second: Sawmill_1
+  - first:
+      213: -8706633738452983588
+    second: Furnace_1
+  - first:
+      213: 6468348035256863810
+    second: Sawmill_2
+  - first:
+      213: -1350421706350673124
+    second: Furnace_2
+  - first:
+      213: 1731031288609824416
+    second: Sawmill_3
+  - first:
+      213: -572955879738025447
+    second: Furnace_3
+  - first:
+      213: 8837394355395978427
+    second: Sawmill_4
+  - first:
+      213: 4525321195280033993
+    second: Furnace_4
+  - first:
+      213: -394020223954340959
+    second: Sawmill_5
+  - first:
+      213: -9102194538864976166
+    second: Furnace_5
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -236,6 +272,270 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: Sawmill_0
+      rect:
+        serializedVersion: 2
+        x: 4
+        y: 3
+        width: 57
+        height: 51
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 06df3c7b1cac4a370800000000000000
+      internalID: 8333008143902834016
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Furnace_0
+      rect:
+        serializedVersion: 2
+        x: 4
+        y: 62
+        width: 57
+        height: 60
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e8c70f68c551a0150800000000000000
+      internalID: 5839503353984351374
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sawmill_1
+      rect:
+        serializedVersion: 2
+        x: 68
+        y: 3
+        width: 57
+        height: 51
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e85af5f027a128d20800000000000000
+      internalID: 3279212555865662862
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Furnace_1
+      rect:
+        serializedVersion: 2
+        x: 68
+        y: 62
+        width: 57
+        height: 60
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cd0241e9eb2db2780800000000000000
+      internalID: -8706633738452983588
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sawmill_2
+      rect:
+        serializedVersion: 2
+        x: 132
+        y: 3
+        width: 57
+        height: 51
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 24cc41d644034c950800000000000000
+      internalID: 6468348035256863810
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Furnace_2
+      rect:
+        serializedVersion: 2
+        x: 132
+        y: 62
+        width: 57
+        height: 60
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c13cdf7ec96524de0800000000000000
+      internalID: -1350421706350673124
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sawmill_3
+      rect:
+        serializedVersion: 2
+        x: 196
+        y: 3
+        width: 57
+        height: 51
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0aedcac19cbd50810800000000000000
+      internalID: 1731031288609824416
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Furnace_3
+      rect:
+        serializedVersion: 2
+        x: 196
+        y: 62
+        width: 57
+        height: 60
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 91a5e3cb9a37c08f0800000000000000
+      internalID: -572955879738025447
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sawmill_4
+      rect:
+        serializedVersion: 2
+        x: 260
+        y: 3
+        width: 57
+        height: 51
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bb46b6df75bb4aa70800000000000000
+      internalID: 8837394355395978427
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Furnace_4
+      rect:
+        serializedVersion: 2
+        x: 260
+        y: 62
+        width: 57
+        height: 60
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9c86633a6ab2dce30800000000000000
+      internalID: 4525321195280033993
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sawmill_5
+      rect:
+        serializedVersion: 2
+        x: 324
+        y: 3
+        width: 57
+        height: 51
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1a3b1e4a1b8288af0800000000000000
+      internalID: -394020223954340959
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Furnace_5
+      rect:
+        serializedVersion: 2
+        x: 324
+        y: 62
+        width: 57
+        height: 60
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aded37ada428ea180800000000000000
+      internalID: -9102194538864976166
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     customData: 
     physicsShape: []
@@ -251,6 +551,12 @@ TextureImporter:
       entries: []
     nameFileIdTable:
       Furnace: 5957728970166404150
+      Furnace_0: 5839503353984351374
+      Furnace_1: -8706633738452983588
+      Furnace_2: -1350421706350673124
+      Furnace_3: -572955879738025447
+      Furnace_4: 4525321195280033993
+      Furnace_5: -9102194538864976166
       Furnace_Only: -6732738433954383147
       Pixel Art Furnace and Sawmill_0: 2872485219603667635
       Pixel Art Furnace and Sawmill_1: -8300950071754738547
@@ -266,6 +572,12 @@ TextureImporter:
       Pixel Art Furnace and Sawmill_8: 7230286855050320180
       Pixel Art Furnace and Sawmill_9: 5433167480692301568
       Sawmill: -1600277247301420504
+      Sawmill_0: 8333008143902834016
+      Sawmill_1: 3279212555865662862
+      Sawmill_2: 6468348035256863810
+      Sawmill_3: 1731031288609824416
+      Sawmill_4: 8837394355395978427
+      Sawmill_5: -394020223954340959
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
