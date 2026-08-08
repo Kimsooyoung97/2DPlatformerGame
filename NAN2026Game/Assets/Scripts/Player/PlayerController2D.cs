@@ -521,6 +521,9 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
 
         if (queuedAttack != null)
         {
+            // FAIL.md #18과 동일 계열 버그: CanAttack이 실패했을 때도 무조건 큐를 비우면
+            // 이번 프레임에 소비 못 한 입력(X 스킬 등)이 영원히 사라진다. 소비에
+            // 성공했을 때만 비우고, 실패하면 다음 FixedUpdate에서 재시도한다.
             if (PlayerLocomotionLogic.CanAttack(attacking))
             {
                 activeAttack = queuedAttack;
@@ -530,8 +533,8 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
                 SpawnAttackEffect(queuedAttack);
                 if (queuedAttack == "Roll" && health != null)
                     health.BeginRollInvincibility();
+                queuedAttack = null;
             }
-            queuedAttack = null;
         }
 
         if (comboVStage == 1 && comboVWindowEnd > 0f && Time.time > comboVWindowEnd) comboVStage = 0; // comboVStage 만료
