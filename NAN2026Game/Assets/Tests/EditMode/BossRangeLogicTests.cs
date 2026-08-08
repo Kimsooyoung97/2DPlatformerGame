@@ -60,6 +60,14 @@ namespace NAN2026.Tests
             }
         }
 
+        [Test] public void 양방향_판정은_등뒤도_맞힌다()
+        {
+            Assert.IsTrue(BossRangeLogic.InHitBandBothSides(10f, 15f, Reach));
+            Assert.IsTrue(BossRangeLogic.InHitBandBothSides(10f, 5f, Reach));
+            Assert.IsFalse(BossRangeLogic.InHitBandBothSides(10f, 16.5f, Reach));
+            Assert.IsFalse(BossRangeLogic.InHitBandBothSides(10f, 3.5f, Reach));
+        }
+
         [Test] public void 시간창_판정()
         {
             Assert.IsFalse(BossRangeLogic.WindowOpen(0.5f, 0.62f, 0.82f));

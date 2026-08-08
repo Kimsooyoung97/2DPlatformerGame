@@ -18,9 +18,9 @@ namespace NAN2026
         public float fps = 12f;
         [Header("클리브(근접)")]
         public float cleaveDur = 1.25f;
-        public float cleaveWinS = 0.62f;  // 패링 시간창 (다른 보스와 동일 감각)
+        public float cleaveWinS = 0.60f;  // 검이 최대로 뻗는 f10(frac 0.60)부터
         public float cleaveWinE = 0.82f;
-        public float cleaveReach = 6.0f;
+        public float cleaveReach = 12.3f; // 시트 실측 f11~f12 검 끝 12.32~12.53u
         public int damage = 1;
         [Header("스매시(접근 공격)")]
         public float smashDur = 1.5f;
@@ -28,10 +28,16 @@ namespace NAN2026
         public float smashWinE = 0.85f;
         public float smashApproachSpeed = 9f;
         public float smashStopX = 3.2f;   // 주인공 옆 정지 거리
-        public float smashReach = 6.5f;
+        public float smashReach = 10.3f;   // 충격파 시트 실측 좌우 10.40u
+        public bool smashBothSides = true; // 충격파가 좌우 대칭이라 등 뒤도 판정
         [Header("캐스트(투사체)")]
         public float castDur = 0.9f;
         public float castFireFrac = 0.55f; // 이 진행률에 발사
+        public int castCount = 5;          // 발사 수 (부채꼴)
+        public float castBaseDeg = -70f;   // 부채꼴 중심 각도(바라보는 방향 0도, 음수=아래)
+        public float castSpreadDeg = 70f;  // 전체 벌어짐 — 착탄 5.3~15.3u, 간격 1.9~3.9u(구체 1.41u)로 회피창 확보
+        public float castPerShotDelay = 0f;// 0이면 동시 발사
+        public float projScale = 1.466f;   // ParryOrb(1.407u) 기준: 0.960u × 1.466
         public Vector2 handOffset = new Vector2(6.85f, -2.04f); // 손 위치(바라보는 쪽 +x, 피벗 기준 y) — cast 시트 실측
         public float projSpeed = 9f;
         public float projLife = 6f;

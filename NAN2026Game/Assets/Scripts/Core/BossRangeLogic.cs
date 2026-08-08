@@ -26,6 +26,14 @@ namespace NAN2026.Core
             return BossFacingLogic.TargetInFront(bossX, targetX, facingSign, deadZone);
         }
 
+        /// 좌우 양쪽으로 퍼지는 공격(스매시 충격파)용 판정. 바라보는 방향과 무관.
+        public static bool InHitBandBothSides(float bossX, float targetX, float reach)
+        {
+            float d = targetX - bossX;
+            float ad = d < 0f ? -d : d;
+            return ad <= reach;
+        }
+
         /// 애니메이션 진행률이 타격 시간창 안인가.
         public static bool WindowOpen(float frac, float winStart, float winEnd)
         {

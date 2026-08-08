@@ -22,18 +22,24 @@ MonoBehaviour:
   attackCooldown: 1.6
   fps: 12
   cleaveDur: 1.25
-  cleaveWinS: 0.62
+  cleaveWinS: 0.6
   cleaveWinE: 0.82
-  cleaveReach: 6
+  cleaveReach: 12.3
   damage: 1
   smashDur: 1.5
   smashWinS: 0.62
   smashWinE: 0.85
   smashApproachSpeed: 9
   smashStopX: 3.2
-  smashReach: 6.5
+  smashReach: 10.3
+  smashBothSides: 1
   castDur: 0.9
   castFireFrac: 0.55
+  castCount: 5
+  castBaseDeg: -70
+  castSpreadDeg: 70
+  castPerShotDelay: 0
+  projScale: 1.466
   handOffset: {x: 6.85, y: -2.04}
   projSpeed: 9
   projLife: 6

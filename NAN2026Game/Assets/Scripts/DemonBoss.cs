@@ -124,7 +124,7 @@ namespace NAN2026
             float frac = stateT / config.smashDur;
             if (frac < config.smashWinS && dx > config.smashStopX)
                 transform.position += new Vector3(side * config.smashApproachSpeed * Time.deltaTime, 0f, 0f);
-            if (!dealtThisSwing && BossRangeLogic.WindowOpen(frac, config.smashWinS, config.smashWinE) && InHitBand(config.smashReach))
+            if (!dealtThisSwing && BossRangeLogic.WindowOpen(frac, config.smashWinS, config.smashWinE) && InSmashBand())
                 ResolveHit();
             if (frac >= 1f) { nextAtk = Time.time + config.attackCooldown; SetState(0); }
         }
@@ -136,17 +136,37 @@ namespace NAN2026
             if (!castFired && frac >= config.castFireFrac)
             {
                 castFired = true;
-                var go = new GameObject("DemonProj");
                 float face = Facing(); // 실제로 바라보는 월드 방향
-                go.transform.position = new Vector3(
+                Vector3 hand = new Vector3(
                     BossFacingLogic.HandWorldX(transform.position.x, config.handOffset.x, face),
                     BossFacingLogic.HandWorldY(transform.position.y, config.handOffset.y), 0f);
-                go.transform.localScale = Vector3.one; // PPU 33.3 = 3배 크기
-                var proj = go.AddComponent<DemonProjectile>();
-                Vector2 dir = player != null ? ((Vector2)(player.position + Vector3.up * 0.8f - go.transform.position)).normalized : new Vector2(face, 0f);
-                proj.Launch(projFly, projBoom, dir, config.projSpeed, config.fps, config.projDamage, config.projLife, config.clashConfig);
+                if (config.castPerShotDelay > 0f) StartCoroutine(FireSpread(face, hand));
+                else for (int i = 0; i < config.castCount; i++) FireOne(i, face, hand);
             }
             if (frac >= 1f) { nextAtk = Time.time + config.attackCooldown; SetState(0); }
+        }
+
+        // 부채꼴 1발. 유도하지 않는다 — 고정 각도라야 회피가 성립한다.
+        private void FireOne(int index, float face, Vector3 hand)
+        {
+            if (projFly == null || projFly.Length == 0) return;
+            float deg = SpreadShotLogic.AngleDeg(index, config.castCount, config.castBaseDeg, config.castSpreadDeg);
+            float rad = deg * Mathf.Deg2Rad;
+            Vector2 dir = new Vector2(Mathf.Cos(rad) * face, Mathf.Sin(rad)); // face 기준 로컬각 → 월드
+            var go = new GameObject("DemonProj" + index);
+            go.transform.position = hand;
+            go.transform.localScale = Vector3.one * config.projScale; // ParryOrb 크기 기준
+            var proj = go.AddComponent<DemonProjectile>();
+            proj.Launch(projFly, projBoom, dir, config.projSpeed, config.fps, config.projDamage, config.projLife, config.clashConfig);
+        }
+
+        private System.Collections.IEnumerator FireSpread(float face, Vector3 hand)
+        {
+            for (int i = 0; i < config.castCount; i++)
+            {
+                FireOne(i, face, hand);
+                yield return new WaitForSeconds(config.castPerShotDelay);
+            }
         }
 
         // 현재 바라보는 월드 방향 (+1 오른쪽 / -1 왼쪽)
@@ -167,6 +187,14 @@ namespace NAN2026
         {
             if (player == null) return false;
             return BossRangeLogic.InHitBand(transform.position.x, player.position.x, reach, Facing(), config.frontDeadZone);
+        }
+
+        // 스매시 충격파는 시트가 좌우 대칭이라 config.smashBothSides 면 등 뒤도 맞는다
+        private bool InSmashBand()
+        {
+            if (player == null) return false;
+            if (!config.smashBothSides) return InHitBand(config.smashReach);
+            return BossRangeLogic.InHitBandBothSides(transform.position.x, player.position.x, config.smashReach);
         }
 
         // 발끝을 아레나 지면에 고정 (공중 부양 방지)
@@ -297,8 +325,9 @@ namespace NAN2026
 
             // 인지 범위는 좌우 양쪽 (판정이 Mathf.Abs 기준)
             SetRect(bands[0], bx - config.aggroX, bx + config.aggroX, y0, y1);
-            SetRect(bands[1], BossRangeLogic.BandMinX(bx, config.smashReach, face, dz),
-                              BossRangeLogic.BandMaxX(bx, config.smashReach, face, dz), y0, y1 * 0.85f);
+            if (config.smashBothSides) SetRect(bands[1], bx - config.smashReach, bx + config.smashReach, y0, y1 * 0.85f);
+            else SetRect(bands[1], BossRangeLogic.BandMinX(bx, config.smashReach, face, dz),
+                                   BossRangeLogic.BandMaxX(bx, config.smashReach, face, dz), y0, y1 * 0.85f);
             SetRect(bands[2], BossRangeLogic.BandMinX(bx, config.cleaveReach, face, dz),
                               BossRangeLogic.BandMaxX(bx, config.cleaveReach, face, dz), y0, y1 * 0.7f);
             float stopX = bx + config.smashStopX * face;
@@ -321,7 +350,7 @@ namespace NAN2026
                 rangeLabel.text = string.Format("dx {0:F1} | 바라봄 {1} | cleave {2:F1}{3} | smash {4:F1}{5}\n{6}{7}",
                     dx, face < 0f ? "◀" : "▶",
                     config.cleaveReach, InHitBand(config.cleaveReach) ? "✔" : "✘",
-                    config.smashReach, InHitBand(config.smashReach) ? "✔" : "✘",
+                    config.smashReach, InSmashBand() ? "✔" : "✘",
                     cur, (cleaveOpen || smashOpen) ? "  ◆타격중" : "");
             }
         }

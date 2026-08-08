@@ -5752,3 +5752,37 @@ DemonBossConfig.showRangesInGame / showRangeLabels (기존: MinoBossConfig.showP
 없음
 ### 커밋
 해당 없음(무수정)
+
+
+## [수정] 데몬 Z대미지 복구 · 사거리 실측 교정 · 캐스트 5발 확산 — 2026-08-08 22:01
+### 프롬프트
+진행해
+(직전 [조사] 결론 승인: 확산 투사체는 cast_spell 개조 / 사거리는 실측값으로 교정)
+### 조작 내역
+**① Z·X 대미지 복구 (침묵 사망 해소)**
+- EffectProjectile.OnTriggerEnter2D(Z 근접)·SlashProjectile.OnTriggerEnter2D(X 검기) 두 디스패처에 `NAN2026.DemonBoss` 분기 추가. SecondSceneBoss 다음, MonsterHealth 앞에 배치
+- 원인은 배선이 아니라 화이트리스트 미등재였음(Scene4 Player 슬롯은 전부 정상 확인)
+**② 사거리 실측 교정**
+- cleaveReach 6.0 → 12.3 (f11~f12 검 끝 실측 12.32~12.53u), cleaveWinS 0.62 → 0.60 (검이 최대로 뻗는 f10 포함)
+- smashReach 6.5 → 10.3 (충격파 실측 좌우 10.40u), smashBothSides=true 신설 — 시트가 좌우 대칭이라 등 뒤도 판정
+- BossRangeLogic.InHitBandBothSides 추가, DemonBoss.InSmashBand()가 분기. 범위 표시 띠도 양방향으로 렌더
+**③ cast_spell: 유도 1발 → 비유도 5발 부채꼴**
+- 신규 순수 로직 NAN2026.Core/SpreadShotLogic.cs: AngleDeg / MinAngleDeg / MaxAngleDeg / FireDelay
+- DemonBoss.FireOne(index, face, hand) + FireSpread 코루틴(perShotDelay>0일 때). 방향은 `dir=(cos(a)*face, sin(a))` 고정각 — 플레이어 추적 제거
+- 투사체 크기 projScale=1.466 → 0.960u × 1.466 = **1.407u = ParryOrb(128px/PPU91)와 동일**. CircleCollider r=0.45도 transform 스케일로 함께 확대
+- 각도 기본값 산정: 손 위치(보스+6.85, 지면+5.94)에서 4개 후보를 착탄 시뮬레이션해 비교
+  · base -30/spread 70(초안): 착탄 12.88·10.21·5.36·-11.14·이탈 — 간격 최대 16.5u, 1발 화면 밖. 기각
+  · base -70/spread 40: 간격 1.05~1.55u < 구체 지름 1.41u → 회피창 없음. 기각
+  · **base -70/spread 70 채택**: 착탄 17.24·15.39·13.49·11.09·7.17 (보스로부터 5.3~15.3u), 간격 1.85~3.93u → 구체 1.41u 대비 회피창 확보, 보스 근처일수록 촘촘
+- 신규 SO 다이얼: castCount=5, castBaseDeg=-70, castSpreadDeg=70, castPerShotDelay=0, projScale=1.466
+### 검증
+- 컴파일 0, read_console error/exception 0건
+- EditMode 179/179 통과 (SpreadShotLogicTests 8 + BossRangeLogic 양방향 1 신규, 실패 0)
+- 리플렉션 실행 검증: AngleDeg 5발(base -30/spread 70) = -65 / -47.5 / -30 / -12.5 / 5 (대칭·단조증가 확인), InHitBandBothSides(10,5,10.3)=True · (10,21,10.3)=False
+- 배선 재읽기: cleaveReach=12.3 cleaveWinS=0.6 smashReach=10.3 smashBothSides=True castCount=5 castBaseDeg=-70 castSpreadDeg=70 projScale=1.466 handOffset=(6.85,-2.04)
+- DemonBoss 오브젝트 슬롯 전수 재검사: ObjectReference NULL 0개, config=DemonBossConfig, 배열 10종 전부 생존(32/6/12/15/18/6/5/22/3/11)
+- 테스트 후 씬 생존: dirty=False, boss=(22.50, 4.03, 0.00)
+- **사용자 눈 판정 필요**: (1) Z·X가 실제로 hp를 깎고 take_hit 모션이 나오는지 (2) 클리브 검 끝과 피격 지점이 맞는지 (3) 스매시가 등 뒤에서도 맞는지 (4) 5발이 ParryOrb 크기로 퍼지고 사이로 피할 수 있는지
+### 실패와 수정
+- 테스트 메서드명을 `5발은_...`으로 지어 CS1519(숫자로 시작하는 식별자) — `다섯발은_...`으로 개명. 이후 세 테스트 파일 전체에 숫자 시작 식별자 정규식 점검 수행
+- EffectProjectile.cs 는 CRLF, SlashProjectile.cs 는 LF 혼재라 동일 패턴 치환이 한쪽만 실패 — 파일별 개행 실측 후 재치환
