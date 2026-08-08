@@ -5717,3 +5717,38 @@ boss_demon_final 시트로 데몬보스: 플레이어 7배, 투사체 3배, tran
 없음
 ### 제출 전 OFF 목록 추가
 DemonBossConfig.showRangesInGame / showRangeLabels (기존: MinoBossConfig.showParryDebug, MidBossConfig.showRangesInGame)
+
+
+## [조사] 데몬 클리브 리치 불일치 · 투사체 요구 · Z 대미지 무반응 — 2026-08-08 21:50
+### 프롬프트
+[조사] 보스가 칼을 내리 찍을때 실제 그림에서 보이는 화면과 타격 거리가 달라서 어색해 보여, 그리고 스매시 Projectile의 크기는 ParryOrb크기 만큼 키우고 5개가 발사해야하는데 주인공에게 유도하는 형식이 아니라 전체적으로 퍼지는 형식으로 주인공이 피할 수 있게 해주고 주인공 타격이 안먹히는거 같으니깐 조사해봐. 칼로 z 기본 공격을 해도 take_hit 모션이 안나와
+### 조사 결과
+**1. Z 대미지·take_hit 무반응 — 원인 확정 (침묵 사망)**
+- 플레이어 Z(ComboV1/V2)는 SpawnComboVDamage → basicEffectPrefab(Skill1) 인스턴스의 EffectProjectile 히트박스로 판정한다
+- EffectProjectile.OnTriggerEnter2D(74~106줄) 분기: PlayerHealth 제외 → ExecutionerBoss → **SecondSceneBoss** → **NHNDemo.MonsterHealth** → (트리거 아니면 소멸). **DemonBoss 분기가 없다**
+- DemonBoss 오브젝트 컴포넌트는 Transform/Rigidbody2D/BoxCollider2D/DemonBoss 뿐 — **MonsterHealth 미보유**(자식 포함 확인)
+- 보스 콜라이더는 isTrigger=true 라서 마지막 `if (!other.isTrigger) Destroy` 에도 안 걸린다 → 히트박스가 무반응 통과. DemonBoss.TakeDamage 가 한 번도 호출되지 않음 → hp 불변 + SetState(6)(take_hit) 미발생
+- **X 검기도 동일**: SlashProjectile.cs 81~95줄도 SecondSceneBoss·MonsterHealth 만 있고 DemonBoss 없음
+- 배선 문제는 아님: Scene4 Player 는 프리팹 인스턴스이고 config/effectConfig/basicEffectPrefab(Skill1)/poweredEffectPrefab(Skill2) 전부 정상 (skillImageUI 만 NULL — 팀 기존 이슈)
+- STATE 하드교훈 #2의 변종. 신규 보스를 대미지 디스패처 화이트리스트에 등재하지 않은 것
+**2. 클리브 그림 vs 판정 거리 — 실측**
+- 15프레임 좌(바라보는 쪽) 도달거리: f10=12.02u, f11=12.32u, f12=12.53u, f13=6.47u, 그 외 2.7~3.8u
+- 현재 cleaveReach=6.0 → 그림이 12.5u까지 뻗는데 판정은 6.0u. **약 2배 미달**
+- 타격창 0.62~0.82 = f11~f13. 검이 최대로 뻗는 첫 프레임 f10(frac 0.60)이 창 밖
+- 제안치: cleaveReach≈12.3, cleaveWinS≈0.60 (f10~f13 초반 포함)
+**3. 스매시 실측**
+- 충격파 f12부터 퍼져 f17에 좌 10.40u / 우 10.40u 최대. **좌우 대칭**
+- 현재 smashReach=6.5 + 정면(InHitBand) 전용 → 사거리 미달 + 등 뒤 충격파 판정 없음
+- 타격창 0.62~0.85 = f12~f16 — 그림과 일치(양호)
+- 제안치: smashReach≈10.3, 스매시만 양방향 판정
+**4. 투사체 현황·크기 기준**
+- **스매시(state 7)에는 투사체가 없다.** 투사체는 cast_spell(state 3)만 생성하며 `dir = (player - hand).normalized` 로 **유도 발사 1발**
+- 데몬 투사체 크기: projectile_idle 32px / PPU 33.333 = **0.960u**, CircleCollider r=0.45
+- ParryOrb: Assets/Sprites_AI/FX/ParryOrb.png 128px / PPU 91 = **1.407u**. Scene4 Stage_Props 에 ParryOrb_S1~S5(SpikeBallTrap) 5기가 이 크기로 실재 → 배율 **1.466배**
+- 즉 요구(ParryOrb 크기 · 5발 · 비유도 확산)를 어느 패턴에 붙일지가 미정: cast 를 개조할지, smash 에 신규 추가할지 — **범위 결정이라 사용자에게 질의함**
+### 검증
+해당 없음
+### 실패와 수정
+없음
+### 커밋
+해당 없음(무수정)
