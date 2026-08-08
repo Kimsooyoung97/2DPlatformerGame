@@ -255,6 +255,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
     private void Update()
     {
         var kb = InputLocked ? null : Keyboard.current;
+        if (parryHeld && (kb == null || !kb.spaceKey.isPressed)) parryHeld = false; // 락·포커스 이탈로 릴리즈 유실 시 자가 회복
         inputX = 0f;
         runHeld = false;
         if (kb != null)
