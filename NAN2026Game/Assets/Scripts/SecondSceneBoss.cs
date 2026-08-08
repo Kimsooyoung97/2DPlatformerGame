@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.InputSystem;
 using System.Reflection;
 
@@ -21,8 +22,7 @@ namespace NAN2026
         private bool atkIs1, dealtThisSwing, holdDone;
         private int parryCount;
         private bool[] swingResolved = new bool[2];
-        private Transform barFill;
-        private float barFullW;
+        private Image barFillImg;
         private GameObject groggyFx;
         private GameObject burstMsg;
         private Coroutine sparkleCo, dashCo;
@@ -58,32 +58,41 @@ namespace NAN2026
         private void BuildBar()
         {
             if (config.barUnder == null) return;
-            var root = new GameObject("HPBar");
-            root.transform.SetParent(transform, false);
-            root.transform.localPosition = new Vector3(0f, config.barOffsetY / Mathf.Max(0.01f, transform.localScale.y), 0f);
-            root.transform.localScale = Vector3.one * (config.barScale / Mathf.Max(0.01f, transform.localScale.x));
-            System.Func<string, Sprite, int, SpriteRenderer> mk = delegate(string nm, Sprite sp, int ord)
+            var cgo = new GameObject("BossHpHud");
+            var canvas = cgo.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvas.sortingOrder = 510;
+            var scaler = cgo.AddComponent<CanvasScaler>();
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = new Vector2(1920f, 1080f);
+            scaler.matchWidthOrHeight = 0.5f;
+            System.Func<string, Sprite, int, Image> mk = delegate(string nm, Sprite sp, int ord)
             {
                 var g = new GameObject(nm);
-                g.transform.SetParent(root.transform, false);
-                var r = g.AddComponent<SpriteRenderer>();
-                r.sprite = sp; r.sortingOrder = ord; r.sharedMaterial = FxUnlit.Mat;
-                return r;
+                g.transform.SetParent(cgo.transform, false);
+                var img = g.AddComponent<Image>();
+                img.sprite = sp; img.raycastTarget = false;
+                var rt = img.rectTransform;
+                rt.anchorMin = new Vector2(0.5f, 1f);
+                rt.anchorMax = new Vector2(0.5f, 1f);
+                rt.pivot = new Vector2(0.5f, 1f);
+                rt.sizeDelta = new Vector2(config.barScale * 260f, config.barScale * 104f);
+                rt.anchoredPosition = new Vector2(0f, -config.barOffsetY * 22f);
+                return img;
             };
-            mk("under", config.barUnder, 800);
-            var fill = mk("fill", config.barProgress, 801);
-            mk("over", config.barOver, 802);
-            barFill = fill.transform;
-            barFullW = config.barProgress.bounds.size.x;
+            mk("under", config.barUnder, 0);
+            barFillImg = mk("fill", config.barProgress, 1);
+            barFillImg.type = Image.Type.Filled;
+            barFillImg.fillMethod = Image.FillMethod.Horizontal;
+            barFillImg.fillOrigin = 0;
+            mk("over", config.barOver, 2);
             UpdateBar();
         }
 
         private void UpdateBar()
         {
-            if (barFill == null) return;
-            float r = Mathf.Clamp01((float)hp / config.maxHp);
-            barFill.localScale = new Vector3(r, 1f, 1f);
-            barFill.localPosition = new Vector3(-(1f - r) * barFullW * 0.5f, 0f, 0f);
+            if (barFillImg == null) return;
+            barFillImg.fillAmount = Mathf.Clamp01((float)hp / config.maxHp);
         }
 
         private void SetState(int s)
@@ -243,7 +252,7 @@ namespace NAN2026
                         swingResolved[w] = true;
                         if (config.clashConfig != null)
                             ParryClashFx.Play((transform.position + player.position) * 0.5f + Vector3.up * 0.8f, config.clashConfig);
-                        player.SendMessage("AddMp", config.damage * 10, SendMessageOptions.DontRequireReceiver);
+                        PlayerMana.RewardParry(player);
                         if (config.showParryDebug) DebugPopup("패링 OK", new Color(0.3f, 1f, 0.4f));
                         parryCount++;
                         if (parryCount >= config.groggyNeed) { parryCount = 0; SetState(5); return; }
@@ -285,7 +294,7 @@ namespace NAN2026
                     {
                         if (config.clashConfig != null)
                             ParryClashFx.Play((transform.position + player.position) * 0.5f + Vector3.up * 0.8f, config.clashConfig);
-                        player.SendMessage("AddMp", config.damage * 10, SendMessageOptions.DontRequireReceiver);
+                        PlayerMana.RewardParry(player);
                         if (config.showParryDebug) DebugPopup("패링 OK", new Color(0.3f, 1f, 0.4f));
                         parryCount++;
                         if (parryCount >= config.groggyNeed) { parryCount = 0; SetState(5); return; }

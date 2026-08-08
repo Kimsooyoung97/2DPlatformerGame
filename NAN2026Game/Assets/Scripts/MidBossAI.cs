@@ -60,6 +60,7 @@ namespace NAN2026
                 object r = tryParry.Invoke(controller, new object[] { gameObject });
                 if (r is bool && (bool)r)
                 {
+                    PlayerMana.RewardParry(player);
                     hitDone = true;
                     SpikeBallTrap.ShowAt(player.position + Vector3.up * 1.4f, "패링 성공!", new Color(0.35f, 1f, 0.45f), config.clashConfig);
                     Vector3 mid = (transform.position + player.position) * 0.5f + Vector3.up * 0.8f;

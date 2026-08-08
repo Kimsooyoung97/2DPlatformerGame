@@ -108,21 +108,34 @@ namespace NAN2026
         System.Reflection.MethodInfo windowActive;
         void ResolveHit()
         {
-            if (resolved) return; resolved = true;
+            if (resolved) return;
+            resolved = true;
+
+            bool ok = false;
+            if (controller != null && tryParry != null)
             {
-                bool ok = false;
-                if (controller != null && tryParry != null)
-                {
-                    object r = tryParry.Invoke(controller, new object[] { gameObject });
-                    ok = r is bool && (bool)r;
-                }
-                if (ok) ParryClashFx.Play((transform.position + player.position) * 0.5f + UnityEngine.Vector3.up * 0.8f, config);
-                Popup(ok ? "패링 성공!" : "패링 실패!", ok ? new Color(0.35f, 1f, 0.45f) : new Color(1f, 0.3f, 0.25f));
-            if (ok) SpikeParryEvents.Report();
-            if (ok && player != null) player.SendMessage("AddMp", 1, SendMessageOptions.DontRequireReceiver);
-                if (ok) { NAN2026.Showroom.ParryMeter.ReportSpike(); dir = new Vector2(-dir.x, Mathf.Abs(dir.y)); Invoke("BreakSilent", 0.5f); }
-                else { player.SendMessage("TakeDamage", config.damage, SendMessageOptions.DontRequireReceiver); Break(false); }
+                object result = tryParry.Invoke(controller, new object[] { gameObject });
+                ok = result is bool && (bool)result;
             }
+
+            if (ok)
+            {
+                ParryClashFx.Play(
+                    (transform.position + player.position) * 0.5f + Vector3.up * 0.8f,
+                    config);
+                Popup("패링 성공!", new Color(0.35f, 1f, 0.45f));
+                PlayerMana.RewardParry(player);
+                SpikeParryEvents.Report();
+                NAN2026.Showroom.ParryMeter.ReportSpike();
+                dir = new Vector2(-dir.x, Mathf.Abs(dir.y));
+                Invoke("BreakSilent", 0.5f);
+                return;
+            }
+
+            Popup("패링 실패!", new Color(1f, 0.3f, 0.25f));
+            if (player != null)
+                player.SendMessage("TakeDamage", config.damage, SendMessageOptions.DontRequireReceiver);
+            Break(false);
         }
 
         void BreakSilent() { Break(false); }

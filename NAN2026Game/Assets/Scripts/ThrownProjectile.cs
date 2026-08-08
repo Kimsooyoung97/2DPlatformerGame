@@ -94,8 +94,7 @@ namespace NAN2026
                 pop.AddComponent<PopupFloater>().Init(config.clashConfig.popupRise, config.clashConfig.popupLife);
             }
             NAN2026.Showroom.ParryMeter.ReportSpike();
-            int mp = kind == ThrownKind.Arrow ? config.arrowMp : kind == ThrownKind.Shuriken ? config.shurikenMp : config.axeMp;
-            if (player != null) player.SendMessage("AddMp", mp, SendMessageOptions.DontRequireReceiver);
+            PlayerMana.RewardParry(player);
             if (kind == ThrownKind.Axe && launcher != null)
             {
                 reflected = true;

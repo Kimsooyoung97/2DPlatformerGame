@@ -29,6 +29,14 @@ namespace NAN2026
             Refresh();
         }
 
+        public static void RewardParry(Component playerContext)
+        {
+            if (playerContext == null) return;
+            PlayerMana mana = playerContext.GetComponentInParent<PlayerMana>();
+            if (mana != null) mana.AddMp(1);
+        }
+
+
         // 스킬 소모용 API — 소모량·연동은 팀 결정 대기, 아직 아무도 호출 안 함
         public bool TryUseMp(int amount)
         {

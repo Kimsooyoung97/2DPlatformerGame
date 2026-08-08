@@ -138,6 +138,7 @@ public sealed class MiddleBossAttackPatterns : MonoBehaviour, IEnemyAttackOverri
         IParryReflector reflector = player.GetComponentInParent<IParryReflector>();
         if (reflector != null && reflector.TryParry(gameObject))
         {
+            NAN2026.PlayerMana.RewardParry(player);
             PlayerHealth parriedPh = player.GetComponentInParent<PlayerHealth>();
             int counterDamage = parriedPh != null ? parriedPh.ParryCounterDamage : 0;
             if (health != null && counterDamage > 0)
