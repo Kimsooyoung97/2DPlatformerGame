@@ -105,12 +105,9 @@ namespace NAN2026
 
         private void SetPlayerControl(bool on)
         {
+            // 입력 게이트 방식: 컨트롤러는 계속 구동(내부 상태·애니 안전), 입력만 차단
+            PlayerController2D.InputLocked = !on;
             if (player == null) return;
-            foreach (var mb in player.GetComponents<MonoBehaviour>())
-            {
-                string n = mb.GetType().Name;
-                if (n == "PlayerController2D" || n == "PlayerSkill") ((Behaviour)mb).enabled = on;
-            }
             var rb = player.GetComponent<Rigidbody2D>();
             if (rb != null && !on) rb.linearVelocity = Vector2.zero;
         }

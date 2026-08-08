@@ -25,6 +25,7 @@ namespace NAN2026
         private Image barFillImg;
         private GameObject hudGo;
         private GameObject groggyFx;
+        private TextMesh groggyPips;
         private GameObject burstMsg;
         private Coroutine sparkleCo, dashCo;
         private SpriteRenderer playerSr;
@@ -53,6 +54,7 @@ namespace NAN2026
                 }
             }
             BuildBar();
+            BuildGroggyPips();
             SetState(0);
         }
 
@@ -108,6 +110,27 @@ namespace NAN2026
             if (s == 5) { BeginGroggyFx(); BeginBurst(); } else { EndGroggyFx(); EndBurst(); }
         }
 
+        private void BuildGroggyPips()
+        {
+            var go = new GameObject("GroggyPips");
+            go.transform.SetParent(transform, false);
+            go.transform.localPosition = new Vector3(0f, config.groggyFxOffsetY + 0.7f, 0f);
+            groggyPips = go.AddComponent<TextMesh>();
+            groggyPips.fontSize = 40; groggyPips.characterSize = 0.07f;
+            groggyPips.anchor = TextAnchor.MiddleCenter;
+            groggyPips.color = new Color(1f, 0.55f, 0.15f);
+            go.GetComponent<MeshRenderer>().sortingOrder = 899;
+            RefreshGroggyPips();
+        }
+
+        private void RefreshGroggyPips()
+        {
+            if (groggyPips == null) return;
+            var sb = new System.Text.StringBuilder();
+            for (int i = 0; i < config.groggyNeed; i++) sb.Append(i < parryCount ? '\u25c6' : '\u25c7');
+            groggyPips.text = sb.ToString();
+        }
+
         private void BeginBurst()
         {
             PlayerController2D.AttackSpeedMul = config.burstAtkSpeedMul;
@@ -159,8 +182,7 @@ namespace NAN2026
         private System.Collections.IEnumerator DashToBoss()
         {
             // Z 자동 대시: 컨트롤러 잠깐 끄고 보스 앞까지 고속 이동
-            var pcComp = player != null ? player.GetComponent<PlayerController2D>() : null;
-            if (pcComp != null) pcComp.enabled = false;
+            PlayerController2D.InputLocked = true; // 입력 게이트
             var rb = player != null ? player.GetComponent<Rigidbody2D>() : null;
             float side = player.position.x < transform.position.x ? -1f : 1f;
             Vector3 target = transform.position + new Vector3(side * config.burstDashStopX, 0f, 0f);
@@ -171,7 +193,7 @@ namespace NAN2026
                 if (rb != null) rb.linearVelocity = Vector2.zero;
                 yield return null;
             }
-            if (pcComp != null) pcComp.enabled = true;
+            PlayerController2D.InputLocked = false;
             dashCo = null;
         }
 
@@ -259,14 +281,15 @@ namespace NAN2026
                         PlayerMana.RewardParry(player);
                         if (config.showParryDebug) DebugPopup("패링 OK", new Color(0.3f, 1f, 0.4f));
                         parryCount++;
-                        if (parryCount >= config.groggyNeed) { parryCount = 0; SetState(5); return; }
+                        RefreshGroggyPips();
+                        if (parryCount >= config.groggyNeed) { parryCount = 0; RefreshGroggyPips(); SetState(5); return; }
                     }
                     else if (!inWin && idx > we)
                     {
                         swingResolved[w] = true; // 창 종료 — 미패링이면 피해
                         if (dx <= config.hitReach)
                         {
-                            player.SendMessage("TakeDamage", config.damage, SendMessageOptions.DontRequireReceiver);
+                            player.SendMessage("TakeDamage", (float)config.damage, SendMessageOptions.DontRequireReceiver);
                             if (config.showParryDebug)
                             {
                                 float since = Time.time - lastParryPress;
@@ -301,11 +324,12 @@ namespace NAN2026
                         PlayerMana.RewardParry(player);
                         if (config.showParryDebug) DebugPopup("패링 OK", new Color(0.3f, 1f, 0.4f));
                         parryCount++;
-                        if (parryCount >= config.groggyNeed) { parryCount = 0; SetState(5); return; }
+                        RefreshGroggyPips();
+                        if (parryCount >= config.groggyNeed) { parryCount = 0; RefreshGroggyPips(); SetState(5); return; }
                     }
                     else
                     {
-                        player.SendMessage("TakeDamage", config.damage, SendMessageOptions.DontRequireReceiver);
+                        player.SendMessage("TakeDamage", (float)config.damage, SendMessageOptions.DontRequireReceiver);
                         if (config.showParryDebug)
                         {
                             float since = Time.time - lastParryPress;

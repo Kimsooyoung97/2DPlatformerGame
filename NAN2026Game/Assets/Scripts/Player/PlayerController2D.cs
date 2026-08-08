@@ -62,6 +62,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
     private string activeAttack;
     private float activeAttackLunge;
     public static float AttackSpeedMul = 1f; // 그로기 버스트 공속 배율(평시 1)
+    public static bool InputLocked = false;  // 연출 락: 입력만 무시(컨트롤러는 계속 구동)
     private float attackTimer;
     private bool parryHeld;
     private float parryEndTimer;
@@ -253,7 +254,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
 
     private void Update()
     {
-        var kb = Keyboard.current;
+        var kb = InputLocked ? null : Keyboard.current;
         inputX = 0f;
         runHeld = false;
         if (kb != null)

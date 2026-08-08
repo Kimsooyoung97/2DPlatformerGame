@@ -71,7 +71,7 @@ namespace NAN2026
             }
             if (dist <= 0.55f)
             {
-                player.SendMessage("TakeDamage", config.damage, SendMessageOptions.DontRequireReceiver);
+                player.SendMessage("TakeDamage", (float)config.damage, SendMessageOptions.DontRequireReceiver);
                 Destroy(gameObject);
             }
         }
