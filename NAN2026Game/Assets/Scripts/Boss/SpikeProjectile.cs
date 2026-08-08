@@ -50,7 +50,7 @@ public class SpikeProjectile : MonoBehaviour
         // 반사된 투사체가 쏜 주인에게 맞았을 때 -> 주인이 대신 데미지를 입는다.
         if (isReflected)
         {
-            var minoHit0 = other.GetComponentInParent<NAN2026.SecondSceneBoss>();
+            var minoHit0 = other.GetComponentInParent<NAN2026.MinoBoss>();
             if (minoHit0 != null) { minoHit0.TakeDamage((int)damage); return; }
             NHNDemo.MonsterHealth hitHealth = other.GetComponentInParent<NHNDemo.MonsterHealth>();
             if (hitHealth != null && hitHealth == ownerHealth)

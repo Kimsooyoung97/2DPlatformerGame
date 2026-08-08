@@ -27,7 +27,7 @@ MonoBehaviour:
   atk1Win2End: 14
   hit2FracStart: 0.62
   hit2FracEnd: 0.82
-  attackCooldown: 1.6
+  attackCooldown: 3
   atk1HoldFrame: 3
   atk1HoldTime: 0.55
   fpsIdle: 10
@@ -44,6 +44,14 @@ MonoBehaviour:
   burstDashSpeed: 20
   burstDashStopX: 1.7
   sparkleInterval: 0.22
+  atk1Windup: 0.25
+  atk2Windup: 0.3
+  dashWindup: 0.5
+  windupFlashColor: {r: 0.39607847, g: 0.26666668, b: 0.23529413, a: 1}
+  windupFlashSpeed: 12
+  dashSpeed: 13
+  dashOvershoot: 2.5
+  dashHitReach: 2.5
   barScale: 1.8
   barOffsetY: 4.0299997
   barUnder: {fileID: 21300000, guid: 6e56a6c15e54bbf44a62fdcdff80e3c5, type: 3}

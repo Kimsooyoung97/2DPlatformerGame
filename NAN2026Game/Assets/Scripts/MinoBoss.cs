@@ -6,7 +6,7 @@ using System.Reflection;
 namespace NAN2026
 {
     // 미노: idle/walk/atk(홀드·패링)/take_hit(항상)/groggy(패링 5회)/death(10타)
-    public class SecondSceneBoss : MonoBehaviour
+    public class MinoBoss : MonoBehaviour
     {
         public MinoBossConfig config;
         public Sprite[] idleF, walkF, atk1F, atk2F, hitF, deathF;
@@ -15,8 +15,13 @@ namespace NAN2026
         private Component controller;
         private MethodInfo tryParry;
         private int hp;
-        private int state; // 0 idle 1 walk 2 attack 3 hit 4 death 5 groggy
-        private float animT, stateT, nextAtk, holdT;
+        private int state; // 0 idle 1 walk 2 attack 3 hit 4 death 5 groggy 6 windup 7 dash
+        private float animT, stateT, nextAtk1, nextAtk2, nextDash, holdT;
+        private int pendingAttack;     // windup 종료 후 진입할 state (2=attack, 7=dash)
+        private float curWindupDur;
+        private float dashDir;
+        private float dashTargetX;
+        private bool dashDealt;
         private Sprite[] cur;
         private float curFps;
         private bool atkIs1, dealtThisSwing, holdDone;
@@ -67,8 +72,20 @@ namespace NAN2026
         {
             state = s; animT = 0f; stateT = 0f; dealtThisSwing = false; holdDone = false; holdT = 0f;
             swingResolved[0] = false; swingResolved[1] = false;
-            cur = s == 0 ? idleF : s == 1 ? walkF : s == 2 ? (atkIs1 ? atk1F : atk2F) : s == 3 ? hitF : s == 5 ? hitF : deathF;
-            curFps = s == 0 ? config.fpsIdle : s == 1 ? config.fpsWalk : s == 2 ? config.fpsAtk : config.fpsHit;
+            cur = s == 0 ? idleF
+                : s == 1 ? walkF
+                : s == 2 ? (atkIs1 ? atk1F : atk2F)
+                : s == 3 ? hitF
+                : s == 5 ? hitF
+                : s == 6 ? idleF   // windup: 별도 시트 없이 idle 프레임 유지
+                : s == 7 ? walkF   // dash: 별도 시트 없이 walk 프레임 재사용
+                : deathF;
+            curFps = s == 0 ? config.fpsIdle
+                : s == 1 ? config.fpsWalk
+                : s == 2 ? config.fpsAtk
+                : s == 6 ? config.fpsIdle
+                : s == 7 ? config.fpsWalk
+                : config.fpsHit;
             if (s == 4) curFps = config.fpsDeath;
             if (s == 5) { BeginGroggyFx(); BeginBurst(); } else { EndGroggyFx(); EndBurst(); }
         }
@@ -185,7 +202,8 @@ namespace NAN2026
             hp -= 1; // 타격 1회 = 10% 고정
             HitFeedback();
             if (hp <= 0) { SetState(4); return; }
-            if (state != 5) SetState(3); // 그로기 중엔 그로기 유지, 그 외엔 항상 피격 모션
+            bool attacking = state == 2 || state == 7; // 공격/돌진 판정·모션 중엔 경직 없음(안 씹힘)
+            if (state != 5 && !attacking) SetState(3); // 그로기 중엔 그로기 유지, 그 외엔 피격 모션
         }
 
         private void HitFeedback()
@@ -234,22 +252,27 @@ namespace NAN2026
             int idx = loop ? (int)animT % cur.Length : Mathf.Min((int)animT, cur.Length - 1);
             sr.sprite = cur[idx];
             if (groggyFx != null) groggyFx.transform.localRotation = Quaternion.Euler(0f, 0f, Mathf.Sin(Time.time * 6f) * 14f);
-            if (player != null && state != 4 && state != 2 && state != 5) sr.flipX = player.position.x > transform.position.x;
+            if (player != null && state != 4 && state != 2 && state != 5 && state != 6 && state != 7) sr.flipX = player.position.x > transform.position.x;
 
             if (state == 4) { if ((int)animT >= cur.Length - 1) enabled = false; return; }
             if (player == null) return;
             float dx = Mathf.Abs(player.position.x - transform.position.x);
 
+            if (state == 6) { DoWindup(); return; }
+            if (state == 7) { DoDash(dx); return; }
+
             if (state == 0)
             {
                 if (dx <= config.aggroX && dx > config.attackRange) SetState(1);
-                else if (dx <= config.attackRange && Time.time >= nextAtk) BeginAttack();
+                else if (dx <= config.attackRange) TryBeginMeleeAttack();
             }
             else if (state == 1)
             {
+                bool dashReady = Time.time >= nextDash && dx > config.attackRange && dx <= config.aggroX;
+                if (dashReady) { if (player != null) sr.flipX = player.position.x > transform.position.x; BeginWindup(7, config.dashWindup); return; }
                 float dir = Mathf.Sign(player.position.x - transform.position.x);
                 transform.position += new Vector3(dir * config.walkSpeed * Time.deltaTime, 0f, 0f);
-                if (dx <= config.attackRange && Time.time >= nextAtk) BeginAttack();
+                if (dx <= config.attackRange) TryBeginMeleeAttack();
                 else if (dx > config.aggroX) SetState(0);
             }
             else if (state == 2 && atkIs1)
@@ -287,7 +310,7 @@ namespace NAN2026
                     }
                 }
                 float frac1 = stateT / config.attackDuration;
-                if (frac1 >= 1f) { nextAtk = Time.time + config.attackCooldown; SetState(0); }
+                if (frac1 >= 1f) { nextAtk1 = Time.time + config.attackCooldown; SetState(0); }
             }
             else if (state == 2)
             {
@@ -325,7 +348,7 @@ namespace NAN2026
                         }
                     }
                 }
-                if (frac >= 1f) { nextAtk = Time.time + config.attackCooldown; SetState(0); }
+                if (frac >= 1f) { nextAtk2 = Time.time + config.attackCooldown; SetState(0); }
             }
             else if (state == 3)
             {
@@ -337,7 +360,7 @@ namespace NAN2026
                     burstMsg.transform.position = player.position + Vector3.up * 2.6f;
                 if (kb != null && kb.zKey.wasPressedThisFrame && dashCo == null && dx > config.burstDashStopX + 0.5f)
                     dashCo = StartCoroutine(DashToBoss());
-                if (stateT >= config.groggyTime) { nextAtk = Time.time + config.attackCooldown; SetState(0); }
+                if (stateT >= config.groggyTime) { nextAtk1 = nextAtk2 = nextDash = Time.time + config.attackCooldown; SetState(0); }
             }
         }
 
@@ -352,11 +375,94 @@ namespace NAN2026
             go.AddComponent<PopupFloater>().Init(1.2f, 1.1f);
         }
 
-        private void BeginAttack()
+        private void TryBeginMeleeAttack()
         {
-            atkIs1 = Random.value < 0.5f;
+            bool a1Ready = Time.time >= nextAtk1;
+            bool a2Ready = Time.time >= nextAtk2;
+            if (!a1Ready && !a2Ready) return;
+            atkIs1 = a1Ready; // 둘 다 돌면 atk1 우선, 아니면 돌아온 쪽
             if (player != null) sr.flipX = player.position.x > transform.position.x;
-            SetState(2);
+            BeginWindup(2, atkIs1 ? config.atk1Windup : config.atk2Windup);
+        }
+
+        // 공격 예열: idle 프레임 유지한 채 색상 플래시로 경고, 지속 후 실제 공격/돌진 state 진입
+        private void BeginWindup(int attackState, float windupDur)
+        {
+            pendingAttack = attackState;
+            curWindupDur = windupDur;
+            SetState(6);
+        }
+
+        private void DoWindup()
+        {
+            if (curWindupDur > 0f)
+            {
+                float pulse = Mathf.PingPong(stateT * config.windupFlashSpeed, 1f);
+                sr.color = Color.Lerp(Color.white, config.windupFlashColor, pulse);
+            }
+            if (stateT >= curWindupDur)
+            {
+                sr.color = Color.white;
+                if (pendingAttack == 7) BeginDash();
+                else SetState(pendingAttack);
+            }
+        }
+
+        private void BeginDash()
+        {
+            dashDir = Mathf.Sign(player.position.x - transform.position.x);
+            if (dashDir == 0f) dashDir = sr.flipX ? 1f : -1f;
+            dashTargetX = player.position.x + dashDir * config.dashOvershoot;
+            dashDealt = false;
+            SetState(7);
+        }
+
+        private void DoDash(float dx)
+        {
+            transform.position += new Vector3(dashDir * config.dashSpeed * Time.deltaTime, 0f, 0f);
+
+            if (!dashDealt && dx <= config.dashHitReach)
+            {
+                dashDealt = true;
+                bool parried = ParryBuffered();
+                if (!parried && controller != null && tryParry != null)
+                {
+                    object r = tryParry.Invoke(controller, new object[] { gameObject });
+                    parried = r is bool && (bool)r;
+                }
+                if (parried)
+                {
+                    if (config.clashConfig != null)
+                        ParryClashFx.Play((transform.position + player.position) * 0.5f + Vector3.up * 0.8f, config.clashConfig);
+                    PlayerMana.RewardParry(player);
+                    if (config.showParryDebug) DebugPopup("패링 OK", new Color(0.3f, 1f, 0.4f));
+                    parryCount++;
+                    RefreshGroggyPips();
+                    if (parryCount >= config.groggyNeed)
+                    {
+                        parryCount = 0; RefreshGroggyPips();
+                        nextAtk1 = nextAtk2 = nextDash = Time.time + config.attackCooldown;
+                        SetState(5);
+                        return;
+                    }
+                }
+                else
+                {
+                    player.SendMessage("TakeDamage", (float)config.damage, SendMessageOptions.DontRequireReceiver);
+                    if (config.showParryDebug)
+                    {
+                        float since = Time.time - lastParryPress;
+                        DebugPopup(since > 3f ? "패링 입력 없음" : "너무 빨랐다 " + since.ToString("F2") + "초 일찍", new Color(1f, 0.35f, 0.3f));
+                    }
+                }
+            }
+
+            bool reachedTarget = (dashDir > 0f && transform.position.x >= dashTargetX) || (dashDir < 0f && transform.position.x <= dashTargetX);
+            if (reachedTarget)
+            {
+                nextDash = Time.time + config.attackCooldown;
+                SetState(0);
+            }
         }
     }
 }

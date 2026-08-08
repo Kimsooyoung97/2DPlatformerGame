@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace NAN2026
 {
@@ -13,12 +13,15 @@ namespace NAN2026
         private int damage;
         private GameObject bossObject;
         private bool hasResolved;
+        private System.Action onParried; // 패링 성공 시 발사 주체(보스)에게 알림 — 그로기 카운터 등에 사용
 
-        /// <summary>공격 시작 시 1회 호출. bossObject는 패링 방향 판정(IsAttackerInFront)에 쓰인다.</summary>
-        public void Init(int damage, GameObject bossObject)
+        /// <summary>공격 시작 시 1회 호출. bossObject는 패링 방향 판정(IsAttackerInFront)에 쓰인다.
+        /// onParried는 패링 성공 시 1회 호출되는 콜백(선택) — 그로기 카운트 등에 사용.</summary>
+        public void Init(int damage, GameObject bossObject, System.Action onParried = null)
         {
             this.damage = damage;
             this.bossObject = bossObject;
+            this.onParried = onParried;
 
             Collider2D col = GetComponent<Collider2D>();
             if (col != null) col.isTrigger = true;
@@ -38,28 +41,24 @@ namespace NAN2026
             if (hasResolved) return;
             if (!other.CompareTag("Player")) return;
 
-            float timer = 0f;
-            float endtime = 0.5f;
+            // FAIL: 예전엔 여기서 0.5초짜리 동기 while 루프로 TryParry를 반복 폴링했다 —
+            // Time.deltaTime이 그 프레임 내내 고정값이라 사실상 그 프레임이 멈추는
+            // 프리즈 버그였다. 패링은 다른 보스(Demon/Mino)처럼 1회 체크로 충분하다 —
+            // 플레이어의 Space 입력 자체가 이미 버퍼(parryBuffer)를 갖고 있어서
+            // 이 트리거가 열려있는 여러 프레임에 걸쳐 OnTriggerStay2D로 자연히 재시도된다.
             PlayerController2D pc = other.GetComponentInParent<PlayerController2D>();
-            while (timer < endtime)
+            if (pc != null && pc.TryParry(bossObject))
             {
-                timer += Time.deltaTime;
-                if (pc != null && pc.TryParry(bossObject))
-                {
-                    NAN2026.PlayerMana.RewardParry(pc);
-                    hasResolved = true;
-                    Debug.Log("패링성공");// 패링당하면 판정 종료(피해 없음)
-                    return;
-                }
+                NAN2026.PlayerMana.RewardParry(pc);
+                hasResolved = true;
+                onParried?.Invoke();
+                return;
             }
-            
-            
 
             PlayerHealth ph = other.GetComponentInParent<PlayerHealth>();
             if (ph != null)
             {
                 ph.TakeDamage(damage);
-                Debug.Log("패링실패");
                 hasResolved = true;
             }
         }

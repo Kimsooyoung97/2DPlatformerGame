@@ -82,7 +82,7 @@ namespace NAN2026
             var exec = other.GetComponentInParent<NAN2026.Showroom.ExecutionerBoss>();
             if (exec != null) { exec.TakeHit(damage, dir); return; }
 
-            var minoHit0 = other.GetComponentInParent<NAN2026.SecondSceneBoss>();
+            var minoHit0 = other.GetComponentInParent<NAN2026.MinoBoss>();
             if (minoHit0 != null) { minoHit0.TakeDamage(damage); return; }
             var demonHit = other.GetComponentInParent<NAN2026.DemonBoss>();
             if (demonHit != null) { demonHit.TakeDamage(damage); return; } // Scene4 데몬 — 미등재 시 무음 통과

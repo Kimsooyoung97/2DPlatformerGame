@@ -44,6 +44,16 @@ namespace NAN2026
         public float burstDashSpeed = 20f;    // 자동 대시 속도
         public float burstDashStopX = 1.7f;   // 보스 앞 정지 거리
         public float sparkleInterval = 0.22f; // 반짝 주기
+        [Header("공격 예열(Windup) — 플레이어 반응 시간 확보용 텔레그래프")]
+        public float atk1Windup = 0.25f;
+        public float atk2Windup = 0.3f;
+        public float dashWindup = 0.35f;
+        public Color windupFlashColor = new Color(1f, 0.35f, 0.35f); // 예열 중 깜빡이는 경고 색
+        public float windupFlashSpeed = 12f; // 값이 클수록 플래시가 빠르게 깜빡임
+        [Header("돌진 공격(Dash)")]
+        public float dashSpeed = 9f;       // walkSpeed보다 확실히 빠르게
+        public float dashOvershoot = 2.5f; // 플레이어를 지나쳐서 멈추는 거리
+        public float dashHitReach = 2.5f;  // 돌진 중 명중 판정 거리
         [Header("체력바")]
         public float barScale = 1.8f;      // 견본(sample_100) 크기감
         public float barOffsetY = 3.1f;
