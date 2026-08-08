@@ -25,6 +25,7 @@ GameObject:
   - component: {fileID: 24102756782323629}
   - component: {fileID: 9064997020484281628}
   - component: {fileID: 5909537138968367621}
+  - component: {fileID: 5141673981799727561}
   m_Layer: 7
   m_Name: RealPlayer
   m_TagString: Player
@@ -594,6 +595,31 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NAN2026.PlayerMana
   config: {fileID: 11400000, guid: 1e8ab3c40df891f4a870bb3cb6e8ccf7, type: 2}
+--- !u!114 &5141673981799727561
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5109878993836927586}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: feb710c4cffadd0478dbc3f488ea1069, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NAN2026.PlayerHurtDeathFx
+  config: {fileID: 11400000, guid: 6800456bc099ac04d9f359e79a5539b3, type: 2}
+  hurtFrames:
+  - {fileID: 5165073382359461468, guid: a0f349d4647a8354f82c15040bf7285e, type: 3}
+  - {fileID: -5119535939895793725, guid: a0f349d4647a8354f82c15040bf7285e, type: 3}
+  - {fileID: 5621915180926783229, guid: a0f349d4647a8354f82c15040bf7285e, type: 3}
+  - {fileID: 3969903004428852666, guid: a0f349d4647a8354f82c15040bf7285e, type: 3}
+  deathFrames:
+  - {fileID: -625099412930161800, guid: 881768e003a3d484083b883d095890d3, type: 3}
+  - {fileID: 5227767282447512884, guid: 881768e003a3d484083b883d095890d3, type: 3}
+  - {fileID: -2905380826100750944, guid: 881768e003a3d484083b883d095890d3, type: 3}
+  - {fileID: -894729927518332931, guid: 881768e003a3d484083b883d095890d3, type: 3}
+  - {fileID: 3314662284431173991, guid: 881768e003a3d484083b883d095890d3, type: 3}
+  - {fileID: -224287705477160955, guid: 881768e003a3d484083b883d095890d3, type: 3}
 --- !u!1 &6114823860119314469
 GameObject:
   m_ObjectHideFlags: 0

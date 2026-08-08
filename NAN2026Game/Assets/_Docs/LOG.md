@@ -6234,3 +6234,70 @@ Window 01 A, Break 02 (1), Window 02 B 등등 창문들도 다 빛나
 해당 없음
 ### 커밋
 해당 없음(무수정)
+
+
+## [조사] 플레이어 피격/사망 연출 — 현행 HP 경로와 신규 시트 실측 — 2026-08-09 06:35
+### 프롬프트
+[조사] ...death, hurt 스프라이트 시트를 추가하였다. 현재 player에 피격을 당했을때 피가 깎이는 기능 구현되어 있지? 그때 hurt 이펙트가 나와야 하고 death는 피가 없으면 죽음으로 변경되게 해야해. player 프리펩화 했는거 보이지 거기에 적용시켜서 어느 씬이든 Player만 있으면 다 적용되도록 해줄 수 있겠니?
+### 조사 결과
+**1. HP 감소는 이미 동작한다 (PlayerHealth.cs)**
+- `TakeDamage(float)` → currentHealth 차감 → `OnHealthChanged(현재,최대)` 이벤트 → 0 이하면 `Kill()`
+- PlayerCombatConfig: maxHealth 10 / hitInvulnerabilityDuration 0.6s / knockbackDistance 0.25 / parryCounterDamage 2 / rollInvincibilityDuration 0.25
+- 무시 조건: dying · invincible(F2) · spawnGrace · 피격 후 0.6s 무적 · 백스텝 무적
+**2. 그러나 피격·사망 '연출'은 전혀 없다**
+- `Kill()`은 SetVisible(false)로 **스프라이트를 그냥 끄고** 0.2s 뒤 Respawn(체크포인트 부활, HP 만땅). 사망 모션 없음
+- Animator(Player_Preview) 상태 19개 전수: Idle/Walk/Run/Slash/Combo2/Combo3/JumpRise/JumpApex/JumpFall/Land/ParryStart/ParryEnd/Roll/Backstep/ComboV1/ComboV2/ComboB1/ComboB2/ComboB3 — **Hurt·Death 상태 없음**. 파라미터도 0개(코드에서 Play(상태명) 직접 호출 방식)
+- 즉 추가 작업은 '연결'이 아니라 '신설'이다
+**3. 잠재 버그 발견** — `SetControllerEnabled()`가 이름으로 `PixelPlayerController`만 찾는데, RealPlayer 프리팹에는 그 컴포넌트가 없고 `PlayerController2D`가 붙어 있다. 따라서 **사망 중에도 조작이 안 잠긴다**(FAIL#24와 동일한 이름 의존 계열)
+**4. 신규 시트 실측**
+- `hurt.png` 2752x1536 — **전면 불투명, 배경 흰색(255,255,255)**. 배경 제외 시 콘텐츠 14.1%. **가로 4덩어리 x 세로 1덩어리 = 4프레임** (x 143~665 / 786~1320 / 1456~1891 / 2087~2475, y 497~1135)
+  · 기존 Knight_SpriteSheet.png(동일 2752x1536)는 알파 27.1%로 배경이 제거돼 있음 → hurt.png는 **배경 제거 선행 필요**
+- `death.png` 765x1024 — 알파 있음(23.3%). **2열 x 3행 = 6프레임이지만 격자가 불균등**
+  · 셀 bbox: (341x160)(350x113) / (266x285)(322x197) / (210x288)(269x277) — 균등 격자 슬라이스 불가, 블롭 단위 rect 산출 필요
+- 두 시트 모두 기존 플레이어 시트(프레임 257x464 @PPU 480)와 해상도 체계가 달라 **PPU를 프레임 실측으로 재산정해야 함**(FAIL#10·#11)
+**5. '어느 씬이든' 범위**
+- PlayerHealth·Animator는 `Assets/Prefabs/RealPlayer.prefab`에 있으므로 프리팹에 넣으면 Scene2·3·4·Test1에 자동 전파됨
+- **단 AdventureScene1만 구형 `Player_Knight!!!!.prefab` 인스턴스** — 여기는 자동 적용 안 됨(팀 영역, 어제 [수정]에서도 동일 지적)
+### 검증
+해당 없음
+### 실패와 수정
+없음
+### 커밋
+해당 없음(무수정)
+
+
+## [구현] 플레이어 피격·사망 스프라이트 연출 (프리팹 부착 · 전 씬 적용) — 2026-08-09 06:45
+### 프롬프트
+사망 연출 >> 체크포인트 부활로 갈거야. 일단 death 새로운 스프라이트 시트로 넣었으니 구현해줄래?AdventureScene3 구현해줄래? 그리고 테스트 해볼려고 하니깐 추가로 4번 누르면 hurt 5번 누르면 death 스프라이트 이미지만 재생되게 해줘 .실제로 죽거나 피격당해서 재생하는건 player 프리펩에 붙여서 주고
+### 조작 내역
+**시트 반입·가공**
+- hurt.png: 흰 배경(255,255,255) 전면 불투명 → 가장자리 flood fill 로 배경만 제거(85.8% 투명화). 캐릭터 내부 흰 픽셀은 보존됨. → Assets/Sprites_AI/Player/Player_Hurt.png
+- death.png: 알파 보유 → 그대로 복사. → Player_Death.png
+- 슬라이스: 균등 격자가 아니라 **블롭 bbox 기반 rect**. 프레임마다 콘텐츠 중심 x 정렬 + 하단 정렬, 공통 rect 크기 사용
+  · Player_Hurt 4프레임 (공통 rect 539x619)
+  · Player_Death 6프레임 (공통 rect 350x288). 시각적 읽기 순서(위→아래, 좌→우) = 서있음→누움. 콘텐츠 높이 288/277/285/197/160/113 로 단조 감소 확인
+- PPU 실측 산정(FAIL#10): 기준 IDLE_0 몸통 447px @PPU480 → 월드 1.397u(scale 1.5). 이에 맞춰 Hurt PPU 664.70 / Death PPU 309.26. 피벗 (0.5, 0)=발끝
+**로직·컴포넌트**
+- 신규 순수 로직 NAN2026.Core/PlayerFxLogic.cs: ShouldPlayHurt / ShouldPlayDeath / Duration / RespawnDelay
+- 신규 PlayerFxConfig(SO) + 자산: hurtFps 12·hurtHold 0.05 / deathFps 7·deathHold 0.45 / lockInputOnDeath / enableDebugKeys
+- 신규 PlayerHurtDeathFx: PlayerHealth 이벤트 구독(OnHealthChanged→hurt, OnPlayerDied→death, OnPlayerRespawned→복구)
+  · **Animator 가 매 프레임 sprite 를 덮어쓰므로 연출 중 Animator.enabled=false 로 소유권 확보**, 종료 시 복구
+  · 사망 중 PlayerController2D.InputLocked=true, 부활 시 해제
+  · 디버그 키 4=hurt / 5=death — **연출만 재생(previewOnly)**, 실제 피해·부활·입력락 없음
+**PlayerHealth 수정 4곳**
+- OnPlayerRespawned 이벤트 추가 / SuppressDeathHide 프로퍼티 추가
+- Kill(): SuppressDeathHide 면 즉시 SetVisible(false) 하지 않음(사망 모션이 보이도록). 부활 지연을 PlayerFxLogic.RespawnDelay(설정값, 연출길이)로 확장 → 실제 1.307초
+- Respawn() 끝에 OnPlayerRespawned 발화
+- **버그 수정**: SetControllerEnabled 가 이름으로 PixelPlayerController 만 찾아 RealPlayer(=PlayerController2D)에서는 사망 중 조작이 안 잠기던 문제 — 두 이름 모두 인정하도록 수정(FAIL#24 계열)
+### 검증
+- 컴파일 0, read_console error/exception 0건
+- EditMode 198/198 통과 (PlayerFxLogicTests 7개 신규, 실패 0)
+- 리플렉션 실행 검증: ShouldPlayHurt(10,9)=True / ShouldPlayHurt(1,0)=False(죽는 타격은 hurt 아님) / Duration(6,7,0.45)=1.307
+  PlayerHealth 이벤트 3종(OnHealthChanged·OnPlayerDied·OnPlayerRespawned) · SuppressDeathHide 존재 확인
+- 프리팹 재읽기: RealPlayer.prefab 에 PlayerHurtDeathFx 부착, config OK, hurtFrames 4 / deathFrames 6 (Player_Death_0~5 순서 확인)
+- **전 씬 전파 확인**: Scene2·Scene3·Scene4·Test1 = ★적용(hurt4/death6/config OK). **Scene1만 미적용**(구형 Player_Knight!!!!.prefab 인스턴스, 팀 영역)
+- **사용자 눈 판정 필요**: (1) 4번 키 hurt·5번 키 death 재생 (2) 실제 피격 시 hurt, HP 0 시 death→1.3초 뒤 부활 (3) death 6프레임 순서가 서있음→누움으로 맞는지(뒤집혔으면 프리팹 deathFrames 배열 역순 배치) (4) 연출 중 캐릭터 크기·발 위치가 튀지 않는지
+### 실패와 수정
+- 없음. 다만 **키 충돌 있음**: PlayerController2D 가 digit4 를 ComboB3 에 이미 쓰고 있어 4번 누르면 콤보도 함께 큐잉된다. 디버그 키라 방치했고 PlayerFxConfig.enableDebugKeys 로 끌 수 있음(제출 전 OFF 대상)
+### 제출 전 OFF 목록 추가
+PlayerFxConfig.enableDebugKeys
