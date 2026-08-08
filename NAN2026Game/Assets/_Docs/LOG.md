@@ -6035,3 +6035,17 @@ GandalfHardcore Archer sheet를 사용 row0은 IDLE로 사용 Walk row3, Attack 
 해당 없음
 ### 커밋
 해당 없음(무수정)
+
+
+## [수정] Scene3 원래 조명 연출 복원 — 2026-08-09 04:47
+### 프롬프트
+원래 의도 복원
+### 조작 내역
+- IntroConfig.globalMaxIntensity 1.00→0.20 (연출 후에도 어둑한 던전 유지 — Scene2식 전체 밝히기 탈피)
+- 씬 전역광 시작값 1.00→0.03(암전 시작), PlayerVisionLight 활성화 + 밝기 0.9·외반경 6.5·내반경 1.2 (주인공 주변 시야, 이동 시 따라옴)
+- 플레이어 탐색은 이미 PlayerLocator(태그→Player→RealPlayer 폴백)로 해결돼 있어 수정 불요 확인
+### 검증
+- 컴파일 0, 디스크 재로드 후 재검증: 전역광=0.03 시야광 active=True 밝기=0.55 반경=4.5 | globalMax=0.20
+- 실제 연출 감각(밝기·반경)은 사용자 재생
+### 실패와 수정
+없음
