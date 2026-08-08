@@ -6102,3 +6102,17 @@ Window 01 A, Break 02 (1), Window 02 B 등등 창문들도 다 빛나
 - 실제 안개 걷힘·성능은 사용자 재생 (rayCount 360, revealRadius 7)
 ### 실패와 수정
 - 없음. WebGL 성능 부담 시 FogOfWarConfig.rayCount 360→120~180 하향 권장
+
+
+## [수정] 포그 재질 회귀 복구 + 촛불 인트로 카메라 복원 — 2026-08-09 05:02
+### 프롬프트
+여전히 주인공 주변에 빛이 감싸고 맵이 밝아지지 않음. 촛불 3개 카메라 줌 후 주인공 보여주는 연출도 사라짐
+### 조작 내역
+- **회귀 자백**: 직전 소품 Lit 일괄 교체 때 Stage_Fog(안개 오버레이)까지 Sprite-Lit-Default로 바꿔 안개가 어둠에 묻혀 무력화됨 → Sprites-Default(Unlit)로 복구
+- 카메라 진단: 씬에 카메라 2벌(구 MainCamera 비활성 / 현 Main Camera). 인트로용 CinemachineCamera는 **비활성**, CM_PlayerCamera는 **추적 대상 NULL** — 인트로 샷·플레이어 추적 모두 죽어 있었음
+- 복원: 인트로캠 활성·촛불 구역(5.5, 4.2) 배치·ortho 5.0·Priority 20 / 플레이어캠 TrackingTarget=RealPlayer·Priority 10 / IntroSequencer에 introCamera 필드 신설 후 배선 — 연출 완주 시 인트로캠 SetActive(false)로 자동 인계(시네머신 블렌드)
+### 검증
+- 컴파일 0, 디스크 재로드: 인트로캠 active/prio20/ortho5.0/pos(5.5,4.2), 플레이어캠 추적=RealPlayer/prio10, introCamera 배선됨
+- 실제 줌·인계·안개 걷힘은 사용자 재생
+### 실패와 수정
+- CinemachineCamera 프로퍼티 경로 오추정(Follow) 1회 → 실제 경로 Target.TrackingTarget·Priority.m_Value 확인 후 정정
