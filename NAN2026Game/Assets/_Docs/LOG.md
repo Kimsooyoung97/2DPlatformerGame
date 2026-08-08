@@ -6409,3 +6409,32 @@ PlayerFxConfig.enableDebugKeys
 - 없음
 ### 제출 전 OFF 목록
 PlayerFxConfig.enableDebugKeys (5·6 미리보기)
+
+
+## [조사] 플레이어 피격 피드백 보강 — 기존 부품 재고 조사 — 2026-08-09 07:16
+### 프롬프트
+[조사]잘되네. 근데 모션이 작아서 피격을 당했는지 사실 구분이 조금 어려운데 다른 유명한 2D 게임은 피격 모션을 어떻게 표시하니? 물론 사운드를 넣을거지만 그래도 좀 부족해 보여.
+### 조사 결과
+**핵심: 필요한 부품이 이미 프로젝트에 있는데 플레이어 피격에 연결만 안 되어 있다.**
+- `FeelConfig`(SPEC 단일기준 모듈) 자산 존재: Assets/Settings/FeelConfig.asset. 필드 보유 — hitStopDuration / knockbackForce·Duration / invincibilityDuration / **screenShakeAmplitude·Duration** / attackStartup·Recovery / inputBufferTime / **hitFlashDuration·Interval**
+  · 참조하는 코드는 HitFlashOnSlash, HitFlashBlinker 둘뿐. **플레이어 피격 경로에서는 아무도 안 씀**
+- `NAN2026.Core.HitFlashBlinker`(순수 로직, EditMode 테스트 보유) 이미 구현됨 — IsVisible/IsFinished. 사용처는 HitFlashOnSlash 하나뿐(적 피격용)
+- 히트스톱 선례 다수: SpikeBallTrap(수명 보정·OnDestroy 안전핀까지 완비), ExecutionerBoss(HitStop 코루틴, timeScale 0.05), PrincessBossAttackPatterns
+- 넉백: MonsterHealth 는 `transform.position += dir * knockbackDistance` 로 적용 중. **PlayerCombatConfig.knockbackDistance=0.25 는 선언만 되어 있고 PlayerHealth.TakeDamage 에서 사용되지 않음**
+- 카메라 흔들림: Scene1·1_1·2·3 의 CM_PlayerCamera 에 **CinemachineImpulseListener 이미 부착**. 다만 프로젝트 전체에 ImpulseSource 는 0개 → 흔들림을 쏘는 쪽이 없다. Scene4·Test1 은 Listener 도 없음
+- 현재 플레이어 피격 시 실제로 일어나는 일: HP 차감 + 0.6s 무적 + hurt 스프라이트 4프레임(0.383초). **그게 전부**. 점멸·정지·넉백·흔들림·팝업 전무
+**2D 액션 게임의 통상적 피격 표현(참고)**
+- 히트스톱(수 프레임 정지) / 화면 흔들림 / 피격 대상 백색 또는 적색 플래시 / 무적 시간 동안 깜빡임 / 넉백 / 히트 파티클·스파크 / 데미지 수치 팝업 / 저체력 시 화면 가장자리 붉은 비네트 / 짧은 슬로모션
+- 통설: 사운드·히트스톱·플래시 3종이 체감 기여도가 가장 크고 구현 비용이 낮다
+**투입 대비 효과 순 제안(실행 안 함)**
+1. 적색 플래시 + 무적 0.6s 깜빡임 — HitFlashBlinker 재사용, 신규 코드 최소. 무적 시간을 시각화하는 부수 효과도 큼
+2. 히트스톱 0.05~0.08s — SpikeBallTrap 의 안전핀 패턴 그대로 이식(FAIL: 수명<히트스톱이면 timeScale 영구 0)
+3. 넉백 0.25u — 이미 config 에 값이 있고 MonsterHealth 에 선례 있음
+4. 화면 흔들림 — Listener 는 있으나 Source 신규 필요. Scene4·Test1 은 Listener 부착도 선행되어야 함
+5. 데미지 팝업 — 데몬/미노에서 쓰던 TextMesh 팝업 재사용 가능
+### 검증
+해당 없음
+### 실패와 수정
+없음
+### 커밋
+해당 없음(무수정)
