@@ -106,3 +106,5 @@
 - #22 타일 시공 시 SetTile은 기존 칸을 무기록 덮어씀 → 사용자 작업 위 시공 금지: 빈 칸 검사 후 배치하거나 전용 타일맵 분리. 대규모 지형은 청사진 합의 후
 
 - #23 커스텀 윗면 엣지 베이커가 신설 씬에서 미작동(푹꺼짐) — 발판은 TilemapCollider+Composite+PlatformEffector 정석 조합 사용
+
+- #24 run_tests(EditMode) job이 started 5초 만에 progress 0/149에서 완전히 멈춤(수 분간 last_update_unix_ms 불변, stuck_suspected=false로 오탐). editor_is_focused=false인 상태와 동시 관찰 — 이전 세션의 재생모드 불안정(H3)과 같은 계열 툴 환경 문제로 추정. 방지: 멈추면 재시도보다 컴파일 성공(read_console error 0) + 리플렉션 타입 로드 확인으로 대체 검증하고, 실제 회귀 여부는 다음 정상 테스트 실행 때 재확인한다.

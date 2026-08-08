@@ -1,0 +1,75 @@
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+/// <summary>
+/// PlayerHealth.OnPlayerDied를 구독해 GameOverPanel을 띄우고, 아무 키(또는 마우스/게임패드
+/// 시작 버튼) 입력 시 타이틀 씬으로 돌아간다. TitleScreen.cs / PauseMenu.cs와 동일한
+/// 입력 감지 방식(Input System 우선, 레거시 Input 폴백)을 사용한다.
+/// </summary>
+public class GameOverController : MonoBehaviour
+{
+    [Header("연결")]
+    [SerializeField] private PlayerHealth playerHealth;
+    [SerializeField] private GameObject gameOverPanel;
+
+    [Header("타이틀 씬")]
+    [Tooltip("Build Settings에 등록된 씬 이름")]
+    [SerializeField] private string titleSceneName = "TitleScene";
+
+    [Header("오입력 방지")]
+    [Tooltip("패널이 뜬 직후 이 시간(초) 동안은 키 입력을 무시한다. 죽는 순간 누르고 있던 키로 즉시 씬 전환되는 것을 막는다.")]
+    [SerializeField] private float inputIgnoreDuration = 0.3f;
+
+    private bool _waitingForInput;
+    private float _acceptInputAt;
+
+    private void Awake()
+    {
+        if (gameOverPanel != null) gameOverPanel.SetActive(false);
+    }
+
+    private void OnEnable()
+    {
+        if (playerHealth != null) playerHealth.OnPlayerDied += HandlePlayerDied;
+    }
+
+    private void OnDisable()
+    {
+        if (playerHealth != null) playerHealth.OnPlayerDied -= HandlePlayerDied;
+    }
+
+    private void HandlePlayerDied()
+    {
+        if (gameOverPanel != null) gameOverPanel.SetActive(true);
+        _waitingForInput = true;
+        _acceptInputAt = Time.unscaledTime + inputIgnoreDuration;
+    }
+
+    private void Update()
+    {
+        if (!_waitingForInput) return;
+        if (Time.unscaledTime < _acceptInputAt) return;
+        if (!AnyKeyPressed()) return;
+
+        _waitingForInput = false;
+        SceneManager.LoadScene(titleSceneName);
+    }
+
+    private bool AnyKeyPressed()
+    {
+#if ENABLE_INPUT_SYSTEM && !ENABLE_LEGACY_INPUT_MANAGER
+        var keyboard = UnityEngine.InputSystem.Keyboard.current;
+        if (keyboard != null && keyboard.anyKey.wasPressedThisFrame) return true;
+
+        var mouse = UnityEngine.InputSystem.Mouse.current;
+        if (mouse != null && mouse.leftButton.wasPressedThisFrame) return true;
+
+        var gamepad = UnityEngine.InputSystem.Gamepad.current;
+        if (gamepad != null && gamepad.startButton.wasPressedThisFrame) return true;
+
+        return false;
+#else
+        return Input.anyKeyDown;
+#endif
+    }
+}
