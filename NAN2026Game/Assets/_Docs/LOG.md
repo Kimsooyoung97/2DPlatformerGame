@@ -5857,3 +5857,17 @@ Decor_40, Furnace 보면 서로 붙어 있어. 이거 떼어서 쓸 수 있게 �
 - 씬 저장 ✓, PropsShowcase 자식 확인: 신규 4종 ON / 합본 2종 OFF
 ### 실패와 수정
 없음
+
+
+## [수정] 공중 발판 원웨이 통일 — 2026-08-09 00:45
+### 프롬프트
+[수정]x77 ~81 y41 구간 발판은 메이플 식으로 윗면만 밟을 수 있게 잘 되 었는데 나머지는 공중 발판은 아무것도 적용이 안되어서 고쳐
+### 조작 내역
+- 진단: 작동 발판(x77~82 y41)은 Stage_Ground 소속(PlatformEffector2D arc170·oneWay·Composite usedByEffector) / 나머지 공중 발판은 Stage_Solid(효과기 없음 = 전면 solid)
+- Stage_Solid는 대부분 두꺼운 지형(12칸런 59개 등)이라 일괄 적용 불가 → '높이≤2 + 아래 2칸 공백' 조건으로 공중 발판 4클러스터만 선별: x70~73 y32 / x51~57 y34~35 / x64~67 y34 / x70~75 y37
+- 해당 28칸을 타일·행렬 보존한 채 Stage_Ground로 이관(20칸 이동 + Ground 기존칸과 중복 8칸은 Solid측 제거)
+### 검증
+- 라이브 GetTile 확인 → 저장 → **디스크 재로드 후 재검증(FAIL#14 규약)**: 대상 28칸 전부 Ground, Solid 잔여 0. 효과기 arc170/oneWay=True/Composite eff=True
+- 실제 통과·착지 감각은 사용자 재생
+### 실패와 수정
+없음
