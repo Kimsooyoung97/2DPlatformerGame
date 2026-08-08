@@ -6234,3 +6234,19 @@ Window 01 A, Break 02 (1), Window 02 B 등등 창문들도 다 빛나
 해당 없음
 ### 커밋
 해당 없음(무수정)
+## [구현] MidBoss_FireKnight 패링/피격/보스공격데미지 연동 — 2026-08-09 (세션 시간)
+### 프롬프트
+[구현] 움직이고 공격하는것까지 확인 완료됐다 이제 플레이어가 보스 공격을 패링(MinoBoss와 똑같은 로직사용), 플레이어가 보스를 공격했을 때 보스 피격(공격중엔 경직당하지 않음), 보스가 플레이어를 공격하면 데미지를 추가해야한다
+### 조작 내역
+- execute_code: EffectProjectile.cs / SlashProjectile.cs 내 DemonBoss/MinoBoss 타입 체크 목록에 MidBoss_FireKnight 하드코딩 체크 없음을 확인(파일 전수 grep). 플레이어 공격이 보스에게 무음으로 데미지 0을 주던 원인.
+- script_apply_edits(anchor_insert): Assets/Scripts/Player/EffectProjectile.cs, Assets/Scripts/SlashProjectile.cs 각각에 MidBoss_FireKnight.TakeDamage 호출 분기 추가 (기존 DemonBoss 분기 바로 뒤).
+- script_apply_edits(anchor_replace x3): Assets/Scripts/FireKnight/MidBossMeleeHitbox.cs — parryBufferedCheck(System.Func<bool>) 델리게이트 추가, Init 시그니처 확장, TryHit()을 MinoBoss와 동일한 2단 판정(버퍼 우선 → pc.TryParry 폴백)으로 교체.
+- script_apply_edits(anchor_replace): Assets/Scripts/FireKnight/MidBoss_FireKnight.cs — SpawnMeleeHitbox()의 hitbox.Init() 호출에 ParryBuffered 델리게이트 인자 추가.
+- 보스→플레이어 데미지(MidBossMeleeHitbox.TryHit의 ph.TakeDamage 호출)와 공격 중 경직 없음(MidBoss_FireKnight.TakeDamage의 attacking 플래그)은 기존 구현이 이미 요구사항을 충족함을 확인 — 추가 변경 없음.
+### 검증
+- refresh_unity(compile=request) → read_console(types=error): 0건
+- run_tests(EditMode): 179/179 통과
+- manage_scene(save): UITestScene 저장 성공
+- git status --porcelain: 스크립트 3개 + 씬 1개 변경 확인
+### 실패와 수정
+없음
