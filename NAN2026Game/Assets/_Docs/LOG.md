@@ -5845,3 +5845,15 @@ Decor_40, Furnace 보면 서로 붙어 있어. 이거 떼어서 쓸 수 있게 �
 - 스프라이트 4종 재읽기 확인(44x58/57x51/95x32/95x39), 프리팹 4종 스프라이트 배선 확인
 ### 실패와 수정
 - codedom이 UnityEditor.U2D.Sprites 어셈블리 미참조 → 레거시 TextureImporter.spritesheet로 우회
+
+
+## [수정] 쇼룸 프롭 교체 (분리본 반영) — 2026-08-09 00:38
+### 프롬프트
+쇼룸에 있던것도 교체해줘
+### 조작 내역
+- MedievalShowroom/PropsShowcase: 합본 인스턴스 2개(Decor_40·Furnace)를 비활성 보존(_합본(비활성) 개명, 삭제 금지 규약 준수)
+- 분리 프리팹 4종 배치: Decor_40_Tent@2.2·Decor_40_Props@5.6 / Furnace_Only@12.6·Sawmill@15.0 (원 위치 기준 나란히)
+### 검증
+- 씬 저장 ✓, PropsShowcase 자식 확인: 신규 4종 ON / 합본 2종 OFF
+### 실패와 수정
+없음
