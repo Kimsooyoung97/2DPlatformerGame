@@ -9,6 +9,9 @@ namespace NAN2026
     public class ThrownProjectile : MonoBehaviour
     {
         public static int Alive; // 맵 전체 동시 생존 수
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetStaticsOnPlay() { Alive = 0; } // DisableDomainReload 대응
         public ThrownTrapConfig config;
         public ThrownKind kind;
         public GameObject launcher;

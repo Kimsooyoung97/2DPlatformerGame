@@ -114,3 +114,5 @@
 - 입력 게이트(kb=null)로 락을 걸면 '뗌 이벤트'가 유실돼 Held 계열 상태가 갇힘 — 게이트 도입 시 모든 Held 필드에 isPressed 기반 자가 회복 필수
 
 - 프리팹 개명 병합 후엔 씬·프리팹의 '슬롯 배선(SerializedProperty)'까지 전수 검사 — 코드 컴파일 통과와 무관하게 유령 참조가 침묵 가드에서 기능을 무음 사망시킴
+
+- EnterPlayMode=DisableDomainReload 프로젝트: 모든 static 상태는 세션 간 생존 — static 필드 추가 시 RuntimeInitializeOnLoadMethod 리셋 동봉 필수 (락 중 정지→다음 세션 입력 봉쇄 사례)

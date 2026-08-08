@@ -5610,3 +5610,15 @@ Z로 공격해도 아무런 피격모션도 안뜨고 피 까이는 UI도 안보
 - Skill1 EffectProjectile 보유 확인, 컴파일 0, 씬 저장. Z→경직·점멸·HP팝업 사슬은 사용자 재생 (X 검기도 동반 복구 예상)
 ### 실패와 수정
 - 병합 검진 때 '프리팹 참조 생존'을 코드 참조만 보고 슬롯 배선까지 전수 안 한 누락 자인 — FAIL 등재
+
+
+## [수정] DisableDomainReload 정적 생존 — 전 정적 자동 리셋 — 2026-08-08 20:39
+### 프롬프트
+다시 정지하고 재생하니깐 캐릭터 사운드는 들리는데 아예 안움직여. idle는 재생됨
+### 조작 내역
+- 실측: InputLocked=True 잔존 + EnterPlayMode=DisableDomainReload — 락 중 정지하면 정적이 다음 세션까지 생존해 입력 봉쇄
+- 응급 해제 + RuntimeInitializeOnLoadMethod(SubsystemRegistration) 리셋 4파일: PC2D(InputLocked·AttackSpeedMul)/ThrownProjectile(Alive)/Launcher(waveBudget·reserved)/SpikeParryEvents(Count·OnParry)
+### 검증
+- 컴파일 0. 정지·재생 반복 후 입력 정상은 사용자 재생
+### 실패와 수정
+- 정적 도입 시 DisableDomainReload 미고려 자인 — FAIL 등재

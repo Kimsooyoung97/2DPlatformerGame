@@ -8,6 +8,9 @@ namespace NAN2026
     public static class SpikeParryEvents
     {
         public static int Count; // 정적 누계 — 구독 유실과 무관
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetStaticsOnPlay() { Count = 0; OnParry = null; } // DisableDomainReload 대응
         public static System.Action OnParry;
         public static void Report() { Count++; if (OnParry != null) OnParry(); }
     }

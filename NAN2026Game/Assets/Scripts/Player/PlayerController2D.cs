@@ -63,6 +63,9 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
     private float activeAttackLunge;
     public static float AttackSpeedMul = 1f; // 그로기 버스트 공속 배율(평시 1)
     public static bool InputLocked = false;  // 연출 락: 입력만 무시(컨트롤러는 계속 구동)
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetStaticsOnPlay() { InputLocked = false; AttackSpeedMul = 1f; } // DisableDomainReload 대응
     private float attackTimer;
     private bool parryHeld;
     private float parryEndTimer;
