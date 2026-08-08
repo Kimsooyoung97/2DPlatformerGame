@@ -5667,3 +5667,25 @@ boss_demon_final 시트로 데몬보스: 플레이어 7배, 투사체 3배, tran
 없음
 ### 커밋
 해당 없음(무수정)
+
+
+## [수정] 데몬 보스 공중부양·역방향 공격 — 2026-08-08 21:32
+### 프롬프트
+일단 그건 나중에 정하고 일단 Scene4에서 보스가 하늘에 떠 다니고 있는고 수정해주고 나를 바라보는 방향으로 공격하는게 아닌 반대 방향으로 공격을 하고 있어.
+### 조작 내역
+- 원인 실측 1(부양): Scene4 아레나 지면은 x=0~44 전 구간 평탄 y=-3.95인데 보스 배치 y=7.82. 시트 288x160·PPU 9.899199 → 반높이 8.0815u, 발여백 1px=0.1010u → 피벗→발 7.9804u. 발끝 실제 y = 7.82-7.9804 = -0.16 → **지면 위 3.79u 공중**
+- 원인 실측 2(역방향): 시트 픽셀 실측으로 기본 바라보는 쪽 확정. cleave 타격창(frac 0.62~0.82 = 프레임 10~12)에서 콘텐츠가 X 20~25까지 **좌측**으로 쓸림(우측 질량 0), 프레임 9는 우측 후방 와인드업. cast 6프레임 모두 구체가 좌측 X[60~99]에 고정. → **비반전 시트는 왼쪽을 향한다**. 기존 코드 `sr.flipX = side < 0f`는 정확히 반대
+- 부수 실측: cast 구체 로컬 좌표 (-6.85, -2.04)u — 기존 config handOffset(3.2, 5.6)은 좌우·상하 모두 오배치
+- 신규 순수 로직 NAN2026.Core/BossFacingLogic.cs: ShouldFlipX / FacingSign / TargetInFront / GroundedPivotY / HandWorldX / HandWorldY
+- DemonBossConfig 신규 필드: spriteFacesLeft=true, groundY=-3.95, feetOffset=7.9804, frontDeadZone=1.0. handOffset (3.2,5.6)→(6.85,-2.04)
+- DemonBoss.cs: flipX 산출을 BossFacingLogic로 교체 / 매 프레임 SnapToGround()로 발끝 접지 고정 / cleave·smash 타격에 TargetInFront() 게이트(등 뒤 타격 차단) / 캐스트 손 위치·기본 발사 방향을 Facing() 기준으로 교체
+- 씬 AdventureScene4: DemonBoss y 7.82 → 4.0304 (콜라이더 하단이 지면 -3.95에 정확히 접함)
+### 검증
+- 컴파일 0, read_console error/exception 0건
+- EditMode 160/160 통과 (BossFacingLogicTests 11개 신규 포함, 실패 0)
+- 리플렉션 실행 검증: ShouldFlipX(10,3,true)=False / ShouldFlipX(10,17,true)=True / GroundedPivotY(-3.95,7.9804)=4.0304
+- 배선 재읽기: config spriteFacesLeft=True groundY=-3.95 feetOffset=7.9804 handOffset=(6.85,-2.04)
+- 씬 저장·테스트 후 생존 확인: boss pos=(22.50, 4.03, 0.00), BoxCollider2D bounds 하단 y=-3.95(지면과 오차 0.00u), 디스크 씬 파일에 4.0304 포함·7.82 소거
+- **사용자 눈 판정 필요**: 재생 시 (1) 보스가 지면을 딛고 서는지 (2) cleave/smash가 플레이어 쪽으로 휘두르는지 (3) 구체가 보스 손에서 나오는지
+### 실패와 수정
+- create_script 도구가 .cs 확장자를 붙여도 bad_extension 반환 — execute_code 파일 쓰기 + AssetDatabase.ImportAsset로 우회

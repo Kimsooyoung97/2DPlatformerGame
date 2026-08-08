@@ -5,6 +5,11 @@ namespace NAN2026
     [CreateAssetMenu(fileName = "DemonBossConfig", menuName = "NAN2026/DemonBossConfig")]
     public class DemonBossConfig : ScriptableObject
     {
+        [Header("접지·바라보기")]
+        public bool spriteFacesLeft = true;   // 비반전 시트가 왼쪽을 향함 (cleave 타격창이 좌측으로 쓸림 — 실측)
+        public float groundY = -3.95f;        // 아레나 지면 표면 Y (Stage_Ground 실측)
+        public float feetOffset = 7.9804f;    // 피벗(중앙) → 발끝 거리 = 160px/2/PPU - 발여백1px
+        public float frontDeadZone = 1.0f;    // 이 거리 안이면 등 뒤라도 정면 처리
         [Header("기본")]
         public int maxHp = 10;            // 10대 사망
         public float aggroX = 14f;
@@ -27,7 +32,7 @@ namespace NAN2026
         [Header("캐스트(투사체)")]
         public float castDur = 0.9f;
         public float castFireFrac = 0.55f; // 이 진행률에 발사
-        public Vector2 handOffset = new Vector2(3.2f, 5.6f); // 손 위치(로컬)
+        public Vector2 handOffset = new Vector2(6.85f, -2.04f); // 손 위치(바라보는 쪽 +x, 피벗 기준 y) — cast 시트 실측
         public float projSpeed = 9f;
         public float projLife = 6f;
         public int projDamage = 1;

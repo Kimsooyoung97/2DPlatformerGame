@@ -12,6 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a55b45808bcaa5d4b8bda393746b578e, type: 3}
   m_Name: DemonBossConfig
   m_EditorClassIdentifier: Assembly-CSharp::NAN2026.DemonBossConfig
+  spriteFacesLeft: 1
+  groundY: -3.95
+  feetOffset: 7.9804
+  frontDeadZone: 1
   maxHp: 10
   aggroX: 14
   walkSpeed: 2.2
@@ -30,7 +34,7 @@ MonoBehaviour:
   smashReach: 6.5
   castDur: 0.9
   castFireFrac: 0.55
-  handOffset: {x: 3.2, y: 5.6}
+  handOffset: {x: 6.85, y: -2.04}
   projSpeed: 9
   projLife: 6
   projDamage: 1

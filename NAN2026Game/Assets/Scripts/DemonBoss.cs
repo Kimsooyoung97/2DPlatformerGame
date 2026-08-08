@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using NAN2026.Core;
 
 namespace NAN2026
 {
@@ -61,6 +62,7 @@ namespace NAN2026
             var kb = Keyboard.current;
             if (kb != null && kb.spaceKey.wasPressedThisFrame) lastParryPress = Time.time;
             stateT += Time.deltaTime; animT += Time.deltaTime * config.fps;
+            SnapToGround();
 
             if (state == 4) { Anim(deathFrames, false); return; }
             if (state == -1)
@@ -71,8 +73,8 @@ namespace NAN2026
             }
             if (player == null) return;
             float dx = Mathf.Abs(player.position.x - transform.position.x);
-            float side = player.position.x < transform.position.x ? -1f : 1f;
-            if (state != 5) sr.flipX = side < 0f;
+            float side = player.position.x < transform.position.x ? -1f : 1f; // 플레이어가 있는 월드 방향(이동용)
+            if (state != 5) sr.flipX = BossFacingLogic.ShouldFlipX(transform.position.x, player.position.x, config.spriteFacesLeft);
 
             if (state == 5)
             {
@@ -111,7 +113,7 @@ namespace NAN2026
         {
             Anim(cleaveFrames, false);
             float frac = stateT / config.cleaveDur;
-            if (!dealtThisSwing && frac >= config.cleaveWinS && frac <= config.cleaveWinE && dx <= config.cleaveReach)
+            if (!dealtThisSwing && frac >= config.cleaveWinS && frac <= config.cleaveWinE && dx <= config.cleaveReach && TargetInFront())
                 ResolveHit();
             if (frac >= 1f) { nextAtk = Time.time + config.attackCooldown; SetState(0); }
         }
@@ -122,7 +124,7 @@ namespace NAN2026
             float frac = stateT / config.smashDur;
             if (frac < config.smashWinS && dx > config.smashStopX)
                 transform.position += new Vector3(side * config.smashApproachSpeed * Time.deltaTime, 0f, 0f);
-            if (!dealtThisSwing && frac >= config.smashWinS && frac <= config.smashWinE && dx <= config.smashReach)
+            if (!dealtThisSwing && frac >= config.smashWinS && frac <= config.smashWinE && dx <= config.smashReach && TargetInFront())
                 ResolveHit();
             if (frac >= 1f) { nextAtk = Time.time + config.attackCooldown; SetState(0); }
         }
@@ -135,14 +137,37 @@ namespace NAN2026
             {
                 castFired = true;
                 var go = new GameObject("DemonProj");
-                float side = sr.flipX ? -1f : 1f;
-                go.transform.position = transform.position + new Vector3(config.handOffset.x * side, config.handOffset.y, 0f);
+                float face = Facing(); // 실제로 바라보는 월드 방향
+                go.transform.position = new Vector3(
+                    BossFacingLogic.HandWorldX(transform.position.x, config.handOffset.x, face),
+                    BossFacingLogic.HandWorldY(transform.position.y, config.handOffset.y), 0f);
                 go.transform.localScale = Vector3.one; // PPU 33.3 = 3배 크기
                 var proj = go.AddComponent<DemonProjectile>();
-                Vector2 dir = player != null ? ((Vector2)(player.position + Vector3.up * 0.8f - go.transform.position)).normalized : new Vector2(side, 0f);
+                Vector2 dir = player != null ? ((Vector2)(player.position + Vector3.up * 0.8f - go.transform.position)).normalized : new Vector2(face, 0f);
                 proj.Launch(projFly, projBoom, dir, config.projSpeed, config.fps, config.projDamage, config.projLife, config.clashConfig);
             }
             if (frac >= 1f) { nextAtk = Time.time + config.attackCooldown; SetState(0); }
+        }
+
+        // 현재 바라보는 월드 방향 (+1 오른쪽 / -1 왼쪽)
+        private float Facing()
+        {
+            return BossFacingLogic.FacingSign(sr.flipX, config.spriteFacesLeft);
+        }
+
+        // 등 뒤 타격 방지
+        private bool TargetInFront()
+        {
+            if (player == null) return false;
+            return BossFacingLogic.TargetInFront(transform.position.x, player.position.x, Facing(), config.frontDeadZone);
+        }
+
+        // 발끝을 아레나 지면에 고정 (공중 부양 방지)
+        private void SnapToGround()
+        {
+            float y = BossFacingLogic.GroundedPivotY(config.groundY, config.feetOffset);
+            var p = transform.position;
+            if (!Mathf.Approximately(p.y, y)) transform.position = new Vector3(p.x, y, p.z);
         }
 
         private void ResolveHit()
