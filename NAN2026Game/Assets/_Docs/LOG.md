@@ -5689,3 +5689,31 @@ boss_demon_final 시트로 데몬보스: 플레이어 7배, 투사체 3배, tran
 - **사용자 눈 판정 필요**: 재생 시 (1) 보스가 지면을 딛고 서는지 (2) cleave/smash가 플레이어 쪽으로 휘두르는지 (3) 구체가 보스 손에서 나오는지
 ### 실패와 수정
 - create_script 도구가 .cs 확장자를 붙여도 bad_extension 반환 — execute_code 파일 쓰기 + AssetDatabase.ImportAsset로 우회
+
+
+## [구현] 데몬 보스 공격 범위 가시화 — 2026-08-08 21:39
+### 프롬프트
+지금 버스 기본 공격시에 공격범위가 예상이 안되는데 내가 볼 수 있게 조절 가능한가?
+### 조작 내역
+- 실판정 형태 확인: 데몬 타격은 원형이 아니라 '수평거리 <= reach && 바라보는 쪽'(수직 제한 없음). 따라서 MidBossAI식 원형 링이 아니라 **수직 띠(band)**로 그려야 표시가 진실해진다
+- 신규 순수 로직 NAN2026.Core/BossRangeLogic.cs: BandMinX / BandMaxX / InHitBand / WindowOpen / FracUntilWindow
+- DemonBoss 실타격 게이트를 BossRangeLogic.InHitBand·WindowOpen 으로 교체 — **표시와 판정이 같은 함수를 사용**하므로 어긋날 수 없음
+- DemonBoss LateUpdate 시각화: LineRenderer 4종(useWorldSpace=true로 부모 스케일·반전 영향 차단)
+  · 노랑 = 인지(aggroX, 양쪽) · 자홍 = 스매시 리치 · 빨강 = 클리브 리치 · 파랑 = 스매시 접근 정지선(smashStopX)
+  · 타격 시간창이 열린 동안 해당 띠를 굵게(0.12→0.30) + 밝은 노랑으로 전환 → '언제 맞는지'가 눈에 보임
+- 머리 위 실시간 라벨: dx / 바라보는 방향(◀▶) / cleave·smash 사거리와 현재 적중 여부(✔✘) / 현재 패턴 진행률과 시간창 / ◆타격중
+- OnDrawGizmosSelected: 씬 뷰에도 동일 범위를 와이어 박스로
+- Config 신규: showRangesInGame=true, showRangeLabels=true, rangeBandHeight=11 (전부 SO 소유, 재생 중 인스펙터 토글 즉시 반영 — 끄면 오브젝트 파괴)
+- 튜닝 다이얼(기존 SO 값, 재생 중 조절 가능): cleaveReach=6 / smashReach=6.5 / smashStopX=3.2 / aggroX=14 / frontDeadZone=1
+### 검증
+- 컴파일 0, read_console error 0건
+- EditMode 170/170 통과 (BossRangeLogicTests 10개 신규, 실패 0)
+- 표시-판정 일치 테스트 포함: x=0~30을 0.15 간격 201점 순회하며 BandMin/Max 구간 판정과 InHitBand 결과가 전부 일치함을 단언
+- 리플렉션 실행 검증: InHitBand(10,15,6,+1,1)=True / InHitBand(10,5,6,+1,1)=False / BandMinX(10,6,-1,1)=4
+- 배선 재읽기: showRangesInGame=True showRangeLabels=True rangeBandHeight=11
+- 씬 무변경(dirty=False), boss pos=(22.50, 4.03, 0.00) 유지
+- **사용자 눈 판정 필요**: 재생 시 띠가 보이는지 / 띠가 굵어지는 순간과 실제 피격 순간이 일치하는지 / 라벨 ✔ 시점과 피격이 일치하는지
+### 실패와 수정
+없음
+### 제출 전 OFF 목록 추가
+DemonBossConfig.showRangesInGame / showRangeLabels (기존: MinoBossConfig.showParryDebug, MidBossConfig.showRangesInGame)

@@ -44,6 +44,10 @@ namespace NAN2026
         [Header("연출")]
         public float hitFlash = 0.12f;
         public SpikeBallConfig clashConfig; // 클래시 공유
+        [Header("디버그 표시 (제출 전 OFF)")]
+        public bool showRangesInGame = true;  // 게임 뷰에 공격 범위 띠 표시
+        public bool showRangeLabels = true;   // 거리·상태 숫자 라벨
+        public float rangeBandHeight = 11f;   // 표시용 띠 높이 (판정과 무관, 보기용)
         [Header("패턴 가중치")]
         public float castChance = 0.35f;   // 원거리 시 캐스트 확률
         public float smashChance = 0.4f;   // 중거리 시 스매시 확률
