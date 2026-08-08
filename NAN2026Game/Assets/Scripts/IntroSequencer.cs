@@ -47,6 +47,27 @@ namespace NAN2026
         }
 
                 private bool introLocked, introLockDone;
+        private System.Collections.Generic.List<AudioSource> mutedSrcs = new System.Collections.Generic.List<AudioSource>();
+        private System.Collections.Generic.List<float> mutedVols = new System.Collections.Generic.List<float>();
+        private void MuteWorldAudio(bool mute)
+        {
+            if (mute)
+            {
+                mutedSrcs.Clear(); mutedVols.Clear();
+                foreach (var src in FindObjectsByType<AudioSource>(FindObjectsSortMode.None))
+                {
+                    if (src == null || src == bgm) continue; // 인트로 BGM은 살림
+                    mutedSrcs.Add(src); mutedVols.Add(src.volume);
+                    src.volume = 0f;
+                }
+            }
+            else
+            {
+                for (int i = 0; i < mutedSrcs.Count; i++)
+                    if (mutedSrcs[i] != null) mutedSrcs[i].volume = mutedVols[i];
+                mutedSrcs.Clear(); mutedVols.Clear();
+            }
+        }
         private void SetPlayerControl(bool on)
         {
             var pgo = GameObject.Find("Player");
@@ -64,8 +85,8 @@ namespace NAN2026
         {
             t += Time.deltaTime;
             float total = IntroSequenceLogic.TotalDuration(config.blackSeconds, EffIgnite(), config.expandSeconds);
-            if (!introLocked && t < total) { introLocked = true; SetPlayerControl(false); } // 연출 중 이동 잠금
-            if (introLocked && !introLockDone && t >= total) { introLockDone = true; SetPlayerControl(true); } // 완주 → 복귀
+            if (!introLocked && t < total) { introLocked = true; SetPlayerControl(false); MuteWorldAudio(true); } // 연출 중 이동·사운드 잠금
+            if (introLocked && !introLockDone && t >= total) { introLockDone = true; SetPlayerControl(true); MuteWorldAudio(false); } // 완주 → 복귀
             // 아무키 스킵 제거 — 토치 점화 연출은 항상 완주 (이동키 오발로 캔슬되던 문제 해소)
             Apply(t);
 
