@@ -6438,3 +6438,31 @@ PlayerFxConfig.enableDebugKeys (5·6 미리보기)
 없음
 ### 커밋
 해당 없음(무수정)
+
+
+## [구현] 플레이어 피격 피드백 4종 — 플래시·깜빡임 / 히트스톱 / 넉백 / 화면흔들림 — 2026-08-09 07:25
+### 프롬프트
+[구현]1,2,3,4를 실행하되 무적은 0.45초로 두자
+### 조작 내역
+- 신규 순수 로직 NAN2026.Core/HitFeedbackLogic.cs: KnockbackSign / KnockbackStep / HitStopFinished / ClampHitStop
+- 신규 PlayerHitFeedback (RealPlayer 프리팹 부착 → 전 씬 자동 적용). PlayerHealth.OnHealthChanged 구독
+  · **플래시+깜빡임**: 기존 NAN2026.Core.HitFlashBlinker 재사용. 무적과 동일한 0.45초 동안 0.06초 간격 점멸 + 적색 틴트
+  · **히트스톱**: Time.timeScale=0 → unscaledTime 으로 복구. SpikeBallTrap 선례대로 **OnDestroy 안전핀** 포함(FAIL: 수명<히트스톱이면 timeScale 영구 0)
+  · **넉백**: 총 이동량이 정확히 knockbackForce 가 되도록 선형 감쇠 적분(테스트로 검증). unscaledDeltaTime 사용해 히트스톱 중에도 진행
+  · **화면 흔들림**: CinemachineImpulseSource 를 프리팹에 추가, 리플렉션으로 GenerateImpulseWithForce/GenerateImpulse 호출(StatueEnemy 선례와 동일 방식으로 asmdef 의존 회피)
+- 카메라 보강: Scene4 CM_PlayerCamera / Test1 CM_Cam 에 **CinemachineImpulseListener 신규 부착**(Scene1·2·3 은 이미 보유)
+- 수치는 전부 **FeelConfig(SPEC 단일 기준 모듈)** 소유. 지금까지 값이 전부 0 이라 아무도 안 쓰던 자산을 실사용으로 전환
+  hitStopDuration 0.06 / knockbackForce 0.25 / knockbackDuration 0.12 / invincibilityDuration 0.45 / screenShakeAmplitude 0.35 / screenShakeDuration 0.25 / hitFlashDuration 0.45 / hitFlashInterval 0.06
+- **무적 0.6 → 0.45**: PlayerCombatConfig.hitInvulnerabilityDuration. 근거는 직전 대화 — 적 쿨다운(1.5~2.0초)이 무적보다 길어 단일 적에는 무의미하고, 데몬 5발 확산 같은 동시 다발에서만 작동하므로 0.4 미만은 위험
+- 넉백 방향은 가해자 위치를 모르므로 **바라보는 반대쪽**으로 민다(TakeDamage 가 float 하나만 받는 SendMessage 계약이라 소스 좌표가 없음). HitFeedbackLogic 은 소스 좌표를 받는 경로도 이미 지원
+### 검증
+- 컴파일 0, read_console error 0건
+- EditMode 207/207 통과 (HitFeedbackLogicTests 9개 신규, 실패 0)
+- 리플렉션 실행 검증: KnockbackSign(false,10,0,+1)=-1(앞을 보면 뒤로) / ClampHitStop(0.5,0.45)=0.1125(상한 작동) / ClampHitStop(0.06,0.45)=0.06
+- 넉백 적분 테스트: dt 0.002 로 0.12초 적분 시 총 이동량이 0.25±0.02 로 수렴
+- 자산 재읽기: FeelConfig 8개 필드 · PlayerCombatConfig.hitInvulnerabilityDuration=0.45 확인
+- 프리팹 재읽기: CinemachineImpulseSource + PlayerHitFeedback 부착, feel=FeelConfig 배선
+- 전 씬 Listener 재로드 검증 5/5 (Scene1·2·3 기존 / Scene4·Test1 신규)
+- **사용자 눈 판정 필요**: (1) 피격 시 적색 점멸이 0.45초 무적과 같이 끝나는지 (2) 히트스톱 0.06 이 답답하지 않은지 (3) 넉백 0.25u 방향·거리 (4) 화면 흔들림 세기 0.35 가 과하지 않은지. 전부 FeelConfig 에서 재생 중 조절 가능
+### 실패와 수정
+- 없음

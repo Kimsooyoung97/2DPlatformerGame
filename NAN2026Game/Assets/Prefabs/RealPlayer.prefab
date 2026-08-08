@@ -26,6 +26,8 @@ GameObject:
   - component: {fileID: 9064997020484281628}
   - component: {fileID: 5909537138968367621}
   - component: {fileID: 5141673981799727561}
+  - component: {fileID: 3480599940953113590}
+  - component: {fileID: 5707629816935853389}
   m_Layer: 7
   m_Name: RealPlayer
   m_TagString: Player
@@ -620,6 +622,73 @@ MonoBehaviour:
   - {fileID: -894729927518332931, guid: 881768e003a3d484083b883d095890d3, type: 3}
   - {fileID: 3314662284431173991, guid: 881768e003a3d484083b883d095890d3, type: 3}
   - {fileID: -224287705477160955, guid: 881768e003a3d484083b883d095890d3, type: 3}
+--- !u!114 &3480599940953113590
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5109878993836927586}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 180ecf9b41d478f468eb3e9083753217, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineImpulseSource
+  ImpulseDefinition:
+    ImpulseChannel: 1
+    ImpulseShape: 2
+    CustomImpulseShape:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    ImpulseDuration: 0.2
+    ImpulseType: 0
+    DissipationRate: 0.25
+    RawSignal: {fileID: 0}
+    AmplitudeGain: 1
+    FrequencyGain: 1
+    RepeatMode: 0
+    Randomize: 1
+    TimeEnvelope:
+      AttackShape:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      DecayShape:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      AttackTime: 0
+      SustainTime: 0.2
+      DecayTime: 0.7
+      ScaleWithImpact: 1
+      HoldForever: 0
+    ImpactRadius: 100
+    DirectionMode: 0
+    DissipationMode: 2
+    DissipationDistance: 100
+    PropagationSpeed: 343
+  DefaultVelocity: {x: 0, y: -1, z: 0}
+--- !u!114 &5707629816935853389
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5109878993836927586}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f70f07ac337edf4ca72e2826b22118c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NAN2026.PlayerHitFeedback
+  feel: {fileID: 11400000, guid: 89bad167137e68945b697ff62157a614, type: 2}
+  flashColor: {r: 1, g: 0.35, b: 0.35, a: 1}
 --- !u!1 &6114823860119314469
 GameObject:
   m_ObjectHideFlags: 0
