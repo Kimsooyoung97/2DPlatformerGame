@@ -41,11 +41,15 @@ namespace NAN2026
         private void BuildHud()
         {
             if (config == null || config.heartFull == null) return;
+            // 독립 루트 캔버스 (플레이어 자식 X — 렌더 안정성) + 해상도 스케일러
             var cgo = new GameObject("MpHud");
-            cgo.transform.SetParent(transform, false);
             var canvas = cgo.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             canvas.sortingOrder = 500;
+            var scaler = cgo.AddComponent<CanvasScaler>();
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = new Vector2(1920f, 1080f);
+            scaler.matchWidthOrHeight = 0.5f;
             hearts = new Image[config.maxMp];
             for (int i = 0; i < config.maxMp; i++)
             {
@@ -53,6 +57,7 @@ namespace NAN2026
                 h.transform.SetParent(cgo.transform, false);
                 var img = h.AddComponent<Image>();
                 img.sprite = config.heartFull;
+                img.raycastTarget = false;
                 var rt = img.rectTransform;
                 rt.anchorMin = new Vector2(0f, 1f);
                 rt.anchorMax = new Vector2(0f, 1f);

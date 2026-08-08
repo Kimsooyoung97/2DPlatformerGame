@@ -17,6 +17,6 @@ MonoBehaviour:
   startMp: 0
   heartFull: {fileID: 3674548051905326134, guid: 50599f976f3fb9249b16886e5082a7cb, type: 3}
   heartEmpty: {fileID: -3502512024636276012, guid: 50599f976f3fb9249b16886e5082a7cb, type: 3}
-  heartSize: 28
-  heartSpacing: 30
-  hudOffset: {x: 20, y: -64}
+  heartSize: 36
+  heartSpacing: 40
+  hudOffset: {x: 24, y: -24}
