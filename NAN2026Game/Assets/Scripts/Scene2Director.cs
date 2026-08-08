@@ -7,65 +7,67 @@ namespace NAN2026
 {
     public static class SpikeParryEvents
     {
-        public static int Count; // 정적 누계 — 구독 유실과 무관하게 항상 오른다
+        public static int Count; // 정적 누계 — 구독 유실과 무관
         public static System.Action OnParry;
         public static void Report() { Count++; if (OnParry != null) OnParry(); }
     }
 
-    // Scene2 연출 감독: 환경 투사체 패링 진행도를 상단에 표시하고,
-    // 목표 달성 시 화면을 밝힌 뒤 스파이크를 종료한다.
+    // Scene2 연출 감독: 스파이크 패링 집계(폴링) → 목표 달성 시 밝아짐+보스 개막 팬 → 복귀
     public class Scene2Director : MonoBehaviour
     {
         public Scene2DirectorConfig config;
         private int count;
         private bool done;
-        private Transform player;
-        private Transform boss;
+        private Transform player, boss;
+        private Component cmCam;
+        private System.Reflection.PropertyInfo followProp;
         private Text topLabel;
+        private TextMesh pips;
 
         private void Start()
         {
-            var playerObject = GameObject.Find("Player");
-            if (playerObject != null) player = playerObject.transform;
-
-            var bossObject = GameObject.Find("MinoBoss");
-            if (bossObject != null) boss = bossObject.transform;
-
-            SpikeParryEvents.OnParry += HandleParry;
+            SpikeParryEvents.Count = 0;
+            var p = GameObject.Find("Player");
+            if (p != null) player = p.transform;
+            var b = GameObject.Find("MinoBoss");
+            if (b != null) boss = b.transform;
+            foreach (var mb in FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
+                if (mb.GetType().Name == "CinemachineCamera") { cmCam = mb; followProp = mb.GetType().GetProperty("Follow"); break; }
             BuildTopLabel();
-
+            BuildPips();
             if (config != null && config.debugSkipToBoss)
             {
-                count = config.parryGoal;
-                done = true;
-                UpdateTopLabel();
+                SpikeParryEvents.Count = config.parryGoal;
                 if (player != null && boss != null)
                     player.position = boss.position + new Vector3(-config.debugSpawnOffsetX, 0.5f, 0f);
-                StartCoroutine(Brighten());
             }
         }
 
-        private void OnDestroy()
+        private void Update()
         {
-            SpikeParryEvents.OnParry -= HandleParry;
+            if (done || config == null) return;
+            if (SpikeParryEvents.Count != count)
+            {
+                count = Mathf.Min(SpikeParryEvents.Count, config.parryGoal);
+                RefreshPips();
+                UpdateTopLabel();
+                if (count >= config.parryGoal) { done = true; StartCoroutine(Brighten()); }
+            }
         }
 
         private void BuildTopLabel()
         {
             var canvas = GameObject.Find("UI Canvas");
             if (canvas == null || config == null) return;
-
-            var labelObject = new GameObject("SpikeParryLabel");
-            labelObject.transform.SetParent(canvas.transform, false);
-
-            var rectTransform = labelObject.AddComponent<RectTransform>();
-            rectTransform.anchorMin = new Vector2(0.5f, 1f);
-            rectTransform.anchorMax = new Vector2(0.5f, 1f);
-            rectTransform.pivot = new Vector2(0.5f, 1f);
-            rectTransform.anchoredPosition = new Vector2(0f, -28f);
-            rectTransform.sizeDelta = new Vector2(640f, 60f);
-
-            topLabel = labelObject.AddComponent<Text>();
+            var go = new GameObject("SpikeParryLabel");
+            go.transform.SetParent(canvas.transform, false);
+            var rt = go.AddComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0.5f, 1f);
+            rt.anchorMax = new Vector2(0.5f, 1f);
+            rt.pivot = new Vector2(0.5f, 1f);
+            rt.anchoredPosition = new Vector2(0f, -28f);
+            rt.sizeDelta = new Vector2(640f, 60f);
+            topLabel = go.AddComponent<Text>();
             topLabel.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             topLabel.fontSize = 34;
             topLabel.alignment = TextAnchor.MiddleCenter;
@@ -76,67 +78,74 @@ namespace NAN2026
         private void UpdateTopLabel()
         {
             if (topLabel == null || config == null) return;
-            topLabel.text = count >= config.parryGoal
-                ? "어둠이 걷혔다!"
-                : "스파이크 패링  " + count + " / " + config.parryGoal;
+            topLabel.text = count >= config.parryGoal ? "어둠이 걷혔다!" : "스파이크 패링  " + count + " / " + config.parryGoal;
         }
 
-        private void HandleParry()
+        private void BuildPips()
         {
-            if (done || config == null) return;
+            if (boss == null || config == null) return;
+            var go = new GameObject("ParryPips");
+            go.transform.SetParent(boss, false);
+            go.transform.localPosition = new Vector3(0f, config.pipOffsetY, 0f);
+            pips = go.AddComponent<TextMesh>();
+            pips.fontSize = 48; pips.characterSize = 0.08f;
+            pips.anchor = TextAnchor.MiddleCenter;
+            pips.color = new Color(1f, 0.85f, 0.2f);
+            go.GetComponent<MeshRenderer>().sortingOrder = 900;
+            RefreshPips();
+        }
 
-            count++;
-            UpdateTopLabel();
+        private void RefreshPips()
+        {
+            if (pips == null || config == null) return;
+            var sb = new System.Text.StringBuilder();
+            for (int i = 0; i < config.parryGoal; i++) sb.Append(i < count ? '\u25c6' : '\u25c7');
+            pips.text = sb.ToString();
+        }
 
-            if (count < config.parryGoal) return;
-            done = true;
-            StartCoroutine(Brighten());
+        private void SetPlayerControl(bool on)
+        {
+            if (player == null) return;
+            foreach (var mb in player.GetComponents<MonoBehaviour>())
+            {
+                string n = mb.GetType().Name;
+                if (n == "PlayerController2D" || n == "PlayerSkill") ((Behaviour)mb).enabled = on;
+            }
+            var rb = player.GetComponent<Rigidbody2D>();
+            if (rb != null && !on) rb.linearVelocity = Vector2.zero;
         }
 
         private IEnumerator Brighten()
         {
-            foreach (var launcher in FindObjectsByType<ThrownWeaponLauncher>())
-                launcher.enabled = false;
-
-            foreach (var projectile in FindObjectsByType<ThrownProjectile>())
-                Destroy(projectile.gameObject);
-
-            foreach (var behaviour in FindObjectsByType<MonoBehaviour>())
+            Time.timeScale = 1f;          // 잔여 히트스톱 청소
+            SetPlayerControl(false);      // 컷신 락
+            foreach (var l in FindObjectsByType<ThrownWeaponLauncher>(FindObjectsSortMode.None)) l.enabled = false;
+            foreach (var pr in FindObjectsByType<ThrownProjectile>(FindObjectsSortMode.None)) Destroy(pr.gameObject);
+            foreach (var mb in FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
+                if (mb.GetType().Name == "SpikeBallTrap") mb.enabled = false;
+            Light2D global = null;
+            foreach (var l2 in FindObjectsByType<Light2D>(FindObjectsSortMode.None))
+                if (l2.lightType == Light2D.LightType.Global) { global = l2; break; }
+            if (global != null)
             {
-                if (behaviour.GetType().Name == "SpikeBallTrap")
-                    behaviour.enabled = false;
-            }
-
-            Light2D globalLight = null;
-            foreach (var light2D in FindObjectsByType<Light2D>())
-            {
-                if (light2D.lightType != Light2D.LightType.Global) continue;
-                globalLight = light2D;
-                break;
-            }
-
-            if (globalLight != null)
-            {
-                float startIntensity = globalLight.intensity;
-                float duration = Mathf.Max(0f, config.brightenTime);
-                float elapsed = 0f;
-
-                while (elapsed < duration)
+                float from = global.intensity, t = 0f;
+                while (t < config.brightenTime)
                 {
-                    elapsed += Time.unscaledDeltaTime;
-                    float progress = duration > 0f ? elapsed / duration : 1f;
-                    globalLight.intensity = Mathf.Lerp(
-                        startIntensity,
-                        config.brightenTarget,
-                        progress);
+                    t += Time.unscaledDeltaTime;
+                    global.intensity = Mathf.Lerp(from, config.brightenTarget, t / config.brightenTime);
                     yield return null;
                 }
-
-                globalLight.intensity = config.brightenTarget;
+                global.intensity = config.brightenTarget;
             }
-
-            if (config.brightenHold > 0f)
-                yield return new WaitForSecondsRealtime(config.brightenHold);
+            // 보스전 개막: 카메라 보스 팬 → 플레이어 복귀 (씬3 벽붕괴 연출과 동일 문법)
+            if (cmCam != null && followProp != null && boss != null)
+            {
+                followProp.SetValue(cmCam, boss, null);
+                yield return new WaitForSecondsRealtime(config.revealHold);
+                if (player != null) followProp.SetValue(cmCam, player, null);
+            }
+            yield return new WaitForSecondsRealtime(config.brightenHold);
+            SetPlayerControl(true);
         }
     }
 }
