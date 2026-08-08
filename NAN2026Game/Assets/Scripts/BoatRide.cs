@@ -13,7 +13,7 @@ namespace NAN2026
 
         private void Start()
         {
-            var p = GameObject.Find("Player");
+            var p = PlayerLocator.Find();
             if (p != null) player = p.transform;
             var w = GameObject.Find("Stage_Wall");
             if (w != null) water = w.GetComponent<Tilemap>();

@@ -71,7 +71,7 @@ namespace NAN2026
         private void SetPlayerControl(bool on)
         {
             PlayerController2D.InputLocked = !on; // 입력 게이트 방식 (컨트롤러 계속 구동)
-            var pgo = GameObject.Find("Player");
+            var pgo = NAN2026.PlayerLocator.Find();
             if (pgo == null) return;
             var rb = pgo.GetComponent<Rigidbody2D>();
             if (rb != null && !on) rb.linearVelocity = Vector2.zero;

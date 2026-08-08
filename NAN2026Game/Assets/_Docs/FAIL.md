@@ -117,3 +117,5 @@
 
 - EnterPlayMode=DisableDomainReload 프로젝트: 모든 static 상태는 세션 간 생존 — static 필드 추가 시 RuntimeInitializeOnLoadMethod 리셋 동봉 필수 (락 중 정지→다음 세션 입력 봉쇄 사례)
 - #24 run_tests(EditMode) job이 started 5초 만에 progress 0/149에서 완전히 멈춤(수 분간 last_update_unix_ms 불변, stuck_suspected=false로 오탐). editor_is_focused=false인 상태와 동시 관찰 — 이전 세션의 재생모드 불안정(H3)과 같은 계열 툴 환경 문제로 추정. 방지: 멈추면 재시도보다 컴파일 성공(read_console error 0) + 리플렉션 타입 로드 확인으로 대체 검증하고, 실제 회귀 여부는 다음 정상 테스트 실행 때 재확인한다.
+
+- #24 이름 기반 GameObject.Find("Player") 의존: 팀이 프리팹을 교체하자 씬별 오브젝트명이 Player/RealPlayer 로 갈라져 우리 코드 10곳이 일제히 null → 보트·데몬·함정이 침묵 무력화. 컴파일·콘솔 모두 무증상. 방지: 플레이어/보스 등 씬 간 참조는 이름이 아니라 **태그 또는 컴포넌트 타입**으로 찾는다(PlayerLocator 경유). 프리팹 교체·개명 병합 직후엔 씬별 오브젝트명과 태그를 전수 실측한다

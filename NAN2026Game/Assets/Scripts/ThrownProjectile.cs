@@ -28,7 +28,7 @@ namespace NAN2026
         public void Launch(Vector2 v)
         {
             vel = v; born = Time.time;
-            var p = GameObject.Find("Player");
+            var p = PlayerLocator.Find();
             if (p != null)
             {
                 player = p.transform;

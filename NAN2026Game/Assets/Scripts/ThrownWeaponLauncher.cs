@@ -23,7 +23,7 @@ namespace NAN2026
 
         private void Start()
         {
-            var p = GameObject.Find("Player");
+            var p = PlayerLocator.Find();
             if (p != null) player = p.transform;
             src = gameObject.AddComponent<AudioSource>();
             src.spatialBlend = 0f; src.volume = 0.85f;

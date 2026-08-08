@@ -35,6 +35,36 @@ TextureImporter:
   - first:
       213: -8259654050442488057
     second: Boat
+  - first:
+      213: 1663310612992089744
+    second: BoatAnim_0
+  - first:
+      213: 563290134943734843
+    second: BoatAnim_1
+  - first:
+      213: -3858964428351112056
+    second: BoatAnim_2
+  - first:
+      213: -5539190740769508321
+    second: BoatAnim_3
+  - first:
+      213: 1117094260334889265
+    second: BoatAnim_4
+  - first:
+      213: -251436624135774090
+    second: BoatAnim_5
+  - first:
+      213: -6999296106022822521
+    second: BoatAnim_6
+  - first:
+      213: -8745468511122240337
+    second: BoatAnim_7
+  - first:
+      213: -5863408251445177672
+    second: BoatAnim_8
+  - first:
+      213: -4163674907845837528
+    second: BoatAnim_9
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -177,6 +207,226 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: BoatAnim_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 80
+        height: 32
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 09ed78e9034451710800000000000000
+      internalID: 1663310612992089744
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BoatAnim_1
+      rect:
+        serializedVersion: 2
+        x: 80
+        y: 0
+        width: 80
+        height: 32
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b3c9dcea46531d700800000000000000
+      internalID: 563290134943734843
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BoatAnim_2
+      rect:
+        serializedVersion: 2
+        x: 160
+        y: 0
+        width: 80
+        height: 32
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 88c734f4c44327ac0800000000000000
+      internalID: -3858964428351112056
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BoatAnim_3
+      rect:
+        serializedVersion: 2
+        x: 240
+        y: 0
+        width: 80
+        height: 32
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f14fc418e57d023b0800000000000000
+      internalID: -5539190740769508321
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BoatAnim_4
+      rect:
+        serializedVersion: 2
+        x: 320
+        y: 0
+        width: 80
+        height: 32
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 13983e7af47b08f00800000000000000
+      internalID: 1117094260334889265
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BoatAnim_5
+      rect:
+        serializedVersion: 2
+        x: 400
+        y: 0
+        width: 80
+        height: 32
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6702dd6f8b7b28cf0800000000000000
+      internalID: -251436624135774090
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BoatAnim_6
+      rect:
+        serializedVersion: 2
+        x: 480
+        y: 0
+        width: 80
+        height: 32
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 78d1cb286418dde90800000000000000
+      internalID: -6999296106022822521
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BoatAnim_7
+      rect:
+        serializedVersion: 2
+        x: 560
+        y: 0
+        width: 80
+        height: 32
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: facc13089bad1a680800000000000000
+      internalID: -8745468511122240337
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BoatAnim_8
+      rect:
+        serializedVersion: 2
+        x: 640
+        y: 0
+        width: 80
+        height: 32
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8b2148fc24df0aea0800000000000000
+      internalID: -5863408251445177672
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BoatAnim_9
+      rect:
+        serializedVersion: 2
+        x: 720
+        y: 0
+        width: 80
+        height: 32
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 82d34ad3bb7a736c0800000000000000
+      internalID: -4163674907845837528
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     customData: 
     physicsShape: []
@@ -192,6 +442,16 @@ TextureImporter:
       entries: []
     nameFileIdTable:
       Boat: -8259654050442488057
+      BoatAnim_0: 1663310612992089744
+      BoatAnim_1: 563290134943734843
+      BoatAnim_2: -3858964428351112056
+      BoatAnim_3: -5539190740769508321
+      BoatAnim_4: 1117094260334889265
+      BoatAnim_5: -251436624135774090
+      BoatAnim_6: -6999296106022822521
+      BoatAnim_7: -8745468511122240337
+      BoatAnim_8: -5863408251445177672
+      BoatAnim_9: -4163674907845837528
       Boat_0: -4548796474974412338
       Boat_1: 7632911036448307472
       Boat_2: -6510708078897605904

@@ -608,7 +608,17 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
     {
         var f = new ContactFilter2D();
         f.useTriggers = false;
-        return col.Cast(Vector2.down, f, castHits, config.groundCheckDistance);
+        int n = col.Cast(Vector2.down, f, castHits, config.groundCheckDistance);
+        int ok = 0;
+        for (int i = 0; i < n; i++)
+        {
+            // 윗면(법선이 위를 향하는 면)만 접지로 인정한다.
+            // 이 검사가 없으면 원웨이 발판의 '아랫면'이나 통과 중 겹침(거리 0)까지
+            // 접지로 잡혀 발판 밑면에 서지는 현상이 생긴다.
+            if (!PlayerLocomotionLogic.IsGroundNormal(castHits[i].normal.y, config.groundNormalMinY)) continue;
+            ok++;
+        }
+        return ok;
     }
 
 }
