@@ -22,8 +22,7 @@ namespace NAN2026
         private bool atkIs1, dealtThisSwing, holdDone;
         private int parryCount;
         private bool[] swingResolved = new bool[2];
-        private Image barFillImg;
-        private GameObject hudGo;
+        private Coroutine flashCo;
         private GameObject groggyFx;
         private TextMesh groggyPips;
         private GameObject burstMsg;
@@ -58,47 +57,9 @@ namespace NAN2026
             SetState(0);
         }
 
-        private void BuildBar()
-        {
-            if (config.barUnder == null) return;
-            var cgo = new GameObject("BossHpHud");
-            hudGo = cgo;
-            var canvas = cgo.AddComponent<Canvas>();
-            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvas.sortingOrder = 510;
-            var scaler = cgo.AddComponent<CanvasScaler>();
-            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(1920f, 1080f);
-            scaler.matchWidthOrHeight = 0.5f;
-            System.Func<string, Sprite, int, Image> mk = delegate(string nm, Sprite sp, int ord)
-            {
-                var g = new GameObject(nm);
-                g.transform.SetParent(cgo.transform, false);
-                var img = g.AddComponent<Image>();
-                img.sprite = sp; img.raycastTarget = false;
-                var rt = img.rectTransform;
-                rt.anchorMin = new Vector2(0.5f, 1f);
-                rt.anchorMax = new Vector2(0.5f, 1f);
-                rt.pivot = new Vector2(0.5f, 1f);
-                rt.sizeDelta = new Vector2(config.barScale * 260f, config.barScale * 104f);
-                rt.anchoredPosition = new Vector2(0f, -config.barOffsetY * 22f);
-                return img;
-            };
-            mk("under", config.barUnder, 0);
-            barFillImg = mk("fill", config.barProgress, 1);
-            barFillImg.type = Image.Type.Filled;
-            barFillImg.fillMethod = Image.FillMethod.Horizontal;
-            barFillImg.fillOrigin = 0;
-            mk("over", config.barOver, 2);
-            UpdateBar();
-            cgo.SetActive(false); // 보스전 개시 전엔 숨김
-        }
+        private void BuildBar() { } // 체력바 HUD 철거 (요청) — 피격 피드백은 점멸+HP 팝업으로
 
-        private void UpdateBar()
-        {
-            if (barFillImg == null) return;
-            barFillImg.fillAmount = Mathf.Clamp01((float)hp / config.maxHp);
-        }
+        private void UpdateBar() { }
 
         private void SetState(int s)
         {
@@ -219,10 +180,36 @@ namespace NAN2026
         public void TakeDamage(int dmg)
         {
             if (state == 4) return;
-            hp -= 1; // 타격 1회 = 10% 고정 (요청 명세)
-            UpdateBar();
+            hp -= 1; // 타격 1회 = 10% 고정
+            HitFeedback();
             if (hp <= 0) { SetState(4); return; }
             if (state != 5) SetState(3); // 그로기 중엔 그로기 유지, 그 외엔 항상 피격 모션
+        }
+
+        private void HitFeedback()
+        {
+            // 빨간 점멸
+            if (flashCo != null) StopCoroutine(flashCo);
+            flashCo = StartCoroutine(FlashRed());
+            // HP 팝업 (배너 대체 — 피가 떨어지는 게 숫자로 보임)
+            var pop = new GameObject("BossHpPopup");
+            pop.transform.position = transform.position + Vector3.up * (config.groggyFxOffsetY + 1.4f);
+            var tm = pop.AddComponent<TextMesh>();
+            tm.text = "HP " + Mathf.Max(0, hp) + " / " + config.maxHp;
+            tm.fontSize = 46; tm.characterSize = 0.075f;
+            tm.anchor = TextAnchor.MiddleCenter;
+            tm.color = new Color(1f, 0.3f, 0.25f);
+            pop.GetComponent<MeshRenderer>().sortingOrder = 902;
+            pop.AddComponent<PopupFloater>().Init(1.0f, 0.7f);
+        }
+
+        private System.Collections.IEnumerator FlashRed()
+        {
+            if (sr == null) yield break;
+            sr.color = new Color(1f, 0.35f, 0.35f);
+            yield return new WaitForSeconds(0.12f);
+            sr.color = Color.white;
+            flashCo = null;
         }
 
         private void Update()
@@ -250,7 +237,6 @@ namespace NAN2026
             if (state == 4) { if ((int)animT >= cur.Length - 1) enabled = false; return; }
             if (player == null) return;
             float dx = Mathf.Abs(player.position.x - transform.position.x);
-            if (hudGo != null && !hudGo.activeSelf && dx <= config.aggroX) hudGo.SetActive(true); // 접근 시 체력바 등장
 
             if (state == 0)
             {
