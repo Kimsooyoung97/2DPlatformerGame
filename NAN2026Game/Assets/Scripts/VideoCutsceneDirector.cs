@@ -21,6 +21,12 @@ public class VideoCutsceneDirector : MonoBehaviour
     [SerializeField] private float skipLockSeconds = 0.5f;
     [SerializeField] private KeyCode skipKey = KeyCode.C;
 
+    [Header("스킵 효과음")]
+    [SerializeField] private AudioSource sfxSource;
+    [SerializeField] private AudioClip skipSfx;
+    [Range(0f, 1f)]
+    [SerializeField] private float sfxVolume = 1f;
+
     [Header("UI")]
     [SerializeField] private GameObject skipHintUI;
     [Tooltip("Image Type = Filled 인 게이지")]
@@ -69,6 +75,12 @@ public class VideoCutsceneDirector : MonoBehaviour
 
     public void Skip()
     {
+        if (_finished) return;
+        if (skipSfx != null)
+        {
+            if (sfxSource != null) sfxSource.PlayOneShot(skipSfx, sfxVolume);
+            else AudioSource.PlayClipAtPoint(skipSfx, Camera.main != null ? Camera.main.transform.position : Vector3.zero, sfxVolume);
+        }
         if (_finished) return;
         if (_player != null && _player.isPlaying) _player.Stop();
         Finish();

@@ -59,6 +59,7 @@ namespace NAN2026.Showroom
         {
             parries++;
             parriedAt = Time.time;
+            NAN2026.PlayerMana.RewardParry(this);
             Flash("PARRY!");
         }
 

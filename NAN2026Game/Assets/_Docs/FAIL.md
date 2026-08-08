@@ -107,4 +107,13 @@
 
 - #23 커스텀 윗면 엣지 베이커가 신설 씬에서 미작동(푹꺼짐) — 발판은 TilemapCollider+Composite+PlatformEffector 정석 조합 사용
 
+- timeScale 히트스톱: 복구 책임자(FX)의 수명이 히트스톱보다 짧으면 timeScale 0 영구 정지 — 히트스톱 수치 올릴 땐 FX 수명·OnDestroy 안전핀 확인
+
+- 팀 병합이 우리 파일을 리팩터하면 기존 문자열 치환 앵커가 전멸 — 병합 직후엔 파일 실측 후 통짜 재작성 우선, '치환 성공' 보고 전 결과 문자열 검증 필수
+
+- 입력 게이트(kb=null)로 락을 걸면 '뗌 이벤트'가 유실돼 Held 계열 상태가 갇힘 — 게이트 도입 시 모든 Held 필드에 isPressed 기반 자가 회복 필수
+
+- 프리팹 개명 병합 후엔 씬·프리팹의 '슬롯 배선(SerializedProperty)'까지 전수 검사 — 코드 컴파일 통과와 무관하게 유령 참조가 침묵 가드에서 기능을 무음 사망시킴
+
+- EnterPlayMode=DisableDomainReload 프로젝트: 모든 static 상태는 세션 간 생존 — static 필드 추가 시 RuntimeInitializeOnLoadMethod 리셋 동봉 필수 (락 중 정지→다음 세션 입력 봉쇄 사례)
 - #24 run_tests(EditMode) job이 started 5초 만에 progress 0/149에서 완전히 멈춤(수 분간 last_update_unix_ms 불변, stuck_suspected=false로 오탐). editor_is_focused=false인 상태와 동시 관찰 — 이전 세션의 재생모드 불안정(H3)과 같은 계열 툴 환경 문제로 추정. 방지: 멈추면 재시도보다 컴파일 성공(read_console error 0) + 리플렉션 타입 로드 확인으로 대체 검증하고, 실제 회귀 여부는 다음 정상 테스트 실행 때 재확인한다.

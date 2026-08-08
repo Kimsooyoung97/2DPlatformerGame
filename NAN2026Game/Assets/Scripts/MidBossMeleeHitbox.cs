@@ -46,6 +46,7 @@ namespace NAN2026
                 timer += Time.deltaTime;
                 if (pc != null && pc.TryParry(bossObject))
                 {
+                    NAN2026.PlayerMana.RewardParry(pc);
                     hasResolved = true;
                     Debug.Log("패링성공");// 패링당하면 판정 종료(피해 없음)
                     return;

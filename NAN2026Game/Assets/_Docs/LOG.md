@@ -5395,6 +5395,397 @@ fireattack이랑 firebomb이 원거리 구체라고?
 ### 실패와 수정
 없음
 
+
+## [구현] MP 시스템 (총량10·패링+1·파란하트 HUD) — 2026-08-08 18:28
+### 프롬프트
+팀 명세: 마나 총량 10, 패링 성공 시 1씩. Player 프리팹 적용(예외 허가). 16x16 Health Heart Blue 사용. 보류: 싱글톤·스킬변경C·대화엔터
+### 조작 내역
+- ManaConfig SO(maxMp10·parryGain1·하트 스프라이트 _0/_2)·PlayerMana(AddMp 훅 수신—수치 무관 +1 통일, TryUseMp API 대기, 좌상단 파란하트 10개 HUD)
+- Player_Knight!!!! 프리팹 부착(Test/Test1 자동 전파) + Scene2 순수 Player 직접 부착(프리팹 연결 없음 실측)
+- SecondSceneBoss 패링 키 cKey→spaceKey (컨트롤러는 이미 스페이스)
+### 검증
+- 컴파일 0, 저장 True. HUD 표시·패링 +1·스페이스 패링은 사용자 재생. 프리팹 부착 Scene2 직접부착 
+### 실패와 수정
+- 없음. 스킬 MP 소모 연동은 시작값·소모량 팀 결정 대기(TryUseMp만 준비)
+
+
+## [수정] MP 하트 HUD 가시성 재작성 — 2026-08-08 18:52
+### 프롬프트
+파란색 하트 화면 왼쪽 상단에 배치해줘. 지금은 파란색 하트가 안보여
+### 조작 내역
+- 전 씬 전수: 핵심 씬 PlayerMana 부착 확인(원인은 렌더) → HUD를 플레이어 자식 캔버스에서 독립 루트 캔버스로 재작성 + CanvasScaler(1920x1080) + 좌상단(24,-24)·하트 36px·간격 40
+### 검증
+- 컴파일 0. 좌상단 하트 표시는 사용자 재생
+### 실패와 수정
+- 자식 캔버스 구조의 렌더 불안정 자인 → 독립 루트로 교정
+
+
+## [수정] Scene2 MP config 재배선 — 2026-08-08 18:59
+### 프롬프트
+다른 씬에는 잘 뜨는데 Scene2에서만 안뜨는 이유는? 화면이 어두워서 그런가?
+### 조작 내역
+- 진단: 어둠 무관(Overlay UI는 조명 영향 0) — Scene2 순수 Player의 PlayerMana.config가 NULL(배선 유실) → BuildHud 조기 리턴이 원인
+- ManaConfig 재배선·저장, 재검증: 배선 확인됨
+### 검증
+- 저장 True / 배선 확인됨. 하트 표시는 사용자 재생
+### 실패와 수정
+- 직접부착 배선이 유실된 원인 미상(병합 검진 중 씬 재저장 추정) — 프리팹 인스턴스 교체가 근본 해법(팀 공지 항목)
+
+
+## [조사] 그로기 버스트 5항목 타당성 — 2026-08-08 19:03
+### 프롬프트
+[조사] 다이아몬드 처음부터 채워짐 / 그로기 시 Z연타 메시지 / Z로 보스 앞 자동대시 / Z 데미지 가능? / 패링5회 공속2배+반짝 버프, 이펙트 줘야 하나
+### 조사 결과
+- ◆ 만땅: 버그 아님 — debugSkipToBoss ON의 의도 동작(시작 즉시 핍 만땅). 끄면 0/5부터 정상
+- Z 데미지: 이미 작동 — Z 2단콤보는 EffectProjectile(투명 근접판정) 경유, SecondSceneBoss 폴백 기주입. 그로기 중 hp-1 유지
+- Z연타 메시지·자동대시·공속2배+반짝: 전부 구현 가능. 공속2배는 컨트롤러에 배율 1줄 필요, 반짝은 에셋 불요(절차 생성 — 원하면 제공분 사용)
+- 제안: 3건을 GroggyBurst 한 시스템으로 묶기
+### 검증
+해당 없음
+### 커밋
+해당 없음(무수정)
+
+
+## [구현] 그로기 버스트 (Z연타 안내·자동대시·공속2배·반짝) — 2026-08-08 19:08
+### 프롬프트
+[구현]그로기 버스트 진행하자
+### 조작 내역
+- PlayerController2D 최소 패치: static AttackSpeedMul(평시 1) — attackTimer 감소 배율 1줄
+- MinoBossConfig: burstAtkSpeedMul 2·dashSpeed 20·dashStopX 1.7·sparkleInterval 0.22
+- SecondSceneBoss: 그로기 진입 시 'Z 연타! 공격 찬스!' 문구(플레이어 추적)+공속 2배+금빛 펄스·✦ 반짝 루프 / Z 첫입력 시 보스 앞 1.7u까지 자동 대시(컨트롤러 임시 비활성→복귀) / 그로기 종료 시 전부 원상복구
+### 검증
+- 컴파일 0, 타입 반영 ✓. 버스트 체감은 사용자 재생
+### 실패와 수정
+없음
+
+
+## [수정] 스파이크 패링 카운터 통합·디버그 OFF — 2026-08-08 19:13
+### 프롬프트
+패링 시 다이아몬드 채워지는 기능이 안구현 — 처음부터 채워져 있어
+### 조작 내역
+- 원인 2중: ①debugSkipToBoss ON(핍 만땅 시작) ②상단 '스파이크 패링 0/10'은 구버전 ParryMeter(Executioner용·호출자 없음)
+- ParryMeter 씬 오브젝트 비활성 보존, Scene2Director에 상단 라벨 흡수(n/5, 달성 시 '어둠이 걷혔다!')
+- debugSkipToBoss OFF → 이제 0/5부터 실제로 채워짐
+### 검증
+- 컴파일 0, 저장 True. ParryMeter 비활성(ParryMeter_구버전(비활성))  핍·라벨 채워짐은 사용자 재생
+### 실패와 수정
+- 구버전 감독 회수 누락 자인 — 이중 시스템 정리
+
+
+## [수정] MP 전패링·그로기 분리·보스컷 제거·정지 수술 — 2026-08-08 19:32
+### 프롬프트
+[수정] 모든 패링=MP, 그로기 카운트는 보스 공격 패링만. 스파이크 패링 시 보스 컷 제거. 어둠 걷힌 후 화면 정지 수정
+### 조작 내역
+- MP: SpikeBallTrap 성공부 AddMp 훅 추가(누락분) — 이제 전 패링(구체·트랩·보스)이 MP+1. 그로기 5카운트는 원래 보스 공격 패링만 집계(구조 확인)
+- Scene2Director.HandleParry의 FocusBoss 호출 제거 — 스파이크 패링 시 카메라 유지
+- 정지 범인: 클래시 FX 수명(0.16)<히트스톱(0.25) → 복구 전 자멸로 timeScale 0 영구. 3중 방어: Init 수명 보정(히트스톱+0.05 이상)/OnDestroy 안전핀(소멸 시 timeScale 복원)/Brighten unscaled화+시작 시 timeScale=1 청소
+### 검증
+- 컴파일 0. 정지 재현 불가·MP 적립·카메라 유지는 사용자 재생
+### 실패와 수정
+- 히트스톱 상향(0.08→0.25) 때 FX 수명 미고려 자인 — FAIL 등재감
+
+
+## [조사] 렉·리로딩 반복 원인 — 2026-08-08 19:37
+### 프롬프트
+[조사] 계속 렉 걸리면서 리로딩 되는 이유가 뭐야?
+### 조사 결과
+- 콘솔: 런타임 예외 스팸 없음(컴파일 경고 29건뿐 — 렉 무관)
+- 제1 원인(자인): 나의 작업 사이클 — 코드 수정→강제 컴파일→도메인 리로드가 이 세션에만 수십 회. 매 리로드가 '멈칫+리로딩'으로 체감. 연결 2회 단절도 그 증거
+- 부차: 병합으로 파일 수천 개 유입 직후라 임포트·컴파일 잦음 / 그로기 반짝 GO 생성·디버그 팝업·Light2D 다수는 프레임 드랍 요인(리로딩과는 별개)
+- 수칙 제안: 사용자 '테스트 시작' 선언 시 나는 컴파일 유발 작업 중지, 파일 수정은 테스트 사이에 몰아서
+### 검증
+해당 없음
+### 커밋
+해당 없음(무수정)
+
+
+## [수정] 보스전 개막 팬 + 대형 스크린 체력바 — 2026-08-08 19:43
+### 프롬프트
+[수정]스파이크 패링 횟수 채우면 보스로 카메라 이동→보스전 시작. 공격해도 피가 안깎이니 기존 ui 불가능하면 자체 제작
+### 조작 내역
+- 개막 연출: Brighten 램프 후 CM Follow=보스 1.6s(revealHold)→플레이어 복귀→언락 — 어둠 걷힘과 보스 공개가 한 호흡
+- 체력바: 월드 바(가시성 실패) 폐기 → 스크린 상단 중앙 대형 바(미노 동봉 UI 3장, fill=Filled Horizontal, 1920 기준 스케일) — 타격당 10%씩 눈에 확실히 줄어듦. Z 폴백 경로는 실측 정상(EffectProjectile ✓)
+### 검증
+- 컴파일 0. 개막 팬·체력바 감소는 사용자 재생
+### 실패와 수정
+- 월드 바 가시성 실패 자인 — 스크린 HUD로 전환
+
+
+## [수정] 패링 카운터 폴링 전환·보스 HP HUD 게이트 — 2026-08-08 19:50
+### 프롬프트
+스파이크 패링해도 화면에 숫자가 안올라가. 보스 hp ui는 왜 띄운거야? (영상 첨부)
+### 조작 내역
+- 영상 프레임 분석: '패링 성공!' 팝업↔카운터 3/5 불일치 확인. 구독(OnParry) 유실 추정 → SpikeParryEvents.Count 정적 누계 + Director.Update 폴링으로 전환(구독 폐기) — Report만 불리면 무조건 반영
+- MINOTAUR 배너=우리 BossHpHud였음(상시 노출 자인) → 시작 숨김, 보스 접근(aggroX) 시 등장으로 게이트
+- SpikeBallTrap MP는 팀 병합분 PlayerMana.RewardParry로 기완비 확인(추가 불요)
+### 검증
+- 컴파일 0. 카운터 상승·HUD 등장 타이밍은 사용자 재생
+### 실패와 수정
+- 이전 'MP 훅 추가 완료' 보고는 앵커 불일치 오보였음 자인(실제론 RewardParry 기존재로 결과 무해)
+
+
+## [수정] Scene2Director 확정판 재작성 (개막 팬 복원) — 2026-08-08 19:56
+### 프롬프트
+Scene3 벽 붕괴 카메라 연출처럼, Scene2 구체 패링 5회 시 보스로 카메라 이동→복귀 기능이 사라진 것 같다
+### 조작 내역
+- 진단: 병합 시 팀이 Scene2Director를 리팩터 — 개막 팬·입력락·timeScale 청소·핍·카메라 필드가 전부 소실, 내 후속 치환도 앵커 미스로 반적용 상태
+- 전면 재작성(확정판): 폴링 카운터(정적 Count)·상단 라벨·◆핍(보스 위)·debugSkip·Brighten(락+청소+함정 정지+램프)+개막 팬(Follow=보스 revealHold 1.6s→플레이어 복귀)→언락 통합
+### 검증
+- 컴파일 0. 개막 팬·카운터·핍 동작은 사용자 재생
+### 실패와 수정
+- 부분 치환 반복이 병합 리팩터와 충돌 — 전면 재작성으로 전환. 이후 이 파일 수정은 통짜 재작성 원칙
+
+
+## [조사] 밝아짐 후 플레이어 정지 — 2026-08-08 20:00
+### 프롬프트
+[조사]어둠이 걷힌 다음에 player 상태가 이상하다. 애니메이션 실행이 안되고 멈춰있음
+### 조사 결과
+- 재생 재현(Report x5 주입): 밝아짐 완료·컨트롤러 복구·카메라 복귀·timeScale 전부 정상 — 락 계열 무죄
+- 실범: Scene2 Player의 Animator에 'Player_Preview'(전시용) 컨트롤러가 물림 — 전이 파라미터가 없어 애니 정지. 밝아짐과 무관하게 씬 자체 결함(그때 처음 인지된 것)
+- 정식 후보: HeroKnight_AnimController 등 — Test1 씬과 대조로 확정 예정
+### 검증
+해당 없음
+### 커밋
+해당 없음(무수정)
+
+
+## [수정] 입력 게이트 락·그로기 다이아·피격 캐스팅 — 2026-08-08 20:05
+### 프롬프트
+수정 진행해. 그로기 다이아몬드 상태 확인하고 피격받으면 피도 까이는지 확인해
+### 조작 내역
+- 락 전면 교체: PC2D.InputLocked 정적 게이트(kb=null화, 컨트롤러 계속 구동) — Scene2 밝아짐·그로기 대시·Scene3 인트로 3곳 적용, enabled 토글 폐기(패링 모션 중 락 파손 원인 제거)
+- 그로기 다이아 신설: 보스 위 주황 ◆◇(5칸) — 보스 공격 패링마다 참, 그로기 진입 시 리셋 (스파이크 노랑 핍과 색·높이 구분)
+- 피격 버그 검거: PlayerHealth.TakeDamage(float)인데 int SendMessage → 매칭 실패로 무시! (float) 캐스팅 — 보스 공격·구체 명중 2계
+### 검증
+- 컴파일 0, 반영 보스 float캐스팅=True 그로기다이아=True 대시게이트=True | Director게이트=True | Intro게이트=False
+### 실패와 수정
+- enabled 토글 락의 상태 파손 자인 / int SendMessage 미매칭 자인
+
+- 추가: IntroSequencer 게이트 교체 재시도 성공 (정규식 실패→정밀 앵커)
+
+
+## [수정] parryHeld 릴리즈 유실 자가 회복 — 2026-08-08 20:10
+### 프롬프트
+점프는 되는데 어둠이 걷혔다 글자 나온뒤로 이동이 안돼
+### 조작 내역
+- 진단: 5회째 패링을 스페이스로 잡은 채 락 진입 → 락 중(kb=null) 릴리즈 이벤트 유실 → parryHeld 영구 true(패링 자세) → 이동 차단(점프는 허용 경로)
+- PC2D 게이트 직후 1줄: parryHeld인데 실제 스페이스가 안 눌려 있으면 해제 — 락·포커스 이탈 등 어떤 유실에도 자가 회복
+### 검증
+- 컴파일 0. 밝아짐 후 이동 복귀는 사용자 재생
+### 실패와 수정
+- 게이트 도입 시 홀드 상태 유실 미고려 자인
+
+
+## [수정] 보스 체력 배너 철거·피격 피드백 전환 — 2026-08-08 20:16
+### 프롬프트
+mino_health_UI_sample_100 쓴거 지워버리고 공격당하면 take_hit+피 떨어지는 거 구현. 10번에 death
+### 조작 내역
+- BossHpHud(미노 UI 배너) 전면 철거(BuildBar 무력화·aggro 표시 제거)
+- 피격 피드백 신설: 빨간 점멸 0.12s + 머리 위 'HP n/10' 붉은 팝업(타격마다) — take_hit 경직·10타 death는 기존 그대로
+### 검증
+- 컴파일 0. 점멸·팝업·death는 사용자 재생
+### 실패와 수정
+없음
+
+
+## [수정] 미노 피격 무반응 — Kinematic 트리거 스위치 — 2026-08-08 20:20
+### 프롬프트
+Z로 공격해도 아무런 피격모션도 안뜨고 피 까이는 UI도 안보여
+### 조작 내역
+- 진단: 폴백·레이어 무죄 → Z 히트박스(Kinematic RB)와 미노(Kinematic RB) 양쪽 모두 useFullKinematicContacts=false → 트리거 이벤트 무발생 (기존 FAIL 항목 재범 — 구보스는 Dynamic이라 무사했음)
+- 미노 씬 RB useFullKinematicContacts=true + SecondSceneBoss.Start 방어 세팅
+### 검증
+- 컴파일 0, 씬 저장. Z 타격→경직·점멸·HP 팝업은 사용자 재생
+### 실패와 수정
+- FAIL 기재 함정 재범 자인 — 보스 생성 시 체크리스트에 반영
+
+
+## [수정] Z 대미지 전멸 — 병합 개명 유령 참조 재배선 — 2026-08-08 20:36
+### 프롬프트
+여전히 Z로 공격해도 데미지가 안먹혀 (계측·라이브 해부 진행)
+### 조작 내역
+- 진범: 3차 병합에서 Effect_Basic/Powered→Skill1/2 개명+구본 삭제 → PC2D의 basicEffectPrefab·poweredEffectPrefab 유령 참조 → SpawnComboVDamage 첫 줄 침묵 가드에서 조기 리턴(히트박스 미생성). 라이브 실측으로 확정(attackTimer는 동작·슬롯 NULL)
+- Player_Knight 프리팹+Scene2 손조립 Player 양쪽 Skill1/Skill2 재배선, 계측 3점 철거
+### 검증
+- Skill1 EffectProjectile 보유 확인, 컴파일 0, 씬 저장. Z→경직·점멸·HP팝업 사슬은 사용자 재생 (X 검기도 동반 복구 예상)
+### 실패와 수정
+- 병합 검진 때 '프리팹 참조 생존'을 코드 참조만 보고 슬롯 배선까지 전수 안 한 누락 자인 — FAIL 등재
+
+
+## [수정] DisableDomainReload 정적 생존 — 전 정적 자동 리셋 — 2026-08-08 20:39
+### 프롬프트
+다시 정지하고 재생하니깐 캐릭터 사운드는 들리는데 아예 안움직여. idle는 재생됨
+### 조작 내역
+- 실측: InputLocked=True 잔존 + EnterPlayMode=DisableDomainReload — 락 중 정지하면 정적이 다음 세션까지 생존해 입력 봉쇄
+- 응급 해제 + RuntimeInitializeOnLoadMethod(SubsystemRegistration) 리셋 4파일: PC2D(InputLocked·AttackSpeedMul)/ThrownProjectile(Alive)/Launcher(waveBudget·reserved)/SpikeParryEvents(Count·OnParry)
+### 검증
+- 컴파일 0. 정지·재생 반복 후 입력 정상은 사용자 재생
+### 실패와 수정
+- 정적 도입 시 DisableDomainReload 미고려 자인 — FAIL 등재
+
+
+## [구현] 데몬 보스 (AdventureScene4) — 2026-08-08 21:03
+### 프롬프트
+boss_demon_final 시트로 데몬보스: 플레이어 7배, 투사체 3배, transform 인트로, idle/walk/cleave(패링)/smash(접근 공격·패링)/cast_spell 투사체(비행 1~3f 루프→명중·패링·벽 시 잔여 프레임), 10대 death, 바닥 접지, Scene2 보스처럼 피격·그로기 5회 적용
+### 조작 내역
+- 반입: individual sprites→Assets/Art/Demon 10동작 130장, PPU 9.9(플레이어 1.52u x7=10.61u, 발여백 1px), 투사체 PPU 33.3(3배)
+- DemonBossConfig SO(수치 전부 SO)·DemonBoss.cs(transform 인트로→idle/walk/cleave/smash/cast/hit/groggy/death, 패링 시간창+0.2s 버퍼+TryParry, 클래시·MP·그로기 주황 다이아·빨간 점멸·HP팝업·그로기 버스트 이식, RB full=true)·DemonProjectile.cs(비행 3f 루프→플레이어/패링/타일맵 충돌 시 폭발 11f 후 소멸)
+- Scene4 배치(22.5, 7.82 접지)·배열 10종 배선·클래시 설정 공유
+### 검증
+- 컴파일 0, 배열 전수(32/6/12/15/18/6/5/22/3/11), 저장 ✓. 전투 감각은 사용자 재생
+### 실패와 수정
+- execute_code 인자 오기 1회
+
+
+## [수정] 데몬 재생 정지 — config 배선 유실·재배선 검증 — 2026-08-08 21:14
+### 프롬프트
+재생 눌러도 진행이 안돼 (+ 콘솔 스택 스샷)
+### 조작 내역
+- 격리 실험(데몬 OFF/ON)으로 원인 국소화 → 스택 확정: Start L33(config.maxHp)·Update L62(config.fps) NRE — 씬 저장본의 config 슬롯 유실. Error Pause가 매 프레임 정지시켜 '진행 안 됨'으로 체감
+- config 재배선 후 재읽기 검증(DemonBossConfig 확인)·저장, Start에 미배선 가드+명시 에러 로그(침묵 사망 방지)
+### 검증
+- 컴파일 0, 재검증 통과. 변신 인트로 기동은 사용자 재생
+### 실패와 수정
+- 첫 배선 시 검증 읽기 생략 자인 — 배선 후 재읽기 검증을 표준 수순으로
+
+
+## [조사] STATE 인계 요약 기준 현재 상태·잔여 우선순위 — 2026-08-08 21:21
+### 프롬프트
+[조사] STATE.md 인계 요약 기준으로 현재 상태 파악하고, 남은 작업 우선순위 확인해줘
+### 조사 결과
+- git: main, 워킹트리 청결, origin/main 대비 ahead 22 (푸시 미실행 — 사람 몫). 리모트 origin=NAN2026Game1(포크), upstream=NoImpMe/NAN2026Game
+- 빌드 타깃 이미 WebGL. 빌드 씬 6개: TitleScene/OpeningScene/AdventureScene1~4 (Builds 폴더 없음 = 빌드 리허설 미실행)
+- **[치명] 씬 전이 사슬 단절**: AdventureScene3.nextSceneName = "SecondScene_1" — 프로젝트에 존재하지 않는 씬. AS3 클리어 시 런타임 예외. 또한 AdventureScene4(데몬 보스)로 들어오는 포탈이 없어 고아 씬이며, AS4 이후 엔딩 전이도 없음(Ending1/2는 빌드 목록 밖)
+- 디버그 플래그 현황: Scene2DirectorConfig.debugSkipToBoss=False(OK) / MinoBossConfig.showParryDebug=True(**미해제**) / MidBossConfig.showRangesInGame=True(**미해제**, 팀 소유 config)
+- STATE '즉시 미결 1(SecondScene_extra를 빌드 목록에 추가)'은 씬 재편(ActiveScene/AdventureSceneN)으로 무효화됨 — STATE 08-05 절이 낡음
+- STATE 'WebGL 지뢰 4(SlashProjectile→gitignored NHNDemo.MonsterHealth)'는 **이미 해소**. NAN2026Game/Assets/Player/Scripts/MonsterHealth.cs 추적 중(git ls-files 확인), check-ignore 무매치. NHNDemo 참조 파일 18개 전부 추적 폴더 내
+- 씬 전이는 전부 직렬화 문자열 필드(Portal/PortalUpKey/CutsceneDirector/TitleScreen/VideoCutsceneDirector) — 문자열 오타가 컴파일로 안 잡힘. PauseMenu 기본값 "FirstTitle", CutsceneDirector 기본값 "ThirdScene"도 빌드 목록 밖(인스턴스 오버라이드 여부 별도 확인 필요)
+- 에디터: isPlaying=False, isCompiling=False, 활성 씬 AdventureScene4(dirty=False)
+### 검증
+해당 없음
+### 실패와 수정
+없음
+### 커밋
+해당 없음(무수정)
+
+
+## [수정] 데몬 보스 공중부양·역방향 공격 — 2026-08-08 21:32
+### 프롬프트
+일단 그건 나중에 정하고 일단 Scene4에서 보스가 하늘에 떠 다니고 있는고 수정해주고 나를 바라보는 방향으로 공격하는게 아닌 반대 방향으로 공격을 하고 있어.
+### 조작 내역
+- 원인 실측 1(부양): Scene4 아레나 지면은 x=0~44 전 구간 평탄 y=-3.95인데 보스 배치 y=7.82. 시트 288x160·PPU 9.899199 → 반높이 8.0815u, 발여백 1px=0.1010u → 피벗→발 7.9804u. 발끝 실제 y = 7.82-7.9804 = -0.16 → **지면 위 3.79u 공중**
+- 원인 실측 2(역방향): 시트 픽셀 실측으로 기본 바라보는 쪽 확정. cleave 타격창(frac 0.62~0.82 = 프레임 10~12)에서 콘텐츠가 X 20~25까지 **좌측**으로 쓸림(우측 질량 0), 프레임 9는 우측 후방 와인드업. cast 6프레임 모두 구체가 좌측 X[60~99]에 고정. → **비반전 시트는 왼쪽을 향한다**. 기존 코드 `sr.flipX = side < 0f`는 정확히 반대
+- 부수 실측: cast 구체 로컬 좌표 (-6.85, -2.04)u — 기존 config handOffset(3.2, 5.6)은 좌우·상하 모두 오배치
+- 신규 순수 로직 NAN2026.Core/BossFacingLogic.cs: ShouldFlipX / FacingSign / TargetInFront / GroundedPivotY / HandWorldX / HandWorldY
+- DemonBossConfig 신규 필드: spriteFacesLeft=true, groundY=-3.95, feetOffset=7.9804, frontDeadZone=1.0. handOffset (3.2,5.6)→(6.85,-2.04)
+- DemonBoss.cs: flipX 산출을 BossFacingLogic로 교체 / 매 프레임 SnapToGround()로 발끝 접지 고정 / cleave·smash 타격에 TargetInFront() 게이트(등 뒤 타격 차단) / 캐스트 손 위치·기본 발사 방향을 Facing() 기준으로 교체
+- 씬 AdventureScene4: DemonBoss y 7.82 → 4.0304 (콜라이더 하단이 지면 -3.95에 정확히 접함)
+### 검증
+- 컴파일 0, read_console error/exception 0건
+- EditMode 160/160 통과 (BossFacingLogicTests 11개 신규 포함, 실패 0)
+- 리플렉션 실행 검증: ShouldFlipX(10,3,true)=False / ShouldFlipX(10,17,true)=True / GroundedPivotY(-3.95,7.9804)=4.0304
+- 배선 재읽기: config spriteFacesLeft=True groundY=-3.95 feetOffset=7.9804 handOffset=(6.85,-2.04)
+- 씬 저장·테스트 후 생존 확인: boss pos=(22.50, 4.03, 0.00), BoxCollider2D bounds 하단 y=-3.95(지면과 오차 0.00u), 디스크 씬 파일에 4.0304 포함·7.82 소거
+- **사용자 눈 판정 필요**: 재생 시 (1) 보스가 지면을 딛고 서는지 (2) cleave/smash가 플레이어 쪽으로 휘두르는지 (3) 구체가 보스 손에서 나오는지
+### 실패와 수정
+- create_script 도구가 .cs 확장자를 붙여도 bad_extension 반환 — execute_code 파일 쓰기 + AssetDatabase.ImportAsset로 우회
+
+
+## [구현] 데몬 보스 공격 범위 가시화 — 2026-08-08 21:39
+### 프롬프트
+지금 버스 기본 공격시에 공격범위가 예상이 안되는데 내가 볼 수 있게 조절 가능한가?
+### 조작 내역
+- 실판정 형태 확인: 데몬 타격은 원형이 아니라 '수평거리 <= reach && 바라보는 쪽'(수직 제한 없음). 따라서 MidBossAI식 원형 링이 아니라 **수직 띠(band)**로 그려야 표시가 진실해진다
+- 신규 순수 로직 NAN2026.Core/BossRangeLogic.cs: BandMinX / BandMaxX / InHitBand / WindowOpen / FracUntilWindow
+- DemonBoss 실타격 게이트를 BossRangeLogic.InHitBand·WindowOpen 으로 교체 — **표시와 판정이 같은 함수를 사용**하므로 어긋날 수 없음
+- DemonBoss LateUpdate 시각화: LineRenderer 4종(useWorldSpace=true로 부모 스케일·반전 영향 차단)
+  · 노랑 = 인지(aggroX, 양쪽) · 자홍 = 스매시 리치 · 빨강 = 클리브 리치 · 파랑 = 스매시 접근 정지선(smashStopX)
+  · 타격 시간창이 열린 동안 해당 띠를 굵게(0.12→0.30) + 밝은 노랑으로 전환 → '언제 맞는지'가 눈에 보임
+- 머리 위 실시간 라벨: dx / 바라보는 방향(◀▶) / cleave·smash 사거리와 현재 적중 여부(✔✘) / 현재 패턴 진행률과 시간창 / ◆타격중
+- OnDrawGizmosSelected: 씬 뷰에도 동일 범위를 와이어 박스로
+- Config 신규: showRangesInGame=true, showRangeLabels=true, rangeBandHeight=11 (전부 SO 소유, 재생 중 인스펙터 토글 즉시 반영 — 끄면 오브젝트 파괴)
+- 튜닝 다이얼(기존 SO 값, 재생 중 조절 가능): cleaveReach=6 / smashReach=6.5 / smashStopX=3.2 / aggroX=14 / frontDeadZone=1
+### 검증
+- 컴파일 0, read_console error 0건
+- EditMode 170/170 통과 (BossRangeLogicTests 10개 신규, 실패 0)
+- 표시-판정 일치 테스트 포함: x=0~30을 0.15 간격 201점 순회하며 BandMin/Max 구간 판정과 InHitBand 결과가 전부 일치함을 단언
+- 리플렉션 실행 검증: InHitBand(10,15,6,+1,1)=True / InHitBand(10,5,6,+1,1)=False / BandMinX(10,6,-1,1)=4
+- 배선 재읽기: showRangesInGame=True showRangeLabels=True rangeBandHeight=11
+- 씬 무변경(dirty=False), boss pos=(22.50, 4.03, 0.00) 유지
+- **사용자 눈 판정 필요**: 재생 시 띠가 보이는지 / 띠가 굵어지는 순간과 실제 피격 순간이 일치하는지 / 라벨 ✔ 시점과 피격이 일치하는지
+### 실패와 수정
+없음
+### 제출 전 OFF 목록 추가
+DemonBossConfig.showRangesInGame / showRangeLabels (기존: MinoBossConfig.showParryDebug, MidBossConfig.showRangesInGame)
+
+
+## [조사] 데몬 클리브 리치 불일치 · 투사체 요구 · Z 대미지 무반응 — 2026-08-08 21:50
+### 프롬프트
+[조사] 보스가 칼을 내리 찍을때 실제 그림에서 보이는 화면과 타격 거리가 달라서 어색해 보여, 그리고 스매시 Projectile의 크기는 ParryOrb크기 만큼 키우고 5개가 발사해야하는데 주인공에게 유도하는 형식이 아니라 전체적으로 퍼지는 형식으로 주인공이 피할 수 있게 해주고 주인공 타격이 안먹히는거 같으니깐 조사해봐. 칼로 z 기본 공격을 해도 take_hit 모션이 안나와
+### 조사 결과
+**1. Z 대미지·take_hit 무반응 — 원인 확정 (침묵 사망)**
+- 플레이어 Z(ComboV1/V2)는 SpawnComboVDamage → basicEffectPrefab(Skill1) 인스턴스의 EffectProjectile 히트박스로 판정한다
+- EffectProjectile.OnTriggerEnter2D(74~106줄) 분기: PlayerHealth 제외 → ExecutionerBoss → **SecondSceneBoss** → **NHNDemo.MonsterHealth** → (트리거 아니면 소멸). **DemonBoss 분기가 없다**
+- DemonBoss 오브젝트 컴포넌트는 Transform/Rigidbody2D/BoxCollider2D/DemonBoss 뿐 — **MonsterHealth 미보유**(자식 포함 확인)
+- 보스 콜라이더는 isTrigger=true 라서 마지막 `if (!other.isTrigger) Destroy` 에도 안 걸린다 → 히트박스가 무반응 통과. DemonBoss.TakeDamage 가 한 번도 호출되지 않음 → hp 불변 + SetState(6)(take_hit) 미발생
+- **X 검기도 동일**: SlashProjectile.cs 81~95줄도 SecondSceneBoss·MonsterHealth 만 있고 DemonBoss 없음
+- 배선 문제는 아님: Scene4 Player 는 프리팹 인스턴스이고 config/effectConfig/basicEffectPrefab(Skill1)/poweredEffectPrefab(Skill2) 전부 정상 (skillImageUI 만 NULL — 팀 기존 이슈)
+- STATE 하드교훈 #2의 변종. 신규 보스를 대미지 디스패처 화이트리스트에 등재하지 않은 것
+**2. 클리브 그림 vs 판정 거리 — 실측**
+- 15프레임 좌(바라보는 쪽) 도달거리: f10=12.02u, f11=12.32u, f12=12.53u, f13=6.47u, 그 외 2.7~3.8u
+- 현재 cleaveReach=6.0 → 그림이 12.5u까지 뻗는데 판정은 6.0u. **약 2배 미달**
+- 타격창 0.62~0.82 = f11~f13. 검이 최대로 뻗는 첫 프레임 f10(frac 0.60)이 창 밖
+- 제안치: cleaveReach≈12.3, cleaveWinS≈0.60 (f10~f13 초반 포함)
+**3. 스매시 실측**
+- 충격파 f12부터 퍼져 f17에 좌 10.40u / 우 10.40u 최대. **좌우 대칭**
+- 현재 smashReach=6.5 + 정면(InHitBand) 전용 → 사거리 미달 + 등 뒤 충격파 판정 없음
+- 타격창 0.62~0.85 = f12~f16 — 그림과 일치(양호)
+- 제안치: smashReach≈10.3, 스매시만 양방향 판정
+**4. 투사체 현황·크기 기준**
+- **스매시(state 7)에는 투사체가 없다.** 투사체는 cast_spell(state 3)만 생성하며 `dir = (player - hand).normalized` 로 **유도 발사 1발**
+- 데몬 투사체 크기: projectile_idle 32px / PPU 33.333 = **0.960u**, CircleCollider r=0.45
+- ParryOrb: Assets/Sprites_AI/FX/ParryOrb.png 128px / PPU 91 = **1.407u**. Scene4 Stage_Props 에 ParryOrb_S1~S5(SpikeBallTrap) 5기가 이 크기로 실재 → 배율 **1.466배**
+- 즉 요구(ParryOrb 크기 · 5발 · 비유도 확산)를 어느 패턴에 붙일지가 미정: cast 를 개조할지, smash 에 신규 추가할지 — **범위 결정이라 사용자에게 질의함**
+### 검증
+해당 없음
+### 실패와 수정
+없음
+### 커밋
+해당 없음(무수정)
+
+
+## [수정] 데몬 Z대미지 복구 · 사거리 실측 교정 · 캐스트 5발 확산 — 2026-08-08 22:01
+### 프롬프트
+진행해
+(직전 [조사] 결론 승인: 확산 투사체는 cast_spell 개조 / 사거리는 실측값으로 교정)
+### 조작 내역
+**① Z·X 대미지 복구 (침묵 사망 해소)**
+- EffectProjectile.OnTriggerEnter2D(Z 근접)·SlashProjectile.OnTriggerEnter2D(X 검기) 두 디스패처에 `NAN2026.DemonBoss` 분기 추가. SecondSceneBoss 다음, MonsterHealth 앞에 배치
+- 원인은 배선이 아니라 화이트리스트 미등재였음(Scene4 Player 슬롯은 전부 정상 확인)
+**② 사거리 실측 교정**
+- cleaveReach 6.0 → 12.3 (f11~f12 검 끝 실측 12.32~12.53u), cleaveWinS 0.62 → 0.60 (검이 최대로 뻗는 f10 포함)
+- smashReach 6.5 → 10.3 (충격파 실측 좌우 10.40u), smashBothSides=true 신설 — 시트가 좌우 대칭이라 등 뒤도 판정
+- BossRangeLogic.InHitBandBothSides 추가, DemonBoss.InSmashBand()가 분기. 범위 표시 띠도 양방향으로 렌더
+**③ cast_spell: 유도 1발 → 비유도 5발 부채꼴**
+- 신규 순수 로직 NAN2026.Core/SpreadShotLogic.cs: AngleDeg / MinAngleDeg / MaxAngleDeg / FireDelay
+- DemonBoss.FireOne(index, face, hand) + FireSpread 코루틴(perShotDelay>0일 때). 방향은 `dir=(cos(a)*face, sin(a))` 고정각 — 플레이어 추적 제거
+- 투사체 크기 projScale=1.466 → 0.960u × 1.466 = **1.407u = ParryOrb(128px/PPU91)와 동일**. CircleCollider r=0.45도 transform 스케일로 함께 확대
+- 각도 기본값 산정: 손 위치(보스+6.85, 지면+5.94)에서 4개 후보를 착탄 시뮬레이션해 비교
+  · base -30/spread 70(초안): 착탄 12.88·10.21·5.36·-11.14·이탈 — 간격 최대 16.5u, 1발 화면 밖. 기각
+  · base -70/spread 40: 간격 1.05~1.55u < 구체 지름 1.41u → 회피창 없음. 기각
+  · **base -70/spread 70 채택**: 착탄 17.24·15.39·13.49·11.09·7.17 (보스로부터 5.3~15.3u), 간격 1.85~3.93u → 구체 1.41u 대비 회피창 확보, 보스 근처일수록 촘촘
+- 신규 SO 다이얼: castCount=5, castBaseDeg=-70, castSpreadDeg=70, castPerShotDelay=0, projScale=1.466
+### 검증
+- 컴파일 0, read_console error/exception 0건
+- EditMode 179/179 통과 (SpreadShotLogicTests 8 + BossRangeLogic 양방향 1 신규, 실패 0)
+- 리플렉션 실행 검증: AngleDeg 5발(base -30/spread 70) = -65 / -47.5 / -30 / -12.5 / 5 (대칭·단조증가 확인), InHitBandBothSides(10,5,10.3)=True · (10,21,10.3)=False
+- 배선 재읽기: cleaveReach=12.3 cleaveWinS=0.6 smashReach=10.3 smashBothSides=True castCount=5 castBaseDeg=-70 castSpreadDeg=70 projScale=1.466 handOffset=(6.85,-2.04)
+- DemonBoss 오브젝트 슬롯 전수 재검사: ObjectReference NULL 0개, config=DemonBossConfig, 배열 10종 전부 생존(32/6/12/15/18/6/5/22/3/11)
+- 테스트 후 씬 생존: dirty=False, boss=(22.50, 4.03, 0.00)
+- **사용자 눈 판정 필요**: (1) Z·X가 실제로 hp를 깎고 take_hit 모션이 나오는지 (2) 클리브 검 끝과 피격 지점이 맞는지 (3) 스매시가 등 뒤에서도 맞는지 (4) 5발이 ParryOrb 크기로 퍼지고 사이로 피할 수 있는지
+### 실패와 수정
+- 테스트 메서드명을 `5발은_...`으로 지어 CS1519(숫자로 시작하는 식별자) — `다섯발은_...`으로 개명. 이후 세 테스트 파일 전체에 숫자 시작 식별자 정규식 점검 수행
+- EffectProjectile.cs 는 CRLF, SlashProjectile.cs 는 LF 혼재라 동일 패턴 치환이 한쪽만 실패 — 파일별 개행 실측 후 재치환
 ## [구현] 사망 시 GameOverPanel 표시 → 아무 키 입력 시 타이틀씬 이동 — 2026-08-08 19:50
 ### 프롬프트
 player가 죽으면 이벤트를 발생시켜 GameOverPanel을 active시키고 아무 키나 입력시 타이틀씬으로 이동하게 해주는 코드 짜줘
