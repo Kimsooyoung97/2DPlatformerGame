@@ -42,6 +42,10 @@ namespace NAN2026
         public float arrowLife = 4f;
         public int arrowDamage = 1;
 
+        [Header("범위 표시 (제출 전 OFF)")]
+        public bool showRangesInGame = true;   // 게임 뷰에 사거리 띠 표시
+        public bool showRangeLabels = true;    // 머리 위 숫자 라벨
+        public float rangeBandHeight = 1.8f;   // 표시용 띠 높이(판정과 무관, 보기용)
         [Header("피격 연출")]
         public float hitFlash = 0.1f;
     }

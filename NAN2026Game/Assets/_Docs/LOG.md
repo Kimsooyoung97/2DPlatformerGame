@@ -6591,3 +6591,38 @@ PlayerFxConfig.enableDebugKeys (5·6 미리보기)
 - 없음
 ### 미결
 - hitsToDie 는 5 유지. 조사에서 3 을 권고했으나 이번 명령에 포함되지 않아 임의 변경하지 않았다. 12마리 x 5대 = 60타가 3~5분 플레이에 과하면 조정 필요
+
+
+## [구현] 잡몹 전용 사거리 표시 + Knight 사거리 실측 교정 — 2026-08-09 08:01
+### 프롬프트
+보스는 보스에만 적용하고 Knight는 따로 적용하는게 좋을거 같은데
+> 맥락: 직전 질문 'knight의 공격범위가 너무 긴거 같은데 게임 씬에서 직접 볼 수 있나?' 에 대해, DemonBoss 의 범위 표시를 공유·리팩터하지 말고 EnemyBase 에 별도 구현하라는 결정
+### 조작 내역
+**사거리 실측 → 교정**
+- Knight ATTACK3 6프레임 픽셀 실측(96px 격자, 중앙 48, PPU 25.714): 타격창(frac 0.40~0.70)인 f4·f5 의 **칼끝 도달 1.21u**
+- 기존 attackRange 1.8 → 그림보다 **0.59u 길었다**. 콜라이더 반폭(Knight 0.45 + Player 0.42=0.87)을 빼도 몸 사이 0.93u 가 벌어진 상태에서 맞았음
+- attackRange 1.8 → **1.25** (칼끝 1.21 과 0.04 차이), stopDistance 1.4 → **1.0**
+  · stopDistance 를 같이 내리지 않으면 정지거리(1.4) > 사거리(1.25) 가 되어 **영원히 공격 불가** 상태가 된다. 기존 1.4/1.8 도 아슬아슬한 조합이었음
+**범위 표시 — EnemyBase 에 별도 구현 (DemonBoss 무수정)**
+- EnemyConfig +3 필드: showRangesInGame / showRangeLabels / rangeBandHeight(1.8)
+- LateUpdate 에서 LineRenderer 3종(useWorldSpace=true)
+  · 노랑 = aggroRange (|dx| 판정이라 좌우 대칭)
+  · 파랑 = stopDistance (좌우 대칭)
+  · 빨강 = attackRange (정면 판정이라 바라보는 쪽만, BossRangeLogic.BandMinX/MaxX 사용)
+- 타격 시간창이 열리면 빨강 띠가 굵어지고(0.06→0.16) 밝은 노랑으로 전환
+- 머리 위 라벨: dx / atk 사거리와 적중 여부(O·X) / stop / 현재 상태(IDLE·WALK·ATK 진행률·HURT·DEAD)
+- **표시와 실판정이 같은 함수(BossRangeLogic.InHitBand/BandMinX/BandMaxX/WindowOpen)를 쓴다** — 데몬 때와 동일 원칙
+- 보스 쪽 시각화는 클리브·스매시 이중 사거리에 양방향 옵션까지 있어 잡몹과 형태가 다르므로 공유하지 않음
+### 검증
+- 컴파일 0, read_console error/exception 0건
+- EditMode 217/217 통과, 실패 0
+- 타입 로드 확인: EnemyBase 신규 멤버 MakeBand·BuildBands·DestroyBands·SetRect·LateUpdate / EnemyConfig 신규 필드 3종
+- Config 재읽기: Knight atkRange=1.25 stop=1.0 aggro=10 show=True bandH=1.8 / Archer atkRange=10 stop=6 aggro=14 show=True
+- 관계 검증: stop(1.0) < attackRange(1.25) 유지 — 역전 시 공격 불가 상태를 코드가 아니라 수치로 방지
+- DemonBoss.cs 미수정 확인
+- 테스트 후 씬 생존: dirty=False, 적 12마리
+- **사용자 눈 판정 필요**: (1) 빨강 띠가 칼끝과 맞는지 (2) 띠가 굵어지는 순간과 실제 피격 순간이 일치하는지 (3) 12마리 띠가 화면을 너무 어지럽히지 않는지 — 어지러우면 showRangeLabels 만 꺼도 됨
+### 실패와 수정
+- 없음
+### 제출 전 OFF 목록 추가
+KnightEnemyConfig.showRangesInGame · showRangeLabels / ArcherEnemyConfig.showRangesInGame · showRangeLabels

@@ -16,10 +16,10 @@ MonoBehaviour:
   hurtLock: 0.35
   deathLinger: 1.6
   aggroRange: 10
-  attackRange: 1.8
+  attackRange: 1.25
   walkSpeed: 1.8
   attackCooldown: 1.5
-  stopDistance: 1.4
+  stopDistance: 1
   separation: 1
   fireStagger: 0.8
   cooldownJitter: 0.6
@@ -36,4 +36,7 @@ MonoBehaviour:
   arrowSpeed: 9
   arrowLife: 4
   arrowDamage: 1
+  showRangesInGame: 1
+  showRangeLabels: 1
+  rangeBandHeight: 1.8
   hitFlash: 0.1
