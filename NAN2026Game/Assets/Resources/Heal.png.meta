@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 063304ba2fc101b4582cf975e2f1c4fe
+guid: 64702d09c505fd14d8a4770168ba57e6
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 4086346213965482846
-    second: MPPlusSkillIon_0
+      213: 6292578399014561105
+    second: HPSkillIcon_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -109,11 +109,24 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: MPPlusSkillIon_0
+      name: HPSkillIcon_0
       rect:
         serializedVersion: 2
         x: 0
@@ -128,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: e5bcca03b3e95b830800000000000000
-      internalID: 4086346213965482846
+      spriteID: 1552f82e6bab35750800000000000000
+      internalID: 6292578399014561105
       vertices: []
       indices: 
       edges: []
@@ -148,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      MPPlusSkillIon_0: 4086346213965482846
+      HPSkillIcon_0: 6292578399014561105
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

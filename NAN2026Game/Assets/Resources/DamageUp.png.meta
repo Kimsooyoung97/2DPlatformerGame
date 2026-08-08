@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 8af10ac0e43519e4480ba5c517dc98eb
+guid: def14686ec227f54c8a5619da51e38dd
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -1594189527970417104
-    second: MPSkillIcon_0
+      213: 9119085295257731586
+    second: DamageSKillIon_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -109,11 +109,24 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: MPSkillIcon_0
+      name: DamageSKillIon_0
       rect:
         serializedVersion: 2
         x: 0
@@ -128,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 036fca8121d40e9e0800000000000000
-      internalID: -1594189527970417104
+      spriteID: 2024354d2cf7d8e70800000000000000
+      internalID: 9119085295257731586
       vertices: []
       indices: 
       edges: []
@@ -148,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      MPSkillIcon_0: -1594189527970417104
+      DamageSKillIon_0: 9119085295257731586
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
