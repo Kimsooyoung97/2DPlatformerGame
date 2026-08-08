@@ -5598,3 +5598,15 @@ Z로 공격해도 아무런 피격모션도 안뜨고 피 까이는 UI도 안보
 - 컴파일 0, 씬 저장. Z 타격→경직·점멸·HP 팝업은 사용자 재생
 ### 실패와 수정
 - FAIL 기재 함정 재범 자인 — 보스 생성 시 체크리스트에 반영
+
+
+## [수정] Z 대미지 전멸 — 병합 개명 유령 참조 재배선 — 2026-08-08 20:36
+### 프롬프트
+여전히 Z로 공격해도 데미지가 안먹혀 (계측·라이브 해부 진행)
+### 조작 내역
+- 진범: 3차 병합에서 Effect_Basic/Powered→Skill1/2 개명+구본 삭제 → PC2D의 basicEffectPrefab·poweredEffectPrefab 유령 참조 → SpawnComboVDamage 첫 줄 침묵 가드에서 조기 리턴(히트박스 미생성). 라이브 실측으로 확정(attackTimer는 동작·슬롯 NULL)
+- Player_Knight 프리팹+Scene2 손조립 Player 양쪽 Skill1/Skill2 재배선, 계측 3점 철거
+### 검증
+- Skill1 EffectProjectile 보유 확인, 컴파일 0, 씬 저장. Z→경직·점멸·HP팝업 사슬은 사용자 재생 (X 검기도 동반 복구 예상)
+### 실패와 수정
+- 병합 검진 때 '프리팹 참조 생존'을 코드 참조만 보고 슬롯 배선까지 전수 안 한 누락 자인 — FAIL 등재
