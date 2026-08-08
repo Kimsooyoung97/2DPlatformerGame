@@ -26,7 +26,7 @@ namespace NAN2026
 
         private void Update()
         {
-            var kb = Keyboard.current;
+            var kb = PlayerController2D.InputLocked ? null : Keyboard.current;
             if (kb == null || !kb.digit1Key.wasPressedThisFrame) return;
             if (casting || Time.time - lastCast < config.cooldown) return;
             StartCoroutine(Cast());

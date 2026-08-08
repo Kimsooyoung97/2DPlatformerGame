@@ -66,6 +66,7 @@ public class SpikeProjectile : MonoBehaviour
             var reflector = other.GetComponentInParent<IParryReflector>();
             if (reflector != null && reflector.TryParry(ownerHealth != null ? ownerHealth.gameObject : null))
             {
+                NAN2026.PlayerMana.RewardParry(other);
                 Reflect();
                 return;
             }

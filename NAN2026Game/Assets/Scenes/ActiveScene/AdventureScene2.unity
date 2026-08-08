@@ -29347,7 +29347,7 @@ Transform:
   m_GameObject: {fileID: 537598684}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 11.999977, y: 7.749995, z: -10}
+  m_LocalPosition: {x: 15.467781, y: 7.749995, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -62401,7 +62401,7 @@ Rigidbody2D:
   m_GameObject: {fileID: 1520008283}
   m_BodyType: 1
   m_Simulated: 1
-  m_UseFullKinematicContacts: 0
+  m_UseFullKinematicContacts: 1
   m_UseAutoMass: 0
   m_Mass: 1
   m_LinearDamping: 0
@@ -64059,6 +64059,7 @@ GameObject:
   - component: {fileID: 1739690764}
   - component: {fileID: 1739690766}
   - component: {fileID: 1739690767}
+  - component: {fileID: 1739690768}
   m_Layer: 7
   m_Name: Player
   m_TagString: Player
@@ -64322,8 +64323,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController2D
   config: {fileID: 11400000, guid: f7660cf53f6672645aa2f4dd3fea7f67, type: 2}
   effectConfig: {fileID: 11400000, guid: b80ea079559c8744195cdca5b2e5eb51, type: 2}
-  basicEffectPrefab: {fileID: 6711275918333177968, guid: 47a6e46a7cb01524cb22b69fe2675bf8, type: 3}
-  poweredEffectPrefab: {fileID: 313029590728753939, guid: 9a147a0a3bdf1f24ea627d7749111de1, type: 3}
+  basicEffectPrefab: {fileID: 6711275918333177968, guid: 4ba4d41d34b707c428957b6aea90fa9c, type: 3}
+  poweredEffectPrefab: {fileID: 313029590728753939, guid: 1a6dda80c9b017849b122e97ebdc0d9a, type: 3}
   basicEffectFrames:
   - {fileID: -5937299428846597122, guid: 4876c5a6ed4140140b9feb96019ac9c5, type: 3}
   - {fileID: -4583900113884633967, guid: 4876c5a6ed4140140b9feb96019ac9c5, type: 3}
@@ -64615,6 +64616,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NAN2026.SceneParryOverride
   config: {fileID: 11400000, guid: 8479da873a4274544a13e3baf07d8c6a, type: 2}
+--- !u!114 &1739690768
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1739690751}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f453815c6b79d594097e9ac54c22d4c9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NAN2026.PlayerMana
+  config: {fileID: 11400000, guid: 1e8ab3c40df891f4a870bb3cb6e8ccf7, type: 2}
 --- !u!1 &1750090626
 GameObject:
   m_ObjectHideFlags: 0
@@ -64626,12 +64640,12 @@ GameObject:
   - component: {fileID: 1750090628}
   - component: {fileID: 1750090627}
   m_Layer: 0
-  m_Name: ParryMeter
+  m_Name: "ParryMeter_\uAD6C\uBC84\uC804(\uBE44\uD65C\uC131)"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1750090627
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 187d0fd4d93b3c844b29d33c31ed8c1b, type: 3}
+  m_Name: ManaConfig
+  m_EditorClassIdentifier: Assembly-CSharp::NAN2026.ManaConfig
+  maxMp: 10
+  parryGain: 1
+  startMp: 0
+  heartFull: {fileID: 3674548051905326134, guid: 50599f976f3fb9249b16886e5082a7cb, type: 3}
+  heartEmpty: {fileID: -3502512024636276012, guid: 50599f976f3fb9249b16886e5082a7cb, type: 3}
+  heartSize: 36
+  heartSpacing: 40
+  hudOffset: {x: 24, y: -24}

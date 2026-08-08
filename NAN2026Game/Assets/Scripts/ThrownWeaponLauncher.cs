@@ -16,6 +16,9 @@ namespace NAN2026
         private float nextReady;
         private static int waveBudget; // 이번 파도 허용 발수(1~2)
         private static int reserved;   // 전조 중 예약 수
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetStaticsOnPlay() { waveBudget = 0; reserved = 0; } // DisableDomainReload 대응
         private AudioSource src;
 
         private void Start()

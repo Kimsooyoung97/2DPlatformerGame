@@ -77,3 +77,42 @@
 - [제출 전 필수] Scene2DirectorConfig.debugSkipToBoss = false 로 끌 것 (보스전 테스트 스위치)
 
 - [제출 전 필수] MinoBossConfig.showParryDebug = false (패링 디버그 팝업)
+
+
+---
+
+# 인계 요약 (2026-08-08 21:16 기준, D-2 야간 세션 종료분)
+
+## 이번 세션에 완성된 것
+- **Scene2(AdventureScene2) 보스전 풀코스**: 어둠 → 천장/돌진 스파이크 패링 5회(상단 라벨 n/5 + 보스 위 노랑 ◆핍) → '어둠이 걷혔다!' 밝아짐 → **보스 개막 카메라 팬** → 미노 보스전
+- **SecondSceneBoss**(구 MinoBossAI→NanMinoBoss→SecondSceneBoss 2회 개명, 팀 MidBoss와 충돌 회피): atk_1 이단 패링(프레임 5~8·11~14) / atk_2 시간창(0.62~0.82) / 선입력 버퍼 0.2s / 패링 5회 그로기 / 10타 death
+- **그로기 버스트**: 'Z 연타! 공격 찬스!' + Z 자동 대시 + 공속 2배(PC2D.AttackSpeedMul) + 금빛 펄스·✦ 반짝
+- **피격 피드백**(배너 UI 철거 후 대체): 빨간 점멸 0.12s + 머리 위 'HP n/10' 붉은 팝업 + take_hit
+- **MP 시스템**: ManaConfig(총량 10·패링 +1) + PlayerMana + 좌상단 파란 하트 10개(독립 캔버스 1920 기준). 전 패링(구체·트랩·보스)이 MP 지급. TryUseMp는 API만 대기(소모 연동은 팀 결정)
+- **연출 락 체계 통일**: PlayerController2D.InputLocked 정적 게이트(컨트롤러 계속 구동, 입력만 차단) — Scene2 밝아짐 / 그로기 Z대시 / Scene3 토치 인트로 3곳. parryHeld 자가 회복 포함
+- **Scene3 토치 인트로**: 아무키 스킵 제거(완주 보장) + 이동 락 + 오디오 락(BGM 예외)
+- **데몬 보스(AdventureScene4)**: 플레이어 7배(PPU 9.9, 10.61u)·투사체 3배(PPU 33.3), transform 32f 인트로 → idle/walk/cleave(패링)/smash(접근 공격·패링)/cast_spell(투사체 비행 3f 루프→명중·패링·타일맵 충돌 시 폭발 11f) / 패링 5회 그로기 / 10타 death / 바닥 접지
+
+## 반드시 지켜야 할 하드 교훈 (FAIL.md 참조 필수)
+1. **Kinematic 트리거**: 양쪽 Kinematic이면 useFullKinematicContacts=true 필수 (미노에서 재범 — Z 대미지 전멸)
+2. **프리팹 개명 병합 후**: 씬·프리팹 '슬롯 배선(SerializedProperty)' 전수 검사 — 컴파일 통과는 보증 아님. Skill1/2 유령 참조로 Z 대미지 무음 사망 겪음
+3. **DisableDomainReload 프로젝트**: 모든 static은 세션 간 생존 — static 추가 시 RuntimeInitializeOnLoadMethod(SubsystemRegistration) 리셋 동봉. 적용된 4곳: PC2D(InputLocked·AttackSpeedMul)/ThrownProjectile(Alive)/Launcher(waveBudget·reserved)/SpikeParryEvents(Count·OnParry)
+4. **timeScale 히트스톱**: 복구 담당 FX 수명 < 히트스톱이면 영구 정지 — 수명 보정 + OnDestroy 안전핀
+5. **입력 게이트 락**: '뗌 이벤트' 유실 → Held 계열은 isPressed 기반 자가 회복 필수
+6. **팀 병합이 우리 파일을 리팩터하면** 치환 앵커 전멸 → 통짜 재작성 우선. Scene2Director는 이미 확정판 재작성됨(이후 이 파일은 부분 치환 금지)
+7. **배선 후엔 반드시 재읽기 검증** (데몬 config 유실로 재생 전체가 멈춘 사고)
+
+## 남은 작업 (우선순위)
+1. 데몬 보스 재생 검증 및 수치 튜닝(사거리·속도·투사체) — DemonBossConfig 다이얼
+2. Scene2 풀코스 최종 완주 후 봉인
+3. 제출 전 디버그 OFF: MinoBossConfig.showParryDebug / showRangesInGame (debugSkipToBoss는 이미 OFF)
+4. **WebGL 지뢰**: Assets/Scripts/SlashProjectile.cs가 gitignored 폴더의 NHNDemo.MonsterHealth 참조 → 신규 클론 컴파일 실패 위험. 제출 전 해결 필수
+5. PR: 타이틀 'feat: 2번째 씬 보스전 + 투척 함정 패링 시스템 (어둠·MP 이코노미)' (데몬 추가분 반영 필요)
+6. 팀 공지 4건: Scene2 Player를 프리팹 인스턴스로 교체 권장(손조립이라 배선 유실 2회) / 팀 SkillImage 흰네모(스프라이트 유실) / Scene2Director 재작성 고지 / 보스 씬별 배정(팀 데몬·미드보스 vs 우리 SecondSceneBoss)
+7. 잔무: Scene2 재진입 시 밝기 유지(정적 플래그 미적용), 키맵 README, AI 활용 문서
+
+## 작업 규약 재확인
+- Z=2콤보 / X=검기 스킬 / **스페이스=패링** / C=스킬변경(보류) / 엔터=대화(보류) / 싱글톤·DontDestroy(보류)
+- 모든 수치는 SO Config 소유. Player 프리팹 수정은 **예외 허가됨**
+- push/pull/reset은 사람만. 나는 add·commit까지
+- '테스트 시작' 선언 시 컴파일 유발 작업 전면 중지(도메인 리로드 렉 방지)

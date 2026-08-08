@@ -39,6 +39,11 @@ namespace NAN2026
         public int groggyNeed = 5;        // 패링 몇 회에 그로기
         public float groggyTime = 3.0f;   // 무방비 시간
         public float groggyFxOffsetY = 3.4f;
+        [Header("그로기 버스트")]
+        public float burstAtkSpeedMul = 2f;   // 공속 배율
+        public float burstDashSpeed = 20f;    // 자동 대시 속도
+        public float burstDashStopX = 1.7f;   // 보스 앞 정지 거리
+        public float sparkleInterval = 0.22f; // 반짝 주기
         [Header("체력바")]
         public float barScale = 1.8f;      // 견본(sample_100) 크기감
         public float barOffsetY = 3.1f;
