@@ -105,3 +105,22 @@
 - Assets/Art/Demon/** (130장): boss_demon_final(boss_demon_slime_FULL_v1.0) 유래 — Sprites_AI 폴더(생성형 AI 산출물, 사용자 반입). 데몬 보스 전 동작+투사체. 생성 프롬프트: 사용자 보관분
 
 - Assets/Map/Showroom/Medieval/Pine_16_Tree.png: 기존 Pine Trees.png(중세 팩)에서 큰 소나무 1그루만 픽셀 추출한 파생본. 원본 라이선스 승계, 신규 창작 아님
+
+
+## Knight 2D Pixel Art — 2026-08-09
+- 파일: Assets/Art/Enemies/Knight/ (IDLE·WALK·RUN·JUMP·ATTACK1~3·DEFEND·HURT·DEATH, with_outline 10파일)
+- 출처: 외부 무료 픽셀아트 에셋 (원본 경로: NHN 대회 에셋/공주를 구하라/Knight 2D/Knight 2D Pixel Art)
+- 라이선스(License.txt 원문 요지): 개인·상업 프로젝트 사용 가능, 수정 가능, 크레딧 권장(필수 아님).
+  **에셋 자체의 재판매·재배포 금지. NFT 전환 금지.**
+- 규격: 프레임 96x84px 균등, 총 67프레임. 임포트 PPU 25.714(본체 36px=1.40u), 피벗 (0.5, 0.2619)=발끝
+- 용도: AdventureScene3 근접 잡몹(KnightEnemy)
+
+## GandalfHardcore Archer — 2026-08-09
+- 파일: Assets/Art/Enemies/Archer/ArcherSheet.png, arrow.png
+- 출처: GandalfHardcore — https://gandalfhardcore.itch.io/ (원본 경로: NHN 대회 에셋/공주를 구하라/Archer)
+- 라이선스(READ ME.txt 원문 요지): 상업·비상업 게임에 포함 가능, 수정 가능.
+  **재판매·리패키징·재배포 금지. AI 학습 사용 금지. 게임 툴·NFT·인쇄물 사용 금지.**
+- 규격: 시트 704x320, 64px 격자 11x5 중 35칸 사용(IDLE5/ATTACK11/WALK8/HURT5/DEATH6).
+  임포트 PPU 30.714(본체 43px=1.40u), 피벗 (0.5, 0)=발끝. arrow 30x5px
+- 용도: AdventureScene3 원거리 잡몹(ArcherEnemy)
+- 주의: 색상 변형 7종(black/blue/brown/green/purple/red/yellow)은 미도입. 팔레트 스왑본으로 픽셀 배치 동일

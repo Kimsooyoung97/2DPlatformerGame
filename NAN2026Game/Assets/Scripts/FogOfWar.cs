@@ -47,7 +47,13 @@ namespace NAN2026
 
         private void LateUpdate()
         {
-            if (target == null) return;
+            if (target == null)
+            {
+                // 씬마다 플레이어 이름이 달라 수동 배선이 끊기는 사고가 반복됐다.
+                // 미배선이면 단일 창구로 자동 탐색한다(태그 → Player → RealPlayer).
+                target = NAN2026.PlayerLocator.FindTransform();
+                if (target == null) return;
+            }
             Vector2 p = (Vector2)target.position + new Vector2(0f, config.eyeHeight);
             if (hasStamped && !FogLogic.ShouldRestamp(p.x - lastStamp.x, p.y - lastStamp.y, config.moveThreshold)) return;
             Stamp(p);
