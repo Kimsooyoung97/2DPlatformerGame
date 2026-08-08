@@ -106,3 +106,5 @@
 - #22 타일 시공 시 SetTile은 기존 칸을 무기록 덮어씀 → 사용자 작업 위 시공 금지: 빈 칸 검사 후 배치하거나 전용 타일맵 분리. 대규모 지형은 청사진 합의 후
 
 - #23 커스텀 윗면 엣지 베이커가 신설 씬에서 미작동(푹꺼짐) — 발판은 TilemapCollider+Composite+PlatformEffector 정석 조합 사용
+
+- timeScale 히트스톱: 복구 책임자(FX)의 수명이 히트스톱보다 짧으면 timeScale 0 영구 정지 — 히트스톱 수치 올릴 땐 FX 수명·OnDestroy 안전핀 확인

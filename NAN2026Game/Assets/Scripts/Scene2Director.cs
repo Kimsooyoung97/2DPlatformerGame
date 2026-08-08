@@ -101,7 +101,6 @@ namespace NAN2026
             count++;
             RefreshPips();
             UpdateTopLabel();
-            StartCoroutine(FocusBoss());
             if (count >= config.parryGoal) { done = true; StartCoroutine(Brighten()); }
         }
 
@@ -130,6 +129,7 @@ namespace NAN2026
         private IEnumerator Brighten()
         {
             SetPlayerControl(false); // 컷신 락: 밝아지는 동안 캐릭터 정지·입력 무시
+            Time.timeScale = 1f; // 잔여 히트스톱 청소 (정지 방어)
             // 스파이크 전면 정지
             foreach (var l in FindObjectsByType<ThrownWeaponLauncher>(FindObjectsSortMode.None)) l.enabled = false;
             foreach (var pr in FindObjectsByType<ThrownProjectile>(FindObjectsSortMode.None)) Destroy(pr.gameObject);
@@ -143,12 +143,12 @@ namespace NAN2026
             float from = global.intensity, t = 0f;
             while (t < config.brightenTime)
             {
-                t += Time.deltaTime;
+                t += Time.unscaledDeltaTime;
                 global.intensity = Mathf.Lerp(from, config.brightenTarget, t / config.brightenTime);
                 yield return null;
             }
             global.intensity = config.brightenTarget;
-            yield return new WaitForSeconds(config.brightenHold);
+            yield return new WaitForSecondsRealtime(config.brightenHold);
             SetPlayerControl(true); // 연출 종료 → 조작 복귀
         }
     }
