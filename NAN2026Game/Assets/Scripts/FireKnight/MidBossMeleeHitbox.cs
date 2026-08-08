@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace NAN2026
 {
@@ -14,14 +14,16 @@ namespace NAN2026
         private GameObject bossObject;
         private bool hasResolved;
         private System.Action onParried; // 패링 성공 시 발사 주체(보스)에게 알림 — 그로기 카운터 등에 사용
+        private System.Func<bool> parryBufferedCheck; // Mino와 동일한 선입력 버퍼 판정(보스 쪽 기록) — 우선 확인
 
         /// <summary>공격 시작 시 1회 호출. bossObject는 패링 방향 판정(IsAttackerInFront)에 쓰인다.
         /// onParried는 패링 성공 시 1회 호출되는 콜백(선택) — 그로기 카운트 등에 사용.</summary>
-        public void Init(int damage, GameObject bossObject, System.Action onParried = null)
+        public void Init(int damage, GameObject bossObject, System.Action onParried = null, System.Func<bool> parryBufferedCheck = null)
         {
             this.damage = damage;
             this.bossObject = bossObject;
             this.onParried = onParried;
+            this.parryBufferedCheck = parryBufferedCheck;
 
             Collider2D col = GetComponent<Collider2D>();
             if (col != null) col.isTrigger = true;
@@ -43,13 +45,16 @@ namespace NAN2026
 
             // FAIL: 예전엔 여기서 0.5초짜리 동기 while 루프로 TryParry를 반복 폴링했다 —
             // Time.deltaTime이 그 프레임 내내 고정값이라 사실상 그 프레임이 멈추는
-            // 프리즈 버그였다. 패링은 다른 보스(Demon/Mino)처럼 1회 체크로 충분하다 —
-            // 플레이어의 Space 입력 자체가 이미 버퍼(parryBuffer)를 갖고 있어서
-            // 이 트리거가 열려있는 여러 프레임에 걸쳐 OnTriggerStay2D로 자연히 재시도된다.
+            // 프리즈 버그였다. 패링은 다른 보스(Demon/Mino)처럼 1회 체크로 충분하다.
+            //
+            // MinoBoss와 동일한 2단 판정: 보스 쪽에 기록된 선입력 버퍼(ParryBuffered)를
+            // 먼저 확인하고, 실패하면 플레이어 컨트롤러의 즉시 판정(TryParry)으로 폴백한다.
             PlayerController2D pc = other.GetComponentInParent<PlayerController2D>();
-            if (pc != null && pc.TryParry(bossObject))
+            bool parried = parryBufferedCheck != null && parryBufferedCheck();
+            if (!parried && pc != null && pc.TryParry(bossObject)) parried = true;
+            if (parried)
             {
-                NAN2026.PlayerMana.RewardParry(pc);
+                if (pc != null) NAN2026.PlayerMana.RewardParry(pc);
                 hasResolved = true;
                 onParried?.Invoke();
                 return;

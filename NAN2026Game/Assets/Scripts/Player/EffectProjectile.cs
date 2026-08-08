@@ -86,6 +86,8 @@ namespace NAN2026
             if (minoHit0 != null) { minoHit0.TakeDamage(damage); return; }
             var demonHit = other.GetComponentInParent<NAN2026.DemonBoss>();
             if (demonHit != null) { demonHit.TakeDamage(damage); return; } // Scene4 데몬 — 미등재 시 무음 통과
+            var fireKnightHit = other.GetComponentInParent<NAN2026.MidBoss_FireKnight>();
+            if (fireKnightHit != null) { fireKnightHit.TakeDamage(damage); return; } // FireKnight 미들보스
             NHNDemo.MonsterHealth monster = other.GetComponentInParent<NHNDemo.MonsterHealth>();
             if (monster != null)
             {

@@ -818,6 +818,17 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
+--- !u!114 &1439907911 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5230090458520678121, guid: 28e4a5c9e8c519c4a9d10e303617fbfb, type: 3}
+  m_PrefabInstance: {fileID: 1897963309}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70dc81c5dcf02c547bf6157b1a734021, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
 --- !u!1 &1603208502
 GameObject:
   m_ObjectHideFlags: 0
@@ -1082,11 +1093,16 @@ PrefabInstance:
       propertyPath: m_Name
       value: MidBoss_FireKnight
       objectReference: {fileID: 0}
+    - target: {fileID: 5035736753214587710, guid: 550ac21977e0bbe4e928cb7e64d71d49, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8645355033657634508, guid: 550ac21977e0bbe4e928cb7e64d71d49, type: 3}
       propertyPath: player
       value: 
       objectReference: {fileID: 194894710}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 5035736753214587710, guid: 550ac21977e0bbe4e928cb7e64d71d49, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 3122392861472832117, guid: 550ac21977e0bbe4e928cb7e64d71d49, type: 3}
@@ -1473,6 +1489,10 @@ PrefabInstance:
       propertyPath: bossHealth
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 404533043710044527, guid: b7df9596408bfdc4d87c04f66f254534, type: 3}
+      propertyPath: playerHealth
+      value: 
+      objectReference: {fileID: 1439907911}
     - target: {fileID: 1061457086282450519, guid: b7df9596408bfdc4d87c04f66f254534, type: 3}
       propertyPath: m_fontAsset
       value: 

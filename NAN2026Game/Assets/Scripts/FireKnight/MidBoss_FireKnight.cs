@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.InputSystem;
 
 namespace NAN2026
@@ -434,7 +434,7 @@ namespace NAN2026
         {
             if (target == null) return;
             MidBossMeleeHitbox hitbox = target.AddComponent<MidBossMeleeHitbox>();
-            hitbox.Init(damage, gameObject, RegisterParrySuccess);
+            hitbox.Init(damage, gameObject, RegisterParrySuccess, ParryBuffered);
             Destroy(hitbox, lifeTime);
         }
 
