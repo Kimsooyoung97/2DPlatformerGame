@@ -107,7 +107,7 @@ namespace NAN2026
                 pos.y += effectSprites[0].bounds.extents.y * config.effectScale;
             go.transform.position = pos;
             go.transform.localScale = Vector3.one * config.effectScale;
-            var esr = go.AddComponent<SpriteRenderer>();
+            var esr = go.AddComponent<SpriteRenderer>(); esr.sharedMaterial = NAN2026.FxUnlit.Mat;
             esr.sortingOrder = config.effectSortingOrder;
             var player = go.AddComponent<EffectPlayback>();
             player.Init(effectSprites, config.effectFps);

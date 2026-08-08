@@ -77,7 +77,7 @@ namespace NAN2026.Showroom
             orb.transform.position = transform.position;
             orb.transform.localScale = Vector3.one * orbScale;
 
-            SpriteRenderer renderer = orb.AddComponent<SpriteRenderer>();
+            SpriteRenderer renderer = orb.AddComponent<SpriteRenderer>(); renderer.sharedMaterial = NAN2026.FxUnlit.Mat;
             renderer.sprite = orbSprite;
             renderer.sortingOrder = 12;
 

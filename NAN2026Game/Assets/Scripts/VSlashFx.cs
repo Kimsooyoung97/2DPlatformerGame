@@ -14,7 +14,7 @@ namespace NAN2026
             go.transform.localScale = new Vector3(scale, scale, 1f);
             var a = go.AddComponent<VSlashFxAnim>();
             a.frames = frames; a.fps = fps <= 0f ? 18f : fps;
-            var sr = go.AddComponent<SpriteRenderer>();
+            var sr = go.AddComponent<SpriteRenderer>(); sr.sharedMaterial = NAN2026.FxUnlit.Mat;
             sr.sortingOrder = 900; sr.flipX = flipX; sr.sprite = frames[0];
             var tc = tint ?? Color.white;
             sr.color = new Color(tc.r, tc.g, tc.b, Mathf.Clamp01(alpha));

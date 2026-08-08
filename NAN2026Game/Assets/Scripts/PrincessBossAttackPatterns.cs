@@ -101,7 +101,7 @@ public sealed class PrincessBossAttackPatterns : MonoBehaviour, IEnemyAttackOver
                 // 여기서 스프라이트를 직접 붙여준다.
                 if (orbSprite != null)
                 {
-                    SpriteRenderer orbSr = go.AddComponent<SpriteRenderer>();
+                    SpriteRenderer orbSr = go.AddComponent<SpriteRenderer>(); orbSr.sharedMaterial = NAN2026.FxUnlit.Mat;
                     orbSr.sprite = orbSprite;
                     orbSr.sortingOrder = orbSortingOrder;
                 }
