@@ -371,6 +371,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
             float fxDir = PlayerLocomotionLogic.EffectDirection(sr.flipX);
             Vector3 fxPos = transform.position + new Vector3(config.comboVFxOffsetX * fxDir, config.comboVFxOffsetY, 0f);
             VSlashFx.Play(fxPos, fxFrames, config.comboVFxFps, fxDir < 0f, config.comboVFxScale, config.comboVFxAlpha);
+            SpawnComboVDamage(attackName, fxDir, fxPos);
             return;
         }
         GameObject prefab = null;
@@ -390,8 +391,30 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
             int baseDamage = AttackDamageLogic.DamageForAttack(attackName, effectConfig.basicDamage, effectConfig.poweredDamage);
             int damageBonus = progression != null ? Mathf.RoundToInt(progression.DamageBonus) : 0;
             float rangeMultiplier = progression != null ? progression.AttackRangeMultiplier : 1f;
+            bool piercing = AttackDamageLogic.IsPiercingSkill(attackName); // Skill1(Slash)=단일, Skill2(Combo2)=관통
             ep.Launch(dir, speed, effectConfig.lifetime * rangeMultiplier, frames, effectConfig.frameRate,
-                baseDamage + damageBonus, effectConfig.hitboxSize);
+                baseDamage + damageBonus, effectConfig.hitboxSize, piercing);
+        }
+    }
+
+    /// <summary>Z키 2단 콤보(ComboV1/ComboV2) 전용 근접 판정. VSlashFx는 순수 시각 효과라
+    /// 데미지가 없었는데, 여기서 눈에 보이지 않는 짧은 히트박스를 그 자리에 하나 더 띄워
+    /// 판정만 담당시킨다(투사체처럼 날아가지 않게 속도 0).</summary>
+    private void SpawnComboVDamage(string attackName, float dir, Vector3 pos)
+    {
+        if (basicEffectPrefab == null || effectConfig == null) return;
+
+        int baseDamage = AttackDamageLogic.DamageForComboV(attackName, effectConfig.comboVDamage);
+        int damageBonus = progression != null ? Mathf.RoundToInt(progression.DamageBonus) : 0;
+
+        var go = Instantiate(basicEffectPrefab, pos, Quaternion.identity);
+        var sr2 = go.GetComponent<SpriteRenderer>();
+        if (sr2 != null) sr2.enabled = false; // 시각 효과는 VSlashFx가 이미 재생 중 — 판정만 담당
+        var ep = go.GetComponent<EffectProjectile>();
+        if (ep != null)
+        {
+            ep.Launch(dir, 0f, effectConfig.comboVHitLifetime, null, 0f,
+                baseDamage + damageBonus, effectConfig.comboVHitboxSize, true);
         }
     }
 
