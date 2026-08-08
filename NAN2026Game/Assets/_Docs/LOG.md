@@ -6063,3 +6063,16 @@ GandalfHardcore Archer sheet를 사용 row0은 IDLE로 사용 Walk row3, Attack 
 - 실제 어둠 반응은 사용자 재생
 ### 실패와 수정
 없음
+
+
+## [수정] Scene3 창문 발광 정리 — 2026-08-09 04:53
+### 프롬프트
+Window 01 A, Break 02 (1), Window 02 B 등등 창문들도 다 빛나
+### 조작 내역
+- 실측: 창문 본체 22개는 이미 Lit 전환 완료 상태였고, 빛나는 주체는 창문 '자식' 오브젝트 — Sky(MT Sky, Unlit Shadow Mask) 20개 + Light Shaft(URP Particles/Unlit) 16개 (직전 작업에서 내가 '의도된 발광'으로 판단해 남긴 것들)
+- Sky 20개 → Sprite-Lit-Default 전환(창밖도 어둠에 묻힘), Light Shaft 16개 → 비활성(삭제 아님, 되돌리기 용이)
+### 검증
+- 디스크 재로드: Sprite-Lit-Default×235 / MT Shadow×15 / FX Light Shaft×16(전부 비활성, 활성 잔여 0) / Sprites-Default×2
+- 실제 화면은 사용자 재생
+### 실패와 수정
+- 직전 작업의 '의도된 발광' 판단이 과했음 자인 — 어둠 씬에선 Sky·Shaft도 정리 대상
