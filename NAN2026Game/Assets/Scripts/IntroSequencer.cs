@@ -46,10 +46,26 @@ namespace NAN2026
             Apply(0f);
         }
 
+                private bool introLocked, introLockDone;
+        private void SetPlayerControl(bool on)
+        {
+            var pgo = GameObject.Find("Player");
+            if (pgo == null) return;
+            foreach (var mb in pgo.GetComponents<MonoBehaviour>())
+            {
+                string n = mb.GetType().Name;
+                if (n == "PlayerController2D" || n == "PlayerSkill") ((Behaviour)mb).enabled = on;
+            }
+            var rb = pgo.GetComponent<Rigidbody2D>();
+            if (rb != null && !on) rb.linearVelocity = Vector2.zero;
+        }
+
         void Update()
         {
             t += Time.deltaTime;
             float total = IntroSequenceLogic.TotalDuration(config.blackSeconds, EffIgnite(), config.expandSeconds);
+            if (!introLocked && t < total) { introLocked = true; SetPlayerControl(false); } // 연출 중 이동 잠금
+            if (introLocked && !introLockDone && t >= total) { introLockDone = true; SetPlayerControl(true); } // 완주 → 복귀
             // 아무키 스킵 제거 — 토치 점화 연출은 항상 완주 (이동키 오발로 캔슬되던 문제 해소)
             Apply(t);
 
