@@ -5981,3 +5981,42 @@ Fire.png 짤라서 애니메이션 만들어주고 Decor_40_b도 텐트랑 도�
 없음
 ### 커밋
 해당 없음(무수정)
+
+
+## [구현] 잡몹 2종(Knight 근접 · Archer 원거리) 프리팹화 + Scene3 배치 — 2026-08-09 04:18
+### 프롬프트
+Knight 2D pixel ART  with_outline 에서 ATTACK 3을 쓰고 Player 평타 5번 맞으면 DEATH가 작동되도록 맞을때 HURT 이펙트 적용, 평소 모습은 IDLE, 걷는건 WALK 작동
+
+GandalfHardcore Archer sheet를 사용 row0은 IDLE로 사용 Walk row3, Attack  은 row2를 쓰지만 이때 arrow가 발사하도록 Player에게 피격을 당할떄는 row4 Player에게  평타 5번 이상 맞으면 row5 DEATH 작동
+
+각 캐릭터들을 프리펩화하고 AdventureScene3에 배치해줘
+(수정 지시: walk는 row2 attack은 row1 피격 당하는건 row3, death는 row4로 적용)
+### 조작 내역
+- 에셋 반입: with_outline 10파일 → Assets/Art/Enemies/Knight/, ArcherSheet+arrow → Assets/Art/Enemies/Archer/
+- 슬라이스: Knight 96x84 균등 67프레임(PPU 25.714 = 본체 36px→1.40u, 피벗 (0.5,0.2619)=발끝 y22)
+  Archer 64x64 격자 중 사용 35칸만(IDLE5/ATTACK11/WALK8/HURT5/DEATH6, PPU 30.714 = 본체 43px→1.40u, 피벗 (0.5,0)=발끝)
+  두 캐릭터 본체를 1.40u로 통일(플레이어 스프라이트 1.45u 대비)
+- 신규 순수 로직 NAN2026.Core/EnemyStateLogic.cs: Decide / IsDead / AnimIndex / AnimFinished / ShouldFire / FaceSign
+- 신규 EnemyConfig(SO) 1종 + 자산 2개(KnightEnemyConfig / ArcherEnemyConfig). 수치 전부 SO 소유
+- EnemyBase(추상) + KnightEnemy / ArcherEnemy / ArcherArrow. 상태 IDLE/WALK/ATTACK/HURT/DEATH
+  · 피격 5회 → DEATH(잔류 후 소멸), 피격마다 HURT + 빨간 점멸
+  · Knight 공격 ATTACK3(6프레임, 타격창 0.40~0.70), Archer 공격 row1(11프레임, fireFrac 0.75에 화살 발사)
+  · 피벗이 발끝이라 접지는 groundY 대입만으로 성립(데몬의 feetOffset 불필요)
+- **IPlayerDamageable 인터페이스 신설**: EffectProjectile(Z)·SlashProjectile(X) 디스패처에 인터페이스 분기 1개씩 추가.
+  FAIL#24가 '신규 적마다 분기 추가 누락 → 침묵 무력화'였으므로, 앞으로는 인터페이스만 구현하면 자동 피격된다
+- 프리팹: Assets/Prefabs/Enemies/KnightEnemy.prefab, ArcherEnemy.prefab (SR order 40 / Kinematic RB useFullKinematicContacts / BoxCollider2D trigger 0.9x1.40 offset y0.70)
+- Scene3 배치: 복도 바닥 y=0.04 실측 후 KnightEnemy(22, 0.04) / ArcherEnemy(45, 0.04). 플레이어 시작 x=2.99 → 근접 먼저, 원거리 나중 순서
+- ASSET_CREDITS.md 2건 기입(라이선스 원문 요지·규격·용도)
+### 검증
+- 컴파일 0, read_console error/exception 0건
+- EditMode 191/191 통과 (EnemyStateLogicTests 12개 신규, 실패 0)
+- 리플렉션 실행 검증: Decide(12,10,2,true)=0(idle) / Decide(6,…)=1(walk) / Decide(1.5,…)=2(attack) / IsDead(5,5)=True
+  KnightEnemy·ArcherEnemy 모두 IPlayerDamageable 구현 확인(IsAssignableFrom=True)
+- 슬라이스 재읽기: Knight 7/8/6/4/12프레임, Archer 5/8/11/5/6프레임, arrow 1개 — 지정 행 매핑과 일치
+- 씬 저장 후 디스크 재로드 검증: 두 프리팹 인스턴스 생존, config 배선 정상, 배열 전수 일치, 콜라이더 하단 y=0.04(바닥과 오차 0)
+- 테스트 후 씬 생존 재확인: dirty=False, 두 오브젝트 active
+- **사용자 눈 판정 필요**: (1) 두 적이 지면을 딛고 서는지 (2) 접근 시 걷기→공격 전환 (3) Z·X 5대에 DEATH, 매 타격마다 HURT (4) 아처 화살이 손에서 나가 플레이어에게 명중하는지
+### 실패와 수정
+- 사용자 지시의 Archer 행 번호(row2=Attack, row3=Walk, row5=Death)가 실측 5행 구조와 +1 어긋남 → 프레임 형상 실측(row1 폭 32→54 활당김, row2 8프레임 균일 보행, row4 마지막 51x15 눕기)으로 대조해 질의 후 확정
+### 범위 메모
+- SPEC '적 2종(돌진형·원거리형)' 항목에 해당. 패링 대응은 요청에 없어 미구현(범위 방어)

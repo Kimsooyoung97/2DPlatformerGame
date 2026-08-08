@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ce00a1d89e9d80f4481f20961901d800, type: 3}
+  m_Name: ArcherEnemyConfig
+  m_EditorClassIdentifier: Assembly-CSharp::NAN2026.EnemyConfig
+  hitsToDie: 5
+  hurtLock: 0.45
+  deathLinger: 1.2
+  aggroRange: 14
+  attackRange: 10
+  walkSpeed: 1.2
+  attackCooldown: 2
+  attackDur: 0.92
+  hitWinS: 0.45
+  hitWinE: 0.65
+  damage: 1
+  frontDeadZone: 0.5
+  fps: 12
+  snapToGround: 1
+  groundY: 0.04
+  fireFrac: 0.75
+  muzzleOffset: {x: 0.55, y: 0.8}
+  arrowSpeed: 10
+  arrowLife: 4
+  arrowDamage: 1
+  hitFlash: 0.1
