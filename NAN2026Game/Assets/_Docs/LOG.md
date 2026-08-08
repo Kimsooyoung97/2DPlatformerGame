@@ -6626,3 +6626,194 @@ PlayerFxConfig.enableDebugKeys (5·6 미리보기)
 - 없음
 ### 제출 전 OFF 목록 추가
 KnightEnemyConfig.showRangesInGame · showRangeLabels / ArcherEnemyConfig.showRangesInGame · showRangeLabels
+
+
+## [조사] EnemyBase 와 팀 보스 코드의 충돌 가능성 · Archer 판정 기준 — 2026-08-09 08:05
+### 프롬프트
+[조사]보스는 다른 팀원이 만들었는데, 너가 지금 구현한건 EnemyBase니깐 충돌은 일어날 일 없다는거지? Archor은 똑같은 기준을 적용하는거야?
+### 조사 결과
+**1. EnemyBase 자체는 격리되어 있다 — 맞다**
+- EnemyBase 를 상속하는 클래스는 **ArcherEnemy, KnightEnemy 2개뿐**. 보스는 하나도 상속하지 않는다
+- 팀 보스 파일 최근 커밋 작성자 실측: MidBossController=NoImpMe / OrkanBoss=NoImpMe / MidBossAI·MiddleBossAttackPatterns·PrincessBossAttackPatterns·LichAttackPattern=worldgreatkim(우리) / DemonBoss·SecondSceneBoss=우리
+- EnemyBase·EnemyConfig·KnightEnemy·ArcherEnemy·ArcherArrow·IPlayerDamageable 는 전부 우리가 신설한 파일. 팀이 건드린 이력 없음
+**2. 그러나 '충돌 위험 0' 은 아니다 — 공유 파일이 있다**
+- `BossRangeLogic.cs` — DemonBoss 와 EnemyBase 가 함께 참조. 우리 파일이라 팀 충돌은 없지만, **여기를 고치면 데몬과 잡몹이 동시에 영향**받는다
+- `EffectProjectile.cs` / `SlashProjectile.cs` — 잡몹 피격을 위해 IPlayerDamageable 분기를 넣은 파일. 8/8 에 NoImpMe 병합 이력 있음. **팀이 같은 파일을 만지면 충돌 지점**
+- `PlayerHealth.cs` — 8/8 NoImpMe 가 'GameOverPanel 표시 및 타이틀씬 복귀' 로 수정한 이력. 우리가 오늘 SuppressDeathHide·OnPlayerRespawned 를 추가했다. **가장 위험한 공유 파일**
+- `PlayerCombatConfig.asset` — 8/8 NoImpMe '수정 커밋' 이력. 오늘 무적 0.45→0.6 변경
+- `RealPlayer.prefab` — 오늘 컴포넌트 3종 추가. 팀이 플레이어 프리팹을 교체한 전례가 있어(어제 사건) 재발 시 배선 유실 위험
+- 즉 **EnemyBase 계열은 안전, 플레이어·디스패처 계열은 병합 시 확인 필요**
+**3. Archer 는 '절반만' 같은 기준이다**
+- 공통(EnemyBase 상속): DecideWithHold 상태 판단 / MoveStep 정지거리 / BlockedAhead 간격 / InitialDelay·JitteredCooldown 산개 / 피격 5회 사망 / 범위 표시
+- **다른 점: 타격 판정 자체가 없다**. ArcherEnemy 는 DoAttack 을 오버라이드해 `ShouldFire` 로 화살만 생성하고 끝난다(17~27줄). 근접용 `BossRangeLogic.InHitBand` 를 호출하지 않는다
+- 실제 피해는 ArcherArrow 의 트리거 충돌이 결정한다. 즉 attackRange 10 은 **'쏘기 시작하는 거리'** 일 뿐 명중 판정과 무관
+- **결과적으로 범위 표시가 아처에서는 오해를 준다**: 빨강 띠와 라벨의 O/X 는 근접 타격 밴드 기준이라, 아처에게는 의미 없는 값이 표시된다(항상 O 에 가깝게 뜸)
+**4. 수정 후보(실행 안 함)**
+- 아처 표시를 '발사 개시 거리' 로 이름·색을 바꾸고 O/X 라벨은 숨긴다. 또는 ArcherEnemy 에서 showRangeLabels 를 기본 false 로
+- 병합 대비: 팀에 `PlayerHealth.cs` `EffectProjectile.cs` `SlashProjectile.cs` `RealPlayer.prefab` 을 우리가 오늘 대폭 수정했다고 사전 공지
+### 검증
+해당 없음
+### 실패와 수정
+없음
+### 커밋
+해당 없음(무수정)
+
+
+## [조사] 사망 연출→게임오버 전환 가능성 · BossRangeLogic 공유 구조 — 2026-08-09 08:12
+### 프롬프트
+[조사]사망 연출 > 게임 오버 > 타이틀 복귀로 수정하려고 하면 해결되나? 그리고 2번째 위험상황인 BossRange를 공유한다는게 이해가 잘안된다.
+### 조사 결과
+**Q1. 순서를 바꾸면 해결되나 — 절반만. 고칠 곳이 세 군데다**
+- ① GameOverController.HandlePlayerDied 가 **즉시** `Time.timeScale = 0` 을 건다. 이걸 사망 연출 길이(1.307초)만큼 미뤄야 한다. **팀원 파일 수정 필요**
+- ② PlayerHurtDeathFx 는 `t += Time.deltaTime`(81줄, scaled) 을 쓴다. timeScale 0 이면 프레임 0 에서 정지. `Time.unscaledDeltaTime` 으로 바꾸면 timeScale 과 무관하게 재생된다 — ①을 못 고칠 때의 대안이 되지만, 패널이 먼저 뜨므로 연출이 가려진다
+- ③ **부활 경로가 남아 있다.** PlayerHealth.Kill() 194줄 `Invoke(nameof(Respawn), delay)` 가 여전히 예약된다
+  · 실측: 프리팹 respawnDelay=0.2, DeathDuration=6/7+0.45=1.307 → 실제 지연 **1.307초**
+  · GameOverController 도 1.307초 뒤 timeScale=0 을 걸면 **같은 시점에 부활과 게임오버가 경합**한다. Respawn 은 dying=false, 체력 만땅, 위치 복귀까지 하므로 패널 뒤에서 플레이어가 되살아난다
+  · 따라서 게임오버 노선으로 가려면 Kill() 에서 **Invoke 예약 자체를 하지 않아야** 한다(게임오버 핸들러 존재 시)
+- 배선 현황: Scene3·4·Test1 은 playerHealth 배선됨(충돌 발생), **Scene2 는 playerHealth=NULL** 이라 게임오버가 아예 동작하지 않음(팀 배선 누락), Scene1 은 컴포넌트 없음
+**Q2. BossRangeLogic '공유' 의 실체**
+- 이건 팀과의 충돌이 아니다. **우리 파일 하나를 데몬 보스와 잡몹이 함께 쓴다**는 뜻이다
+- 함수 6개: BandMinX / BandMaxX / InHitBand / InHitBandBothSides / WindowOpen / FracUntilWindow
+- 호출처 실측
+  · DemonBoss.cs 10곳 — 클리브·스매시 실판정(152·163·225·233줄) + 범위 표시(372~381줄)
+  · EnemyBase.cs 6곳 — 잡몹 실판정(202·203줄) + 범위 표시(150·151·154·164줄)
+  · BossRangeLogicTests.cs 다수
+- 위험의 형태: 예컨대 `InHitBand` 의 deadZone 처리나 경계 포함(<=) 을 바꾸면 **데몬 보스 판정과 잡몹 12마리 판정이 동시에 바뀐다**. 잡몹만 손보려다 보스 난이도가 함께 변할 수 있다
+- 반대로 이 구조의 이점: 표시와 판정이 같은 함수를 쓰므로 '그림과 판정이 어긋나는' FAIL 이 구조적으로 재발하지 않는다. 그래서 **분리하지 말고 유지하되, 이 파일을 고칠 때는 데몬·잡몹을 함께 재생 확인**하는 것이 맞다
+- 안전장치: BossRangeLogicTests 가 경계·데드존·표시-판정 일치(201점 순회)를 고정하고 있어, 규약을 깨는 수정은 테스트가 먼저 잡는다
+### 검증
+해당 없음
+### 실패와 수정
+없음
+### 커밋
+해당 없음(무수정)
+
+
+## [조사] BossRangeLogic 분리 타당성 · EnemyBase 상속 근거 — 2026-08-09 08:15
+### 프롬프트
+[조사]분리하고 같은 함수 적용하면 안되는거야? 상속받는게 편해서 이렇게 하는건가?
+### 조사 결과
+**전제 정리: 두 가지가 섞여 있다. 서로 다른 이야기다**
+- (가) `BossRangeLogic` — **static 유틸 클래스 공유**. 상속이 아니다. DemonBoss 와 EnemyBase 가 각각 호출할 뿐
+- (나) `EnemyBase` — **추상 클래스 상속**. KnightEnemy·ArcherEnemy 만 상속. DemonBoss 는 상속하지 않는다
+**(가) 분리(복제)해도 되는가 — 된다. 다만 손해다**
+- 실측 규모: BossRangeLogic **49줄, 함수 6개, 전부 순수 산술**. 상태도 의존성도 없다(BossFacingLogic.TargetInFront 만 참조)
+- 복제 시 비용: 파일 2개 + 테스트 2벌(BossRangeLogicTests 86줄)을 이중 관리. 한쪽 버그 수정이 다른 쪽에 전파되지 않아 **시간이 지나면 두 판정이 갈라진다**
+- 우리 FAIL 이력은 '공유해서' 생긴 게 아니라 **'표시와 판정이 갈라져서'** 생겼다(#25 death 겹침, 데몬 사거리 2배 미달). 복제는 그 갈라짐을 조장하는 방향
+- 실제 위험도 재평가: 6개 함수 의미가 고정적이고(경계 <=, 데드존, 정면 판정) BossRangeLogicTests 가 경계·데드존·표시-판정 일치(201점 순회)를 잠그고 있다. **규약을 깨는 수정은 테스트가 먼저 잡는다** → 위험을 과장했음
+- 다만 **이름은 실제로 문제**다. 잡몹이 쓰는데 `BossRangeLogic` 이라 오해를 준다. 개명(예: HitBandLogic)이 복제보다 나은 처방이나, DemonBoss 10곳·EnemyBase 6곳·테스트 20곳을 건드려야 해 마감 전 이득이 작다
+**(나) 상속이 '편해서' 인가 — 아니다. 공유 비율이 근거다**
+- 직접 선언 멤버 실측
+  · EnemyBase 메서드 16 / 필드 17 (공통)
+  · KnightEnemy 메서드 **1개**(FlipFor) / 필드 0
+  · ArcherEnemy 메서드 4개(FlipFor·SetState·DoAttack·Fire) / 필드 2
+  → 두 잡몹이 공유하는 코드가 90% 이상. 상속을 안 쓰면 상태머신·애니·피격·사망·산개·범위표시를 **두 벌 복제**해야 한다
+- DemonBoss 를 EnemyBase 에 넣지 않은 이유: 직접 선언 메서드 **37개 / 필드 38개**, 536줄. 상태가 9개(transform 인트로·windup·cleave·smash·cast·hit·groggy·death)이고 패링·그로기·버스트·투사체 확산까지 있다. 잡몹의 5상태 골격에 억지로 맞추면 EnemyBase 가 보스 전용 분기로 오염된다
+**결론(실행 안 함)**
+- (가) 복제하지 말고 현행 유지. 규칙 하나만: **BossRangeLogic 수정 시 데몬·잡몹 양쪽 재생 확인**. 마감 후 여유 있으면 개명
+- (나) 상속 구조는 근거가 있다. 유지
+### 검증
+해당 없음
+### 실패와 수정
+- 직전 [조사]에서 BossRangeLogic 공유를 '2번째 위험 상황' 으로 올렸으나, 테스트가 잠그고 있는 49줄짜리 순수 함수라 위험도를 과대평가했다. 실제 위험은 이름 오해 수준
+### 커밋
+해당 없음(무수정)
+
+
+## [조사] 팀 충돌 지점 전수 · 사망 노선 전환 시 잔여 문제 — 2026-08-09 08:21
+### 프롬프트
+[조사]그럼 팀원 코드와 충돌이 일으킬 수 있는 부분은 사망 관련 로직이라는거지? 사망 연출 >> 게임오버 >>타이틀로만 바꾸면 문제 될 부분은 없니?
+### 조사 결과
+**Q1. 충돌 지점 전수 — 사망 로직만은 아니다**
+- 방법: 우리가 08-08 이후 수정한 파일(1,212개) ∩ 팀원이 한 번이라도 수정한 파일(7,177개) = **교집합 202개**
+- 그중 178개는 Map/Showroom/Medieval/sy/AWT_*.asset (타일 팔레트 자동생성물, 실질 무해)
+- **실제로 의미 있는 충돌 후보 24개**
+  · 코드: PlayerHealth.cs / PlayerController2D.cs / EffectProjectile.cs / SlashProjectile.cs / DemonBoss.cs / DemonBossConfig.cs / DemonProjectile.cs / EnemyAI.cs / MidBossAI.cs / MidBossMeleeHitbox.cs / MiddleBossAttackPatterns.cs / PrincessBossAttackPatterns.cs / SpikeProjectile.cs
+  · 자산: PlayerCombatConfig / MovementConfig / PlayerSkillConfig / MidBossPatternConfig / DemonBossConfig
+  · 프리팹: RealPlayer.prefab / Player_Knight!!!!.prefab / TP_Medieval.prefab
+  · 씬: AdventureScene2·3·4 / AdventureScene_Test1
+- 다만 **동작이 정면으로 모순되는 건 사망 로직 하나뿐**이다. 나머지는 '같은 파일을 각자 다른 줄에서 고친' 형태라 병합 충돌 가능성일 뿐 설계 모순은 아니다
+**Q2. 노선 전환 시 남는 문제 — 4건**
+- ① **타이틀 씬이 얼어붙는다.** GameOverController 는 `Time.timeScale = 0` 을 걸고 `SceneManager.LoadScene(TitleScene)` 을 호출하는데, **어디서도 1 로 되돌리지 않는다.** TitleScreen.cs 에 timeScale 코드 없음(실측). PauseMenu 는 있지만 타이틀 씬에 없다면 무의미. → 타이틀 복귀 후 모든 것이 정지
+- ② **부활 경로가 이중으로 남는다.** PlayerHealth.Kill() 194줄의 `Invoke(Respawn, 1.307)` 를 게임오버 노선에선 예약하지 않아야 한다
+- ③ **낙사는 게임오버를 우회한다.** 97~98줄 `if (!dying && y < fallKillY) Respawn();` — Kill() 을 거치지 않고 곧장 부활한다. 죽으면 타이틀인데 떨어지면 공짜 부활이라 규칙이 어긋난다
+- ④ **체크포인트 시스템이 사문화된다.** Checkpoint2D.cs:31 이 SetCheckpoint 를 호출하고 있으나, 게임오버 노선에선 부활 자체가 없어 의미를 잃는다. OrbProjectile.cs:71 은 health.Kill() 직접 호출 → 게임오버로 이어짐(의도 확인 필요)
+- 배선 결손: **Scene2 는 GameOverController.playerHealth 가 NULL** 이라 그 씬에서만 게임오버가 안 뜬다. Scene1 은 컴포넌트 자체가 없다
+**전환 시 수정 대상 정리(실행 안 함)**
+1. GameOverController.HandlePlayerDied — timeScale=0 을 사망 연출 길이만큼 지연 (**팀원 파일**)
+2. GameOverController.Update — LoadScene 직전 `Time.timeScale = 1f` (**팀원 파일**, ① 해결)
+3. PlayerHealth.Kill() — 게임오버 핸들러 존재 시 Invoke(Respawn) 예약 안 함 (② 해결)
+4. PlayerHealth.Update() 낙사 처리 — Respawn() → Kill() 로 통일할지 결정 (③)
+5. Scene2 UI Canvas 의 playerHealth 배선 (배선 결손)
+### 검증
+해당 없음
+### 실패와 수정
+없음
+### 커밋
+해당 없음(무수정)
+
+
+## [조사] 게임오버 모순만 부분 수정 시 안전성 — 2026-08-09 08:24
+### 프롬프트
+[조사]사실 아직 체크 포인트를 할지, 낙사당하면 어떻게 할지 이건 못정했어. 그래서 너가 말한 중대한 모순인 게임 오버 부분만 고치고 나머지는 팀원들이랑 토론 후에 결정할게. 충돌이 뜨는건 아니잖아.
+### 조사 결과
+**결론: 맞다. 낙사·체크포인트를 미뤄도 충돌도 오류도 나지 않는다. 다만 '게임 규칙 불일치' 는 남는다**
+**1. 경로 독립성 실측 — 미뤄도 되는 근거**
+- Respawn 호출처는 딱 2곳이고 서로 독립이다
+  · 낙사: PlayerHealth 98줄 `Respawn();` — Kill() 을 거치지 않는 **직접 호출**
+  · 사망: 194줄 `Invoke(nameof(Respawn), delay);` — Kill() 안의 예약
+- 따라서 194줄만 손대면 **낙사 경로는 그대로 살아 있고 컴파일·런타임 어디에도 영향이 없다**
+- Checkpoint2D.SetCheckpoint 도 계속 동작한다(값만 기록). 사망 부활이 없어져 활용처가 줄 뿐, 죽은 코드가 되진 않는다(낙사 부활이 그 값을 쓴다)
+**2. 병합 충돌 관점 — 발생하지 않는다**
+- git 충돌은 같은 줄을 동시에 고칠 때 난다. 미결로 남기는 것은 **아무 줄도 안 고치는 것**이므로 충돌 원인이 되지 않는다
+- 실제 충돌 위험은 우리가 고치는 쪽에 있다: GameOverController.cs 는 팀원 파일이고 **UI Canvas.prefab 에 들어 있는 프리팹 컴포넌트**다(실측). 팀원이 같은 파일을 만지면 그때 충돌
+**3. 최소 수정 3곳 — 이 조합이 모순 해소의 하한선**
+- [A] PlayerHealth.Kill() 189~194 — 게임오버 핸들러가 있으면 Invoke(Respawn) 을 예약하지 않는다. **안 고치면 부활과 게임오버가 같은 시점에 경합**하므로 선택 사항이 아니다
+- [B] GameOverController.HandlePlayerDied 43~46 — panel ON + `Time.timeScale = 0` 을 사망 연출 길이(1.307초)만큼 지연. 안 고치면 death 애니가 프레임 0 에서 정지
+- [C] GameOverController.Update 56줄 — `SceneManager.LoadScene` 직전에 `Time.timeScale = 1f`. **이건 전환과 무관하게 이미 존재하는 버그**다(TitleScreen.cs 에 timeScale 복구 없음 — 실측). 지금도 게임오버→타이틀 시 화면이 멈춘다
+**4. 미루면 남는 것 — 오류가 아니라 규칙 불일치**
+- 적에게 죽으면 게임오버→타이틀, **낙사하면 체크포인트 부활**. 플레이어 입장에서 일관성이 없다
+- 다만 이는 팀 논의로 정할 게임 디자인 사안이고, 미결 상태로도 빌드·플레이는 정상 동작한다
+**5. 배선 결손(별건)**
+- Scene2 의 GameOverController.playerHealth = NULL → 그 씬만 게임오버 미동작. Scene1 은 컴포넌트 없음. 코드 수정과 무관하게 남는 문제
+### 검증
+해당 없음
+### 실패와 수정
+없음
+### 커밋
+해당 없음(무수정)
+
+
+## [조사] 마감 D-1 잔여 작업 전수 정리 — 즉시 수정 vs 팀 논의 — 2026-08-09 08:30
+### 프롬프트
+[조사]일단 그 부분도 아직 팀원들과 정하지 않은 부분이라서 보류할게. 그럼 지금 당장 고쳐야 하는것과 팀원들과 수정을 진행하기 위해 토론해야 할것들이 뭐가 남았는지 정리해줘.
+### 조사 결과
+**A. 제출을 막는 것 — 즉시 조치 (팀 논의 불필요)**
+1. **빌드 타깃이 StandaloneWindows64**. SPEC 은 WebGL. 전환 필요. WebGL 모듈은 설치돼 있음(실측 True)
+2. **WebGL 빌드 리허설 0회**. Builds 폴더 없음. 마감 전 최소 1회 성공 확인 필수
+3. **Brotli 압축 + decompressionFallback=False**. GitHub Pages 는 Content-Encoding 헤더를 못 주므로 브라우저 로딩 실패 위험. fallback=true 또는 Gzip/Disabled 로 변경
+4. **씬 전이 사슬 단절** — AdventureScene3 → `SecondScene_1`(프로젝트에 없는 씬). Scene3 클리어 시 런타임 예외. AdventureScene4 는 진입 전이도 이후 전이도 없음(고아 씬)
+5. **디버그 표시 7개 ON** — ArcherEnemyConfig(2) · KnightEnemyConfig(2) · DemonBossConfig(2) · MidBossConfig(1) · MinoBossConfig(1) · PlayerFxConfig(1). 제출 빌드에 그대로 노출
+6. **미푸시 커밋 12개**. push 는 사람만 실행
+**B. 팀 논의 필요 (동작·규칙을 바꾸는 결정)**
+1. **사망 노선** — 게임오버→타이틀 vs 체크포인트 부활. 현재 두 로직이 동시에 걸려 death 애니가 프레임 0 에서 정지하고 부활과 게임오버가 경합. 팀원 파일(GameOverController.cs, UI Canvas.prefab 소속) 수정 필요
+2. **timeScale 복구** — 게임오버 후 타이틀→재시작 시 timeScale 0 이 유지돼 게임 전체 정지. 전 씬에 PauseMenu 미배치라 자가 복구 없음(실측). 사망 노선과 함께 결정
+3. **낙사 처리** — 현재 Kill() 을 우회해 곧바로 체크포인트 부활. 사망 노선과 규칙이 어긋남
+4. **체크포인트 유지 여부** — Checkpoint2D 가 동작 중이나 게임오버 노선에서는 사문화
+5. **Scene2 GameOverController.playerHealth = NULL** (실측) — 그 씬만 게임오버 미동작. 배선을 채울지, 사망 노선 결정 후로 미룰지
+6. **Test1 Stage_Wall one-way** — 벽이 옆에서 통과됨. 팀원이 고치기로 함(보류 중)
+7. **AdventureScene1 만 구형 Player_Knight!!!!.prefab** — 사망 연출·피격 피드백 미적용(실측: 사망연출=없음). RealPlayer 로 교체할지 팀 확인
+8. **GitHub Pages 배포처** — private 저장소는 무료 계정에서 Pages 불가. public 전환 / 빌드 전용 public 저장소 / itch.io 중 택일. SPEC 은 GitHub Pages 명시라 변경 시 범위 결정
+**C. 우리 쪽 잔무 (독립 진행 가능)**
+1. **AI 활용 기술 문서** 미작성. LOG.md 항목 491개가 재료
+2. **hitsToDie 5 유지** — 12마리 x 5대 = 60타. 3~5분 플레이 대비 과할 수 있음. Config 값이라 즉시 조정 가능
+3. **FAIL.md 번호 중복 4건** — #11×2, #16×2, #17×2, #24×2 (총 26종). 재번호 필요
+4. **Archer 범위 표시 오해 소지** — attackRange 10 은 '발사 개시 거리' 이고 명중은 화살 충돌이 결정. 라벨의 O/X 가 무의미
+5. **PR 미생성** — 포크→upstream. 자동 병합 불가 상태
+6. ProjectVersion.txt 는 추적 중임을 확인(실측). clone 시 버전 미인식 문제는 해소됨
+### 검증
+해당 없음
+### 실패와 수정
+없음
+### 커밋
+해당 없음(무수정)
