@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70990f24a40562d49b119c1a486b285d, type: 3}
+  m_Name: MinoBossConfig
+  m_EditorClassIdentifier: Assembly-CSharp::NAN2026.MinoBossConfig
+  maxHp: 10
+  aggroX: 9
+  attackRange: 3.3799996
+  hitReach: 4.42
+  walkSpeed: 2.2
+  damage: 1
+  attackDuration: 1.5
+  hitFracStart: 0.42
+  hitFracEnd: 0.62
+  hit2FracStart: 0.62
+  hit2FracEnd: 0.82
+  attackCooldown: 1.6
+  atk1HoldFrame: 3
+  atk1HoldTime: 0.55
+  fpsIdle: 10
+  fpsWalk: 12
+  fpsAtk: 10.7
+  fpsHit: 14
+  fpsDeath: 12
+  showParryDebug: 1
+  groggyNeed: 5
+  groggyTime: 3
+  groggyFxOffsetY: 3.4
+  barScale: 1.8
+  barOffsetY: 4.0299997
+  barUnder: {fileID: 21300000, guid: 6e56a6c15e54bbf44a62fdcdff80e3c5, type: 3}
+  barProgress: {fileID: 21300000, guid: 87c8d36c3d4eb584f9d908df57748686, type: 3}
+  barOver: {fileID: 21300000, guid: 30667c31bcffce343b89a8ad2dc9bb93, type: 3}
+  clashConfig: {fileID: 11400000, guid: 31b4bd26897983b4fb8fcb4703f841b5, type: 2}
