@@ -6817,3 +6817,27 @@ KnightEnemyConfig.showRangesInGame · showRangeLabels / ArcherEnemyConfig.showRa
 없음
 ### 커밋
 해당 없음(무수정)
+
+
+## [수정] Scene3 → Scene4 전이 사슬 복구 — 2026-08-09 08:33
+### 프롬프트
+Secen3다음에는 Secen4 진행하도록 했는데
+> 맥락: 직전 [조사]의 A-4(씬 전이 단절) 에 대해 'Scene3 다음이 무엇인가' 를 답한 것. AdventureScene3 → AdventureScene4 로 확정
+### 조작 내역
+- 원인 실측: Scene3 의 `Portal` 오브젝트(72.30, 10.18) 하나에 **컴포넌트 2개가 동시에** 붙어 있었다
+  · `Portal`(팀 코드, 닿으면 즉시 이동) = "AdventureScene4" — **이미 올바름**
+  · `PortalUpKey`(우리 코드, ↑/W 입력 시 이동) = "SecondScene_1" — **존재하지 않는 씬**
+- 위험도: ↑ 키는 PlayerController2D 의 **점프 키**다. 포탈 트리거(BoxCollider2D 71.80~72.80) 안에서 점프하면 PortalUpKey 가 발동해 없는 씬을 로드 → 런타임 예외
+- 조치: PortalUpKey.nextSceneName 을 "AdventureScene4" 로 정정. 컴포넌트 삭제는 하지 않음(수동 배치 오브젝트 훼손 금지 규약)
+### 검증
+- EditMode 217/217 통과, 실패 0
+- 디스크 재로드 검증: Portal="AdventureScene4" / PortalUpKey="AdventureScene4" 양쪽 일치, dirty=False
+- 전 빌드 씬 전이 사슬 재점검 (빌드 목록 대조 포함)
+    TitleScene → OpeningScene → AdventureScene1 → AdventureScene2 → AdventureScene3 → AdventureScene4
+    빌드 목록에 없는 대상 0건 (이전에는 SecondScene_1 1건)
+- 테스트 후 씬 생존 확인: dirty=False
+- **사용자 눈 판정 필요**: Scene3 포탈에서 Scene4 로 실제 넘어가는지, 넘어간 뒤 플레이어가 정상 위치에 스폰되는지
+### 실패와 수정
+- 없음
+### 남은 것
+- **AdventureScene4 는 여전히 이후 전이가 없다**(고아 종점). 데몬 보스 격파 후 무엇을 할지 미정 — 엔딩 씬 / 타이틀 복귀 / 그대로 종료 중 택일 필요
