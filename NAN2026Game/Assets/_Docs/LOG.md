@@ -6874,3 +6874,28 @@ Secen3다음에는 Secen4 진행하도록 했는데
 - `GameOverController.cs`(팀원 파일, Assets/Prefab/UI Canvas.prefab 소속)를 3곳 수정했다
 - **AdventureScene2 는 GameOverController.playerHealth 가 NULL** 이라 그 씬에서만 게임오버가 뜨지 않는다(배선 결손, 미해결)
 - 낙사(fallKillY)는 여전히 Kill() 을 우회해 체크포인트 부활한다 — 팀 논의 대기
+
+
+## [수정] AdventureScene2 게임오버 배선 결손 복구 — 2026-08-09 08:44
+### 프롬프트
+[수정]AdventureScene2 는 GameOverController.playerHealth 가 비어 있으니 그 씬도 게임 오버가 뜨도록 수정해라
+### 조작 내역
+- 대상: AdventureScene2 / `UI Canvas`(프리팹 인스턴스) 의 GameOverController
+- 변경 전 실측: playerHealth=**NULL** / gameOverPanel=GameOverPanel(정상) / titleSceneName="TitleScene"(정상) → **playerHealth 하나만 결손**
+- 씬의 `Player`(RealPlayer 프리팹 인스턴스) 의 PlayerHealth 를 배선. 프리팹 자체가 아니라 **인스턴스 오버라이드**로 기록(씬 오브젝트 참조는 프리팹 자산에 저장 불가)
+- 부수 효과: OnEnable 에서 `playerHealth.SuppressRespawnOnDeath = true` 가 걸리므로, Scene2 도 직전 커밋의 게임오버 노선(사망 연출 → 패널 → 타이틀)을 그대로 탄다
+### 검증
+- EditMode 217/217 통과, 실패 0
+- 전 빌드 씬 재로드 검증
+    TitleScene / OpeningScene : 컴포넌트 없음(정상 — 게임플레이 씬 아님)
+    AdventureScene2 : playerHealth=OK panel=OK title="TitleScene"  ← 이번 수정
+    AdventureScene3 : playerHealth=OK panel=OK title="TitleScene"
+    AdventureScene4 : playerHealth=OK panel=OK title="TitleScene"
+    **AdventureScene1 : 컴포넌트 자체가 없음** (미해결)
+- 테스트 후 배선 생존 확인, 씬 dirty=False
+- **사용자 눈 판정 필요**: Scene2 에서 죽었을 때 사망 연출 후 게임오버 패널이 뜨는지
+### 실패와 수정
+- 없음
+### 남은 불일치
+- **AdventureScene1 에는 GameOverController 가 아예 없다.** 그 씬에서 죽으면 SuppressRespawnOnDeath 가 false 로 남아 기존 체크포인트 부활 경로를 탄다 — 씬마다 사망 결과가 다르다
+- Scene1 은 플레이어도 구형 `Player_Knight!!!!.prefab` 이라 사망 연출·피격 피드백도 없다. 두 문제가 같은 씬에 겹쳐 있음 — 팀 논의 대상
