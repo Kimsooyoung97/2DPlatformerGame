@@ -30,7 +30,7 @@ namespace NAN2026
             var rb = gameObject.AddComponent<Rigidbody2D>();
             rb.bodyType = RigidbodyType2D.Kinematic;
             rb.useFullKinematicContacts = true; // FAIL: Kinematic 트리거 이벤트 보장
-            var pgo = GameObject.Find("Player");
+            var pgo = PlayerLocator.Find();
             if (pgo != null)
             {
                 player = pgo.transform;

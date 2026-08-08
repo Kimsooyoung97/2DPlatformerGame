@@ -30,7 +30,7 @@ namespace NAN2026
         private void Start()
         {
             SpikeParryEvents.Count = 0;
-            var p = GameObject.Find("Player");
+            var p = PlayerLocator.Find();
             if (p != null) player = p.transform;
             var b = GameObject.Find("MinoBoss");
             if (b != null) boss = b.transform;

@@ -281,6 +281,18 @@ TextureImporter:
   - first:
       213: -860183753245864206
     second: Decor_40_b
+  - first:
+      213: 5248361700418712403
+    second: Decor_40_Props
+  - first:
+      213: 3035789406322158688
+    second: Decor_40_Tent
+  - first:
+      213: -158109220563934685
+    second: Decor_40b_Tent
+  - first:
+      213: -8548594347188134172
+    second: Decor_40b_Props
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -1875,6 +1887,94 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: Decor_40_Props
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 416
+        width: 95
+        height: 32
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 353f836d82de5d840800000000000000
+      internalID: 5248361700418712403
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Decor_40_Tent
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 448
+        width: 95
+        height: 39
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 06ce9b8716a412a20800000000000000
+      internalID: 3035789406322158688
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Decor_40b_Tent
+      rect:
+        serializedVersion: 2
+        x: 97
+        y: 448
+        width: 94
+        height: 39
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 322a29860884ecdf0800000000000000
+      internalID: -158109220563934685
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Decor_40b_Props
+      rect:
+        serializedVersion: 2
+        x: 106
+        y: 416
+        width: 79
+        height: 15
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4ee50fecbba4d5980800000000000000
+      internalID: -8548594347188134172
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     customData: 
     physicsShape: []
@@ -1925,7 +2025,11 @@ TextureImporter:
       Decor_39: -933470041020961179
       Decor_4: -8502563662169142480
       Decor_40: -4336383471466243096
+      Decor_40_Props: 5248361700418712403
+      Decor_40_Tent: 3035789406322158688
       Decor_40_b: -860183753245864206
+      Decor_40b_Props: -8548594347188134172
+      Decor_40b_Tent: -158109220563934685
       Decor_41: -4805805668124148689
       Decor_42: 2569401401197613589
       Decor_43: -7413064677276684382

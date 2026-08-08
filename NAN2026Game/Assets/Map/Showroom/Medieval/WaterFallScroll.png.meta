@@ -26,6 +26,18 @@ TextureImporter:
   - first:
       213: -7614025304166163696
     second: WFS_3
+  - first:
+      213: -6650289912836708381
+    second: WaterFallAnim_0
+  - first:
+      213: -1358660544182413238
+    second: WaterFallAnim_1
+  - first:
+      213: 7943834513598502129
+    second: WaterFallAnim_2
+  - first:
+      213: -9177235045472902590
+    second: WaterFallAnim_3
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -234,6 +246,94 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: WaterFallAnim_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 32
+        height: 32
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3e7210c1f8c65b3a0800000000000000
+      internalID: -6650289912836708381
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WaterFallAnim_1
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 0
+        width: 32
+        height: 32
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a481badfe61152de0800000000000000
+      internalID: -1358660544182413238
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WaterFallAnim_2
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 0
+        width: 32
+        height: 32
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1f4d681e66b2e3e60800000000000000
+      internalID: 7943834513598502129
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WaterFallAnim_3
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 0
+        width: 32
+        height: 32
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 24262566959e3a080800000000000000
+      internalID: -9177235045472902590
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     customData: 
     physicsShape: []
@@ -252,6 +352,10 @@ TextureImporter:
       WFS_1: -5097781656891359913
       WFS_2: 8259049325459589033
       WFS_3: -7614025304166163696
+      WaterFallAnim_0: -6650289912836708381
+      WaterFallAnim_1: -1358660544182413238
+      WaterFallAnim_2: 7943834513598502129
+      WaterFallAnim_3: -9177235045472902590
       WaterFallScroll_0: 7312280473639947073
       WaterFallScroll_1: 4043996657648844394
       WaterFallScroll_2: 4279102172843932371
