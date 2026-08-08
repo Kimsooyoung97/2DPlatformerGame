@@ -53,6 +53,54 @@ TextureImporter:
   - first:
       213: 4234636494385734113
     second: "NPC\uB300\uC0AC\uCC3D_16"
+  - first:
+      213: -2613816078380065921
+    second: Box_00
+  - first:
+      213: -7315526652852008224
+    second: Box_01
+  - first:
+      213: 4236299565422217915
+    second: Box_02
+  - first:
+      213: -7497096401500782790
+    second: Box_03
+  - first:
+      213: -6379644126351679878
+    second: Box_04
+  - first:
+      213: -7687087799647437872
+    second: Box_05
+  - first:
+      213: 3106850342171833274
+    second: Box_06
+  - first:
+      213: -967664967403786125
+    second: Box_07
+  - first:
+      213: -8286095724103454137
+    second: Box_08
+  - first:
+      213: -2964234038254347170
+    second: Box_09
+  - first:
+      213: -1273279436267063791
+    second: Box_10
+  - first:
+      213: 6555382581961517458
+    second: Box_11
+  - first:
+      213: -2429301481772960443
+    second: Box_12
+  - first:
+      213: 8311673593838942506
+    second: Box_13
+  - first:
+      213: -2206094737953561273
+    second: Box_14
+  - first:
+      213: -7892796562209174804
+    second: Box_15
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -120,10 +168,10 @@ TextureImporter:
   platformSettings:
   - serializedVersion: 4
     buildTarget: DefaultTexturePlatform
-    maxTextureSize: 2048
+    maxTextureSize: 4096
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -161,375 +209,353 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: "NPC\uB300\uC0AC\uCC3D_0"
+      name: Box_00
       rect:
         serializedVersion: 2
-        x: 47
-        y: 1091
-        width: 668
-        height: 306
+        x: 0
+        y: 1071
+        width: 745
+        height: 369
       alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 110, y: 90, z: 110, w: 90}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 44f966df46e899d30800000000000000
-      internalID: 4438735472149569348
+      spriteID: f7b93f3102cd9bbd0800000000000000
+      internalID: -2613816078380065921
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "NPC\uB300\uC0AC\uCC3D_1"
+      name: Box_01
       rect:
         serializedVersion: 2
-        x: 775
-        y: 1091
-        width: 668
-        height: 306
+        x: 745
+        y: 1071
+        width: 726
+        height: 369
       alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 110, y: 90, z: 110, w: 90}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 1b6084d69d17b1030800000000000000
-      internalID: 3466489516847007409
+      spriteID: 0ea8adfb4470a7a90800000000000000
+      internalID: -7315526652852008224
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "NPC\uB300\uC0AC\uCC3D_2"
+      name: Box_02
       rect:
         serializedVersion: 2
-        x: 1547
-        y: 1110
-        width: 582
-        height: 263
+        x: 1471
+        y: 1071
+        width: 724
+        height: 369
       alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 110, y: 90, z: 110, w: 90}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 6a8b07403cb2cc730800000000000000
-      internalID: 4020636683928123558
+      spriteID: bba0227820c5aca30800000000000000
+      internalID: 4236299565422217915
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "NPC\uB300\uC0AC\uCC3D_3"
+      name: Box_03
       rect:
         serializedVersion: 2
-        x: 2230
-        y: 1089
-        width: 666
-        height: 308
+        x: 2195
+        y: 1071
+        width: 743
+        height: 369
       alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 110, y: 90, z: 110, w: 90}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ded28f53d1af094d0800000000000000
-      internalID: -3129726737656042003
+      spriteID: a3fbfad4b86f4f790800000000000000
+      internalID: -7497096401500782790
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "NPC\uB300\uC0AC\uCC3D_4"
+      name: Box_04
       rect:
         serializedVersion: 2
-        x: 51
-        y: 748
-        width: 664
-        height: 306
+        x: 0
+        y: 729
+        width: 745
+        height: 342
       alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 110, y: 90, z: 110, w: 90}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 3dbe728acfb0389c0800000000000000
-      internalID: -3926281270356087853
+      spriteID: a7e9667c773f677a0800000000000000
+      internalID: -6379644126351679878
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "NPC\uB300\uC0AC\uCC3D_5"
+      name: Box_05
       rect:
         serializedVersion: 2
-        x: 781
-        y: 748
-        width: 660
-        height: 306
+        x: 745
+        y: 729
+        width: 726
+        height: 342
       alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 110, y: 90, z: 110, w: 90}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a5786005eae381120800000000000000
-      internalID: 2384724921080514394
+      spriteID: 0db76c8cf5af15590800000000000000
+      internalID: -7687087799647437872
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "NPC\uB300\uC0AC\uCC3D_6"
+      name: Box_06
       rect:
         serializedVersion: 2
-        x: 1501
-        y: 748
-        width: 662
-        height: 306
+        x: 1471
+        y: 729
+        width: 724
+        height: 342
       alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 110, y: 90, z: 110, w: 90}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 865a24d13dfa718b0800000000000000
-      internalID: -5181479525002599064
+      spriteID: ab3f377ecefbd1b20800000000000000
+      internalID: 3106850342171833274
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "NPC\uB300\uC0AC\uCC3D_7"
+      name: Box_07
       rect:
         serializedVersion: 2
-        x: 2230
-        y: 748
-        width: 663
-        height: 306
+        x: 2195
+        y: 729
+        width: 743
+        height: 342
       alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 110, y: 90, z: 110, w: 90}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 564c7227452cdce70800000000000000
-      internalID: 9137172886952854629
+      spriteID: 370be4cc6d92292f0800000000000000
+      internalID: -967664967403786125
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "NPC\uB300\uC0AC\uCC3D_8"
+      name: Box_08
       rect:
         serializedVersion: 2
-        x: 48
-        y: 406
-        width: 667
-        height: 306
+        x: 0
+        y: 387
+        width: 745
+        height: 342
       alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 110, y: 90, z: 110, w: 90}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 131b6870f9281f140800000000000000
-      internalID: 4751722701390262577
+      spriteID: 7423eed27dfd10d80800000000000000
+      internalID: -8286095724103454137
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "NPC\uB300\uC0AC\uCC3D_9"
+      name: Box_09
       rect:
         serializedVersion: 2
-        x: 783
-        y: 406
-        width: 657
-        height: 307
+        x: 745
+        y: 387
+        width: 726
+        height: 342
       alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 110, y: 90, z: 110, w: 90}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 683b67f1b439846c0800000000000000
-      internalID: -4158912305016949882
+      spriteID: e5c5abee8dcecd6d0800000000000000
+      internalID: -2964234038254347170
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "NPC\uB300\uC0AC\uCC3D_10"
+      name: Box_10
       rect:
         serializedVersion: 2
-        x: 1500
-        y: 406
-        width: 660
-        height: 306
+        x: 1471
+        y: 387
+        width: 724
+        height: 342
       alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 110, y: 90, z: 110, w: 90}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 1393be5ca330fde30800000000000000
-      internalID: 4530343301121521969
+      spriteID: 116fd7d4917645ee0800000000000000
+      internalID: -1273279436267063791
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "NPC\uB300\uC0AC\uCC3D_11"
+      name: Box_11
       rect:
         serializedVersion: 2
-        x: 44
-        y: 66
-        width: 671
-        height: 304
+        x: 2195
+        y: 387
+        width: 743
+        height: 342
       alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 110, y: 90, z: 110, w: 90}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 592ee634016a6f420800000000000000
-      internalID: 2663498818417255061
+      spriteID: 2996994f9b569fa50800000000000000
+      internalID: 6555382581961517458
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "NPC\uB300\uC0AC\uCC3D_12"
+      name: Box_12
       rect:
         serializedVersion: 2
-        x: 780
-        y: 66
-        width: 660
-        height: 304
+        x: 0
+        y: 0
+        width: 745
+        height: 387
       alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 110, y: 90, z: 110, w: 90}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 5950aed13a0e4e110800000000000000
-      internalID: 1289402384520971669
+      spriteID: 545b79e5c23694ed0800000000000000
+      internalID: -2429301481772960443
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "NPC\uB300\uC0AC\uCC3D_13"
+      name: Box_13
       rect:
         serializedVersion: 2
-        x: 1501
-        y: 66
-        width: 657
-        height: 306
+        x: 745
+        y: 0
+        width: 726
+        height: 387
       alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 110, y: 90, z: 110, w: 90}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 3738f0c43e1208080800000000000000
-      internalID: -9187305979718433933
+      spriteID: a29b3c1b81ff85370800000000000000
+      internalID: 8311673593838942506
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "NPC\uB300\uC0AC\uCC3D_14"
+      name: Box_14
       rect:
         serializedVersion: 2
-        x: 2235
-        y: 112
-        width: 158
-        height: 224
+        x: 1471
+        y: 0
+        width: 724
+        height: 387
       alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 110, y: 90, z: 110, w: 90}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 34b3866fefa940e20800000000000000
-      internalID: 3315945645497924419
+      spriteID: 7456b6336806261e0800000000000000
+      internalID: -2206094737953561273
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "NPC\uB300\uC0AC\uCC3D_15"
+      name: Box_15
       rect:
         serializedVersion: 2
-        x: 2425
-        y: 236
-        width: 445
-        height: 99
+        x: 2195
+        y: 0
+        width: 743
+        height: 387
       alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 110, y: 90, z: 110, w: 90}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 8b56177210fddd360800000000000000
-      internalID: 7196152975657625016
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: "NPC\uB300\uC0AC\uCC3D_16"
-      rect:
-        serializedVersion: 2
-        x: 2436
-        y: 107
-        width: 435
-        height: 97
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 1e164c0a47374ca30800000000000000
-      internalID: 4234636494385734113
+      spriteID: cea09113857277290800000000000000
+      internalID: -7892796562209174804
       vertices: []
       indices: 
       edges: []
@@ -548,6 +574,22 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
+      Box_00: -2613816078380065921
+      Box_01: -7315526652852008224
+      Box_02: 4236299565422217915
+      Box_03: -7497096401500782790
+      Box_04: -6379644126351679878
+      Box_05: -7687087799647437872
+      Box_06: 3106850342171833274
+      Box_07: -967664967403786125
+      Box_08: -8286095724103454137
+      Box_09: -2964234038254347170
+      Box_10: -1273279436267063791
+      Box_11: 6555382581961517458
+      Box_12: -2429301481772960443
+      Box_13: 8311673593838942506
+      Box_14: -2206094737953561273
+      Box_15: -7892796562209174804
       "NPC\uB300\uC0AC\uCC3D_0": 4438735472149569348
       "NPC\uB300\uC0AC\uCC3D_1": 3466489516847007409
       "NPC\uB300\uC0AC\uCC3D_10": 4530343301121521969
