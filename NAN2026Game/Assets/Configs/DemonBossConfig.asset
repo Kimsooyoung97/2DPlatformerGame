@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a55b45808bcaa5d4b8bda393746b578e, type: 3}
+  m_Name: DemonBossConfig
+  m_EditorClassIdentifier: Assembly-CSharp::NAN2026.DemonBossConfig
+  maxHp: 10
+  aggroX: 14
+  walkSpeed: 2.2
+  attackCooldown: 1.6
+  fps: 12
+  cleaveDur: 1.25
+  cleaveWinS: 0.62
+  cleaveWinE: 0.82
+  cleaveReach: 6
+  damage: 1
+  smashDur: 1.5
+  smashWinS: 0.62
+  smashWinE: 0.85
+  smashApproachSpeed: 9
+  smashStopX: 3.2
+  smashReach: 6.5
+  castDur: 0.9
+  castFireFrac: 0.55
+  handOffset: {x: 3.2, y: 5.6}
+  projSpeed: 9
+  projLife: 6
+  projDamage: 1
+  parryBuffer: 0.2
+  groggyNeed: 5
+  groggyTime: 3
+  groggyFxOffsetY: 11.2
+  hitFlash: 0.12
+  clashConfig: {fileID: 11400000, guid: 31b4bd26897983b4fb8fcb4703f841b5, type: 2}
+  castChance: 0.35
+  smashChance: 0.4

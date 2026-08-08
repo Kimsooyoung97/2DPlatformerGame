@@ -5622,3 +5622,16 @@ Z로 공격해도 아무런 피격모션도 안뜨고 피 까이는 UI도 안보
 - 컴파일 0. 정지·재생 반복 후 입력 정상은 사용자 재생
 ### 실패와 수정
 - 정적 도입 시 DisableDomainReload 미고려 자인 — FAIL 등재
+
+
+## [구현] 데몬 보스 (AdventureScene4) — 2026-08-08 21:03
+### 프롬프트
+boss_demon_final 시트로 데몬보스: 플레이어 7배, 투사체 3배, transform 인트로, idle/walk/cleave(패링)/smash(접근 공격·패링)/cast_spell 투사체(비행 1~3f 루프→명중·패링·벽 시 잔여 프레임), 10대 death, 바닥 접지, Scene2 보스처럼 피격·그로기 5회 적용
+### 조작 내역
+- 반입: individual sprites→Assets/Art/Demon 10동작 130장, PPU 9.9(플레이어 1.52u x7=10.61u, 발여백 1px), 투사체 PPU 33.3(3배)
+- DemonBossConfig SO(수치 전부 SO)·DemonBoss.cs(transform 인트로→idle/walk/cleave/smash/cast/hit/groggy/death, 패링 시간창+0.2s 버퍼+TryParry, 클래시·MP·그로기 주황 다이아·빨간 점멸·HP팝업·그로기 버스트 이식, RB full=true)·DemonProjectile.cs(비행 3f 루프→플레이어/패링/타일맵 충돌 시 폭발 11f 후 소멸)
+- Scene4 배치(22.5, 7.82 접지)·배열 10종 배선·클래시 설정 공유
+### 검증
+- 컴파일 0, 배열 전수(32/6/12/15/18/6/5/22/3/11), 저장 ✓. 전투 감각은 사용자 재생
+### 실패와 수정
+- execute_code 인자 오기 1회
