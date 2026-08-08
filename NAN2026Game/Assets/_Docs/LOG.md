@@ -5560,3 +5560,5 @@ Scene3 벽 붕괴 카메라 연출처럼, Scene2 구체 패링 5회 시 보스�
 - 컴파일 0, 반영 보스 float캐스팅=True 그로기다이아=True 대시게이트=True | Director게이트=True | Intro게이트=False
 ### 실패와 수정
 - enabled 토글 락의 상태 파손 자인 / int SendMessage 미매칭 자인
+
+- 추가: IntroSequencer 게이트 교체 재시도 성공 (정규식 실패→정밀 앵커)
