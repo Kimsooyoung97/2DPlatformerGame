@@ -49,9 +49,8 @@ namespace NAN2026
         void Update()
         {
             t += Time.deltaTime;
-            bool skip = Keyboard.current != null && Keyboard.current.anyKey.wasPressedThisFrame;
             float total = IntroSequenceLogic.TotalDuration(config.blackSeconds, EffIgnite(), config.expandSeconds);
-            if (skip && t < total) t = total;
+            // 아무키 스킵 제거 — 토치 점화 연출은 항상 완주 (이동키 오발로 캔슬되던 문제 해소)
             Apply(t);
 
             if (bgmStarted && bgm != null)
