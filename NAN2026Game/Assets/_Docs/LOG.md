@@ -6466,3 +6466,34 @@ PlayerFxConfig.enableDebugKeys (5·6 미리보기)
 - **사용자 눈 판정 필요**: (1) 피격 시 적색 점멸이 0.45초 무적과 같이 끝나는지 (2) 히트스톱 0.06 이 답답하지 않은지 (3) 넉백 0.25u 방향·거리 (4) 화면 흔들림 세기 0.35 가 과하지 않은지. 전부 FeelConfig 에서 재생 중 조절 가능
 ### 실패와 수정
 - 없음
+
+
+## [조사] 피격 카메라 흔들림 실제 세기 — 2026-08-09 07:30
+### 프롬프트
+[조사] 지금 피격 당했을때 카메라 떨림 어느정도지?
+### 조사 결과
+- 재생 중이라 씬 열기·저장은 하지 않음(FAIL#5). 프리팹 직렬화값 + 재생 중 씬의 Listener 실측으로 확인
+**신호 발생 측 — RealPlayer.prefab / CinemachineImpulseSource (전부 Unity 기본값)**
+- DefaultVelocity = (0, -1, 0) → **수직 1단위 아래로 치는 신호**
+- ImpulseShape = Bump / ImpulseDuration 0.2 / ImpulseType Uniform(거리 감쇠 없음)
+- TimeEnvelope: Attack 0.0 · Sustain 0.2 · Decay 0.7 · ScaleWithImpact true → **신호 총 길이 약 0.9초**
+- AmplitudeGain 1.0 / FrequencyGain 1.0 / ImpactRadius 100 / DissipationDistance 100
+**호출 측**
+- `GenerateImpulseWithForce(0.35)` — FeelConfig.screenShakeAmplitude 를 force 로 전달
+- 즉 실효 신호 = DefaultVelocity(0,-1,0) x 0.35 = **아래로 0.35단위 충격**
+**수신 측 — CM_PlayerCamera / CinemachineImpulseListener (기본값)**
+- Gain 1.0 / AmplitudeGain 1.0 / FrequencyGain 1.0 / Duration 1.0 / UseCameraSpace true / Use2DDistance false
+**결론: 피격 시 카메라가 세로로 약 0.35u 크기의 Bump 를 맞고 약 0.9초에 걸쳐 감쇠한다.**
+- 화면 기준 체감: 카메라 orthographic size 대비 비율로 환산해야 정확하나, 0.35u 는 플레이어 키(1.4u)의 25% 수준 변위라 **작지 않다**
+- 다만 감쇠가 0.9초로 길어 '툭 치고 끝'이 아니라 **여운이 길게 남는** 형태
+**조정 가능 지점(실행 안 함)**
+1. 세기: FeelConfig.screenShakeAmplitude (현재 0.35)
+2. 길이: 프리팹 ImpulseDefinition.TimeEnvelope.DecayTime (현재 0.7) — 짧게 하려면 0.2~0.3
+3. 방향: DefaultVelocity 가 (0,-1,0) 수직 고정. 좌우 흔들림을 섞으려면 (0.5,-1,0) 등
+4. **FeelConfig.screenShakeDuration(0.25)은 선언만 되어 있고 코드에서 사용하지 않음** — 실제 길이는 프리팹의 TimeEnvelope 가 결정. 문서-구현 불일치
+### 검증
+해당 없음
+### 실패와 수정
+없음
+### 커밋
+해당 없음(무수정)
