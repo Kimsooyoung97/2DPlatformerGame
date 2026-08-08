@@ -1,5 +1,6 @@
+using Unity.VisualScripting;
 using UnityEngine;
-
+using UnityEngine.InputSystem;
 /// <summary>
 /// 플레이어가 범위 안에 들어오면 대화 UI를 띄우고, 벗어나면 닫습니다.
 /// 지금은 형태 확인용이라 대사 진행(다음 줄 넘기기) 기능은 없습니다.
@@ -25,7 +26,7 @@ public class NPCDialogueTrigger : MonoBehaviour
     [SerializeField] private GameObject interactHint;
 
     private bool _inRange;
-
+    private bool isOpen;
     private void Reset()
     {
         var col = GetComponent<Collider2D>();
@@ -39,15 +40,45 @@ public class NPCDialogueTrigger : MonoBehaviour
 
     private void Start()
     {
+        isOpen = false;
         if (dialogueRoot != null) dialogueRoot.SetActive(false);
         if (interactHint != null) interactHint.SetActive(false);
+    }
+    private void Update()
+    {
+        if (dialogueRoot.activeSelf && isOpen)
+        {
+            if (Keyboard.current != null && Keyboard.current.enterKey.wasPressedThisFrame)
+            {
+                Hide();
+                isOpen = false;
+                return;
+            }
+            
+        }
+        if (_inRange)
+        {
+            if (interactHint != null) interactHint.SetActive(true);
+
+            if (!isOpen && Keyboard.current != null && Keyboard.current.enterKey.wasPressedThisFrame)
+            {
+                Show();
+                isOpen = true;
+                return;
+            }
+        }
+        else 
+        {
+            interactHint.SetActive(false);
+        }
+        
+        
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (!IsPlayer(other)) return;
         _inRange = true;
-        Show();
     }
 
     private void OnTriggerExit2D(Collider2D other)
@@ -67,7 +98,6 @@ public class NPCDialogueTrigger : MonoBehaviour
     private void Show()
     {
         if (animator != null && !string.IsNullOrEmpty(talkingBool)) animator.SetBool(talkingBool, true);
-        if (interactHint != null) interactHint.SetActive(true);
         if (dialogueRoot == null) return;
         if (speakerLabel != null) speakerLabel.text = speakerName;
         if (bodyLabel != null) bodyLabel.text = message;

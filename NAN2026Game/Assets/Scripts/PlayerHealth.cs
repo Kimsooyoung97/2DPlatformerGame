@@ -50,6 +50,10 @@ public class PlayerHealth : MonoBehaviour
     /// <summary>체력이 바뀔 때마다 (현재, 최대)를 통지한다. 월드스페이스 HP바 등이 구독할 수 있다.</summary>
     public event System.Action<int, int> OnHealthChanged;
 
+    /// <summary>플레이어가 죽는 순간(Kill 진입 시) 딱 한 번 통지한다. GameOverPanel 등이 구독해
+    /// 화면 전환을 시작할 수 있다. 체크포인트 재시작 로직(Respawn)과는 무관하게 별도로 발생한다.</summary>
+    public event System.Action OnPlayerDied;
+
     private void Awake()
     {
         body = GetComponent<Rigidbody2D>();
@@ -171,6 +175,8 @@ public class PlayerHealth : MonoBehaviour
         deaths++;
         SetControllerEnabled(false);
         SetVisible(false);
+
+        OnPlayerDied?.Invoke();
 
         Invoke(nameof(Respawn), respawnDelay);
     }

@@ -119,23 +119,17 @@ public sealed class PlayerProgression : MonoBehaviour
         float magnitude = augmentConfig.GetMagnitude(type, tier);
         switch (type)
         {
-            case AugmentType.ParryCooldownDown:
-                parryCooldownReduction += magnitude;
-                break;
-            case AugmentType.ParryDurationUp:
-                parryDurationBonus += magnitude;
-                break;
             case AugmentType.DamageUp:
                 damageBonus += magnitude;
                 break;
             case AugmentType.Heal:
                 if (health != null) health.Heal(Mathf.RoundToInt(magnitude));
                 break;
-            case AugmentType.MaxHealthUp:
-                if (health != null) health.AddMaxHealthBonus(Mathf.RoundToInt(magnitude));
-                break;
-            case AugmentType.AttackRangeUp:
-                attackRangeMultiplier += magnitude;
+            //case AugmentType.ManaHeal:
+            //    if (health != null) mana.Heal(Mathf.RoundToInt(magnitude));
+            //    break;
+            case AugmentType.ManaUp:
+                //manaUp += magnitude;
                 break;
             case AugmentType.UnlockSkill1:
                 if (controller != null) controller.AddSkill("Skill1");

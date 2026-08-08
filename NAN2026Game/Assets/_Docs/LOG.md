@@ -5786,3 +5786,20 @@ DemonBossConfig.showRangesInGame / showRangeLabels (기존: MinoBossConfig.showP
 ### 실패와 수정
 - 테스트 메서드명을 `5발은_...`으로 지어 CS1519(숫자로 시작하는 식별자) — `다섯발은_...`으로 개명. 이후 세 테스트 파일 전체에 숫자 시작 식별자 정규식 점검 수행
 - EffectProjectile.cs 는 CRLF, SlashProjectile.cs 는 LF 혼재라 동일 패턴 치환이 한쪽만 실패 — 파일별 개행 실측 후 재치환
+## [구현] 사망 시 GameOverPanel 표시 → 아무 키 입력 시 타이틀씬 이동 — 2026-08-08 19:50
+### 프롬프트
+player가 죽으면 이벤트를 발생시켜 GameOverPanel을 active시키고 아무 키나 입력시 타이틀씬으로 이동하게 해주는 코드 짜줘
+### 조작 내역
+- Assets/Scripts/PlayerHealth.cs: `public event System.Action OnPlayerDied;` 추가, `Kill()` 진입 시(Invoke(Respawn) 예약 직전) 1회 발생하도록 연결. 기존 체크포인트 리스폰(Invoke(Respawn, respawnDelay))은 건드리지 않음(다른 트랩/해저드가 의존하는 기존 계약 보존)
+- Assets/Scripts/GameOverController.cs 신규 작성: PlayerHealth.OnPlayerDied 구독(OnEnable/OnDisable, PlayerHealthBarUI.cs와 동일 패턴) → gameOverPanel.SetActive(true) → inputIgnoreDuration(0.3s) 경과 후 AnyKeyPressed()(TitleScreen.cs와 동일한 Input System/레거시 폴백 패턴) 감지 시 SceneManager.LoadScene(titleSceneName="TitleScene", Build Settings 실제 씬명과 일치)
+- refresh_unity(compile=request, force) → 컴파일 성공
+### 검증
+- read_console(types=error) → 0건
+- 리플렉션으로 GameOverController 타입 로드 확인(MonoBehaviour 상속 정상)
+- run_tests(EditMode) 잡이 5초 만에 progress 0/149에서 멈춰 정상 완료 확인 실패 — FAIL.md #24로 별도 기록. 이번 변경은 기존 테스트 대상 순수 로직(PlayerLocomotionLogic 등)을 건드리지 않는 이벤트 추가/신규 UI 스크립트뿐이라 회귀 위험은 낮음. 다음 세션에서 테스트 러너 정상화 시 149/149 재확인 필요
+- 씬 변경 없음(스크립트만 작업) — Test.unity의 GameOverPanel 오브젝트는 사용자가 에디터에서 직접 배치한 것으로, 이번 커밋에 함께 포함됨(제가 생성/수정하지 않음)
+### 실패와 수정
+GameOverController.cs 최초 작성 시 [Header("타이틀 씬"))] 괄호 오타 — 컴파일 전 발견하여 즉시 수정, 컴파일에는 반영되지 않음
+### 사람이 확인/연결해야 할 것
+- GameOverPanel(Canvas 하위, 사용자가 이미 배치)에 GameOverController 컴포넌트를 부착하고 playerHealth/gameOverPanel 필드를 인스펙터에서 연결
+- Kill() 후 0.2s 뒤 체크포인트 리스폰이 그대로 실행됨 — GameOverPanel이 화면을 완전히 덮지 않으면 패널 뒤에서 리스폰이 보일 수 있음. 필요 시 별도로 처리 방식(시간 정지 등) 논의 필요
