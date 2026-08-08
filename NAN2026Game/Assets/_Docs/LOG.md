@@ -5367,3 +5367,16 @@ SecondScene2에서 보스와 패링할때 0.2초 정도 빨리해도 다 되도�
 - 컴파일 0. 조기 패링 관대함은 사용자 재생
 ### 실패와 수정
 - WriteAlltext 오타 1회
+
+
+## [조사] 씬 재진입 시 촛불 밝아짐 연출 소실 — 2026-08-08 16:41
+### 프롬프트
+[조사] SecondScene2에서 SecondScene2로 옮기면 우리가 연출한 촛불켜지는 화면이 캔슬되는데 어떻게 하면 좋을까?
+### 조사 결과
+- 원인: Scene2Director 진행상태(count/done)가 인스턴스 지역변수 — LoadScene(Portal 등)으로 씬 재로드 시 감독 파괴·전역광이 씬 저장값 0.03으로 리셋. 밝아짐(Brighten)은 done일 때만 실행되나 done도 초기화되어 어둠 복귀
+- 씬 전환: Portal.cs 등 LoadScene 방식(단일 씬 리로드)
+- 해법 3안: ①정적 플래그(static bool sceneCleared)로 클리어 기억 → Start에서 즉시 밝게 복원(퀵·경량) ②진행상태 static 승격+PlayerPrefs 영속(재시작에도 유지) ③단일 씬 세션이면 재진입 자체를 없애 additive 유지(구조 변경 큼). 마감 감안 ①권장
+### 검증
+해당 없음
+### 커밋
+해당 없음(무수정)
