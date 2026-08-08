@@ -6222,3 +6222,15 @@ Window 01 A, Break 02 (1), Window 02 B 등등 창문들도 다 빛나
 - 연출 후(t=5.80, 완주): 전역광 **1.000 도달 ✓** / 시야광 점등 ✓ / 켜진 촛불 3개 ✓ / 포그 target 배선·enabled ✓
 ### 실패와 수정
 - 없음. 앞선 0.20 하향이 포그와 겹쳐 이중 감광을 만든 것 확인·해소
+
+
+## [조사] Scene3 연출 재소실 시 복구 요청문 — 2026-08-09 05:37
+### 프롬프트
+[조사]지금 우리가 수정한 연출씬과 안개 걷는 씬 다시 또 없어지면 너한테 정확히 뭐라고 요청해야하니?
+### 조사 결과
+- 재소실 시 필요한 복구 정보 5종을 확정: ①대상 씬 AdventureScene3 ②시스템 3층(IntroSequencer 토치 인트로 / PlayerVisionLight 점등 시점 / FogOfWar 광선 안개) ③확정 수치(IntroConfig globalMaxIntensity 1.00·blackSeconds 1.0·igniteSeconds 1.2·igniteStagger 0.6·expandSeconds 1.2 / FogOfWarConfig fogAlpha 0.96·revealRadius 7·rayCount 360·eyeHeight 0.8 / PlayerVisionLight 0.9·외6.5·내1.2 / CM_PlayerCamera ortho 6.75·구 vcam 비활성) ④배선 3곳(FogOfWar.target, IntroSequencer.playerVisionLight, Stage_Fog 재질 Sprites-Default=Unlit) ⑤검증법(재생+첫프레임 일시정지 계측: t=0 전역광 0·시야광 소등, 완주 후 전역광 1.0·시야광 점등·촛불 3)
+- 실패 유발 3대 함정 기록: 전역광 상한 하향(포그와 이중 감광)/Stage_Fog를 Lit 재질로 교체(안개 무력화)/시야광을 씬에서 상시 활성(주인공 조기 노출)
+### 검증
+해당 없음
+### 커밋
+해당 없음(무수정)
