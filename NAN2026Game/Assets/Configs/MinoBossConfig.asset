@@ -40,6 +40,10 @@ MonoBehaviour:
   groggyNeed: 5
   groggyTime: 3
   groggyFxOffsetY: 3.4
+  burstAtkSpeedMul: 2
+  burstDashSpeed: 20
+  burstDashStopX: 1.7
+  sparkleInterval: 0.22
   barScale: 1.8
   barOffsetY: 4.0299997
   barUnder: {fileID: 21300000, guid: 6e56a6c15e54bbf44a62fdcdff80e3c5, type: 3}

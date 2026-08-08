@@ -106,3 +106,13 @@
 - #22 타일 시공 시 SetTile은 기존 칸을 무기록 덮어씀 → 사용자 작업 위 시공 금지: 빈 칸 검사 후 배치하거나 전용 타일맵 분리. 대규모 지형은 청사진 합의 후
 
 - #23 커스텀 윗면 엣지 베이커가 신설 씬에서 미작동(푹꺼짐) — 발판은 TilemapCollider+Composite+PlatformEffector 정석 조합 사용
+
+- timeScale 히트스톱: 복구 책임자(FX)의 수명이 히트스톱보다 짧으면 timeScale 0 영구 정지 — 히트스톱 수치 올릴 땐 FX 수명·OnDestroy 안전핀 확인
+
+- 팀 병합이 우리 파일을 리팩터하면 기존 문자열 치환 앵커가 전멸 — 병합 직후엔 파일 실측 후 통짜 재작성 우선, '치환 성공' 보고 전 결과 문자열 검증 필수
+
+- 입력 게이트(kb=null)로 락을 걸면 '뗌 이벤트'가 유실돼 Held 계열 상태가 갇힘 — 게이트 도입 시 모든 Held 필드에 isPressed 기반 자가 회복 필수
+
+- 프리팹 개명 병합 후엔 씬·프리팹의 '슬롯 배선(SerializedProperty)'까지 전수 검사 — 코드 컴파일 통과와 무관하게 유령 참조가 침묵 가드에서 기능을 무음 사망시킴
+
+- EnterPlayMode=DisableDomainReload 프로젝트: 모든 static 상태는 세션 간 생존 — static 필드 추가 시 RuntimeInitializeOnLoadMethod 리셋 동봉 필수 (락 중 정지→다음 세션 입력 봉쇄 사례)

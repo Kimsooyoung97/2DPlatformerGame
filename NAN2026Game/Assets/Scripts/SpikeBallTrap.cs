@@ -108,20 +108,33 @@ namespace NAN2026
         System.Reflection.MethodInfo windowActive;
         void ResolveHit()
         {
-            if (resolved) return; resolved = true;
+            if (resolved) return;
+            resolved = true;
+
+            bool ok = false;
+            if (controller != null && tryParry != null)
             {
-                bool ok = false;
-                if (controller != null && tryParry != null)
-                {
-                    object r = tryParry.Invoke(controller, new object[] { gameObject });
-                    ok = r is bool && (bool)r;
-                }
-                if (ok) ParryClashFx.Play((transform.position + player.position) * 0.5f + UnityEngine.Vector3.up * 0.8f, config);
-                Popup(ok ? "패링 성공!" : "패링 실패!", ok ? new Color(0.35f, 1f, 0.45f) : new Color(1f, 0.3f, 0.25f));
-            if (ok) SpikeParryEvents.Report();
-                if (ok) { NAN2026.Showroom.ParryMeter.ReportSpike(); dir = new Vector2(-dir.x, Mathf.Abs(dir.y)); Invoke("BreakSilent", 0.5f); }
-                else { player.SendMessage("TakeDamage", config.damage, SendMessageOptions.DontRequireReceiver); Break(false); }
+                object result = tryParry.Invoke(controller, new object[] { gameObject });
+                ok = result is bool && (bool)result;
             }
+
+            if (ok)
+            {
+                ParryClashFx.Play(
+                    (transform.position + player.position) * 0.5f + Vector3.up * 0.8f,
+                    config);
+                Popup("패링 성공!", new Color(0.35f, 1f, 0.45f));
+                PlayerMana.RewardParry(player);
+                SpikeParryEvents.Report();
+                dir = new Vector2(-dir.x, Mathf.Abs(dir.y));
+                Invoke("BreakSilent", 0.5f);
+                return;
+            }
+
+            Popup("패링 실패!", new Color(1f, 0.3f, 0.25f));
+            if (player != null)
+                player.SendMessage("TakeDamage", config.damage, SendMessageOptions.DontRequireReceiver);
+            Break(false);
         }
 
         void BreakSilent() { Break(false); }
@@ -211,6 +224,7 @@ namespace NAN2026
         SpikeBallConfig cfgRef;
         public void Init(float d, int n, float r, float hitstop, SpikeBallConfig cfg2 = null)
         {
+            if (hitstop > 0f && d < hitstop + 0.05f) d = hitstop + 0.05f; // 수명 < 히트스톱이면 timeScale 영구 0 — 보정
             dur = d; lines = n; radius = r; cfgRef = cfg2;
             if (dot == null)
             {
@@ -234,6 +248,7 @@ namespace NAN2026
             }
             if (hitstop > 0f) { Time.timeScale = 0f; restoreAt = Time.unscaledTime + hitstop; }
         }
+        void OnDestroy() { if (restoreAt > 0f) Time.timeScale = 1f; } // 안전핀: 복구 전 소멸해도 시간 복원
         void Update()
         {
             if (restoreAt > 0f && Time.unscaledTime >= restoreAt)

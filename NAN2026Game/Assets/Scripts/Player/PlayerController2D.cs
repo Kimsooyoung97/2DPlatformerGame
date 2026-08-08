@@ -61,6 +61,11 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
     private float queuedAttackLunge;
     private string activeAttack;
     private float activeAttackLunge;
+    public static float AttackSpeedMul = 1f; // 그로기 버스트 공속 배율(평시 1)
+    public static bool InputLocked = false;  // 연출 락: 입력만 무시(컨트롤러는 계속 구동)
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetStaticsOnPlay() { InputLocked = false; AttackSpeedMul = 1f; } // DisableDomainReload 대응
     private float attackTimer;
     private bool parryHeld;
     private float parryEndTimer;
@@ -252,7 +257,8 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
 
     private void Update()
     {
-        var kb = Keyboard.current;
+        var kb = InputLocked ? null : Keyboard.current;
+        if (parryHeld && (kb == null || !kb.spaceKey.isPressed)) parryHeld = false; // 락·포커스 이탈로 릴리즈 유실 시 자가 회복
         inputX = 0f;
         runHeld = false;
         if (kb != null)
@@ -488,6 +494,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
                     FloatingText.Spawn(transform.position + Vector3.up * 1.1f,
                         judge == 0 ? "PERFECT" : "GOOD",
                         judge == 0 ? Color.yellow : Color.white);
+                    PlayerMana.RewardParry(this);
                     orb.SendMessage("OnParried", SendMessageOptions.DontRequireReceiver);
                     Destroy(orb.gameObject);
                 }
@@ -497,7 +504,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
         bool attacking = attackTimer > 0f;
         if (attacking)
         {
-            attackTimer -= Time.fixedDeltaTime;
+            attackTimer -= Time.fixedDeltaTime * AttackSpeedMul;
             // 1타 캔슬 구간 진입 + 2타 예약됨 → 즉시 2타 발동(반응성)
             if (comboVStage == 1 && comboVBuffered && activeAttack == "ComboV1"
                 && attackTimer <= config.slashDuration * (1f - config.comboVCancelFrac))

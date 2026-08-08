@@ -9,6 +9,9 @@ namespace NAN2026
     public class ThrownProjectile : MonoBehaviour
     {
         public static int Alive; // 맵 전체 동시 생존 수
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetStaticsOnPlay() { Alive = 0; } // DisableDomainReload 대응
         public ThrownTrapConfig config;
         public ThrownKind kind;
         public GameObject launcher;
@@ -71,7 +74,7 @@ namespace NAN2026
             }
             if (dist <= 0.55f)
             {
-                player.SendMessage("TakeDamage", config.damage, SendMessageOptions.DontRequireReceiver);
+                player.SendMessage("TakeDamage", (float)config.damage, SendMessageOptions.DontRequireReceiver);
                 Destroy(gameObject);
             }
         }
@@ -93,9 +96,7 @@ namespace NAN2026
                 pop.GetComponent<MeshRenderer>().sortingOrder = 900;
                 pop.AddComponent<PopupFloater>().Init(config.clashConfig.popupRise, config.clashConfig.popupLife);
             }
-            NAN2026.Showroom.ParryMeter.ReportSpike();
-            int mp = kind == ThrownKind.Arrow ? config.arrowMp : kind == ThrownKind.Shuriken ? config.shurikenMp : config.axeMp;
-            if (player != null) player.SendMessage("AddMp", mp, SendMessageOptions.DontRequireReceiver);
+            PlayerMana.RewardParry(player);
             if (kind == ThrownKind.Axe && launcher != null)
             {
                 reflected = true;
