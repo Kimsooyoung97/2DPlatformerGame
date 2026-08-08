@@ -73,3 +73,7 @@
 ## SPEC.md 범위 예외 승인 (2026-08-02)
 - SPEC.md는 '레벨업'을 범위 밖으로 명시하지만, 사용자가 대화 중 명시적으로 예외 승인함("Spec.md를 수정하지는 말고 그냥 직접적으로 승인할게 구현해줘"). SPEC.md 문서 자체는 미수정 상태로 유지 — 문서와 실제 구현이 이 부분에서 의도적으로 어긋나 있음을 다음 세션이 인지해야 함
 - 경험치/레벨/증강(브론즈·실버·골드, 6종) 시스템 구현 완료. PlayerProgression 컴포넌트가 Player에 부착됨
+
+- [제출 전 필수] Scene2DirectorConfig.debugSkipToBoss = false 로 끌 것 (보스전 테스트 스위치)
+
+- [제출 전 필수] MinoBossConfig.showParryDebug = false (패링 디버그 팝업)

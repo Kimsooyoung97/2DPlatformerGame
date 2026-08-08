@@ -118,7 +118,8 @@ namespace NAN2026
                 }
                 if (ok) ParryClashFx.Play((transform.position + player.position) * 0.5f + UnityEngine.Vector3.up * 0.8f, config);
                 Popup(ok ? "패링 성공!" : "패링 실패!", ok ? new Color(0.35f, 1f, 0.45f) : new Color(1f, 0.3f, 0.25f));
-                if (ok) { dir = new Vector2(-dir.x, Mathf.Abs(dir.y)); Invoke("BreakSilent", 0.5f); }
+            if (ok) SpikeParryEvents.Report();
+                if (ok) { NAN2026.Showroom.ParryMeter.ReportSpike(); dir = new Vector2(-dir.x, Mathf.Abs(dir.y)); Invoke("BreakSilent", 0.5f); }
                 else { player.SendMessage("TakeDamage", config.damage, SendMessageOptions.DontRequireReceiver); Break(false); }
             }
         }
@@ -218,7 +219,7 @@ namespace NAN2026
                 tx2.Apply();
                 dot = Sprite.Create(tx2, new Rect(0, 0, 4, 4), new Vector2(0.5f, 0.5f), 4f);
             }
-            flash = gameObject.AddComponent<SpriteRenderer>();
+            flash = gameObject.AddComponent<SpriteRenderer>(); flash.sharedMaterial = NAN2026.FxUnlit.Mat;
             flash.sprite = dot; flash.color = Color.white; flash.sortingOrder = 950;
             rays = new LineRenderer[lines];
             for (int i = 0; i < lines; i++)

@@ -23,12 +23,11 @@ namespace NAN2026
             Collider2D col = GetComponent<Collider2D>();
             if (col != null) col.isTrigger = true;
 
-            if (GetComponent<Rigidbody2D>() == null)
-            {
-                Rigidbody2D rb = gameObject.AddComponent<Rigidbody2D>();
-                rb.bodyType = RigidbodyType2D.Kinematic;
-                rb.gravityScale = 0f;
-            }
+            // 이 오브젝트들(Normal/Fire/Wheel/Bomb)은 전부 MidBoss의 자식이고
+            // MidBoss 자신이 이미 Rigidbody2D를 갖고 있다. 여기에 또 붙이면 부모-자식에
+            // Rigidbody2D가 중첩되는데, 이는 Unity 2D 물리가 공식적으로 지원하지 않는
+            // 구성이라 예측 불가능한 동작(성능 저하·행 등)을 일으킬 수 있어 붙이지 않는다.
+            // 트리거 판정은 상대(플레이어) 쪽에 Rigidbody2D가 있으면 정상 작동한다.
         }
 
         private void OnTriggerEnter2D(Collider2D other) => TryHit(other);
@@ -39,23 +38,27 @@ namespace NAN2026
             if (hasResolved) return;
             if (!other.CompareTag("Player")) return;
 
-            PlayerController2D pc = other.GetComponentInParent<PlayerController2D>();
             float timer = 0f;
-            float targetTime = 0.5f;
-            while((timer < targetTime) && pc!= null)
+            float endtime = 0.5f;
+            PlayerController2D pc = other.GetComponentInParent<PlayerController2D>();
+            while (timer < endtime)
             {
-                if (pc.TryParry(bossObject))
+                timer += Time.deltaTime;
+                if (pc != null && pc.TryParry(bossObject))
                 {
-                    hasResolved = true; // 패링당하면 판정 종료(피해 없음)
-                    Debug.Log("패링 성공");
+                    hasResolved = true;
+                    Debug.Log("패링성공");// 패링당하면 판정 종료(피해 없음)
                     return;
                 }
             }
+            
+            
+
             PlayerHealth ph = other.GetComponentInParent<PlayerHealth>();
             if (ph != null)
             {
                 ph.TakeDamage(damage);
-                Debug.Log("패링 실패");
+                Debug.Log("패링실패");
                 hasResolved = true;
             }
         }

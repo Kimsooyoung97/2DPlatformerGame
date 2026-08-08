@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc862311ed9261b408ab9c7554141ee6, type: 3}
+  m_Name: WaterSinkConfig
+  m_EditorClassIdentifier: Assembly-CSharp::NAN2026.WaterSinkConfig
+  peekHeight: 0.35
+  peekTime: 0.35
+  sinkDepth: 2
+  sinkTime: 1.4
+  respawnDelay: 2

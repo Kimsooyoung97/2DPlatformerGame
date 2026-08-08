@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 using NAN2026;
 using NAN2026.Core;
 
@@ -35,6 +36,12 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
     private bool comboVBuffered = false;
     [SerializeField] private float rollDuration = 0.75f;
     [SerializeField] private float rollSpeed = 4f;
+
+    [Header("레벨업 증강으로 얻는 스킬 (X=사용, C=다음 스킬로 전환)")]
+    [Tooltip("UI Canvas/SkillImage — 현재 선택된 스킬의 아이콘을 보여준다")]
+    [SerializeField] private Image skillImageUI;
+    private readonly System.Collections.Generic.List<string> ownedSkills = new System.Collections.Generic.List<string>();
+    private int selectedSkillIndex = -1;
 
     private Rigidbody2D rb;
     private Animator anim;
@@ -104,6 +111,55 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
     public bool IsParryWindowActive()
     {
         return parryHeld && PlayerLocomotionLogic.ParrySuccessWindow(Time.time - parryPressTime, EffectiveParryWindow());
+    }
+
+    /// <summary>레벨업 증강으로 스킬을 얻었을 때 PlayerProgression이 호출한다.
+    /// 이미 갖고 있으면 무시. 플레이어의 '첫 스킬'이면 즉시 선택하고 SkillImage를 갱신한다.</summary>
+    public void AddSkill(string skillId)
+    {
+        if (string.IsNullOrEmpty(skillId) || ownedSkills.Contains(skillId)) return;
+        bool wasEmpty = ownedSkills.Count == 0;
+        ownedSkills.Add(skillId);
+        if (wasEmpty)
+        {
+            selectedSkillIndex = 0;
+            UpdateSkillImage();
+        }
+    }
+
+    /// <summary>스킬 이름 -> (애니메이션 상태 이름, 지속시간, 돌진속도). 기존 Z(Slash)·X(Combo2)
+    /// 공격이 스킬로 편입된 것이라 실제 재생 파라미터는 그대로 재사용한다.</summary>
+    private (string animName, float duration, float lunge) GetSkillAttackParams(string skillId)
+    {
+        switch (skillId)
+        {
+            case "Skill1": return ("Slash", config.slashDuration, config.slashLungeSpeed);
+            case "Skill2": return ("Combo2", config.combo2Duration, config.combo2LungeSpeed);
+            default: return ("Slash", config.slashDuration, config.slashLungeSpeed);
+        }
+    }
+
+    /// <summary>X키: 현재 선택된 스킬을 사용한다. 스킬이 하나도 없으면 아무 동작 안 함.</summary>
+    private void UseSelectedSkill()
+    {
+        if (selectedSkillIndex < 0 || selectedSkillIndex >= ownedSkills.Count) return;
+        var p = GetSkillAttackParams(ownedSkills[selectedSkillIndex]);
+        QueueAttack(p.animName, p.duration, p.lunge);
+    }
+
+    /// <summary>C키: 보유 스킬 중 다음 스킬로 전환하고 SkillImage를 갱신한다.</summary>
+    private void CycleSkill()
+    {
+        if (ownedSkills.Count == 0) return;
+        selectedSkillIndex = (selectedSkillIndex + 1) % ownedSkills.Count;
+        UpdateSkillImage();
+    }
+
+    private void UpdateSkillImage()
+    {
+        if (skillImageUI == null || selectedSkillIndex < 0 || selectedSkillIndex >= ownedSkills.Count) return;
+        Sprite sprite = Resources.Load<Sprite>(ownedSkills[selectedSkillIndex]);
+        if (sprite != null) skillImageUI.sprite = sprite;
     }
 
     /// <summary>IParryReflector 구현 — SpikeProjectile 등 투사체가 자동으로 패링 여부를 물어본다.</summary>
@@ -218,12 +274,8 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
                 dashDir = PlayerLocomotionLogic.EffectDirection(sr.flipX);
                 airDashesUsed++;
             }
-            // 기본 공격: 좌클릭 → Z
-            if (kb.zKey.wasPressedThisFrame) QueueAttack("Slash", config.slashDuration, config.slashLungeSpeed);
-            // 스킬 공격(구 K) → X
-            if (kb.xKey.wasPressedThisFrame) QueueAttack("Combo2", config.combo2Duration, config.combo2LungeSpeed);
-            // V 2단 콤보 (이펙트 없음): 1타 Slash모션 → 창 내 재입력 시 2타 Combo2모션
-            if (kb.vKey.wasPressedThisFrame)
+            // 2단 콤보 (원래 V) → Z: 1타 Slash모션 → 창 내 재입력 시 2타 Combo2모션
+            if (kb.zKey.wasPressedThisFrame)
             {
                 if (comboVStage == 1)
                 {
@@ -236,6 +288,10 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
                     comboVStage = 1; comboVWindowEnd = 0f; comboVBuffered = false;
                 }
             }
+            // 스킬 사용(레벨업 증강으로 획득) → X
+            if (kb.xKey.wasPressedThisFrame) UseSelectedSkill();
+            // 보유 스킬 중 다음 스킬로 전환 → C
+            if (kb.cKey.wasPressedThisFrame) CycleSkill();
             // 2/3/4 숫자키 = testParry 3동작 개별 발동
             if (kb.digit2Key.wasPressedThisFrame) QueueAttack("ComboB1", config.comboB1Duration, config.slashLungeSpeed);
             if (kb.digit3Key.wasPressedThisFrame) QueueAttack("ComboB2", config.combo2Duration, config.combo2LungeSpeed);
@@ -258,13 +314,13 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
                     backstepReadyTime = Time.time + config.backstepDuration + config.backstepCooldown;
                 }
             }
-            // 패링: 마우스 휠클릭 → C
-            if (kb.cKey.wasPressedThisFrame && attackTimer <= 0f && Time.time >= parryReadyTime)
+            // 패링(기존 C) → Space
+            if (kb.spaceKey.wasPressedThisFrame && attackTimer <= 0f && Time.time >= parryReadyTime)
             {
                 if (Time.time <= parryChainWindowEnd)
                 {
                     parryChainWindowEnd = 0f;
-                    QueueAttack("ComboB1", config.comboB1Duration, config.slashLungeSpeed); // C-C 연계: 가로베기
+                    QueueAttack("ComboB1", config.comboB1Duration, config.slashLungeSpeed); // 패링-패링 연계: 가로베기
                 }
                 else
                 {
@@ -280,7 +336,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
                 parryReadyTime = Time.time + EffectiveParryCooldown();
                 } // else(신규 패링) 닫힘
             }
-            if (kb.cKey.wasReleasedThisFrame && parryHeld)
+            if (kb.spaceKey.wasReleasedThisFrame && parryHeld)
             {
                 parryHeld = false;
                 parryEndTimer = config.parryEndDuration;
@@ -315,6 +371,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
             float fxDir = PlayerLocomotionLogic.EffectDirection(sr.flipX);
             Vector3 fxPos = transform.position + new Vector3(config.comboVFxOffsetX * fxDir, config.comboVFxOffsetY, 0f);
             VSlashFx.Play(fxPos, fxFrames, config.comboVFxFps, fxDir < 0f, config.comboVFxScale, config.comboVFxAlpha);
+            SpawnComboVDamage(attackName, fxDir, fxPos);
             return;
         }
         GameObject prefab = null;
@@ -334,8 +391,30 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
             int baseDamage = AttackDamageLogic.DamageForAttack(attackName, effectConfig.basicDamage, effectConfig.poweredDamage);
             int damageBonus = progression != null ? Mathf.RoundToInt(progression.DamageBonus) : 0;
             float rangeMultiplier = progression != null ? progression.AttackRangeMultiplier : 1f;
+            bool piercing = AttackDamageLogic.IsPiercingSkill(attackName); // Skill1(Slash)=단일, Skill2(Combo2)=관통
             ep.Launch(dir, speed, effectConfig.lifetime * rangeMultiplier, frames, effectConfig.frameRate,
-                baseDamage + damageBonus, effectConfig.hitboxSize);
+                baseDamage + damageBonus, effectConfig.hitboxSize, piercing);
+        }
+    }
+
+    /// <summary>Z키 2단 콤보(ComboV1/ComboV2) 전용 근접 판정. VSlashFx는 순수 시각 효과라
+    /// 데미지가 없었는데, 여기서 눈에 보이지 않는 짧은 히트박스를 그 자리에 하나 더 띄워
+    /// 판정만 담당시킨다(투사체처럼 날아가지 않게 속도 0).</summary>
+    private void SpawnComboVDamage(string attackName, float dir, Vector3 pos)
+    {
+        if (basicEffectPrefab == null || effectConfig == null) return;
+
+        int baseDamage = AttackDamageLogic.DamageForComboV(attackName, effectConfig.comboVDamage);
+        int damageBonus = progression != null ? Mathf.RoundToInt(progression.DamageBonus) : 0;
+
+        var go = Instantiate(basicEffectPrefab, pos, Quaternion.identity);
+        var sr2 = go.GetComponent<SpriteRenderer>();
+        if (sr2 != null) sr2.enabled = false; // 시각 효과는 VSlashFx가 이미 재생 중 — 판정만 담당
+        var ep = go.GetComponent<EffectProjectile>();
+        if (ep != null)
+        {
+            ep.Launch(dir, 0f, effectConfig.comboVHitLifetime, null, 0f,
+                baseDamage + damageBonus, effectConfig.comboVHitboxSize, true);
         }
     }
 
@@ -409,6 +488,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
                     FloatingText.Spawn(transform.position + Vector3.up * 1.1f,
                         judge == 0 ? "PERFECT" : "GOOD",
                         judge == 0 ? Color.yellow : Color.white);
+                    orb.SendMessage("OnParried", SendMessageOptions.DontRequireReceiver);
                     Destroy(orb.gameObject);
                 }
             }
