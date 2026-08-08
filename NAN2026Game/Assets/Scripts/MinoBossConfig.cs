@@ -32,6 +32,7 @@ namespace NAN2026
         public float fpsAtk = 14f;
         public float fpsHit = 14f;
         public float fpsDeath = 12f;
+        public float parryBuffer = 0.2f; // 선입력 버퍼(일찍 눌러도 이 시간 내 유효)
         [Header("디버그")]
         public bool showParryDebug = true; // 패링 판정 텔레메트리 (제출 전 OFF)
         [Header("그로기")]
