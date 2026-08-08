@@ -6020,3 +6020,18 @@ GandalfHardcore Archer sheet를 사용 row0은 IDLE로 사용 Walk row3, Attack 
 - 사용자 지시의 Archer 행 번호(row2=Attack, row3=Walk, row5=Death)가 실측 5행 구조와 +1 어긋남 → 프레임 형상 실측(row1 폭 32→54 활당김, row2 8프레임 균일 보행, row4 마지막 51x15 눕기)으로 대조해 질의 후 확정
 ### 범위 메모
 - SPEC '적 2종(돌진형·원거리형)' 항목에 해당. 패링 대응은 요청에 없어 미구현(범위 방어)
+
+
+## [조사] Scene3 조명 설정 꼬임 — 2026-08-09 04:44
+### 프롬프트
+[조사]지금 AdventureScene3에 AdventureScene2에 적용되었던 전체 화면 어두워지는걸로 적용되어 있는데... 토치 연출 후 주인공 주변 밝히고 이동에 따라 밝게 한 설정이 꼬인 것 같다
+### 조사 결과
+- 실측: Global Light 2D **intensity 1.00**(씬 저장값) — 시작부터 전체가 환함. 토치 12개 CandleLight2D는 전부 0.00(연출 대기 상태로 정상)
+- **PlayerVisionLight(RealPlayer 자식, point 0.55/반경4.5)가 비활성** → 주인공 주변 시야광이 아예 꺼져 있음. 이게 '주변만 밝히고 이동 따라 밝아지는' 연출의 주체
+- IntroSequencer(IntroDirector)는 globalLight만 제어(globalMaxIntensity 1.00까지 올림) — 시야광은 코드가 건드리지 않음. 즉 연출 종료 후 전체가 1.00으로 환해지는 현재 구성은 'Scene2식 전체 밝히기'와 동일 결과
+- 이름 불일치 위험: 우리 락 코드가 GameObject.Find("Player")를 쓰는데 이 씬 플레이어는 **RealPlayer** — 인트로 이동/오디오 락이 무효일 수 있음(별건, 확인 필요)
+- 해법 방향 3안: ①globalMax를 낮은 값(0.15~0.25)로 두고 PlayerVisionLight 활성화(시야 연출 복원) ②전체 밝히기 유지(현행) ③토치 주변만 밝히고 시야광 없음
+### 검증
+해당 없음
+### 커밋
+해당 없음(무수정)
