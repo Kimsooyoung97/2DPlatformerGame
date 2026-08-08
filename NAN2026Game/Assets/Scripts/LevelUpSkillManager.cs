@@ -101,12 +101,18 @@ public sealed class LevelUpSkillManager : MonoBehaviour
 
         switch (type)
         {
-            case AugmentType.ParryCooldownDown: return "패링 쿨타임\n-" + m + "초";
-            case AugmentType.ParryDurationUp: return "패링 지속시간\n+" + m + "초";
-            case AugmentType.DamageUp: return "공격 데미지\n+" + m;
-            case AugmentType.Heal: return "체력 회복\n+" + m;
-            case AugmentType.MaxHealthUp: return "최대 체력\n+" + m;
-            case AugmentType.AttackRangeUp: return "공격 사거리\n+" + Mathf.RoundToInt(m * 100f) + "%";
+            case AugmentType.DamageUp:
+                skillIcon[idx].sprite = Resources.Load<Sprite>("DamageUp");
+                return "공격 데미지\n+" + m;
+            case AugmentType.Heal:
+                skillIcon[idx].sprite = Resources.Load<Sprite>("Heal");
+                return "체력 회복\n+" + m;
+            case AugmentType.ManaUp:
+                skillIcon[idx].sprite = Resources.Load<Sprite>("ManaUp");
+                return "마나 수급량\n+" + m;
+            case AugmentType.ManaHeal:
+                skillIcon[idx].sprite = Resources.Load<Sprite>("ManaHeal");
+                return "마나 회복\n+" + m;
             case AugmentType.UnlockSkill1: return "Skill1 획득";
             case AugmentType.UnlockSkill2: return "Skill2 획득";
             default: return string.Empty;
