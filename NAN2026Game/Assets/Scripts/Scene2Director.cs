@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using UnityEngine.Rendering.Universal;
+using UnityEngine.UI;
 
 namespace NAN2026
 {
@@ -20,6 +21,7 @@ namespace NAN2026
         private Component cmCam;
         private System.Reflection.PropertyInfo followProp;
         private TextMesh pips;
+        private Text topLabel;
 
         private void Start()
         {
@@ -31,10 +33,12 @@ namespace NAN2026
                 if (mb.GetType().Name == "CinemachineCamera") { cmCam = mb; followProp = mb.GetType().GetProperty("Follow"); break; }
             SpikeParryEvents.OnParry += HandleParry;
             BuildPips();
+            BuildTopLabel();
             if (config != null && config.debugSkipToBoss)
             {
                 count = config.parryGoal; done = true;
                 RefreshPips();
+                UpdateTopLabel();
                 if (player != null && boss != null)
                     player.position = boss.position + new Vector3(-config.debugSpawnOffsetX, 0.5f, 0f);
                 StartCoroutine(Brighten());
@@ -42,6 +46,32 @@ namespace NAN2026
         }
 
         private void OnDestroy() { SpikeParryEvents.OnParry -= HandleParry; }
+
+        private void BuildTopLabel()
+        {
+            var canvas = GameObject.Find("UI Canvas");
+            if (canvas == null || config == null) return;
+            var go = new GameObject("SpikeParryLabel");
+            go.transform.SetParent(canvas.transform, false);
+            var rt = go.AddComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0.5f, 1f);
+            rt.anchorMax = new Vector2(0.5f, 1f);
+            rt.pivot = new Vector2(0.5f, 1f);
+            rt.anchoredPosition = new Vector2(0f, -28f);
+            rt.sizeDelta = new Vector2(640f, 60f);
+            topLabel = go.AddComponent<Text>();
+            topLabel.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            topLabel.fontSize = 34;
+            topLabel.alignment = TextAnchor.MiddleCenter;
+            topLabel.color = new Color(1f, 0.9f, 0.35f);
+            UpdateTopLabel();
+        }
+
+        private void UpdateTopLabel()
+        {
+            if (topLabel == null || config == null) return;
+            topLabel.text = count >= config.parryGoal ? "어둠이 걷혔다!" : "스파이크 패링  " + count + " / " + config.parryGoal;
+        }
 
         private void BuildPips()
         {
@@ -70,6 +100,7 @@ namespace NAN2026
             if (done || config == null) return;
             count++;
             RefreshPips();
+            UpdateTopLabel();
             StartCoroutine(FocusBoss());
             if (count >= config.parryGoal) { done = true; StartCoroutine(Brighten()); }
         }
