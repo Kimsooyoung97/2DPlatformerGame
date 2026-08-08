@@ -6049,3 +6049,17 @@ GandalfHardcore Archer sheet를 사용 row0은 IDLE로 사용 Walk row3, Attack 
 - 실제 연출 감각(밝기·반경)은 사용자 재생
 ### 실패와 수정
 없음
+
+
+## [수정] Scene3 소품 발광 제거 (조명 반응 통일) — 2026-08-09 04:51
+### 프롬프트
+지금은 소품들이 다 빛나고 있어서 어색한데, 예전에 소품 발광도 다 지웠던걸로 기억하는데?
+### 조작 내역
+- 원인: Scene3 소품이 Cainos 전용 셰이더(Sprite 3D Lit Shadow Mask 계열) 사용 → URP Light2D를 따르지 않아 암전에서도 원색 유지. Scene2는 이미 Sprite-Lit-Default 126개로 전환돼 있었음(사용자 기억 확인)
+- Scene3의 MT Props/Props Transparent/Wall Dirt/Spider Web 205개를 Sprite-Lit-Default로 인스턴스 오버라이드(공유 .mat 원본 무수정, 프리팹 인스턴스는 RecordPrefabInstancePropertyModifications)
+- 유지: MT Shadow 15(그림자), MT Sky 20(하늘), FX Light Shaft 16(광선 연출) — 의도적 자체 발광
+### 검증
+- 디스크 재로드 후 분포: Sprite-Lit-Default×215 / MT Shadow×15 / MT Sky×20 / FX Light Shaft×16 / Sprites-Default×2
+- 실제 어둠 반응은 사용자 재생
+### 실패와 수정
+없음
