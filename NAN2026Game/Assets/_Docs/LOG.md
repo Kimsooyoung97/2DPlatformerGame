@@ -5355,85 +5355,26 @@ fireattack이랑 firebomb이 원거리 구체라고?
 - 컴파일 0, 타입 생존, Scene2 MinoBoss의 SecondSceneBoss 컴포넌트 GUID 유지(MISSING 0)
 ### 실패와 수정
 없음
-
-
-## [수정] 보스 패링 선입력 버퍼 0.2s — 2026-08-08 16:39
+## [수정] 조작키 재배치(Z/X/C/Space) + 레벨업 증강으로 얻는 스킬 시스템 구현 — 2026-08-08
 ### 프롬프트
-SecondScene2에서 보스와 패링할때 0.2초 정도 빨리해도 다 되도록
+조작키를 바꿀거야 현재 v 키에 존재하던 공격이 z가 되고 x키를 스킬 사용, c키를 가지고 있는 스킬 중 다음 스킬로 변경, 스페이스바- 패링 , 그리고 스킬은 레벨업 할 때 고르는 증강에서 얻을 수 있도록 바꿀 것이고 원래 존재하던 z키, x키 모두 스킬로 이전돼 첫 스킬을 얻으면 바로UI Canvas의 SkillImage sprite를 첫 스킬 이름을 통해 Resources.Load<Sprite> () 해서 스프라이트를 바꿔주고 C 키를 누르면 다음 이미지로 바뀌게 해야해
+### 조사
+현재 키 배치 확인: Z=Slash(기본공격), X=Combo2(구 K, 스킬공격), V=2단 콤보(ComboV1/2, 이펙트 없음), C=패링(+패링-연계 콤보, VFX 스폰 포함). LevelUpSkillManager에 이미 skillIcon[]·Resources.Load("Skill1"/"Skill2") 패턴이 부분적으로 작업 중이었으나 기존 6개 수치 증강 전부에 잘못 뒤섞여 배정되어 있었음(모든 카드가 "Skill1/Skill2 획득"으로만 표시). Resources 폴더에 Skill1/2/3.jpeg 이미 존재, UI Canvas에 SkillImage·LevelUpPanel/Skill1~3 카드 구조 이미 준비됨
 ### 조작 내역
-- MinoBossConfig.parryBuffer 0.2s / SecondSceneBoss.ParryBuffered(): 최근 0.2s 내 미소비 입력이면 성립
-- atk_1 프레임창: wasPressedThisFrame→ParryBuffered(), atk_2 시간창: 창 진입 시 버퍼 선점 후 TryParry 폴백 — 양 공격 모두 조기 입력 흡수(1회 소비 가드로 중복 방지)
+- PlayerController2D.cs: Z키에 기존 V키의 2단 콤보 로직(ComboV1/ComboV2, comboVStage 등 상태 그대로) 이전, V키 블록 완전 제거. X키는 UseSelectedSkill() 호출로 교체. C키는 CycleSkill() 호출로 교체. 기존 C키의 패링 전체 블록(패링-연계 콤보, VFX 스폰 포함)을 그대로 spaceKey로 이전
+- 스킬 관리 신규: ownedSkills(List<string>)·selectedSkillIndex 필드, AddSkill(id)(중복 방지, 첫 스킬이면 자동 선택+SkillImage 갱신)·GetSkillAttackParams(id)(Skill1→Slash/slashDuration/slashLungeSpeed, Skill2→Combo2/combo2Duration/combo2LungeSpeed)·UseSelectedSkill()·CycleSkill()·UpdateSkillImage()(Resources.Load<Sprite>(스킬id)) 추가. skillImageUI(Image) 직렬화 필드로 UI Canvas/SkillImage 연결
+- AugmentConfig.cs: AugmentType에 UnlockSkill1(구 Z=Slash)·UnlockSkill2(구 X=Combo2) 추가, GetMagnitude에 고정값(등급 무관) 처리 추가
+- PlayerProgression.cs: PlayerController2D 참조 추가(Awake에서 GetComponent), ApplyAugment에 UnlockSkill1/2 케이스 추가 — controller.AddSkill("Skill1"/"Skill2") 호출
+- LevelUpSkillManager.cs: DescribeAugment 재작성 — 기존 6개 수치 증강은 원래의 정확한 설명 텍스트로 복원(잘못 섞여있던 'Skill1/2 획득' 표시 제거), UnlockSkill1/2만 skillIcon 아이콘 교체 + 배열 범위·null 체크 추가(인덱스 초과 위험 제거)
 ### 검증
-- 컴파일 0. 조기 패링 관대함은 사용자 재생
+- 매 파일 수정 직후 refresh_unity(compile=force) + read_console(types=error) → 전부 0건
+- 씬에서 PlayerController2D.skillImageUI를 UI Canvas/SkillImage로 연결, 저장 → manage_scene(load) 강제 재로드로 유지 확인
+- run_tests(EditMode) → 144/144 통과 (job 7e654a2a0f0e4f349c00dc604972edba)
+- **재생 모드 진입 전 사용자에게 명시적 허락을 구함**(직전 세션에서 무한 루프로 에디터가 멈췄던 사고 직후라 신중하게 진행)
+- 재생 모드 실측: img.sprite를 NULL로 초기화하고 ownedSkills를 리플렉션으로 비운 뒤 AddSkill("Skill1") 호출 → SkillImage.sprite가 정확히 NULL→Skill1로 갱신됨을 확인(첫 스킬 자동 반영). AddSkill("Skill2") 추가 후 selectedSkillIndex는 0(Skill1) 그대로 유지됨을 확인(자동 선택은 '첫 스킬'에만 적용됨이 맞음). CycleSkill()을 2회 호출해 index/sprite가 0(Skill1)→1(Skill2)→0(Skill1)으로 정확히 순환함을 확인. UseSelectedSkill() 호출 시 queuedAttack이 정확히 "Slash"(Skill1의 매핑)로 큐잉됨을 확인. Z/Space는 인라인 로직이라 리플렉션 직접 호출 불가 — 기존에 검증됐던 로직을 키만 바꿔 그대로 옮긴 것이라 컴파일 통과로 갈음
+- 재생 모드 전체 구간에서 콘솔 에러/경고 0건, 응답 지연·멈춤 없음 확인
 ### 실패와 수정
-- WriteAlltext 오타 1회
-
-
-## [조사] 씬 재진입 시 촛불 밝아짐 연출 소실 — 2026-08-08 16:41
-### 프롬프트
-[조사] SecondScene2에서 SecondScene2로 옮기면 우리가 연출한 촛불켜지는 화면이 캔슬되는데 어떻게 하면 좋을까?
-### 조사 결과
-- 원인: Scene2Director 진행상태(count/done)가 인스턴스 지역변수 — LoadScene(Portal 등)으로 씬 재로드 시 감독 파괴·전역광이 씬 저장값 0.03으로 리셋. 밝아짐(Brighten)은 done일 때만 실행되나 done도 초기화되어 어둠 복귀
-- 씬 전환: Portal.cs 등 LoadScene 방식(단일 씬 리로드)
-- 해법 3안: ①정적 플래그(static bool sceneCleared)로 클리어 기억 → Start에서 즉시 밝게 복원(퀵·경량) ②진행상태 static 승격+PlayerPrefs 영속(재시작에도 유지) ③단일 씬 세션이면 재진입 자체를 없애 additive 유지(구조 변경 큼). 마감 감안 ①권장
-### 검증
-해당 없음
-### 커밋
-해당 없음(무수정)
-
-
-## [구현] 밝아짐 연출 입력 락 (A방안) — 2026-08-08 16:44
-### 프롬프트
-[구현]A방안으로 진행하자 (아무 키 눌러도 계속 재생·캐릭터는 안 움직임)
-### 조작 내역
-- Scene2Director.Brighten: 시작 시 SetPlayerControl(false)=PlayerController2D·PlayerSkill 비활성+속도0(입력 무시·정지), 밝아짐 1.8s+여유 brightenHold 0.6s 후 복귀
-- Scene2DirectorConfig.brightenHold 0.6 신설
-### 검증
-- 컴파일 0. 락·복귀는 사용자 재생
-### 실패와 수정
-없음
-
-
-## [조사] 토치 인트로 아무키 스킵 — 2026-08-08 16:47
-### 프롬프트
-[조사]SecondScene2→3 토치 3개 순차 점화 연출이 키 누르면 캔슬되고 바로 밝아지는 오류
-### 조사 결과
-- 범인: IntroSequencer.Update의 `anyKey.wasPressedThisFrame → t=total` — 아무 키나 누르면 연출 시간을 끝으로 점프시키는 '의도된 스킵'이 이동 입력에도 발동
-- 방안: ①스킵 전면 제거(항상 완주) ②C 홀드 스킵으로 교체(CutsceneDirector와 동일 문법 — 이동키 오발 방지) ③스킵 유지+입력 락(이동만 무시). 권장 ① 또는 ②
-### 검증
-해당 없음
-### 커밋
-해당 없음(무수정)
-
-
-## [구현] 토치 인트로 아무키 스킵 제거 — 2026-08-08 16:50
-### 프롬프트
-[구현] 1번 방안으로 진행하자
-### 조작 내역
-- IntroSequencer.Update의 anyKey→t=total 스킵 라인 제거 — 토치 순차 점화·플레이어 주변 확장 연출 항상 완주
-### 검증
-- 컴파일 0. Scene3 진입 시 키 연타에도 연출 완주는 사용자 재생
-### 실패와 수정
-없음
-
-
-## [수정] 토치 인트로 이동 잠금 — 2026-08-08 16:51
-### 프롬프트
-취소 안되는건 좋은데 움직이지도 못하게 하는건 안돼?
-### 조작 내역
-- IntroSequencer: 연출 진행 중(t<total) 컨트롤러·스킬 비활성+속도0, 완주 시 1회 복귀 — Brighten 락과 동일 문법
-### 검증
-- 컴파일 0. 인트로 중 이동 불가·완주 후 조작 복귀는 사용자 재생
-### 실패와 수정
-없음
-
-
-## [수정] 인트로 오디오 락 — 2026-08-08 16:53
-### 프롬프트
-[수정] 움직임 락은 좋으나 사운드는 그대로 다 들리네. 사운드 이펙트도 락 가능하나?
-### 조작 내역
-- IntroSequencer.MuteWorldAudio: 락 시 씬 전 AudioSource 볼륨 0(원볼륨 보관, 인트로 BGM 예외)·완주 시 복원 — 이동 잠금과 동일 시점 연동
-### 검증
-- 컴파일 0. 인트로 중 무음(BGM 페이드만)·완주 후 사운드 복귀는 사용자 재생
-### 실패와 수정
-없음
+- 없음
+### 눈으로 확인 필요
+- 실제 키보드로 Z(콤보)·Space(패링+연계)가 체감상 자연스러운지(리플렉션으로는 인라인 로직을 직접 못 눌러봄)
+- LevelUpPanel에서 실제로 UnlockSkill1/UnlockSkill2 카드가 뽑혔을 때 아이콘·설명이 올바르게 나오는지

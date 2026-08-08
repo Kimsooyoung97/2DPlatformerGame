@@ -7,7 +7,9 @@ public enum AugmentType
     DamageUp,
     Heal,
     MaxHealthUp,
-    AttackRangeUp
+    AttackRangeUp,
+    UnlockSkill1, // 기존 Z키(구 Slash) 공격이 스킬화된 것 — 처음 얻는 스킬이면 SkillImage도 갱신됨
+    UnlockSkill2  // 기존 X키(구 Combo2) 공격이 스킬화된 것
 }
 
 /// <summary>
@@ -45,6 +47,8 @@ public sealed class AugmentConfig : ScriptableObject
             case AugmentType.Heal: return healByTier[tier];
             case AugmentType.MaxHealthUp: return maxHealthUpByTier[tier];
             case AugmentType.AttackRangeUp: return attackRangeUpByTier[tier];
+            case AugmentType.UnlockSkill1: return 1f; // 스킬 획득은 등급과 무관, 값 자체는 안 쓰임
+            case AugmentType.UnlockSkill2: return 1f;
             default: return 0f;
         }
     }

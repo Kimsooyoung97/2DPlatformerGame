@@ -21,6 +21,11 @@ namespace NAN2026
         [Header("데미지")]
         public int basicDamage = 1;
         public int poweredDamage = 3;
+        [Tooltip("Z키 2단 콤보(ComboV1/ComboV2) 고정 데미지")]
+        public int comboVDamage = 3;
         public Vector2 hitboxSize = new Vector2(0.9f, 0.9f);
+        [Tooltip("Z키 콤보의 근접 판정 히트박스 크기·지속시간(투사체처럼 날아가지 않고 그 자리에서 잠깐 판정)")]
+        public Vector2 comboVHitboxSize = new Vector2(1.1f, 1.1f);
+        public float comboVHitLifetime = 0.12f;
     }
 }

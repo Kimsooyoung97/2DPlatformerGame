@@ -15,6 +15,7 @@ public sealed class PlayerProgression : MonoBehaviour
     [SerializeField] private AugmentConfig augmentConfig;
     [SerializeField] private GameObject canvas;
     private PlayerHealth health;
+    private PlayerController2D controller;
 
     private int level = 1;
     private int xp;
@@ -46,6 +47,7 @@ public sealed class PlayerProgression : MonoBehaviour
     private void Awake()
     {
         health = GetComponent<PlayerHealth>();
+        controller = GetComponent<PlayerController2D>();
     }
 
     /// <summary>몬스터를 처치했을 때 등 경험치를 지급한다. 레벨업이 일어나면 증강 선택 이벤트를 발행한다.</summary>
@@ -134,6 +136,12 @@ public sealed class PlayerProgression : MonoBehaviour
                 break;
             case AugmentType.AttackRangeUp:
                 attackRangeMultiplier += magnitude;
+                break;
+            case AugmentType.UnlockSkill1:
+                if (controller != null) controller.AddSkill("Skill1");
+                break;
+            case AugmentType.UnlockSkill2:
+                if (controller != null) controller.AddSkill("Skill2");
                 break;
         }
     }
