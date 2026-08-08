@@ -23,6 +23,7 @@ namespace NAN2026
         private int parryCount;
         private bool[] swingResolved = new bool[2];
         private Image barFillImg;
+        private GameObject hudGo;
         private GameObject groggyFx;
         private GameObject burstMsg;
         private Coroutine sparkleCo, dashCo;
@@ -59,6 +60,7 @@ namespace NAN2026
         {
             if (config.barUnder == null) return;
             var cgo = new GameObject("BossHpHud");
+            hudGo = cgo;
             var canvas = cgo.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             canvas.sortingOrder = 510;
@@ -87,6 +89,7 @@ namespace NAN2026
             barFillImg.fillOrigin = 0;
             mk("over", config.barOver, 2);
             UpdateBar();
+            cgo.SetActive(false); // 보스전 개시 전엔 숨김
         }
 
         private void UpdateBar()
@@ -225,6 +228,7 @@ namespace NAN2026
             if (state == 4) { if ((int)animT >= cur.Length - 1) enabled = false; return; }
             if (player == null) return;
             float dx = Mathf.Abs(player.position.x - transform.position.x);
+            if (hudGo != null && !hudGo.activeSelf && dx <= config.aggroX) hudGo.SetActive(true); // 접근 시 체력바 등장
 
             if (state == 0)
             {

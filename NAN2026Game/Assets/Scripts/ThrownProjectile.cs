@@ -93,7 +93,6 @@ namespace NAN2026
                 pop.GetComponent<MeshRenderer>().sortingOrder = 900;
                 pop.AddComponent<PopupFloater>().Init(config.clashConfig.popupRise, config.clashConfig.popupLife);
             }
-            NAN2026.Showroom.ParryMeter.ReportSpike();
             PlayerMana.RewardParry(player);
             if (kind == ThrownKind.Axe && launcher != null)
             {

@@ -126,7 +126,6 @@ namespace NAN2026
                 Popup("패링 성공!", new Color(0.35f, 1f, 0.45f));
                 PlayerMana.RewardParry(player);
                 SpikeParryEvents.Report();
-                NAN2026.Showroom.ParryMeter.ReportSpike();
                 dir = new Vector2(-dir.x, Mathf.Abs(dir.y));
                 Invoke("BreakSilent", 0.5f);
                 return;

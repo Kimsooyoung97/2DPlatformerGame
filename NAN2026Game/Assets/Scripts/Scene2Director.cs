@@ -7,8 +7,9 @@ namespace NAN2026
 {
     public static class SpikeParryEvents
     {
+        public static int Count; // 정적 누계 — 구독 유실과 무관하게 항상 오른다
         public static System.Action OnParry;
-        public static void Report() { if (OnParry != null) OnParry(); }
+        public static void Report() { Count++; if (OnParry != null) OnParry(); }
     }
 
     // Scene2 연출 감독: 환경 투사체 패링 진행도를 상단에 표시하고,
