@@ -6383,3 +6383,29 @@ PlayerFxConfig.enableDebugKeys
 - 직전 [조사]에서 '슬라이스는 정상이니 원화가 문제'라고 단정했으나, **같은 키에 두 기능이 붙어 있는지 확인하지 않았다**. 내가 [구현] 당시 키 충돌을 인지하고 보고까지 해놓고도 원인 후보에서 제외한 것이 오진의 원인. FAIL 등재 대상
 ### 커밋
 해당 없음(무수정)
+
+
+## [수정] 미리보기 키 이전(5=hurt, 6=death) · hurt 4프레임 복원 — 2026-08-09 07:12
+### 프롬프트
+[수정]hurt를 5번 death를 6번으로 옮기고 hurt 프레임 4개로 복원해, InputLocked를 키면 다른 스킬이나 키에는 영향 끼치는건 없나?
+### 조작 내역
+- PlayerHurtDeathFx 디버그 키 이전: hurt digit4→**digit5**, death digit5→**digit6**. digit2~4 는 PlayerController2D 가 ComboB1~B3 에 선점 중
+- hurt 4프레임 복원: 직전 [조사]로 4번째 프레임이 정상임이 밝혀져 3→4 재슬라이스. 프레임별 정확 bbox + 접지점 피벗 방식 유지, PPU 664.64(최대 619px)
+- lockInputOnHurt 는 false 유지 — 아래 조사 결과 때문
+### InputLocked 영향 범위 조사 (사용자 질문)
+- 실체는 PlayerController2D.cs:260 한 줄 `var kb = InputLocked ? null : Keyboard.current;` 뿐인 **전역 static**
+- 차단: 방향키 이동 / ↑점프 / Shift 대시 / Z 콤보 / X 스킬 / C 스킬전환 / 숫자 2·3·4 / L / Ctrl 구르기·백스텝 / Space 패링. **PlayerSkill.cs:29 도 같은 플래그를 봐서 digit1 스킬도 차단**
+- 미차단: PlayerHealth F2·F3, OneWayDropThrough ↓+Space 하향점프, PlayerHurtDeathFx 디버그 키 — 각자 Keyboard.current 를 직접 읽음. **락 중에도 하향점프가 된다**
+- 컨트롤러는 계속 구동되어 중력·관성·애니메이션 유지. parryHeld 자가 회복 라인 있어 홀드 갇힘은 이미 방지됨
+- **최대 위험: 참조 카운트가 없다.** DemonBoss·SecondSceneBoss·Scene2Director·IntroSequencer·PlayerHurtDeathFx 가 같은 플래그를 공유하므로 **나중에 false 로 푸는 쪽이 이긴다**. 연출 락 중 피격 → hurt FX 종료가 연출 락을 해제해버릴 수 있음. 그래서 hurt 에는 켜지 않는다
+### 검증
+- 컴파일 0, read_console 우리 변경분 에러 0
+- EditMode 198/198 통과, 실패 0
+- hurt rect 상호 겹침 0건, 프레임별 내부 덩어리 전수 1개
+- 프리팹 재읽기: hurtFrames 4(Player_Hurt_0~3) / deathFrames 6(Player_Death_0~5)
+- 월드 크기 hurt 1.18x1.39 / 1.22x1.39 / 0.98x1.37 / 0.88x1.40 (높이 일정), 재생 길이 4/12+0.05 = 0.383초
+- **사용자 눈 판정 필요**: 5번=hurt 단독 재생(칼 모션 끼어들지 않음) / 6번=death / 실제 피격·사망 동작
+### 실패와 수정
+- 없음
+### 제출 전 OFF 목록
+PlayerFxConfig.enableDebugKeys (5·6 미리보기)

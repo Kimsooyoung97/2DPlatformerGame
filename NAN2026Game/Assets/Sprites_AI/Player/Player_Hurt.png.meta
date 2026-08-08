@@ -60,7 +60,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 660.3436
+  spritePixelsToUnits: 664.63855
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -196,6 +196,28 @@ TextureImporter:
       bones: []
       spriteID: dfe4484221e050e40800000000000000
       internalID: 5621915180926783229
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hurt_3
+      rect:
+        serializedVersion: 2
+        x: 2087
+        y: 498
+        width: 390
+        height: 619
+      alignment: 9
+      pivot: {x: 0.62965995, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: abddcb3cfbde71730800000000000000
+      internalID: 3969903004428852666
       vertices: []
       indices: 
       edges: []

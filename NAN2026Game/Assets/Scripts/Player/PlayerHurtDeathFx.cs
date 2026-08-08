@@ -70,8 +70,9 @@ namespace NAN2026
                 var kb = Keyboard.current;
                 if (kb != null)
                 {
-                    if (kb.digit4Key.wasPressedThisFrame) Play(1, true);
-                    if (kb.digit5Key.wasPressedThisFrame) Play(2, true);
+                    // 5=hurt / 6=death. digit2~4 는 PlayerController2D 가 ComboB1~B3 에 쓰고 있어 충돌한다(FAIL#26).
+                    if (kb.digit5Key.wasPressedThisFrame) Play(1, true);
+                    if (kb.digit6Key.wasPressedThisFrame) Play(2, true);
                 }
             }
 
