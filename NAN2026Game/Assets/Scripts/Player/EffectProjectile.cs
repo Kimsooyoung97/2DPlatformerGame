@@ -86,6 +86,8 @@ namespace NAN2026
             if (minoHit0 != null) { minoHit0.TakeDamage(damage); return; }
             var demonHit = other.GetComponentInParent<NAN2026.DemonBoss>();
             if (demonHit != null) { demonHit.TakeDamage(damage); return; } // Scene4 데몬 — 미등재 시 무음 통과
+            var dmgTarget = other.GetComponentInParent<NAN2026.IPlayerDamageable>();
+            if (dmgTarget != null) { dmgTarget.TakeDamage(damage); return; } // 신규 잡몹 공통 창구(FAIL#24)
             NHNDemo.MonsterHealth monster = other.GetComponentInParent<NHNDemo.MonsterHealth>();
             if (monster != null)
             {

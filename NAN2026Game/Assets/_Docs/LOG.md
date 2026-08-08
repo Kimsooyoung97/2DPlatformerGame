@@ -5953,3 +5953,284 @@ Fire.png 짤라서 애니메이션 만들어주고 Decor_40_b도 텐트랑 도�
 - 불꽃 재생·구도는 사용자 재생 확인
 ### 실패와 수정
 없음
+
+
+## [조사] 외부 에셋 Archer / Knight 2D 스프라이트 시트 정밀 실측 — 2026-08-09 03:50
+### 프롬프트
+[조사]C:\Users\edwin\OneDrive\Desktop\NHN 대회 에셋\공주를 구하라에 보면 Archer, Knight 2D 2개가 있어. 이 스프라이트 시트 정밀하게 조사해봐.
+### 조사 결과
+**Knight 2D Pixel Art** (with_outline / without_outline 각 10파일, 규격 동일)
+- 전 시트 **캔버스 높이 84px, 프레임 폭 96px 균등**. 96px 격자로 자르면 프레임 경계 침범 0건 (IDLE·RUN·ATTACK1·DEATH 전수 검증)
+- 프레임 수: IDLE 7 / WALK 8 / RUN 8 / JUMP 5 / ATTACK1 6 / ATTACK2 5 / ATTACK3 6 / DEFEND 6 / HURT 4 / DEATH 12 = **합계 67프레임**
+- 본체 실측: 대기 26~32 x 34~37px. **발끝 y=22 고정**(JUMP만 y=24) — 하단 정렬이 아니라 하단 22px 여백이 있는 중앙 배치
+- 공격 시 콘텐츠 폭 최대 54px(ATTACK1 f4), DEATH는 12프레임에 걸쳐 높이 35→14px로 쓰러짐
+- SPEC.md '플레이어 스프라이트 캔버스 96×84px' 기술 기준과 **캔버스 규격이 정확히 일치**. 단 SPEC의 '본체 16×40 하단 정렬'과 달리 실측은 약 30×36에 하단여백 22px — SPEC 문구가 실물과 어긋남
+**GandalfHardcore Archer** (색상 변형 8종 + arrow.png)
+- 시트 704x320, **64px 정사각 격자 11열 x 5행 = 55칸**. 8색 변형 전부 픽셀 배치 동일(불투명 27,511px로 일치) — 팔레트 스왑
+- 행별 프레임: row0 5 / row1 11 / row2 8 / row3 5 / row4 6 = **35프레임 사용, 20칸 공백**
+- 본체 32x43px, **발끝 y=0 완전 하단 정렬**(row2 c7만 y=1). row1은 활 당김으로 폭 최대 54px, row4는 마지막 2프레임이 51x15/51x16 → 사망 눕기로 추정
+- **경계 침범 1칸: row1 col9** (X 10~63으로 오른쪽 끝에 붙음). 64px 격자 슬라이스 시 이웃 칸 파편 유입 가능 — FAIL#9 후처리 대상
+- arrow.png 30x5px 단일 스프라이트
+**라이선스 (ASSET_CREDITS 기입 필요)**
+- Archer(GandalfHardcore): 상업/비상업 게임 포함 가능, 수정 가능. **재판매·리패키징·재배포 금지, AI 학습 사용 금지, NFT·인쇄물 금지**. 출처 https://gandalfhardcore.itch.io/
+- Knight 2D: 개인·상업 프로젝트 사용 가능, 수정 가능, 크레딧 권장(필수 아님). **에셋 자체로의 재판매·재배포 금지, NFT 금지**
+- 둘 다 재배포 금지 조항이 있어 **공개 저장소 커밋 시 주의 필요**(현재 프로젝트 저장소는 public 여부 확인 안 함)
+### 검증
+해당 없음
+### 실패와 수정
+없음
+### 커밋
+해당 없음(무수정)
+
+
+## [구현] 잡몹 2종(Knight 근접 · Archer 원거리) 프리팹화 + Scene3 배치 — 2026-08-09 04:18
+### 프롬프트
+Knight 2D pixel ART  with_outline 에서 ATTACK 3을 쓰고 Player 평타 5번 맞으면 DEATH가 작동되도록 맞을때 HURT 이펙트 적용, 평소 모습은 IDLE, 걷는건 WALK 작동
+
+GandalfHardcore Archer sheet를 사용 row0은 IDLE로 사용 Walk row3, Attack  은 row2를 쓰지만 이때 arrow가 발사하도록 Player에게 피격을 당할떄는 row4 Player에게  평타 5번 이상 맞으면 row5 DEATH 작동
+
+각 캐릭터들을 프리펩화하고 AdventureScene3에 배치해줘
+(수정 지시: walk는 row2 attack은 row1 피격 당하는건 row3, death는 row4로 적용)
+### 조작 내역
+- 에셋 반입: with_outline 10파일 → Assets/Art/Enemies/Knight/, ArcherSheet+arrow → Assets/Art/Enemies/Archer/
+- 슬라이스: Knight 96x84 균등 67프레임(PPU 25.714 = 본체 36px→1.40u, 피벗 (0.5,0.2619)=발끝 y22)
+  Archer 64x64 격자 중 사용 35칸만(IDLE5/ATTACK11/WALK8/HURT5/DEATH6, PPU 30.714 = 본체 43px→1.40u, 피벗 (0.5,0)=발끝)
+  두 캐릭터 본체를 1.40u로 통일(플레이어 스프라이트 1.45u 대비)
+- 신규 순수 로직 NAN2026.Core/EnemyStateLogic.cs: Decide / IsDead / AnimIndex / AnimFinished / ShouldFire / FaceSign
+- 신규 EnemyConfig(SO) 1종 + 자산 2개(KnightEnemyConfig / ArcherEnemyConfig). 수치 전부 SO 소유
+- EnemyBase(추상) + KnightEnemy / ArcherEnemy / ArcherArrow. 상태 IDLE/WALK/ATTACK/HURT/DEATH
+  · 피격 5회 → DEATH(잔류 후 소멸), 피격마다 HURT + 빨간 점멸
+  · Knight 공격 ATTACK3(6프레임, 타격창 0.40~0.70), Archer 공격 row1(11프레임, fireFrac 0.75에 화살 발사)
+  · 피벗이 발끝이라 접지는 groundY 대입만으로 성립(데몬의 feetOffset 불필요)
+- **IPlayerDamageable 인터페이스 신설**: EffectProjectile(Z)·SlashProjectile(X) 디스패처에 인터페이스 분기 1개씩 추가.
+  FAIL#24가 '신규 적마다 분기 추가 누락 → 침묵 무력화'였으므로, 앞으로는 인터페이스만 구현하면 자동 피격된다
+- 프리팹: Assets/Prefabs/Enemies/KnightEnemy.prefab, ArcherEnemy.prefab (SR order 40 / Kinematic RB useFullKinematicContacts / BoxCollider2D trigger 0.9x1.40 offset y0.70)
+- Scene3 배치: 복도 바닥 y=0.04 실측 후 KnightEnemy(22, 0.04) / ArcherEnemy(45, 0.04). 플레이어 시작 x=2.99 → 근접 먼저, 원거리 나중 순서
+- ASSET_CREDITS.md 2건 기입(라이선스 원문 요지·규격·용도)
+### 검증
+- 컴파일 0, read_console error/exception 0건
+- EditMode 191/191 통과 (EnemyStateLogicTests 12개 신규, 실패 0)
+- 리플렉션 실행 검증: Decide(12,10,2,true)=0(idle) / Decide(6,…)=1(walk) / Decide(1.5,…)=2(attack) / IsDead(5,5)=True
+  KnightEnemy·ArcherEnemy 모두 IPlayerDamageable 구현 확인(IsAssignableFrom=True)
+- 슬라이스 재읽기: Knight 7/8/6/4/12프레임, Archer 5/8/11/5/6프레임, arrow 1개 — 지정 행 매핑과 일치
+- 씬 저장 후 디스크 재로드 검증: 두 프리팹 인스턴스 생존, config 배선 정상, 배열 전수 일치, 콜라이더 하단 y=0.04(바닥과 오차 0)
+- 테스트 후 씬 생존 재확인: dirty=False, 두 오브젝트 active
+- **사용자 눈 판정 필요**: (1) 두 적이 지면을 딛고 서는지 (2) 접근 시 걷기→공격 전환 (3) Z·X 5대에 DEATH, 매 타격마다 HURT (4) 아처 화살이 손에서 나가 플레이어에게 명중하는지
+### 실패와 수정
+- 사용자 지시의 Archer 행 번호(row2=Attack, row3=Walk, row5=Death)가 실측 5행 구조와 +1 어긋남 → 프레임 형상 실측(row1 폭 32→54 활당김, row2 8프레임 균일 보행, row4 마지막 51x15 눕기)으로 대조해 질의 후 확정
+### 범위 메모
+- SPEC '적 2종(돌진형·원거리형)' 항목에 해당. 패링 대응은 요청에 없어 미구현(범위 방어)
+
+
+## [조사] Scene3 조명 설정 꼬임 — 2026-08-09 04:44
+### 프롬프트
+[조사]지금 AdventureScene3에 AdventureScene2에 적용되었던 전체 화면 어두워지는걸로 적용되어 있는데... 토치 연출 후 주인공 주변 밝히고 이동에 따라 밝게 한 설정이 꼬인 것 같다
+### 조사 결과
+- 실측: Global Light 2D **intensity 1.00**(씬 저장값) — 시작부터 전체가 환함. 토치 12개 CandleLight2D는 전부 0.00(연출 대기 상태로 정상)
+- **PlayerVisionLight(RealPlayer 자식, point 0.55/반경4.5)가 비활성** → 주인공 주변 시야광이 아예 꺼져 있음. 이게 '주변만 밝히고 이동 따라 밝아지는' 연출의 주체
+- IntroSequencer(IntroDirector)는 globalLight만 제어(globalMaxIntensity 1.00까지 올림) — 시야광은 코드가 건드리지 않음. 즉 연출 종료 후 전체가 1.00으로 환해지는 현재 구성은 'Scene2식 전체 밝히기'와 동일 결과
+- 이름 불일치 위험: 우리 락 코드가 GameObject.Find("Player")를 쓰는데 이 씬 플레이어는 **RealPlayer** — 인트로 이동/오디오 락이 무효일 수 있음(별건, 확인 필요)
+- 해법 방향 3안: ①globalMax를 낮은 값(0.15~0.25)로 두고 PlayerVisionLight 활성화(시야 연출 복원) ②전체 밝히기 유지(현행) ③토치 주변만 밝히고 시야광 없음
+### 검증
+해당 없음
+### 커밋
+해당 없음(무수정)
+
+
+## [수정] Scene3 원래 조명 연출 복원 — 2026-08-09 04:47
+### 프롬프트
+원래 의도 복원
+### 조작 내역
+- IntroConfig.globalMaxIntensity 1.00→0.20 (연출 후에도 어둑한 던전 유지 — Scene2식 전체 밝히기 탈피)
+- 씬 전역광 시작값 1.00→0.03(암전 시작), PlayerVisionLight 활성화 + 밝기 0.9·외반경 6.5·내반경 1.2 (주인공 주변 시야, 이동 시 따라옴)
+- 플레이어 탐색은 이미 PlayerLocator(태그→Player→RealPlayer 폴백)로 해결돼 있어 수정 불요 확인
+### 검증
+- 컴파일 0, 디스크 재로드 후 재검증: 전역광=0.03 시야광 active=True 밝기=0.55 반경=4.5 | globalMax=0.20
+- 실제 연출 감각(밝기·반경)은 사용자 재생
+### 실패와 수정
+없음
+
+
+## [수정] Scene3 소품 발광 제거 (조명 반응 통일) — 2026-08-09 04:51
+### 프롬프트
+지금은 소품들이 다 빛나고 있어서 어색한데, 예전에 소품 발광도 다 지웠던걸로 기억하는데?
+### 조작 내역
+- 원인: Scene3 소품이 Cainos 전용 셰이더(Sprite 3D Lit Shadow Mask 계열) 사용 → URP Light2D를 따르지 않아 암전에서도 원색 유지. Scene2는 이미 Sprite-Lit-Default 126개로 전환돼 있었음(사용자 기억 확인)
+- Scene3의 MT Props/Props Transparent/Wall Dirt/Spider Web 205개를 Sprite-Lit-Default로 인스턴스 오버라이드(공유 .mat 원본 무수정, 프리팹 인스턴스는 RecordPrefabInstancePropertyModifications)
+- 유지: MT Shadow 15(그림자), MT Sky 20(하늘), FX Light Shaft 16(광선 연출) — 의도적 자체 발광
+### 검증
+- 디스크 재로드 후 분포: Sprite-Lit-Default×215 / MT Shadow×15 / MT Sky×20 / FX Light Shaft×16 / Sprites-Default×2
+- 실제 어둠 반응은 사용자 재생
+### 실패와 수정
+없음
+
+
+## [수정] Scene3 창문 발광 정리 — 2026-08-09 04:53
+### 프롬프트
+Window 01 A, Break 02 (1), Window 02 B 등등 창문들도 다 빛나
+### 조작 내역
+- 실측: 창문 본체 22개는 이미 Lit 전환 완료 상태였고, 빛나는 주체는 창문 '자식' 오브젝트 — Sky(MT Sky, Unlit Shadow Mask) 20개 + Light Shaft(URP Particles/Unlit) 16개 (직전 작업에서 내가 '의도된 발광'으로 판단해 남긴 것들)
+- Sky 20개 → Sprite-Lit-Default 전환(창밖도 어둠에 묻힘), Light Shaft 16개 → 비활성(삭제 아님, 되돌리기 용이)
+### 검증
+- 디스크 재로드: Sprite-Lit-Default×235 / MT Shadow×15 / FX Light Shaft×16(전부 비활성, 활성 잔여 0) / Sprites-Default×2
+- 실제 화면은 사용자 재생
+### 실패와 수정
+- 직전 작업의 '의도된 발광' 판단이 과했음 자인 — 어둠 씬에선 Sky·Shaft도 정리 대상
+
+
+## [조사] FogOfWar(캐릭터 광선 시야) 복원 여부 — 2026-08-09 04:54
+### 프롬프트
+[조사]캐릭터가 이동하면 맵이 밝아지는것도 복원했지? 캐릭터에서 광선을 쏴서 조절한다고 했던거 같은데?
+### 조사 결과
+- 그 시스템 실존: FogOfWar.cs(5KB)+FogLogic+FogOfWarConfig — 플레이어 눈 위치에서 전방위 RaycastAll(occlusionMask)로 벽 차폐를 계산해 안개를 걷는 방식 (사용자 기억과 일치)
+- Scene3 부착 상태: Stage_Fog 오브젝트에 enabled=True로 살아 있으나 **target 슬롯이 NULL** → 추적 대상이 없어 사실상 미동작 상태
+- 앞선 복원 작업에서 되살린 것은 PlayerVisionLight(단순 추종 점광원)뿐이며, 안개 걷기(광선 시야)는 별개 시스템으로 아직 미복원
+### 검증
+해당 없음
+### 커밋
+해당 없음(무수정)
+
+
+## [수정] FogOfWar 복원 (광선 시야) — 2026-08-09 04:56
+### 프롬프트
+[수정] 포그 복원해라
+### 조작 내역
+- FogOfWar.cs: target 미배선 시 PlayerLocator.FindTransform()으로 자동 탐색하도록 보강(씬별 이름 상이로 인한 배선 유실 재발 방지)
+- Scene3 Stage_Fog: target=RealPlayer 명시 배선 + 활성화, config 연결 확인
+### 검증
+- 컴파일 0, 디스크 재로드 후: target=RealPlayer / enabled=True / active=True / config=OK
+- 실제 안개 걷힘·성능은 사용자 재생 (rayCount 360, revealRadius 7)
+### 실패와 수정
+- 없음. WebGL 성능 부담 시 FogOfWarConfig.rayCount 360→120~180 하향 권장
+
+
+## [수정] 포그 재질 회귀 복구 + 촛불 인트로 카메라 복원 — 2026-08-09 05:02
+### 프롬프트
+여전히 주인공 주변에 빛이 감싸고 맵이 밝아지지 않음. 촛불 3개 카메라 줌 후 주인공 보여주는 연출도 사라짐
+### 조작 내역
+- **회귀 자백**: 직전 소품 Lit 일괄 교체 때 Stage_Fog(안개 오버레이)까지 Sprite-Lit-Default로 바꿔 안개가 어둠에 묻혀 무력화됨 → Sprites-Default(Unlit)로 복구
+- 카메라 진단: 씬에 카메라 2벌(구 MainCamera 비활성 / 현 Main Camera). 인트로용 CinemachineCamera는 **비활성**, CM_PlayerCamera는 **추적 대상 NULL** — 인트로 샷·플레이어 추적 모두 죽어 있었음
+- 복원: 인트로캠 활성·촛불 구역(5.5, 4.2) 배치·ortho 5.0·Priority 20 / 플레이어캠 TrackingTarget=RealPlayer·Priority 10 / IntroSequencer에 introCamera 필드 신설 후 배선 — 연출 완주 시 인트로캠 SetActive(false)로 자동 인계(시네머신 블렌드)
+### 검증
+- 컴파일 0, 디스크 재로드: 인트로캠 active/prio20/ortho5.0/pos(5.5,4.2), 플레이어캠 추적=RealPlayer/prio10, introCamera 배선됨
+- 실제 줌·인계·안개 걷힘은 사용자 재생
+### 실패와 수정
+- CinemachineCamera 프로퍼티 경로 오추정(Follow) 1회 → 실제 경로 Target.TrackingTarget·Priority.m_Value 확인 후 정정
+
+
+## [수정] 인트로 카메라 프레이밍 교정 (주인공 배제) — 2026-08-09 05:05
+### 프롬프트
+처음부터 주인공을 비추면 안돼. 토치 하나씩 켜지는 걸 비추다가 다 켜지면 그제서야 주인공 비추고 노래 나오는 방식
+### 조작 내역
+- 이력 조사: IntroSequencer에 카메라 제어 코드가 존재한 적 없음(git -S 검색) → 원 연출은 '카메라를 촛불 쪽에 두고, 빛 확장으로 주인공을 드러내는' 구조로 판단
+- 배선 실측: candleLights 3개 = x2.5/5.5/8.5 @ y4.8, 주인공 @ (3.0, 0.1) — 세로로 분리됨
+- 인트로캠 재배치: (5.5, 5.2) ortho 2.8 → 프레임 x0.5~10.5 / y2.4~8.0. 촛불 3개 포함, 주인공(y0.1) 프레임 밖
+- 완주 시 introCamera 비활성 → CM_PlayerCamera(prio10, RealPlayer 추적)로 시네머신 블렌드 인계 (직전 커밋 구현분)
+### 검증
+- 재로드 계산 검증: 촛불 y4.8 포함=True / 주인공 y0.1 포함=False
+- 실제 순서(점화 → 인계 → BGM)는 사용자 재생
+### 실패와 수정
+- 직전 배치(5.5,4.2 ortho5.0)가 주인공까지 담아 '처음부터 주인공 노출' 유발 자인
+
+
+## [수정] 인트로 카메라 실범인 — Confiner/Composer 강제 보정 — 2026-08-09 05:12
+### 프롬프트
+처음에 토치를 확대해 비추다가 3개 다 켜지면 그제서야 주인공으로 카메라가 비춰야 한다
+### 조작 내역
+- 첫 프레임 일시정지 계측(EditorApplication.isPlaying+isPaused)로 t=0 상태 포착: 인트로캠은 정상 라이브(ortho 2.8)였으나 위치가 y5.2가 아닌 **y1.0**으로 끌려감 → 주인공이 프레임에 들어옴
+- 진범: 인트로캠에 붙은 CinemachinePositionComposer·CinemachineConfiner2D가 고정 샷 좌표를 강제 보정. 두 컴포넌트 비활성 + 위치 재설정(5.5, 5.2)
+### 검증
+- 재계측(frame=1): 카메라 (5.5,5.2) ortho 2.8 / 주인공 화면안=False(vp y -0.41) / 화면 안 촛불 4개
+- 전체 순서(점화→인계→BGM)는 사용자 재생
+### 실패와 수정
+- 앞선 두 차례 '기하 계산상 정상' 판정이 런타임 보정 컴포넌트를 놓쳤음 자인 — 카메라 문제는 첫 프레임 계측으로 확인해야 함
+
+
+## [수정] 인트로캠 원본 수치 복원(A안) — 2026-08-09 05:17
+### 프롬프트
+원본 수치 그대로 복원해
+### 조작 내역
+- git 발굴값(4621ed89/606f70d0) 그대로 적용: 위치(0.73,-2.72,-10)·OrthographicSize 5·TrackingTarget 없음(고정샷)·PositionComposer/Confiner2D 재활성 (Priority만 20 유지 — 원본 0은 플레이어캠과 동률이라 승자 불확정)
+### 검증
+- 첫 프레임 계측: 실제 카메라 (0.80,-2.72) ortho 5.0 — 원본 재현 확인
+- **판정 결과: 화면 안 촛불 0개 / 주인공 화면안 True** → 현재 씬의 촛불 배치(y4.8)와 원본 카메라 프레임(y-7.7~2.3)이 어긋남. 원본 수치는 씬이 바뀌기 전 기준이었음이 실증됨
+### 실패와 수정
+- 없음(요청대로 복원). 촛불 연출을 살리려면 B안(ortho 5 유지 + 위치를 촛불 중심으로) 필요
+
+
+## [수정] 인트로캠 최종 프레이밍 (원본 줌 + 실제 토치 좌표) — 2026-08-09 05:21
+### 프롬프트
+8.5,4.1 / 5.5,4.1 / 2.5,4.1 이게 토치 3개의 위치야
+### 조작 내역
+- 사용자 제공 좌표 반영: 중심 x5.5, 세로 중심 6.3 → 화면 y 1.3~11.3 (토치 4.1 포함 / 주인공 0.1 제외). 줌은 원본값 OrthographicSize 5 유지
+- Confiner2D·PositionComposer 해제 유지 — 활성 시 경계 클램프가 카메라를 y1.0 부근으로 끌어내려 토치가 화면 밖으로 나감(실증됨)
+### 검증
+- 첫 프레임 계측: 카메라 (5.50, 6.30) ortho 5.0 / 토치 3/3 화면 안(vp y 0.28) / 주인공 화면 밖(vp y -0.12)
+- 점화→인계→BGM 순서는 사용자 재생
+### 실패와 수정
+- A안(원본 좌표 그대로)은 씬 변경 탓에 토치 0/3 — B안 좌표로 확정
+
+
+## [수정] 인트로 카메라 원본 구성으로 최종 복원 — 2026-08-09 05:25
+### 프롬프트
+원본 카메라 배치 기억한다고 했지? 토치를 그 위치로 옮겨봐. 원본으로 복원해
+### 조작 내역
+- git 대조 결과 **토치는 이동한 적 없음**(4621ed89·606f70d0 모두 x2.5 / y4.0758 = 현재와 동일) → '토치를 옛 카메라 위치로 옮긴다'는 전제가 성립하지 않음을 실증
+- 따라서 원본 구성 자체를 복원: 구 vcam(CinemachineCamera)은 추적 없음·prio0·ortho5·Composer/Confiner 활성·**비활성 상태**가 원본이므로 그대로 되돌림 / CM_PlayerCamera ortho 6.75(원본값)·prio10
+- 결론: 원본 인트로에는 토치 전용 카메라가 없었고, 플레이어 추적 카메라 화면 안에 토치가 이미 들어와 있으며 '어둠 속에서 토치 불만 보이는' 것이 줌처럼 보였던 것
+### 검증
+- 첫 프레임 계측: 카메라(12.07,4.75) ortho 6.75 / 토치 3/3 화면 안(vp y0.45) / 주인공 화면 안(vp 0.12,0.15) / 전역광 0.000(완전 암전)
+### 실패와 수정
+- 인트로 전용 카메라 신설(내 임의 개선)이 원본과 달랐음 — 원복 완료
+
+
+## [수정] 인트로 중 주인공 노출 차단 (시야광 점등 시점) — 2026-08-09 05:30
+### 프롬프트
+처음에는 주인공도 안보이고 토치만 보이면서 불이 3개 들어온 다음에 그 다음에서야 주인공이 보였다
+### 조작 내역
+- 진범 확정: PlayerVisionLight. 원래 **비활성** 상태였는데(최초 조사 시 확인) 내가 '조명 복원'이라며 켜버려 첫 프레임부터 주인공이 밝게 노출됨
+- IntroSequencer에 playerVisionLight 필드 신설: Awake에서 소등 → 연출 완주 시 점등. 씬 배선 완료
+- hiddenDuringIgnite(103개)에는 주인공 미포함 확인 — 주인공은 '빛이 없어서' 안 보이는 구조가 원본
+### 검증
+- 첫 프레임 계측: 시야광 active=False(소등 ✓) / 전역광 0.000(완전 암전) / 켜진 촛불 0개
+- 점화→확장→시야광 점등 순서는 사용자 재생
+### 실패와 수정
+- 앞선 '시야광 활성화' 조치가 원본 연출을 깨뜨린 원인이었음 자인
+
+
+## [조사] Scene3 이중 어둠(전역광 하향 + 포그) — 2026-08-09 05:32
+### 프롬프트
+[조사]캐릭터 광선으로 맵 밝아지는 기능은 잘 되는데, Scene2에 적용했던 어두운 배경이 덧씌워진 것 같다
+### 조사 결과
+- 어둠 유발 요소 2중 확인: ①IntroConfig.globalMaxIntensity **0.20** (원본 1.00 — 오늘 내가 'Scene2식 전체 밝히기 탈피' 목적으로 낮춤) ②FogOfWar fogAlpha 0.96·revealRadius 7 (정상 동작 중)
+- 화면 전체를 덮는 어둠 스프라이트는 없음(Gradient Shadow 3개는 40x8 소품 그림자, order -50대)
+- 결론: 포그가 어둠을 전담하는 구조인데 전역광 상한까지 0.2로 눌러 이중 감광 → 포그가 걷힌 영역조차 어둡게 보임. 사용자가 말한 '덧씌워진 어둠'의 실체
+- 해법: globalMaxIntensity를 원본 1.00으로 복귀(포그가 미탐색 영역을 가리므로 밝기 손실 없음). 중간값 0.6~0.8도 선택 가능
+### 검증
+해당 없음
+### 커밋
+해당 없음(무수정)
+
+
+## [수정] 전역광 상한 원본 복귀(이중 어둠 해소) — 2026-08-09 05:35
+### 프롬프트
+[수정] A로 진행해
+### 조작 내역
+- IntroConfig.globalMaxIntensity 0.20 → **1.00**(원본값). 어둠은 FogOfWar(fogAlpha 0.96·반경 7)가 전담, 전역광은 탐색된 영역의 정상 밝기를 담당하도록 역할 분리
+### 검증 (재생 계측 2시점)
+- t=0: 전역광 0.000(암전 유지 ✓) / 시야광 소등 ✓ → 인트로 암전 그대로 보존됨
+- 연출 후(t=5.80, 완주): 전역광 **1.000 도달 ✓** / 시야광 점등 ✓ / 켜진 촛불 3개 ✓ / 포그 target 배선·enabled ✓
+### 실패와 수정
+- 없음. 앞선 0.20 하향이 포그와 겹쳐 이중 감광을 만든 것 확인·해소
+
+
+## [조사] Scene3 연출 재소실 시 복구 요청문 — 2026-08-09 05:37
+### 프롬프트
+[조사]지금 우리가 수정한 연출씬과 안개 걷는 씬 다시 또 없어지면 너한테 정확히 뭐라고 요청해야하니?
+### 조사 결과
+- 재소실 시 필요한 복구 정보 5종을 확정: ①대상 씬 AdventureScene3 ②시스템 3층(IntroSequencer 토치 인트로 / PlayerVisionLight 점등 시점 / FogOfWar 광선 안개) ③확정 수치(IntroConfig globalMaxIntensity 1.00·blackSeconds 1.0·igniteSeconds 1.2·igniteStagger 0.6·expandSeconds 1.2 / FogOfWarConfig fogAlpha 0.96·revealRadius 7·rayCount 360·eyeHeight 0.8 / PlayerVisionLight 0.9·외6.5·내1.2 / CM_PlayerCamera ortho 6.75·구 vcam 비활성) ④배선 3곳(FogOfWar.target, IntroSequencer.playerVisionLight, Stage_Fog 재질 Sprites-Default=Unlit) ⑤검증법(재생+첫프레임 일시정지 계측: t=0 전역광 0·시야광 소등, 완주 후 전역광 1.0·시야광 점등·촛불 3)
+- 실패 유발 3대 함정 기록: 전역광 상한 하향(포그와 이중 감광)/Stage_Fog를 Lit 재질로 교체(안개 무력화)/시야광을 씬에서 상시 활성(주인공 조기 노출)
+### 검증
+해당 없음
+### 커밋
+해당 없음(무수정)
