@@ -42,6 +42,12 @@ namespace NAN2026
         public float projSpeed = 9f;
         public float projLife = 6f;
         public int projDamage = 1;
+        [Header("공격 예열(Windup) — 플레이어 반응 시간 확보용 텔레그래프")]
+        public float cleaveWindup = 0.25f; // 공격 선택 후 실제 cleave 애니메이션 시작까지 대기 시간(초)
+        public float smashWindup = 0.30f;
+        public float castWindup = 0.35f;
+        public Color windupFlashColor = new Color(1f, 0.35f, 0.35f); // 예열 중 깜빡이는 경고 색
+        public float windupFlashSpeed = 12f; // 값이 클수록 플래시가 빠르게 깜빡임
         [Header("패링·그로기")]
         public float parryBuffer = 0.2f;
         public int groggyNeed = 5;
@@ -54,7 +60,7 @@ namespace NAN2026
         public bool showRangesInGame = true;  // 게임 뷰에 공격 범위 띠 표시
         public bool showRangeLabels = true;   // 거리·상태 숫자 라벨
         public float rangeBandHeight = 11f;   // 표시용 띠 높이 (판정과 무관, 보기용)
-        [Header("패턴 가중치")]
+        [Header("패턴 가중치 (미사용 — 쿨타임 우선 선택으로 대체됨)")]
         public float castChance = 0.35f;   // 원거리 시 캐스트 확률
         public float smashChance = 0.4f;   // 중거리 시 스매시 확률
     }

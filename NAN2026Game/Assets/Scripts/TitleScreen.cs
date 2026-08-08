@@ -16,6 +16,14 @@ public class TitleScreen : MonoBehaviour
     [Header("BGM (무한 반복)")]
     [SerializeField] private AudioSource bgmSource;
 
+    [Header("입력 효과음")]
+    [SerializeField] private AudioSource sfxSource;
+    [SerializeField] private AudioClip pressSfx;
+    [Range(0f, 1f)]
+    [SerializeField] private float sfxVolume = 1f;
+    [Tooltip("효과음이 들리도록 씬 전환을 잠시 늦춥니다.")]
+    [SerializeField] private float delayBeforeLoad = 0.45f;
+
     [Header("다음 씬")]
     [Tooltip("비워두면 씬 전환 없이 로그만 남깁니다. Build Settings에 등록된 씬 이름을 입력하세요.")]
     [SerializeField] private string nextSceneName = "";
@@ -41,6 +49,7 @@ public class TitleScreen : MonoBehaviour
         if (!AnyKeyPressed()) return;
 
         _started = true;
+        PlayPressSfx();
         StartGame();
     }
 
@@ -72,6 +81,13 @@ public class TitleScreen : MonoBehaviour
 #endif
     }
 
+    private void PlayPressSfx()
+    {
+        if (pressSfx == null) return;
+        if (sfxSource != null) sfxSource.PlayOneShot(pressSfx, sfxVolume);
+        else AudioSource.PlayClipAtPoint(pressSfx, Camera.main != null ? Camera.main.transform.position : Vector3.zero, sfxVolume);
+    }
+
     private void StartGame()
     {
         if (string.IsNullOrEmpty(nextSceneName))
@@ -87,6 +103,17 @@ public class TitleScreen : MonoBehaviour
             return;
         }
 
+        StartCoroutine(DelayThenLoad());
+    }
+
+    private System.Collections.IEnumerator DelayThenLoad()
+    {
+        float t = 0f;
+        while (t < delayBeforeLoad)
+        {
+            t += Time.unscaledDeltaTime;
+            yield return null;
+        }
         SceneManager.LoadScene(nextSceneName);
     }
 
