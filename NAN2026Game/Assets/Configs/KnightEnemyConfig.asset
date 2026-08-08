@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce00a1d89e9d80f4481f20961901d800, type: 3}
   m_Name: KnightEnemyConfig
   m_EditorClassIdentifier: Assembly-CSharp::NAN2026.EnemyConfig
-  hitsToDie: 5
+  hitsToDie: 3
   hurtLock: 0.35
   deathLinger: 1.6
   aggroRange: 10

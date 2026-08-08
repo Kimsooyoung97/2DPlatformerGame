@@ -78,7 +78,7 @@ namespace NAN2026
 
             if (mode == 0) return;
 
-            t += Time.deltaTime;
+            t += Time.unscaledDeltaTime;   // 히트스톱·게임오버로 timeScale 이 0 이어도 연출은 진행
             var frames = mode == 1 ? hurtFrames : deathFrames;
             float fps = mode == 1 ? config.hurtFps : config.deathFps;
             float hold = mode == 1 ? config.hurtHold : config.deathHold;

@@ -60,6 +60,11 @@ public class PlayerHealth : MonoBehaviour
     /// <summary>true 면 Kill() 이 스프라이트를 즉시 끄지 않는다. 사망 연출을 보여줄 때 켠다.</summary>
     public bool SuppressDeathHide { get; set; }
 
+    /// <summary>true 면 Kill() 이 체크포인트 부활을 예약하지 않는다.
+    /// 게임오버→타이틀 노선에서 부활과 게임오버가 같은 시점에 경합하는 것을 막는다.
+    /// GameOverController 가 구독 시점에 켠다.</summary>
+    public bool SuppressRespawnOnDeath { get; set; }
+
     private void Awake()
     {
         body = GetComponent<Rigidbody2D>();
@@ -185,6 +190,10 @@ public class PlayerHealth : MonoBehaviour
             SetVisible(false);
 
         OnPlayerDied?.Invoke();
+
+        // 게임오버 노선(타이틀 복귀)에서는 부활을 예약하지 않는다.
+        if (SuppressRespawnOnDeath)
+            return;
 
         // 사망 연출이 있으면 그 길이만큼 부활을 미룬다(연출이 잘리지 않도록).
         float delay = respawnDelay;

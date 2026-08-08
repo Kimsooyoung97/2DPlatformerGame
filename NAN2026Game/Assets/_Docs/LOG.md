@@ -6841,3 +6841,36 @@ Secen3다음에는 Secen4 진행하도록 했는데
 - 없음
 ### 남은 것
 - **AdventureScene4 는 여전히 이후 전이가 없다**(고아 종점). 데몬 보스 격파 후 무엇을 할지 미정 — 엔딩 씬 / 타이틀 복귀 / 그대로 종료 중 택일 필요
+
+
+## [수정] 사망 노선 게임오버 일원화 · hitsToDie 3 · FAIL 번호 중복 해소 — 2026-08-09 08:40
+### 프롬프트
+[수정] 사망 연출 >> 게임오버 >> 타이틀로 변경 / `hitsToDie` 5 → 3 여부 / FAIL.md 번호 중복 4건 해결
+### 조작 내역
+**① 사망 노선 일원화 (3파일)**
+- `PlayerHealth` — `SuppressRespawnOnDeath` 프로퍼티 신설. Kill() 에서 이 값이 true 면 **Invoke(Respawn) 예약 자체를 하지 않는다**. 부활과 게임오버가 같은 시점에 경합하던 문제 해소
+- `GameOverController`(팀원 파일) — 3곳 수정
+  · OnEnable/OnDisable 에서 `playerHealth.SuppressRespawnOnDeath` 를 켜고 끈다. 게임오버가 배선된 씬에서만 부활이 꺼진다(미배선 씬은 기존 동작 유지)
+  · HandlePlayerDied → `ShowAfterDeathSequence()` 코루틴으로 교체. 사망 연출 길이만큼 기다린 뒤 패널 ON + timeScale=0. 대기는 **WaitForSecondsRealtime** — 치명타 시 PlayerHitFeedback 히트스톱으로 timeScale 이 0 일 수 있어 scaled 대기는 멈춘다
+  · 대기 시간은 `PlayerHurtDeathFx.DeathDuration`(현재 1.307초)을 우선 사용, 없으면 신설 `minDeathSequenceDelay`
+  · Update — `SceneManager.LoadScene` 직전에 **`Time.timeScale = 1f`** 복구. 복구가 없어 타이틀에서 재시작한 게임이 정지 상태로 뜨던 기존 버그도 함께 해소
+- `PlayerHurtDeathFx` — 연출 진행을 `Time.deltaTime` → **`Time.unscaledDeltaTime`** 으로 변경. 히트스톱·게임오버 정지에 영향받지 않고 재생된다
+**② hitsToDie 5 → 3** (KnightEnemyConfig / ArcherEnemyConfig). 12마리 x 3대 = **36타**(이전 60타). 3~5분 플레이 대비 분량 조정
+**③ FAIL.md 번호 중복 4건 해소** — 뒤쪽 항목에 새 번호를 주고 구번호를 병기해 기존 LOG 참조가 깨지지 않게 함
+  · #11(시트 기준선 픽셀 오염) → **#28 (구 #11)**
+  · #16(IgnoreCollision) → **#29 (구 16)** — 미저장 편집 보호가 #16 유지(STATE·LOG 다수 참조)
+  · #17(입력 분기 replace) → **#30 (구 #17)**
+  · #24(run_tests 정지) → **#31 (구 #24)** — 이름 기반 Find 가 #24 유지(LOG 다수 참조)
+### 검증
+- 컴파일 0, read_console error/exception 0건
+- EditMode 217/217 통과, 실패 0
+- 타입 로드 확인: PlayerHealth.SuppressRespawnOnDeath 존재=True / GameOverController 에 ShowAfterDeathSequence 추가 확인
+- Config 재읽기: Knight hitsToDie=3, Archer hitsToDie=3
+- FAIL.md 재검증: **중복 번호 없음**, 총 30종, 번호 범위 1~31
+- **사용자 눈 판정 필요**: (1) 죽으면 사망 6프레임이 끝까지 재생된 뒤 게임오버 패널이 뜨는지 (2) 아무 키 → 타이틀 → 다시 시작 시 게임이 정상 속도인지 (3) 잡몹이 3대에 죽는지
+### 실패와 수정
+- 없음
+### 팀 공지 필요
+- `GameOverController.cs`(팀원 파일, Assets/Prefab/UI Canvas.prefab 소속)를 3곳 수정했다
+- **AdventureScene2 는 GameOverController.playerHealth 가 NULL** 이라 그 씬에서만 게임오버가 뜨지 않는다(배선 결손, 미해결)
+- 낙사(fallKillY)는 여전히 Kill() 을 우회해 체크포인트 부활한다 — 팀 논의 대기
