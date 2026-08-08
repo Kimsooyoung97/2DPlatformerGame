@@ -27,6 +27,7 @@ namespace NAN2026
 
         void Start()
         {
+            if (config == null) { Debug.LogError("[DemonBoss] config 미배선! 인스펙터에서 DemonBossConfig 연결 필요"); enabled = false; return; }
             sr = GetComponent<SpriteRenderer>();
             if (sr == null) sr = gameObject.AddComponent<SpriteRenderer>();
             sr.sortingOrder = 50;
