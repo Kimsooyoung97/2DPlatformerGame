@@ -13,12 +13,12 @@ MonoBehaviour:
   m_Name: FeelConfig
   m_EditorClassIdentifier: Assembly-CSharp::FeelConfig
   hitStopDuration: 0.06
-  knockbackForce: 0.25
-  knockbackDuration: 0.12
+  knockbackForce: 0.55
+  knockbackDuration: 0.16
   invincibilityDuration: 0.45
   dashInvincibilityDuration: 0
   screenShakeAmplitude: 0.35
-  screenShakeDuration: 0.25
+  screenShakeDuration: 0.24
   attackStartupTime: 0
   attackRecoveryTime: 0
   inputBufferTime: 0

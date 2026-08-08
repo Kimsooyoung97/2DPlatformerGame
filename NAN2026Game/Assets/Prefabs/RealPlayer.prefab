@@ -643,7 +643,7 @@ MonoBehaviour:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-    ImpulseDuration: 0.2
+    ImpulseDuration: 0.12
     ImpulseType: 0
     DissipationRate: 0.25
     RawSignal: {fileID: 0}
@@ -665,8 +665,8 @@ MonoBehaviour:
         m_PostInfinity: 2
         m_RotationOrder: 4
       AttackTime: 0
-      SustainTime: 0.2
-      DecayTime: 0.7
+      SustainTime: 0.04
+      DecayTime: 0.2
       ScaleWithImpact: 1
       HoldForever: 0
     ImpactRadius: 100

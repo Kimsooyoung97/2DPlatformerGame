@@ -6497,3 +6497,27 @@ PlayerFxConfig.enableDebugKeys (5·6 미리보기)
 없음
 ### 커밋
 해당 없음(무수정)
+
+
+## [수정] 화면 흔들림 단축 · 넉백 증가 — 2026-08-09 07:34
+### 프롬프트
+[수정]너무 오래 흔들린다. 그리고 넉백 거리를 좀 더 줄수 있니?
+### 조작 내역
+- 흔들림 길이: RealPlayer.prefab / CinemachineImpulseSource 의 시간 봉투 단축
+  · ImpulseDuration 0.20 → **0.12**
+  · TimeEnvelope.SustainTime 0.20 → **0.04**, DecayTime 0.70 → **0.20**, AttackTime 0 유지
+  · 신호 총 길이 **0.90초 → 0.24초**. 무적 0.45초보다 짧아져 '툭 치고 끝'이 됨
+  · 세기(screenShakeAmplitude 0.35)는 그대로 — 요청은 길이였음
+- 넉백 강화: FeelConfig.knockbackForce 0.25 → **0.55**, knockbackDuration 0.12 → **0.16**
+  · 거리를 2.2배 늘리면서 시간도 함께 늘려 속도가 과격해지지 않게 함(0.25/0.12=2.08u/s → 0.55/0.16=3.44u/s)
+  · HitFeedbackLogic.KnockbackStep 이 총 이동량을 knockbackForce 와 일치시키므로 값만 바꾸면 그대로 반영
+- FeelConfig.screenShakeDuration 0.25 → **0.24**: 직전 [조사]에서 '선언만 되고 코드가 안 쓴다'고 지적한 필드. 실제 봉투 길이와 값을 일치시켜 문서-구현 괴리를 없앰(여전히 코드가 읽지는 않음, 표기용)
+### 검증
+- 컴파일 0, EditMode 207/207 통과, 실패 0
+- 프리팹 재읽기: ImpulseDuration 0.12 / Attack 0 / Sustain 0.04 / Decay 0.20
+- FeelConfig 재읽기: hitStop 0.06 / knockForce 0.55 / knockDur 0.16 / invinc 0.45 / shakeAmp 0.35 / shakeDur 0.24 / flashDur 0.45 / flashInt 0.06
+- **사용자 눈 판정 필요**: (1) 흔들림이 0.24초로 짧아진 체감 (2) 넉백 0.55u 가 과하지 않은지 — 벽·낭떠러지 근처에서 밀려 떨어지지 않는지 확인 필요
+### 실패와 수정
+- 없음
+### 주의
+- 프리팹 변경이라 **재생 중에는 반영되지 않는다**. 정지 후 다시 재생해야 새 봉투가 적용됨. FeelConfig(넉백)는 SO 라 재생 중에도 즉시 반영
