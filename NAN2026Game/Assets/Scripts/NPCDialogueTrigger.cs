@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// NPC 대화. 범위 안에서 Enter 로 시작하고, Enter 를 누를 때마다 다음 대사로 넘어갑니다.
@@ -42,6 +43,11 @@ public class NPCDialogueTrigger : MonoBehaviour
     [Header("타이핑 연출")]
     [Tooltip("한 글자당 걸리는 시간(초). 0이면 즉시 표시")]
     [SerializeField] private float charInterval = 0.03f;
+
+    [Header("대화가 끝나면 이동할 씬 (비우면 이동 안 함)")]
+    [SerializeField] private string sceneOnFinish = "";
+    [Tooltip("마지막 대사 후 씬 전환까지의 여유 시간")]
+    [SerializeField] private float delayBeforeLoad = 0.4f;
 
     [Header("애니메이터")]
     [SerializeField] private Animator animator;
@@ -126,7 +132,7 @@ public class NPCDialogueTrigger : MonoBehaviour
         }
 
         _index++;
-        if (_index >= lines.Count) { Close(); return; }
+        if (_index >= lines.Count) { Close(true); return; }
         ShowLine(_index);
     }
 
@@ -182,7 +188,7 @@ public class NPCDialogueTrigger : MonoBehaviour
         if (moreHint != null) moreHint.SetActive(true);
     }
 
-    private void Close()
+    private void Close(bool completed = false)
     {
         _isOpen = false;
         _typing = false;
@@ -190,6 +196,16 @@ public class NPCDialogueTrigger : MonoBehaviour
         if (animator != null && !string.IsNullOrEmpty(talkingBool)) animator.SetBool(talkingBool, false);
         if (dialogueRoot != null) dialogueRoot.SetActive(false);
         if (moreHint != null) moreHint.SetActive(false);
+
+        if (completed && !string.IsNullOrEmpty(sceneOnFinish))
+            StartCoroutine(LoadAfterDelay());
+    }
+
+    private IEnumerator LoadAfterDelay()
+    {
+        float t = 0f;
+        while (t < delayBeforeLoad) { t += Time.unscaledDeltaTime; yield return null; }
+        SceneManager.LoadScene(sceneOnFinish);
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -202,7 +218,7 @@ public class NPCDialogueTrigger : MonoBehaviour
     {
         if (!IsPlayer(other)) return;
         _inRange = false;
-        if (_isOpen) Close();
+        if (_isOpen) Close(false);
         if (interactHint != null) interactHint.SetActive(false);
     }
 
