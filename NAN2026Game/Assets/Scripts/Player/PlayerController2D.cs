@@ -382,7 +382,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
         {
             float bDir = PlayerLocomotionLogic.EffectDirection(sr.flipX);
             Vector3 bPos = transform.position + new Vector3(config.comboVFxOffsetX * bDir, config.comboVFxOffsetY, 0f);
-            VSlashFx.Play(bPos, comboB1Fx, config.comboVFxFps, bDir < 0f, config.comboVFxScale, config.comboVFxAlpha, transform, config.comboB1FxTint); // 추종+하늘 틴트
+            VSlashFx.Play(bPos, comboB1Fx, config.comboVFxFps, bDir < 0f, config.comboB1FxScale, config.comboVFxAlpha, transform, config.comboB1FxTint); // 추종+하늘 틴트
             SpawnComboBDamage(bDir, bPos); // 이펙트만 있고 대미지가 없던 문제 보완
             return;
         }
