@@ -7943,3 +7943,6 @@ X 145 부근 몬스터가 아래로 떨어지며 바닥에 끼인다. 2·3층 �
 - 실제 낙하 방지·끼임 재발은 사용자 재생
 ### 실패와 수정
 - 들여쓰기(4칸) 오추정으로 치환 2회 실패 후 원문 확인하여 정정
+
+- 추가: EnemyAIConfig 4종 설정 완료(잡몹 DeathDog·Lich 앞0.55/깊이1.2/마스크 전체). **보스 2종(MiddleBoss·PrincessBoss)은 edgeProbeAhead=0으로 감지 비활성** — 패턴 이동이 막히는 것 방지
+- 검증: DeathDogAIConfig=0.55 LichAIConfig=0.55 MiddleBossAIConfig=0.00 PrincessBossAIConfig=0.00 

@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAIConfig
   aggroRange: 9
   attackRange: 2.2
+  attackHeightRange: 1.2
   chaseStopDistance: 14
   patrolSpeed: 0
   chaseSpeed: 0.8
@@ -28,3 +29,10 @@ MonoBehaviour:
   healthBarOffset: {x: 0, y: 4, z: 0}
   healthBarBackground: {r: 0, g: 0, b: 0, a: 0.75}
   healthBarFill: {r: 0.85, g: 0.15, b: 0.15, a: 1}
+  knockbackForce: 6
+  knockbackDuration: 0.15
+  edgeProbeAhead: 0
+  edgeProbeDepth: 1.2
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
