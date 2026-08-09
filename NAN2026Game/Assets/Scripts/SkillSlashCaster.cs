@@ -22,7 +22,7 @@ namespace NAN2026
         private void Update()
         {
             var kb = PlayerController2D.InputLocked ? null : Keyboard.current;
-            if (kb == null || !kb.digit6Key.wasPressedThisFrame) return;
+            if (kb == null || !kb.digit2Key.wasPressedThisFrame) return;
             if (config == null || slashPrefab == null) return;
             if (Time.time - lastCast < config.cooldown) return;
             if (mana != null && !mana.TryUseMp(config.mpCost)) return; // MP 부족 시 불발

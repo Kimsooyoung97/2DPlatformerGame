@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using NAN2026;
@@ -300,9 +300,6 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
             // 보유 스킬 중 다음 스킬로 전환 → C
             if (kb.cKey.wasPressedThisFrame) CycleSkill();
             // 2/3/4 숫자키 = testParry 3동작 개별 발동
-            if (kb.digit2Key.wasPressedThisFrame) QueueAttack("ComboB1", config.comboB1Duration, config.slashLungeSpeed);
-            if (kb.digit3Key.wasPressedThisFrame) QueueAttack("ComboB2", config.combo2Duration, config.combo2LungeSpeed);
-            if (kb.digit4Key.wasPressedThisFrame) QueueAttack("ComboB3", config.combo2Duration, config.combo2LungeSpeed);
             if (kb.lKey.wasPressedThisFrame) QueueAttack("Combo3", config.combo3Duration, config.combo3LungeSpeed);
             // 구르기: G키 제거, Ctrl(좌/우)만 사용. 공중에서는 사용할 수 없다(접지 중에만).
             if (grounded && (kb.leftCtrlKey.wasPressedThisFrame || kb.rightCtrlKey.wasPressedThisFrame))

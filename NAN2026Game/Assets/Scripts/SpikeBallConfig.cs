@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace NAN2026
 {
@@ -52,5 +52,7 @@ namespace NAN2026
         public float popupLife = 0.9f;
         public int popupFontSize = 64;
         public float popupCharSize = 0.06f;
-    }
+            public float homingTurn = 3.5f;   // 비행 중 유도 강도(0이면 직진)
+        public float homingSeconds = 1.6f; // 유도 지속 시간(이후 직진)
+}
 }

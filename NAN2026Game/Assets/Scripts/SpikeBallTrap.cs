@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using NAN2026.Core;
 
 namespace NAN2026
@@ -12,6 +12,7 @@ namespace NAN2026
         System.Reflection.MethodInfo tryParry;
         Component controller;
         Vector3 home;
+        float flightT;
         Vector2 dir;
         int phase; // 0대기 1경고 2돌진 3사멸
         float respawnAt;
@@ -68,6 +69,13 @@ namespace NAN2026
             }
             if (phase == 2)
             {
+                // 유도 비행: 발사 후 일정 시간 동안 플레이어 쪽으로 진행 방향을 서서히 튼다
+                if (config.homingTurn > 0f && player != null && flightT < config.homingSeconds)
+                {
+                    Vector2 want = ((Vector2)(player.position + Vector3.up * config.aimHeight) - (Vector2)transform.position).normalized;
+                    dir = Vector2.Lerp(dir, want, config.homingTurn * Time.deltaTime).normalized;
+                }
+                flightT += Time.deltaTime;
                 transform.position += (Vector3)(dir * config.launchSpeed * Time.deltaTime);
                 // 조기 패링: 이펙트 리치(parryReachX) 안이고 창 활성이면 접촉 전 성공 처리
                 if (!resolved && controller != null && parryReach > 0f)
@@ -107,7 +115,7 @@ namespace NAN2026
                 }
                 SpikeBallLogic.LaunchDir(transform.position.x, transform.position.y, aim.x, aim.y, out dx, out dy);
                 dir = new Vector2(dx, dy);
-                phase = 2; SetAlpha(1f);
+                phase = 2; flightT = 0f; SetAlpha(1f);
                 return;
             }
             phase = p;

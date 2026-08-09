@@ -23,7 +23,7 @@ namespace NAN2026
         private void Update()
         {
             var kb = PlayerController2D.InputLocked ? null : Keyboard.current;
-            if (kb == null || !kb.digit7Key.wasPressedThisFrame) return;
+            if (kb == null || !kb.digit3Key.wasPressedThisFrame) return;
             bool hasFrames = orbFrames != null && orbFrames.Length > 0;
             if (config == null || (orbSprite == null && !hasFrames)) return;
             if (Time.time - lastCast < config.cooldown) return;

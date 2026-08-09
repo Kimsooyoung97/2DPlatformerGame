@@ -7832,3 +7832,18 @@ GameOverBg, GameOver(글자) 이미지 넣었다 → 게임오버 화면 구성
 - 체감 타이밍은 사용자 재생
 ### 실패와 수정
 없음
+
+
+## [구현] 스킬 키 1·2·3 이전 + 번개 피격 판정 + Scene1 구체 유도 — 2026-08-10 04:52
+### 프롬프트
+Scene1 스파이크 구체 유도되게, 5·6·7 스킬을 1·2·3으로 이동, 1번 번개 범위에 맞은 적 피격
+### 조작 내역
+- 키 이전: PlayerSkill digit5→**digit1**(번개) / SkillSlashCaster digit6→**digit2**(검기) / SkillOrbCaster digit7→**digit3**(나선환)
+- 충돌 해소: PC2D의 digit2·3·4 테스트용 콤보(ComboB1~B3 개별 발동) 3줄 제거 — 주석상 testParry 테스트 입력이었음
+- 번개 피격 신설: PlayerSkill.DamageAround(center) — 번개 소환 지점마다 OverlapBoxAll(config.hitSize)로 MinoBoss/DemonBoss/MonsterHealth 타격, 자기 자신 제외. PlayerSkillConfig에 damage 2·hitSize(1.4,3.0) 신설
+- Scene1 구체 유도: SpikeBallTrap 비행 중 진행 방향을 플레이어 쪽으로 Lerp(homingTurn 3.5, homingSeconds 1.6 이후 직진). SpikeBallConfig·SpikeBallConfig_Scene1 양쪽 적용. 기존 발사 시점 예측 조준은 유지
+### 검증
+- 컴파일 0, Config 재읽기: 유도 3.5/1.6, 번개 대미지 2·판정 (1.4,3.0)·MP 1
+- 실제 유도 궤적·번개 타격은 사용자 재생
+### 실패와 수정
+없음

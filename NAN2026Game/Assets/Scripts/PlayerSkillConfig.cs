@@ -19,5 +19,7 @@ namespace NAN2026
     public float groundSnapDepth;
         public int startFrame;         // 모션 시작 컷 (0-기준, 예비 동작 생략용)  // 이펙트 지면 탐색 깊이 (없으면 생략)
             public int mpCost = 2; // 번개 스킬 MP 소모
+        public int damage = 2;                      // 번개 1발 대미지
+        public Vector2 hitSize = new Vector2(1.4f, 3.0f); // 번개 기둥 판정 범위
 }
 }
