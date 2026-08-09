@@ -22,6 +22,12 @@ namespace Assets.PixelFantasy.PixelMonsters.Common.Scripts.ExampleScripts
 
         private bool _jump;
 
+        // 넉백: 이 시각까지는 FixedUpdate가 Input 기반 속도 제어(가속/감속)를 건너뛴다.
+        // Input.x==0일 때 매 스텝 velocity.x를 0으로 되돌리는 로직이 넉백 속도를 그대로
+        // 씹어버리기 때문에(MiddleBossAttackPatterns.cs에서 겪은 것과 동일한 원인), 이
+        // 기간 동안만 그 로직을 완전히 우회한다. 중력은 계속 적용해서 자연스럽게 떨어진다.
+        private float _knockbackUntil;
+
         public void Start()
         {
             _collider = GetComponent<Collider2D>();
@@ -29,13 +35,32 @@ namespace Assets.PixelFantasy.PixelMonsters.Common.Scripts.ExampleScripts
             _animation = GetComponent<MonsterAnimation>();
         }
 
+        /// <summary>외부(MonsterHealth 등)에서 피격 넉백을 걸 때 호출한다.
+        /// velocity: 즉시 부여할 속도(방향+크기). duration: 이 속도를 유지하며
+        /// Input 기반 제어를 무시할 시간(초).</summary>
+        public void ApplyKnockback(Vector2 velocity, float duration)
+        {
+            _rigidbody.linearVelocity = velocity;
+            _knockbackUntil = Time.time + duration;
+        }
+
         public void FixedUpdate()
         {
             var state = _animation.GetState();
 
             if (state == MonsterState.Die) return;
-            
+
             var velocity = _rigidbody.linearVelocity;
+
+            if (Time.time < _knockbackUntil)
+            {
+                // 넉백 중: Input 기반 가속/감속을 건너뛰고, 중력만 그대로 적용한다.
+                if (!IsGrounded)
+                    velocity.y -= Gravity * Time.fixedDeltaTime;
+
+                _rigidbody.linearVelocity = velocity;
+                return;
+            }
 
             if (Input.x == 0)
             {
@@ -57,7 +82,7 @@ namespace Assets.PixelFantasy.PixelMonsters.Common.Scripts.ExampleScripts
                 velocity.x = Mathf.MoveTowards(velocity.x, Input.x * maxSpeed, acceleration * Time.fixedDeltaTime);
                 Turn(velocity.x);
             }
-            
+
             if (IsGrounded)
             {
                 if (!_jump)

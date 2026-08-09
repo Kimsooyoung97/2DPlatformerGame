@@ -21,4 +21,7 @@ MonoBehaviour:
   frameRate: 16
   basicDamage: 1
   poweredDamage: 3
-  hitboxSize: {x: 0.9, y: 0.9}
+  comboVDamage: 3
+  hitboxSize: {x: 3, y: 1.2}
+  comboVHitboxSize: {x: 3.2, y: 1.2}
+  comboVHitLifetime: 0.12

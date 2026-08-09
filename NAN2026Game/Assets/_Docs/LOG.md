@@ -7532,3 +7532,172 @@ NAN2026Game/Assets/_Docs/ASSET_CREDITS.md merge=union
 - 씬 파일(*.unity)은 이번에 손대지 않았다. `-merge`(binary 취급)로 자동 병합을 막는 선택지가 있으나 팀 합의 사항
 ### 실패와 수정
 - 없음
+
+
+## [수정] FireKnight 패링 타이밍 완화 — 2026-08-09 (세션 시간)
+### 프롬프트
+지금 패링 타이밍이 너무 어려운데 좀 더 쉽게 해줘야할 것 같다
+(후속: 범위 확인 질문에 대한 답 "FireKnight만")
+### 조작 내역
+- execute_code: MidBossFireKnightConfig.asset(ScriptableObject) 리플렉션으로 값 직접 수정
+  - parryBuffer: 0.2 -> 0.35 (선입력 허용 폭 확대)
+  - normalHitboxLifetime / fireHitboxLifetime / bombHitboxLifetime / wheelHitboxLifetime: 0.15 -> 0.3 (각 공격 판정 창 2배)
+- 코드(.cs) 변경 없음 — 전부 Config 애셋 수치 조정
+### 검증
+- read_console(types=error): 이번 변경과 무관한 기존 이슈 2건만 존재(확인됨, 불변) — 새 에러 없음
+- run_tests(EditMode): 250/250 통과
+- manage_scene(save): UITestScene 저장 성공
+### 실패와 수정
+없음
+
+
+## [수정] FireKnight 패링 판정을 프레임 구간 방식으로 전환 — 2026-08-09 (세션 시간)
+### 프롬프트
+프레임/frac 구간형식으로 바꿔줄 수 있나?
+### 조작 내역
+- MidBossFireKnightConfig.cs: normalHitDelay/fireHitDelay/bombHitDelay/wheelHitDelay/wheelTickInterval/
+  *HitboxLifetime(4개) 제거. normalWinStart~End, fireWinStart~End, bombWinStart~End,
+  wheelWin1Start~End, wheelWin2Start~End(int, 프레임 인덱스) 추가.
+- MidBoss_FireKnight.cs: DoNormalAttack/DoFireAttack/DoFireBomb/DoWheelAttack을 '시간 지나면 1회 스폰'
+  방식에서 '현재 프레임 인덱스가 Win 구간 안이면 히트박스 활성' 방식으로 교체.
+  SpawnMeleeHitbox(1회성, Destroy(lifeTime)) -> UpdateMeleeHitboxState(구간 진입/이탈 시 AddComponent/Destroy)로 교체.
+  더 이상 안 쓰는 dealtThisSwing/wheelTick2Done 필드 제거(SetState 리셋 라인 포함).
+- MidBossFireKnightConfig.asset: 스크립트 필드 변경 반영 위해 재직렬화(SetDirty+SaveAssets) —
+  새 Win 필드는 스크립트 기본값(임의 지정, 실측 아님)으로 채워짐. parryBuffer=0.35는 유지됨.
+### 검증
+- refresh_unity(compile=request) -> read_console(types=error): 0건
+- run_tests(EditMode): 250/250 통과
+- manage_scene(save): UITestScene 저장 성공
+### 실패와 수정
+없음. 단, Win 구간 프레임 값(normalWinStart=4 등)은 실제 스프라이트 시트를 보고 잡은 게 아니라
+공격별 프레임 수 대비 대략적인 비율로 임의 지정한 값 — 실제 플레이 확인 후 조정 필요.
+
+
+## [수정] FireKnight 근접 판정을 DemonBoss 방식(거리 기반, 물리 히트박스 제거)으로 전환 — 2026-08-09 (세션 시간)
+### 프롬프트
+이거 콜라이더 내가 설정한 것으로 하지 말고 DemonBoss처럼 너가 만들어서 넣어줄래
+(후속 확인 질문 답변: 히트박스 오브젝트는 "내가 직접 지우기를 원한다")
+### 조작 내역
+- **규칙 예외 명시**: 이 작업은 작업 규약의 "절대 하지 않는다 — 수동 배치한 씬 오브젝트를 코드로
+  재생성하거나 삭제" 항목을 정면으로 깨는 지시였음. 사전에 명확히 되물어("오브젝트 자체도 삭제해도
+  되나") 사용자로부터 명시적 승인("내가 직접 지우기를 원한다")을 받은 뒤에만 진행함.
+- MidBossFireKnightConfig.cs: normalHitReach/fireHitReach/bombHitReach/wheelHitReach(float) 추가 —
+  DemonBoss의 cleaveReach/smashReach와 동일한 역할.
+- MidBoss_FireKnight.cs: 통짜 재작성(manage_script delete 후 create, 부분 치환 대신 — FAIL.md #6).
+  - normalHitboxObject/fireHitboxObject/bombHitboxObject/wheelHitboxObject, childObjects 필드 제거
+  - EnsureHitboxesAreTriggers/SetColliderTrigger/FlipHitBox/UpdateMeleeHitboxState 메서드 제거
+  - ResolveMeleeHit(damage) 신규 — DemonBoss.ResolveHit()와 동일 패턴(버퍼 패링 우선 → 리플렉션 폴백
+    → 성공 시 RegisterParrySuccess, 실패 시 player.SendMessage("TakeDamage", ...))
+  - DoNormalAttack/DoFireAttack/DoFireBomb/DoWheelAttack이 dx 인자를 받아 프레임 구간+hitReach로 직접 판정
+  - dealtThisSwing(단일 판정창 3개 공격 공용) / wheelSwingResolved[2](Wheel 2틱) 필드로 스윙당 1회 보장
+- manage_gameobject(delete) x4: 씬에서 히트박스 오브젝트 n / f / b / w 직접 삭제 (사용자 명시 승인 하에).
+### 검증
+- refresh_unity(compile=request) -> read_console(types=error): 0건 (스크립트 재작성, 오브젝트 삭제 양쪽 다 확인)
+- run_tests(EditMode): FAIL.md #24 패턴으로 0/전체에서 job 자체가 초기화 실패(status=failed, "did not
+  start within timeout"). 재시도 대신 대체 검증 수행: 리플렉션으로 MidBoss_FireKnight/
+  MidBossFireKnightConfig 타입 로드 확인 + ResolveMeleeHit 메서드 존재 확인 — 둘 다 성공.
+  실제 회귀 여부는 다음 정상 세션에서 EditMode 재실행으로 확인 필요.
+- manage_scene(save): UITestScene 저장 성공
+### 실패와 수정
+- git add -A로 스테이징 시 무관한 Assets/Scripts/Config/AugmentConfig.cs가 같이 잡혔음(git diff상
+  내용 차이는 없음 — 메타데이터성 변경으로 추정). 이번 커밋이 안 건드린 파일이라 git add -A 대신
+  변경한 4개 파일만 경로 지정해서 개별 add함.
+- git add 시 경로에 실수로 저장소 루트 기준 접두사("NAN2026Game/")를 그대로 넣어서 처음엔 아무것도
+  안 스테이징됐음(git status --porcelain 표시 경로는 repo root 기준이지만, execute_code의 CWD는 이미
+  안쪽 Unity 프로젝트 폴더라 상대경로 기준점이 다름) — 접두사 제거 후 재시도해서 해결.
+
+
+## [구현] FireKnight 공격 범위 디버그 표시 추가 — 2026-08-09 (세션 시간)
+### 프롬프트
+demonboss는 거리 +프레임 구간 판정에 개발자가 시각적으로 그 범위를 볼 수 있던데 얘도 추가 되나?
+### 조작 내역
+- DemonBoss.cs의 실제 구현(LineRenderer 기반 런타임 띠 + OnDrawGizmosSelected 씬 뷰 + TextMesh 라벨)을
+  먼저 읽고 동일 패턴으로 이식.
+- MidBossFireKnightConfig.cs: showRangesInGame/showRangeLabels/rangeBandHeight 추가(Demon과 동일 이름).
+- MidBoss_FireKnight.cs: rangeBands(3: aggro/attackRange/활성공격리치), rangeLabel, BuildRangeGizmos/
+  DestroyRangeGizmos/SetRangeRect/HighlightRangeBand/GetActiveAttackRange/LateUpdate/OnDrawGizmosSelected
+  추가. GetActiveAttackRange()가 각 Do*Attack()과 동일한 WinStart~WinEnd·hitReach 값을 그대로 참조해서
+  판정과 표시가 어긋나지 않게 함(Demon 원본 설계 원칙 유지).
+### 검증
+- refresh_unity(compile=request) -> read_console(types=error): FireKnight 관련 에러 0건.
+  단, Assets/Scripts/LevelUpSkillManager.cs에서 무관한 기존 컴파일 에러 4건 발견(CS0103, 필드
+  'skillIcon' 미선언) — git status상 이번 세션에서 수정 이력 없는 파일이라 세션 시작 전부터 있던
+  버그로 판단. 이 에러 때문에 프로젝트 전체가 지금 컴파일 안 됨 -> run_tests 실행 불가.
+  사용자에게 별도 확인 요청함(고칠지 여부).
+- manage_scene(save): UITestScene 저장 성공
+### 실패와 수정
+없음(FireKnight 범위 내). LevelUpSkillManager.cs 이슈는 이번 작업 범위 밖이라 미수정.
+
+
+## [수정] FireKnight 범위 표시 Y 오프셋 추가 — 2026-08-09 (세션 시간)
+### 프롬프트
+넣어줘
+(선행 진단: transform.position=SpriteRenderer.bounds.center로 pivot 자체는 Center로 정확함을 실측
+확인. 다만 288x128 캔버스 중 캐릭터가 아래쪽에만 그려져 있어 pivot이 시각적으로 몸통보다 위에 있는
+것처럼 보임 — bombF/wheelF처럼 무기가 머리 위로 올라가는 포즈까지 담을 수 있게 캔버스가 크게 잡힌
+것으로 추정. 판정(dx, X축만 사용)에는 영향 없음, 순수 표시용 기즈모 위치만 보정 필요했음.)
+### 조작 내역
+- MidBossFireKnightConfig.cs: rangeBandYOffset(float, 기본 -2.5) 추가.
+- MidBoss_FireKnight.cs: LateUpdate()·OnDrawGizmosSelected() 양쪽의 `by` 계산에
+  `+ config.rangeBandYOffset` 적용(문자열 치환 2곳, 둘 다 확인).
+### 검증
+- refresh_unity(compile=request) -> read_console(types=error): 0건
+- run_tests(EditMode): 250/250 통과
+- manage_scene(save): UITestScene 저장 성공
+### 실패와 수정
+- 파일이 LF 개행이라 CRLF 기준 문자열 치환이 처음에 안 먹힘 — LF로 재시도해서 해결.
+
+
+## [수정] FireKnight GroggyPips 위치 조정 + 공격별 전방판정(FrontOnly) 토글 추가 — 2026-08-09 (세션 시간)
+### 프롬프트
+firenight의 GroggyPips가 지금 (0,4.1)인데 (0, -0.4)로 바꿔주고 지금 fireknight의 공격이 각 공격마다
+fireknight를 중간으로 두고 hit reach 크기만큼 양옆으로 벌어지는 느낌인데 이러면 안되는게 전방만
+공격하는 스킬이 있어서 바꿀 수 있게 해줘야할거같다
+### 조작 내역
+- MidBossFireKnightConfig.cs:
+  - groggyPipsOffsetY(float, -0.4) 추가 — 리터럴 금지 규칙 때문에 하드코딩 대신 Config 필드로.
+  - normalFrontOnly/fireFrontOnly/bombFrontOnly/wheelFrontOnly(bool, 기본 false=기존과 동일 양방향) 추가.
+  - frontDeadZone(float, 1.0) 추가 — DemonBoss와 동일 개념(정면 판정 시 등 뒤 근접 허용 오차).
+- MidBoss_FireKnight.cs:
+  - BuildGroggyPips()의 localPosition을 (0, config.groggyFxOffsetY+0.7f) -> (0, config.groggyPipsOffsetY)로 교체.
+  - Facing()/InFront() 헬퍼 추가(DemonBoss 개념 이식).
+  - DoNormalAttack/DoFireAttack/DoFireBomb/DoWheelAttack(2곳) 총 5개 판정 조건에
+    `&& (!config.xxxFrontOnly || InFront())` 추가.
+### 검증
+- refresh_unity(compile=request) -> read_console: CS 컴파일 에러 0건. 무관한 에디터 내부 노이즈
+  (UnityEditor.Graphs NullReferenceException, missing script 2건) 발견했으나 내 코드와 무관 확인.
+- 재생 모드가 세션 중 예상치 못하게 True로 걸려있던 순간 발견(H3 패턴) — 재확인 후 정지 상태로 복귀시킴.
+- run_tests(EditMode): 250/250 통과
+- manage_scene(save): UITestScene 저장 성공
+### 실패와 수정
+없음
+
+
+## [수정] FireKnight range band FrontOnly 반영 + Wheel 공격 안 나가는 문제 수정 — 2026-08-09 (세션 시간)
+### 프롬프트
+front only를 켰는데 range band는 보스 뒤까지 있는데 이건 무슨 경우지?
+그리고 wheel attack 공격이 나오지 않는다
+### 조작 내역
+- **원인 1 (range band)**: LateUpdate()의 활성 공격 리치 띠(rangeBands[2])와 OnDrawGizmosSelected()가
+  FrontOnly 플래그를 안 보고 항상 좌우 대칭(bx-reach ~ bx+reach)으로 그리고 있었음 — 판정
+  (ResolveMeleeHit 호출부의 InFront() 체크)과 표시가 어긋나 있었음.
+- **원인 2 (Wheel 안 나감)**: TryBeginAttack()이 고정 우선순위(Normal>Fire>Bomb>Wheel)였는데,
+  normalCooldown(1.4)이 wheelCooldown(2.5)보다 훨씬 짧아서 Wheel이 쿨타임 다 돌아도 그 시점엔
+  거의 항상 Normal도 이미 준비돼있어 Wheel이 사실상 영구적으로 안 뽑히는 구조였음(실측: config
+  4개 쿨타임 값 확인).
+### 수정
+- MidBoss_FireKnight.cs:
+  - GetActiveAttackRange()에 frontOnly out 파라미터 추가.
+  - LateUpdate(): frontOnly면 Facing() 방향 + frontDeadZone만 반영해 띠를 비대칭으로 그리게 수정.
+  - DrawReachGizmo() 헬퍼 신설, OnDrawGizmosSelected()의 4개 공격 리치 표시도 동일하게 FrontOnly 반영.
+  - TryBeginAttack(): 고정 우선순위 제거, 준비된 공격 중 쿨타임이 가장 먼저 끝난(가장 오래 대기한)
+    걸 고르는 방식으로 교체 — 특정 공격이 영구적으로 안 나가는 걸 방지.
+### 검증
+- refresh_unity(compile=request) -> read_console(filter=CS): 컴파일 에러 0건
+  (script_apply_edits 1건에서 네트워크 오류(WinError 10035) 발생했으나 실제로는 적용됨을
+  파일 재확인으로 확정 — 응답 유실이었을 뿐 반영 자체는 성공)
+- run_tests(EditMode): 250/250 통과
+- manage_scene(save): UITestScene 저장 성공
+### 실패와 수정
+- script_apply_edits 호출 중 네트워크 계층 오류로 성공/실패 여부가 불명확했음 — 파일을 다시 읽어
+  실제 반영 여부를 텍스트로 직접 확인하는 방식으로 검증(재시도 전 상태 재확인 원칙 재확인, FAIL.md #4 계열).

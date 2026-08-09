@@ -17,7 +17,6 @@ public sealed class LevelUpSkillManager : MonoBehaviour
     [SerializeField] private Image[] cardBackgrounds;
     [SerializeField] private Button[] choiceButtons;
     [SerializeField] private TMP_Text[] choiceTexts;
-    [SerializeField] private Image[] skillIcon;
 
     private void Awake()
     {
@@ -92,29 +91,17 @@ public sealed class LevelUpSkillManager : MonoBehaviour
         float m = playerProgression.AugmentConfig.GetMagnitude(type, tier);
 
         // 스킬 획득 타입만 카드 아이콘을 스킬 스프라이트로 바꾼다(그 외 6종은 원래 아이콘 유지).
-        if ((type == AugmentType.UnlockSkill1 || type == AugmentType.UnlockSkill2)
-            && skillIcon != null && idx >= 0 && idx < skillIcon.Length && skillIcon[idx] != null)
-        {
-            string skillId = type == AugmentType.UnlockSkill1 ? "Skill1" : "Skill2";
-            skillIcon[idx].sprite = Resources.Load<Sprite>(skillId);
-        }
-
+        
         switch (type)
         {
             case AugmentType.DamageUp:
-                skillIcon[idx].sprite = Resources.Load<Sprite>("DamageUp");
                 return "공격 데미지\n+" + m;
             case AugmentType.Heal:
-                skillIcon[idx].sprite = Resources.Load<Sprite>("Heal");
                 return "체력 회복\n+" + m;
             case AugmentType.ManaUp:
-                skillIcon[idx].sprite = Resources.Load<Sprite>("ManaUp");
                 return "마나 수급량\n+" + m;
             case AugmentType.ManaHeal:
-                skillIcon[idx].sprite = Resources.Load<Sprite>("ManaHeal");
                 return "마나 회복\n+" + m;
-            case AugmentType.UnlockSkill1: return "Skill1 획득";
-            case AugmentType.UnlockSkill2: return "Skill2 획득";
             default: return string.Empty;
         }
     }
