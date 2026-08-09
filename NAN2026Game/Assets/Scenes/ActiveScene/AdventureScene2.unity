@@ -621,13 +621,17 @@ PrefabInstance:
       propertyPath: m_Name
       value: SavePoint1
       objectReference: {fileID: 0}
+    - target: {fileID: 3576910732333444912, guid: 18e5b14087795a7498a4649810ea446d, type: 3}
+      propertyPath: triggerOnce
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5001517998708988740, guid: 18e5b14087795a7498a4649810ea446d, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 4.11058
+      value: 7.26
       objectReference: {fileID: 0}
     - target: {fileID: 5001517998708988740, guid: 18e5b14087795a7498a4649810ea446d, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 3.0362349
+      value: 3.06
       objectReference: {fileID: 0}
     - target: {fileID: 5001517998708988740, guid: 18e5b14087795a7498a4649810ea446d, type: 3}
       propertyPath: m_LocalPosition.z
@@ -18970,7 +18974,7 @@ GameObject:
   - component: {fileID: 707894674}
   - component: {fileID: 707894675}
   m_Layer: 0
-  m_Name: SpawnPoint
+  m_Name: SpawnPoint2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -43845,9 +43849,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 5277710431667870429}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c2d8e5cfcaa45ea4f83eea3c4f0950d8, type: 3}
+  m_Script: {fileID: 11500000, guid: 5ac9fc046e0d59948b8b6d9ec9d2d7ce, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PortalOpen
+  m_EditorClassIdentifier: Assembly-CSharp::PortalOpen1
   portal: {fileID: 1510970154}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

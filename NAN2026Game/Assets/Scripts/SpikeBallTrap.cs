@@ -12,6 +12,7 @@ namespace NAN2026
         System.Reflection.MethodInfo tryParry;
         Component controller;
         Vector3 home;
+        float flightT;
         Vector2 dir;
         int phase; // 0대기 1경고 2돌진 3사멸
         float respawnAt;
@@ -56,6 +57,10 @@ namespace NAN2026
             // 패링 목표를 채우면 돌진 중이던 것도 멈추고 사라진다. 리스폰도 하지 않는다.
             if (NAN2026.SpikeParryEvents.CombatSealed) { if (phase != 3) Break(false); return; }
             if (config == null || player == null) return;
+            // 플레이어 실측 속도(보트는 transform 이동이라 rigidbody 속도로는 안 잡힌다)
+            if (hasLastPos && Time.deltaTime > 0f)
+                playerVel = (Vector2)(player.position - lastPlayerPos) / Time.deltaTime;
+            lastPlayerPos = player.position; hasLastPos = true;
             if (phase == 3)
             {
                 if (Time.time >= respawnAt)
@@ -64,6 +69,13 @@ namespace NAN2026
             }
             if (phase == 2)
             {
+                // 유도 비행: 발사 후 일정 시간 동안 플레이어 쪽으로 진행 방향을 서서히 튼다
+                if (config.homingTurn > 0f && player != null && flightT < config.homingSeconds)
+                {
+                    Vector2 want = ((Vector2)(player.position + Vector3.up * config.aimHeight) - (Vector2)transform.position).normalized;
+                    dir = Vector2.Lerp(dir, want, config.homingTurn * Time.deltaTime).normalized;
+                }
+                flightT += Time.deltaTime;
                 transform.position += (Vector3)(dir * config.launchSpeed * Time.deltaTime);
                 // 조기 패링: 이펙트 리치(parryReachX) 안이고 창 활성이면 접촉 전 성공 처리
                 if (!resolved && controller != null && parryReach > 0f)
@@ -81,17 +93,29 @@ namespace NAN2026
                     }
                 }
                 transform.Rotate(0f, 0f, config.spinDegPerSec * Time.deltaTime);
-                if (transform.position.y < 2.6f || Vector3.Distance(transform.position, home) > 40f) Break(false);
+                if (transform.position.y < config.killPlaneY || Vector3.Distance(transform.position, home) > config.maxTravel) Break(false);
                 return;
             }
+            // 위쪽 플레이어에게는 반응하지 않는다(천장 위 루트가 있는 씬용)
+            if (config.onlyBelow && player.position.y > transform.position.y)
+            { phase = 0; SetAlpha(1f); return; }
             float dist = Mathf.Abs(transform.position.x - player.position.x); // 천장 트랩: 수평거리 기준
             int p = SpikeBallLogic.Phase(dist, visionR, config.warnMultiplier, config.launchMultiplier);
             if (p >= 2 && phase != 2)
             {
                 float dx, dy;
-                SpikeBallLogic.LaunchDir(transform.position.x, transform.position.y, player.position.x, player.position.y + 0.4f, out dx, out dy);
+                Vector2 aim = new Vector2(player.position.x, player.position.y + config.aimHeight);
+                if (config.leadTarget && config.launchSpeed > 0f)
+                {
+                    // 비행 시간만큼 표적을 앞질러 노린다. 속도는 발사 속도로 상한을 둔다
+                    Vector2 v = playerVel;
+                    if (v.magnitude > config.launchSpeed) v = v.normalized * config.launchSpeed;
+                    float flight = Vector2.Distance(transform.position, aim) / config.launchSpeed;
+                    aim += v * flight;
+                }
+                SpikeBallLogic.LaunchDir(transform.position.x, transform.position.y, aim.x, aim.y, out dx, out dy);
                 dir = new Vector2(dx, dy);
-                phase = 2; SetAlpha(1f);
+                phase = 2; flightT = 0f; SetAlpha(1f);
                 return;
             }
             phase = p;
@@ -107,6 +131,7 @@ namespace NAN2026
 
         bool resolved;
         float parryReach = 1.5f;
+        Vector3 lastPlayerPos; bool hasLastPos; Vector2 playerVel;   // 예측 조준용 실측 속도
         System.Reflection.MethodInfo windowActive;
         void ResolveHit()
         {

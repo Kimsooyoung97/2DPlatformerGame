@@ -27,8 +27,10 @@ namespace NAN2026
         private void Update()
         {
             var kb = PlayerController2D.InputLocked ? null : Keyboard.current;
-            if (kb == null || !kb.digit5Key.wasPressedThisFrame) return;
+            if (kb == null || !kb.digit1Key.wasPressedThisFrame) return;
+            if (!NAN2026.SkillGate.IsUnlocked(0)) return;      // 상자에서 아이콘을 먹어야 사용 가능
             if (casting || Time.time - lastCast < config.cooldown) return;
+            NAN2026.SkillGate.Report(0, config.cooldown);      // 아이콘 쿨타임 표시용
             var mana = GetComponent<NAN2026.PlayerMana>();
             if (mana != null && !mana.TryUseMp(config.mpCost)) return; // MP 부족 시 불발
             StartCoroutine(Cast());
@@ -61,8 +63,10 @@ namespace NAN2026
                     {
                         spawned++;
                         float ox = SkillLogic.OffsetX(spawned, config.startOffset, config.spacing);
-                        SpawnEffect(transform.position + new Vector3(ox, 0f, 0f));
-                        SpawnEffect(transform.position + new Vector3(-ox, 0f, 0f));
+                        var pR = transform.position + new Vector3(ox, 0f, 0f);
+                        var pL = transform.position + new Vector3(-ox, 0f, 0f);
+                        SpawnEffect(pR); DamageAround(pR);
+                        SpawnEffect(pL); DamageAround(pL);
                     }
                 }
                 t += Time.deltaTime;
@@ -78,6 +82,27 @@ namespace NAN2026
             }
             if (hasPose && anim != null) anim.enabled = true;
             casting = false;
+        }
+
+        // 번개가 내리꽂힌 지점 주변의 적을 때린다 (보스·일반 몬스터 공통)
+        private void DamageAround(Vector3 center)
+        {
+            var hits = Physics2D.OverlapBoxAll(center, config.hitSize, 0f);
+            for (int i = 0; i < hits.Length; i++)
+            {
+                var h = hits[i];
+                if (h == null) continue;
+                if (h.GetComponentInParent<PlayerHealth>() != null) continue; // 자신 제외
+                var mino = h.GetComponentInParent<NAN2026.MinoBoss>();
+                if (mino != null) { mino.TakeDamage(config.damage); continue; }
+                var demon = h.GetComponentInParent<NAN2026.DemonBoss>();
+                if (demon != null) { demon.TakeDamage(config.damage); continue; }
+                var mon = h.GetComponentInParent<NHNDemo.MonsterHealth>();
+                // SendMessage는 인자 1개만 넘긴다. TakeDamage(int, Vector2)는 2개라 직접 호출해야 한다
+                // (SendMessage 사용 시 'Failed to call function TakeDamage' 에러 → Error Pause로 에디터 정지)
+                if (mon != null)
+                    mon.TakeDamage(config.damage, new Vector2(Mathf.Sign(center.x - transform.position.x), 0.2f));
+            }
         }
 
         private void SpawnEffect(Vector3 pos)

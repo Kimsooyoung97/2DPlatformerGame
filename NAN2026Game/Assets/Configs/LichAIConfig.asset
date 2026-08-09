@@ -12,15 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: defc207cb5290274d84a36d470dc11ad, type: 3}
   m_Name: LichAIConfig
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAIConfig
-  aggroRange: 8
-  attackRange: 5
+  aggroRange: 6.5
+  attackRange: 4
+  attackHeightRange: 1.2
   chaseStopDistance: 12
   patrolSpeed: 1
   chaseSpeed: 1.5
   patrolRadius: 1.5
   jumpYThreshold: 1.2
   jumpConfirmDuration: 0.35
-  attackCooldown: 4
+  attackCooldown: 4.5
   attackDamage: 1
   maxHealth: 3
   xpReward: 6
@@ -28,3 +29,11 @@ MonoBehaviour:
   healthBarOffset: {x: 0, y: 3.5, z: 0}
   healthBarBackground: {r: 0, g: 0, b: 0, a: 0.75}
   healthBarFill: {r: 0.85, g: 0.15, b: 0.15, a: 1}
+  knockbackForce: 6
+  knockbackDuration: 0.15
+  edgeProbeAhead: 0.55
+  edgeProbeDepth: 1.2
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  firstAttackDelay: 1.4

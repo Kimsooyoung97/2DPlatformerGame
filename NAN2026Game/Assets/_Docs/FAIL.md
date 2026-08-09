@@ -133,3 +133,10 @@
 - DH-01 타일맵 구간 절단 시 제거 폭과 이동 폭을 다르게 계산해 이음새마다 빈 열 발생 — [lo,hi] 양끝 포함으로 지우면(hi-lo+1칸) 이동도 hi-lo+1 이어야 하는데 hi-lo 만 당겼다. 방지: 구간 폭은 항상 **hi-lo+1** 로 계산하고, 절단 직후 바닥 표면 높이를 전 구간 스캔해 '타일 없는 열 0개' 를 확인한다
 - DH-02 TilemapCollider2D 는 타일을 코드로 지워도 이전 범위를 유지한다 — CompositeCollider2D.GenerateGeometry() 만으로는 갱신되지 않아 맵 끝 너머 14u 에 보이지 않는 바닥이 남았다. 방지: Tilemap.RefreshAllTiles() + 콜라이더 enabled 토글까지 하고, **Physics2D.Raycast 로 맵 끝 안팎을 찍어 물리로 확인**한다. bounds 값만 믿지 않는다
 - DH-03 씬 오브젝트를 이름으로만 찾고 컴포넌트 타입을 가정함 — Stage_CameraBounds 를 PolygonCollider2D 로 단정해 검색했으나 실제로는 BoxCollider2D 라 보정이 통째로 누락됐다. 방지: 대상 오브젝트의 컴포넌트 목록을 먼저 실측하고 분기한다
+
+- DH-04 콜라이더 크기에 Transform scale 이 곱해지는 것을 계산에서 빼먹음 — 스킬 판정 hitbox2D (3.0,1.2) 에 scale 3 이 또 곱해져 월드 9.0x3.6 이 되고, 스폰 순간 지면을 물어 '벽 충돌'로 즉시 소멸했다. 방지: 콜라이더 수치를 Config 로 줄 때는 **월드 크기 = 로컬값 x lossyScale** 을 반드시 환산해 확인한다
+- DH-05 에디터 좌표로 물리 검증을 하면 지면 관련 버그가 재현되지 않는다 — 에디터의 플레이어가 지면 2.82u 위에 떠 있어 OverlapBox 가 '겹침 없음' 을 반환했고, 하마터면 미해결 상태를 해결로 보고할 뻔했다. 방지: 접지 관련 검증은 **레이캐스트로 실제 지면 y 를 찾아 그 기준으로** 재현한다
+
+- DH-06 SendMessage 는 인자를 1개만 넘긴다 — MonsterHealth.TakeDamage(int, Vector2) 를 SendMessage 로 불러 'Failed to call function' 예외가 났고 그 프레임 로직이 끊겨 게임이 멈춘 것처럼 보였다. DontRequireReceiver 는 수신자 부재만 봐주지 **인자 수 불일치는 예외**다. 방지: SendMessage 대상 메서드의 인자 수를 먼저 확인하고, 2개 이상이면 GetComponent 로 직접 호출한다
+
+- SendMessage는 인자를 1개만 전달한다 — TakeDamage(int, Vector2)처럼 2개 이상이면 호출 실패 에러가 나고 Error Pause와 겹치면 에디터가 멈춘다. 대상 시그니처 확인 후 직접 호출할 것

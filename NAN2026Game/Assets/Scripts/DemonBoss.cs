@@ -28,7 +28,7 @@ namespace NAN2026
         private GameObject groggyFx, burstMsg;
         private Coroutine flashCo, sparkleCo, dashCo;
         private SpriteRenderer playerSr;
-
+        public bool death = false;
         void Start()
         {
             if (config == null) { Debug.LogError("[DemonBoss] config 미배선! 인스펙터에서 DemonBossConfig 연결 필요"); enabled = false; return; }
@@ -68,7 +68,7 @@ namespace NAN2026
             stateT += Time.deltaTime; animT += Time.deltaTime * config.fps;
             SnapToGround();
 
-            if (state == 4) { Anim(deathFrames, false); return; }
+            if (state == 4) { Anim(deathFrames, false); death = true; return; }
             if (state == -1)
             {
                 Anim(introFrames, false);

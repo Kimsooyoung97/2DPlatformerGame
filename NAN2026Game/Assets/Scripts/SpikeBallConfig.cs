@@ -22,6 +22,18 @@ namespace NAN2026
         public float deflectSpeed = 9f;
         public float respawnDelay = 3f;
 
+        [Header("소멸 조건 (씬마다 다름)")]
+        [Tooltip("이 높이 아래로 내려가면 소멸. Scene2 기본 2.6")]
+        public float killPlaneY = 2.6f;
+        [Tooltip("발사 지점에서 이 거리를 넘으면 소멸")]
+        public float maxTravel = 40f;
+        [Tooltip("플레이어가 스파이크보다 아래에 있을 때만 작동. Scene2 는 false")]
+        public bool onlyBelow = false;
+        [Tooltip("조준 높이: 플레이어 발밑에서 몇 유닛 위를 노리는가")]
+        public float aimHeight = 0.4f;
+        [Tooltip("이동 중인 표적을 예측 조준한다(보트 탑승 구간용). Scene2 는 false")]
+        public bool leadTarget = false;
+
         [Header("격돌 이펙트(할로우나이트식)")]
         public float clashDuration = 0.16f;
         public int clashLines = 8;
@@ -40,5 +52,7 @@ namespace NAN2026
         public float popupLife = 0.9f;
         public int popupFontSize = 64;
         public float popupCharSize = 0.06f;
-    }
+            public float homingTurn = 3.5f;   // 비행 중 유도 강도(0이면 직진)
+        public float homingSeconds = 1.6f; // 유도 지속 시간(이후 직진)
+}
 }

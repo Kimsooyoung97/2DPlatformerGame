@@ -60,6 +60,10 @@ namespace NAN2026
         public Sprite barUnder;
         public Sprite barProgress;
         public Sprite barOver;
+        [Header("보상")]
+        [Tooltip("이 보스를 처치했을 때 플레이어에게 주는 경험치")]
+        public int xpReward = 55;
+
         [Header("클래시")]
         public SpikeBallConfig clashConfig;
     }

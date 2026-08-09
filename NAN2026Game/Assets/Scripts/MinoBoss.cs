@@ -35,6 +35,7 @@ namespace NAN2026
         private SpriteRenderer playerSr;
         private float lastParryPress = -999f;
         private float lastConsumed = -999f;
+        public bool death = false;
         private bool ParryBuffered()
         {
             // 최근 buffer 내 새 입력이 있고 아직 소비 안 됐으면 성립 (일찍 눌러도 OK)
@@ -196,12 +197,24 @@ namespace NAN2026
             if (groggyFx != null) Destroy(groggyFx);
         }
 
+        private bool xpGranted;
+
+        /// <summary>처치 시 1회만 경험치를 지급한다. EnemyAI 와 같은 방식.</summary>
+        private void GrantXpOnce()
+        {
+            if (xpGranted || config == null || config.xpReward <= 0) return;
+            xpGranted = true;
+            if (player == null) return;
+            PlayerProgression progression = player.GetComponentInParent<PlayerProgression>();
+            if (progression != null) progression.AddXp(config.xpReward);
+        }
+
         public void TakeDamage(int dmg)
         {
             if (state == 4) return;
             hp -= 1; // 타격 1회 = 10% 고정
             HitFeedback();
-            if (hp <= 0) { SetState(4); return; }
+            if (hp <= 0) { GrantXpOnce(); SetState(4); return; }
             bool attacking = state == 2 || state == 7; // 공격/돌진 판정·모션 중엔 경직 없음(안 씹힘)
             if (state != 5 && !attacking) SetState(3); // 그로기 중엔 그로기 유지, 그 외엔 피격 모션
         }
@@ -254,7 +267,7 @@ namespace NAN2026
             if (groggyFx != null) groggyFx.transform.localRotation = Quaternion.Euler(0f, 0f, Mathf.Sin(Time.time * 6f) * 14f);
             if (player != null && state != 4 && state != 2 && state != 5 && state != 6 && state != 7) sr.flipX = player.position.x > transform.position.x;
 
-            if (state == 4) { if ((int)animT >= cur.Length - 1) enabled = false; return; }
+            if (state == 4) { if ((int)animT >= cur.Length - 1) enabled = false; death = true; return; }
             if (player == null) return;
             float dx = Mathf.Abs(player.position.x - transform.position.x);
 

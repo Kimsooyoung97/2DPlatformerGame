@@ -21746,6 +21746,72 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 2999419454741437746, guid: 9b8645b5edcf1ce4ea0fe106dc7e92cc, type: 3}
   m_PrefabInstance: {fileID: 2128203530}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &4000037576799339733
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 6235012550541511267, guid: 79ddc804b4c426447aaef41c6c5b2b70, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 36.816303
+      objectReference: {fileID: 0}
+    - target: {fileID: 6235012550541511267, guid: 79ddc804b4c426447aaef41c6c5b2b70, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -1.73
+      objectReference: {fileID: 0}
+    - target: {fileID: 6235012550541511267, guid: 79ddc804b4c426447aaef41c6c5b2b70, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6235012550541511267, guid: 79ddc804b4c426447aaef41c6c5b2b70, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6235012550541511267, guid: 79ddc804b4c426447aaef41c6c5b2b70, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6235012550541511267, guid: 79ddc804b4c426447aaef41c6c5b2b70, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6235012550541511267, guid: 79ddc804b4c426447aaef41c6c5b2b70, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6235012550541511267, guid: 79ddc804b4c426447aaef41c6c5b2b70, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6235012550541511267, guid: 79ddc804b4c426447aaef41c6c5b2b70, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6235012550541511267, guid: 79ddc804b4c426447aaef41c6c5b2b70, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6496658408545524274, guid: 79ddc804b4c426447aaef41c6c5b2b70, type: 3}
+      propertyPath: m_Name
+      value: portal
+      objectReference: {fileID: 0}
+    - target: {fileID: 7162873444004518467, guid: 79ddc804b4c426447aaef41c6c5b2b70, type: 3}
+      propertyPath: nextSceneName
+      value: AdventureScene5
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 79ddc804b4c426447aaef41c6c5b2b70, type: 3}
+--- !u!1 &4000037576799339734 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6496658408545524274, guid: 79ddc804b4c426447aaef41c6c5b2b70, type: 3}
+  m_PrefabInstance: {fileID: 4000037576799339733}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &7317815284595991051
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -21801,8 +21867,29 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8701348437991366046, guid: 55cd6de1c5739cc4e9a0052f31380601, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7317815284595991053}
   m_SourcePrefab: {fileID: 100100000, guid: 55cd6de1c5739cc4e9a0052f31380601, type: 3}
+--- !u!1 &7317815284595991052 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8701348437991366046, guid: 55cd6de1c5739cc4e9a0052f31380601, type: 3}
+  m_PrefabInstance: {fileID: 7317815284595991051}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7317815284595991053
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7317815284595991052}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9be301811aa65734fb378ba7d10f9857, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PortalOpen2
+  portal: {fileID: 4000037576799339734}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -21821,3 +21908,4 @@ SceneRoots:
   - {fileID: 1021511967}
   - {fileID: 2083536985}
   - {fileID: 1589180212}
+  - {fileID: 4000037576799339733}
