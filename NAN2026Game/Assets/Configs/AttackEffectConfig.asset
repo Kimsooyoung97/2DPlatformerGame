@@ -25,3 +25,6 @@ MonoBehaviour:
   hitboxSize: {x: 3, y: 1.2}
   comboVHitboxSize: {x: 3.2, y: 1.2}
   comboVHitLifetime: 0.12
+  comboBHitboxSize: {x: 4.6, y: 3.2255998}
+  comboBHitOffsetY: 0.4
+  comboBDamage: 3

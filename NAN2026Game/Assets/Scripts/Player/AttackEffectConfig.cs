@@ -27,5 +27,10 @@ namespace NAN2026
         [Tooltip("Z키 콤보의 근접 판정 히트박스 크기·지속시간(투사체처럼 날아가지 않고 그 자리에서 잠깐 판정)")]
         public Vector2 comboVHitboxSize = new Vector2(1.1f, 1.1f);
         public float comboVHitLifetime = 0.12f;
-    }
+    
+    [Header("ComboB1(가로베기) 전용 판정 — 세로도 덮는다")]
+    public Vector2 comboBHitboxSize = new Vector2(3.4f, 3.0f);
+    public float comboBHitOffsetY = 0.6f;
+    public int comboBDamage = 3;
+}
 }

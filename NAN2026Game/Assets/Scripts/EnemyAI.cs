@@ -183,8 +183,12 @@ public sealed class EnemyAI : MonoBehaviour
 
         float distance = Mathf.Abs(player.position.x - transform.position.x);
         float heightDiff = Mathf.Abs(player.position.y - transform.position.y);
+        bool wasEngaged = engaged;
         state = EnemyAILogic.DetermineState(distance, heightDiff, engaged, config.aggroRange, config.attackRange, config.chaseStopDistance, config.attackHeightRange);
         engaged = state != EnemyAIState.Patrol;
+        // 발견 직후엔 곧바로 때리지 않는다 — 플레이어가 반응할 틈을 준다
+        if (!wasEngaged && engaged && attackTimer < config.firstAttackDelay)
+            attackTimer = config.firstAttackDelay;
 
         switch (state)
         {
@@ -200,6 +204,23 @@ public sealed class EnemyAI : MonoBehaviour
         }
     }
 
+    /// 진행 방향 앞에 발판이 있는지 검사 — 없으면 그쪽으로 가지 않는다(메이플식 자리 지키기)
+    private bool HasGroundAhead(float dir)
+    {
+        if (config == null || config.edgeProbeAhead <= 0f) return true;
+        var col = GetComponent<Collider2D>();
+        float feetY = col != null ? col.bounds.min.y : transform.position.y;
+        Vector2 origin = new Vector2(transform.position.x + dir * config.edgeProbeAhead, feetY + 0.05f);
+        var hit = Physics2D.Raycast(origin, Vector2.down, config.edgeProbeDepth, config.groundMask);
+        return hit.collider != null;
+    }
+
+    private float GuardDir(float dir)
+    {
+        if (Mathf.Abs(dir) < 0.01f) return dir;
+        return HasGroundAhead(Mathf.Sign(dir)) ? dir : 0f;
+    }
+
     private void Patrol()
     {
         heightGapTimer = 0f;
@@ -211,7 +232,8 @@ public sealed class EnemyAI : MonoBehaviour
         }
 
         patrolDir = EnemyAILogic.PatrolDirection(transform.position.x, leftBoundX, rightBoundX, patrolDir);
-        controller.Input = new Vector2(patrolDir, 0f);
+        if (!HasGroundAhead(patrolDir)) patrolDir = -patrolDir; // 발판 끝에서 되돌아선다
+        controller.Input = new Vector2(GuardDir(patrolDir), 0f);
     }
 
     private void Chase()
@@ -229,7 +251,7 @@ public sealed class EnemyAI : MonoBehaviour
         heightGapTimer = EnemyAILogic.UpdateHeightGapTimer(aboveThresholdNow, heightGapTimer, Time.deltaTime);
         bool needsJump = controller.IsGrounded && EnemyAILogic.ShouldJumpNow(heightGapTimer, config.jumpConfirmDuration);
 
-        controller.Input = new Vector2(dir, needsJump ? 1f : 0f);
+        controller.Input = new Vector2(GuardDir(dir), needsJump ? 1f : 0f); // 낭떠러지면 추격해도 안 나간다
     }
 
     private void AttackPlayer()

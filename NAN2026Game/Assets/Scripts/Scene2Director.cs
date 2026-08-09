@@ -36,6 +36,13 @@ namespace NAN2026
         private void Start()
         {
             SpikeParryEvents.Count = 0;
+            // FAIL: DisableDomainReload 프로젝트라 CombatSealed는 Play 시작 시 딱 한 번만
+            // 리셋되고, 씬을 다시 로드해도 안 풀린다. 예전엔 씬2를 한 번 클리어하면 다시
+            // 못 돌아오는 선형 진행이라 문제없었는데, 세이브포인트로 자유 왕복이 가능해진
+            // 지금은 이미 클리어했던 세션에서 다시 씬2로 오면 CombatSealed=true가 그대로 남아
+            // ThrownWeaponLauncher가 영원히 발사를 안 하는(스파이크가 안 생기는) 버그가 됨.
+            // 이 씬이 새로 시작될 때마다 반드시 다시 풀어준다.
+            SpikeParryEvents.CombatSealed = false;
             var p = PlayerLocator.Find();
             if (p != null) player = p.transform;
             var b = GameObject.Find("MinoBoss");

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: defc207cb5290274d84a36d470dc11ad, type: 3}
   m_Name: DeathDogAIConfig
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAIConfig
-  aggroRange: 4
+  aggroRange: 3.5
   attackRange: 0.85
   attackHeightRange: 0.9
   chaseStopDistance: 6
@@ -31,3 +31,9 @@ MonoBehaviour:
   healthBarFill: {r: 0.85, g: 0.15, b: 0.15, a: 1}
   knockbackForce: 6
   knockbackDuration: 0.15
+  edgeProbeAhead: 0.55
+  edgeProbeDepth: 1.2
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  firstAttackDelay: 1

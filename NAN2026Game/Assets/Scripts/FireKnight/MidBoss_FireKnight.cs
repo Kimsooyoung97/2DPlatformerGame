@@ -40,7 +40,7 @@ namespace NAN2026
         private float lastParryPress = -999f;
         private float lastConsumed = -999f;
         private float hitInvulnUntil; // 최근 피격 후 재경직 면역 마감 시각
-
+        public bool death = false;
         private bool ParryBuffered()
         {
             if (Time.time - lastParryPress <= config.parryBuffer && lastParryPress > lastConsumed)
@@ -268,7 +268,7 @@ namespace NAN2026
             bool facingLocked = state == 2 || state == 3 || state == 4 || state == 5 || state == 7 || state == 8 || state == 9;
             if (player != null && !facingLocked) SetFacing(player.position.x < transform.position.x);
 
-            if (state == 7) { if ((int)animT >= cur.Length - 1) enabled = false; return; }
+            if (state == 7) { if ((int)animT >= cur.Length - 1) enabled = false; death = true; return; }
             if (player == null) return;
 
             if (state == 9) { DoWindup(); return; }
