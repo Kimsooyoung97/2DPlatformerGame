@@ -7005,3 +7005,33 @@ CheckpointTrigger.Update()도 동일한 Enter wasPressedThisFrame을 읽어 Open
 - manage_scene(save): AdventureScene2 저장 성공
 ### 실패와 수정
 없음
+
+
+## [수정] PlayerHealth.cs 중복 판정 로직이 작업 파일에서 사라진 것 재적용 — 2026-08-10
+### 프롬프트
+setcheckpoint에 중복판정로직이안들어가있음
+### 조사 결과
+직전 커밋(HEAD)에는 중복 판정 로직이 정상적으로 들어있었는데(git diff HEAD로 확인), 실제
+디스크의 작업 파일에서는 3곳이 통째로 빠져있었음:
+1. duplicateCheckpointRadius 필드 선언
+2. Awake()의 시작 지점 자동 등록(checkpoints.Add) 호출 줄
+3. SetCheckpoint()의 중복 판정 for 루프
+정확한 원인은 특정 못 함 — 직전에 refresh_unity 호출이 두 차례 연속 타임아웃/연결끊김을
+겪었던 것과 시점이 겹침("Timeout receiving Unity response", "Connection closed before
+reading expected bytes"). git checkout/reset 등은 안 썼음(사람만 실행하는 규칙 준수) — 대신
+git diff HEAD로 정확히 뭐가 빠졌는지 확인 후 동일 내용을 script_apply_edits로 다시 적용.
+### 조작 내역
+- Assets/Scripts/PlayerHealth.cs: 위 3곳 전부 재적용(이전 커밋과 동일 내용)
+### 검증
+- 재적용 직후 파일 내용에 세 문자열(duplicateCheckpointRadius / Vector3.Distance(existing.
+  position, position) / "시작 지점") 전부 포함됨을 텍스트로 재확인
+- refresh_unity(compile=request) -> read_console(types=error): 0건
+- run_tests(EditMode): 229/229 통과
+- **실측 재검증**: play mode에서 새 지점(+1) -> 완전히 같은 좌표 재호출(변화 없음) -> 확실히
+  먼 좌표(+1) 순서로 다시 정상 동작 확인
+- manage_scene(save): AdventureScene2 저장 성공
+### 실패와 수정
+- 커밋된 내용이 작업 파일에 실제로 반영돼 있는지, 이번처럼 세션 도중 도구 연결 문제가 있었던
+  직후엔 재확인이 필요함을 재확인. 다음부터는 연결 끊김/타임아웃 직후 이어지는 작업 전에
+  직전에 수정했던 파일들의 핵심 내용이 실제로 디스크에 남아있는지 먼저 grep으로 확인하는
+  습관 필요
