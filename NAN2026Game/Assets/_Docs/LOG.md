@@ -6916,3 +6916,40 @@ Secen3다음에는 Secen4 진행하도록 했는데
 - git status --porcelain: 스크립트 3개 + 씬 1개 변경 확인
 ### 실패와 수정
 없음
+
+
+## [조사] 잡몹 3건 — 점프 회피 불가 / 패링 미연동 / 연출 중 정지 — 2026-08-09 09:00
+### 프롬프트
+[조사]knight가 player점프 했을때 범위보다 공격 범위가 넓어서 힘드네. 그리고 궁수와 기사의 공격시 패링도 가능하도록 넣었어? 우리의 목표는 최대한 쉬운 난이도를 지향해. 그리고 Scene3 연출이 진행될 동안은 적들도 전혀 움직이면 안돼.
+### 조사 결과
+**① 점프해도 맞는 이유 — 판정에 세로 좌표가 아예 없다**
+- `BossRangeLogic.InHitBand`(21~27줄)은 **수평거리 + 정면 여부만** 본다. y 를 한 번도 참조하지 않는다
+- `EnemyBase.DoAttack`(202~203줄)도 그 함수만 호출 → 플레이어가 머리 위로 점프해도 x 만 가까우면 피격
+- 실측: jumpVelocity 10.5 / gravityScale 2.5 → 중력 24.5, **점프 최고점 약 2.25u**
+- Knight 콜라이더 상단은 y=1.40. 즉 점프 정점(≈2.2u)은 적 키의 약 1.6배 높이인데도 판정이 따라온다
+- 데몬 보스도 같은 구조지만(수직 제한 없음) 보스는 덩치가 커서 덜 드러났다. 잡몹 12마리에서 체감이 커짐
+**② 패링 — 잡몹에는 전혀 연동돼 있지 않다**
+- EnemyBase / KnightEnemy / ArcherEnemy / ArcherArrow 4파일 모두 `TryParry`·`ParryClashFx`·`RewardParry` 참조 0건
+- 반면 보스·함정은 전부 연동돼 있다: DemonBoss, DemonProjectile, MinoBoss, PrincessBossAttackPatterns, SpikeBallTrap, ThrownProjectile, SpikeProjectile, EnemyAI, MidBossMeleeHitbox, MidBoss_FireKnight
+- 즉 **잡몹만 패링 불가**. 플레이어는 보스에선 패링으로 대응하다가 잡몹 구간에서만 대응 수단을 잃는다. SPEC 의 '패링 = 핵심 메커니즘' 과도 어긋난다
+- 연동 방식은 확립돼 있다: MinoBoss 처럼 `PlayerController2D.TryParry(GameObject)`(171줄)를 리플렉션으로 잡아 타격 순간 호출 → 성공 시 데미지 취소 + ParryClashFx + PlayerMana.RewardParry
+- 잡몹은 EnemyBase.DoAttack 1곳, ArcherArrow 명중 1곳 = **2곳만 손대면 전부 적용**
+**③ 연출 중 적 정지 — 현재 전혀 막히지 않는다**
+- `EnemyBase` 는 `PlayerController2D.InputLocked` 를 참조하지 않는다(실측 False)
+- IntroSequencer 는 76줄에서 `InputLocked = !on` 으로 **플레이어 입력만** 막는다. 적은 그동안 계속 접근·공격한다
+- Scene3 은 토치 인트로가 완주 보장(스킵 제거)이라 그 시간 동안 잡몹 12마리가 자유롭게 움직인다
+**④ 난이도 하향 관점 정리 (현재 수치)**
+- Knight: attackRange 1.25 / damage 1 / cooldown 1.5 / hitsToDie 3
+- Archer: attackRange 10 / damage 1 / cooldown 2.0 / hitsToDie 3
+- 플레이어: HP 10, 무적 0.6s
+- 가장 큰 체감 난이도 요인은 수치가 아니라 **①(회피 불가)** 와 **③(연출 중 피격)** 이다. 둘 다 '피할 방법이 없는' 종류라 수치 조정보다 우선한다
+**수정 방향(실행 안 함)**
+1. 판정에 세로 조건 추가 — `InHitBand` 에 y 인자를 받는 오버로드 또는 EnemyConfig 에 `attackHeight` 신설. 기존 보스 호출부는 건드리지 않도록 오버로드가 안전
+2. 잡몹 패링 연동 — EnemyBase.DoAttack + ArcherArrow 2곳
+3. EnemyBase.Update 선두에 연출 게이트 — InputLocked 이면 Idle 애니만 재생하고 이동·공격 중단
+### 검증
+해당 없음
+### 실패와 수정
+- 잡몹 구현 시 패링 연동을 '요청에 없어 범위 방어' 로 뺐는데, SPEC 이 패링을 핵심 메커니즘으로 규정하므로 기본 요구사항으로 봤어야 했다
+### 커밋
+해당 없음(무수정)
