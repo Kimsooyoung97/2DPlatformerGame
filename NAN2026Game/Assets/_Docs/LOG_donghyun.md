@@ -6935,3 +6935,46 @@ x94 y41  ~ x  :115 y:41에 Scene2에 썼던것처럼 스파이크 구체 붙이�
 - 보트 위에서 점프가 다시 되는지
 - 물에 빠졌을 때 수면에서 잠깐 떴다가(0.35초) 가라앉고(1.4초) 사망 처리로 넘어가는지
 - 익사 후 체크포인트 복귀인지 게임오버인지 (PlayerHealth 설정에 달려 있다)
+
+
+## [구현] Scene1 게임오버 화면 조립 (배경·로고·연출 배선) — 2026-08-10 04:46
+### 프롬프트
+맞아 그렇게 조립 진행해
+> 맥락: 직전 대화에서 확인한 조립안 — 배경 GameOverBg, 로고 GameOver.png, GameOverPanelFx(페이드·떠오름·점멸) 부착
+
+### 조사에서 밝혀진 것
+- 스프라이트 유실이 아니라 **배선 누락**이었다. DeathIMG.png 15프레임은 전부 정상 슬라이스 상태
+- 다만 DeathIMG 는 애니메이션 시트가 아니다: 프레임 폭 35~502px(편차 93%), 높이 47~346px(편차 86%).
+  실제로 열어 보니 **'사망' 로고 12종 시안 모음**이었다. 순차 재생하면 FAIL#25 그대로 튄다 → 프레임 애니 배선은 하지 않았다
+- Assets/Art/UI/GameOver.png(금색 GAME OVER, 1024x559)와 GameOverBg.png(던전 방·꽂힌 검·찢긴 망토, 2752x1536)는
+  어느 씬·프리팹에서도 참조되지 않는 미사용 상태였다
+
+### 조작 내역
+- GameOverPanel 자식 재구성 (기존 오브젝트는 삭제하지 않았다)
+  [0] Bg      신설, GameOverBg 전체화면 스트레치(1.79:1 vs 16:9 = 0.8% 차이)
+  [1] Image   기존 DeathIMG_4('사망'). GAME OVER 와 역할이 겹쳐 **비활성만** 시킴
+  [2] Logo    신설, GameOver.png. 앵커 비율 26~74% x 63~90% + preserveAspect
+  [3] Text (TMP)  하단 앵커(0.5,0) +44px 로 이동, CanvasGroup 추가
+- GameOverPanelFx 부착 + 배선: background=Bg / logo=Logo / hintGroup=Text (TMP)
+- 문구 "Please Any Key Press" → "Press ENTER to Continue"
+  (GameOverController 의 AnyKeyPressed 는 Input System 경로에서 **엔터만** 받는다 — 문구가 거짓이었다)
+
+### 검증
+- EditMode 236/236, read_console error 0 (남은 1건은 기존 Portal Legacy 경고, 무관)
+- 원본 PNG 3장을 임시 폴더로 복사해 실제로 열어 확인한 뒤 배치했다(추측 배치 아님). 확인 후 임시 파일 삭제
+- 1280x720 합성 미리보기를 만들어 구도 확인: 로고가 배경의 빈 벽 구역에 들어가고 검·망토를 가리지 않음
+- 해상도별 로고 크기 계산: 1280x720 → 356x194(폭 28%) / 1920x1080 → 534x292(28%) / 1024x768 → 380x207(37%).
+  힌트 문구는 하단 앵커라 모든 해상도에서 화면 안
+- **기존 버그 발견·수정**: Text (TMP) 가 중앙 앵커 y=-389 였다. 캔버스가 ConstantPixelSize(scaleFactor 1)이고
+  현재 게임뷰가 1556x718 이라 반높이가 359 — 즉 **문구가 화면 밖 30px 아래에 있어 안 보이는 상태**였다
+- GameOverController 배선 유지 확인: playerHealth=RealPlayer, panel=GameOverPanel
+
+### 실패와 수정
+- 미리보기용 임시 폴더가 없어 File.Copy 가 DirectoryNotFound. Directory.CreateDirectory 선행으로 해결
+- 텍스처 isReadable 을 건드리지 않으려고 임포트 설정 대신 PNG 바이트를 LoadImage 로 읽어 합성했다
+
+### 눈으로 봐야 판정되는 항목
+- 실제로 죽어서 패널이 뜰 때 배경 0.7초 페이드 → 0.35초 뒤 로고가 40px 떠오르며 등장 → 1.4초 뒤 문구 점멸 순인지
+- 검은 배경(패널 자체 Image)이 즉시 깔린 뒤 던전 배경이 페이드되는 흐름이 어색하지 않은지
+- '사망' 로고를 다시 쓰고 싶으면 GameOverPanel/Image 체크박스를 켜면 된다(대신 GAME OVER 와 겹친다)
+- 이 조립은 **Scene1 에만** 했다. Scene2~4 의 GameOverPanel 은 그대로다
