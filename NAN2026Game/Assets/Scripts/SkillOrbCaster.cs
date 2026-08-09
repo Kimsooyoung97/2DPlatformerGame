@@ -84,8 +84,20 @@ namespace NAN2026
             if (mino != null) { mino.TakeDamage(damage); Destroy(gameObject); return; }
             var demon = other.GetComponentInParent<DemonBoss>();
             if (demon != null) { demon.TakeDamage(damage); Destroy(gameObject); return; }
+            // 신규 잡몹(EnemyBase 등) 공통 창구 — FAIL#24
+            var dmgTarget = other.GetComponentInParent<IPlayerDamageable>();
+            if (dmgTarget != null) { dmgTarget.TakeDamage(damage); Destroy(gameObject); return; }
+
             var mon = other.GetComponentInParent<NHNDemo.MonsterHealth>();
-            if (mon != null) { mon.SendMessage("TakeDamage", damage, SendMessageOptions.DontRequireReceiver); Destroy(gameObject); return; }
+            if (mon != null)
+            {
+                // SendMessage 는 인자를 1개만 넘긴다. TakeDamage(int, Vector2) 는 2개라
+                // "Failed to call function" 예외가 나고 그 프레임 로직이 끊겼다.
+                // EffectProjectile 과 동일하게 직접 호출한다.
+                mon.TakeDamage(damage, new Vector2(Mathf.Sign(vel.x), 0f));
+                Destroy(gameObject);
+                return;
+            }
             if (other.GetComponent<UnityEngine.Tilemaps.TilemapCollider2D>() != null || other.GetComponent<CompositeCollider2D>() != null)
                 Destroy(gameObject); // 벽 충돌 소멸
         }

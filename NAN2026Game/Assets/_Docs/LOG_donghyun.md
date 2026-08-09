@@ -6640,3 +6640,28 @@ foreach (SpikeBallTrap)        mb.enabled = false;     // 가시구 정지
 ### 실패와 수정
 - 직전 [수정]에서 `life` 를 2→8 로 올린 것은 **잘못된 진단**이었다. 수명이 아니라 첫 프레임 지면 충돌로 죽고 있었다. life 8 은 그대로 두되(사거리 확보 목적은 유효), 진짜 원인은 이번에 잡았다
 - **에디터 좌표로 물리 검증을 하면 안 된다** — 플레이어가 공중에 떠 있으면 지면 관련 버그가 재현되지 않는다. 레이캐스트로 실제 접지면을 찾아 그 기준으로 재야 한다
+
+
+## [수정] 7번 오브 적중 시 예외 발생 해소 — SendMessage 인자 수 불일치 — 2026-08-10 03:19
+### 프롬프트
+7번 투사체가 적에 맞으면 갑자기 종료가 돼
+### 조작 내역
+**원인: 콘솔에 그대로 찍혀 있었다**
+```
+Failed to call function TakeDamage of class MonsterHealth
+Calling function TakeDamage with 1 parameter but the function requires 2.
+  NAN2026.SkillOrbFlight:OnTriggerEnter2D (SkillOrbCaster.cs:88)
+```
+- `MonsterHealth.TakeDamage(int damage, Vector2 attackDirection)` 는 **인자 2개**인데 `SendMessage` 는 1개만 넘길 수 있다
+- `SendMessageOptions.DontRequireReceiver` 는 '수신자가 없을 때' 만 봐주고, **인자 수가 안 맞으면 예외**가 난다. 그 프레임 로직이 끊겨 게임이 멈춘 것처럼 보였다
+- 6번 검기(EffectProjectile)는 `monster.TakeDamage(damage, Vector2.right * dir)` 로 **직접 호출**해 멀쩡했다. 7번만 SendMessage 를 썼다
+**조치**
+- `mon.TakeDamage(damage, new Vector2(Mathf.Sign(vel.x), 0f))` 직접 호출로 교체 (EffectProjectile 과 동일 방식, 넉백 방향도 비행 방향으로 전달)
+- 더불어 `IPlayerDamageable` 분기를 앞에 추가했다 — 우리 잡몹(KnightEnemy/ArcherEnemy)은 MonsterHealth 가 아니라 이 인터페이스를 쓴다. 없었으면 7번 오브가 **잡몹에게 대미지를 못 넣고 통과**했을 것이다(FAIL#24 계열)
+### 검증
+- 컴파일 성공, SkillOrbFlight 타입 재로드 확인
+- **프로젝트 전체 SendMessage 사용처 12곳 전수 검사**: SkillOrbCaster 외에는 전부 수신자가 `PlayerHealth.TakeDamage(float)` 로 **인자 1개** → 안전. MonsterHealth 를 SendMessage 로 부르던 곳은 여기 하나뿐이었다
+- 수정 후 명중 분기 순서: MinoBoss → DemonBoss → IPlayerDamageable → MonsterHealth → 타일맵(벽)
+- **사용자 눈 판정 필요**: (1) 7번이 적에 맞아도 안 끊기는지 (2) 적이 실제로 피해를 입는지 (3) 잡몹(기사·아처)에게도 대미지가 들어가는지 (4) 넉백 방향이 자연스러운지
+### 실패와 수정
+- 없음
