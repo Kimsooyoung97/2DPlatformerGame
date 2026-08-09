@@ -7168,3 +7168,57 @@ Secen3다음에는 Secen4 진행하도록 했는데
 - **사용자 눈 판정 필요**: (1) 늦게 눌러도 패링이 되는지 (2) 등 뒤 기사 패링이 되는지 (3) 검이 스쳐 지나가는 헛나감이 거슬리는지 (4) 데미지가 0.15초 늦게 들어오는 게 느껴지는지
 ### 실패와 수정
 - 없음. 단, 커밋 직전 AdventureScene3.unity 에 **내가 하지 않은 변경**을 발견(KnightEnemy_22 x=22→25.79 이동, KnightEnemy_47 삭제, ArcherEnemy_58 복제본 x=42.32 추가). 사용자 에디터 수동 편집으로 판단해 **이번 커밋에서 씬 파일을 제외**하고 그대로 두었다
+
+
+## [조사] 보스 3종 vs 오늘 변경분 충돌·난이도·패링 타이밍 감사 — 2026-08-09 10:02
+### 프롬프트
+[조사] DemonBoss, MinoBoss,Midboss와 관련해서 팀원 변경사항과 오늘 수정했던 사항과 충돌이 전혀 없지? 난이도가 변한다거나 패링 타이밍이 변한다거나
+### 조사 결과
+**결론: 병합 충돌 0, 보스 패링 타이밍 불변. 단 보스전 난이도는 이미 바뀌어 있고, FAIL#24 재발 1건 발견.**
+**① 병합 충돌 — 없음**
+- upstream 재fetch 후 `HEAD..upstream/main` 비어 있음 = 받을 커밋 0. 팀 작업(PR #54~#57)이 이미 우리 HEAD 에 전부 병합됨
+- `git merge-tree --write-tree HEAD upstream/main` → **CONFLICT 0건**
+- 팀원 오늘 커밋 `1d4da5fc feat: FireKnight 패링/피격/보스공격데미지 연동` 이 EffectProjectile.cs·SlashProjectile.cs 를 건드렸으나 이미 병합 완료
+**② BossRangeLogic 공유 — 안전 확인**
+- 오늘 `a19d20c5` 에서 8인자 InHitBand 오버로드를 **추가만** 했다(기존 5인자 시그니처 무변경)
+- 호출부 실측: DemonBoss.cs = 5인자 1곳 / 8인자 **0곳**. EnemyBase.cs = 5인자 1곳 / 8인자 1곳 → 오결합 없음
+**③ 보스 패링 타이밍 — 불변**
+- MovementConfig.asset **오늘 변경 이력 없음**. parryWindow 0.35 / parryCooldown 0.5 / 하한 0.3 / followupDelay 0.5 / endDuration 0.22 그대로
+- 오늘의 '창 끝 판정'과 '전방위 패링'은 **EnemyBase.cs 안에서만** 동작. 보스는 각자 ResolveHit / MidBossMeleeHitbox / DemonProjectile 경로를 쓰므로 영향 0
+- MidBossMeleeHitbox 는 `pc.TryParry(bossObject)` 직접 호출(정면 판정 유지) — 우리 전방위 패링은 잡몹 전용
+**④ 보스전 난이도 — 이미 변했다 (충돌 아님, 전역 의도 변경)**
+  FeelConfig(7822431f·49b15709·78520b3a) 와 PlayerCombatConfig 는 **공격원을 가리지 않는다**. 데몬·미노·미드보스 피격에도 전부 적용:
+  - invincibilityDuration **0.6초** (0.45 → 0.6), hitInvulnerabilityDuration 0.6
+  - hitStopDuration 0.06 (timeScale 정지) / knockbackForce 0.55 / screenShake 0.35 x 0.24초 / hitFlash 0.6초
+  - PlayerHurtDeathFx 사망 연출 + GameOverController 대기 → **모든 보스 사망도 게임오버→타이틀 노선**
+  → 보스 DPS 상한이 1/0.6 = 1.67회/초로 묶임. 보스전이 함께 쉬워진 것은 사실이며, 사용자 목표(최대한 쉬움)와는 일치
+**⑤ 발견된 위험 — FAIL#24 재발 (팀원 커밋)**
+- `a9689dc1 PC-064\Administrator 프리팹 수정` 이 DemonBoss.cs 의 우리 PlayerLocator 를 **`GameObject.Find("RealPlayer")` 로 되돌림**
+- 씬별 실측: RealPlayer 이름 = Test1 / Scene3 / **Scene4** / Player 이름 = Scene1 / 1_1 / **Scene2** / Test / Test 1
+- 데몬은 Scene4 에만 있으므로 **지금은 동작한다.** 그러나 프리팹 교체·씬 이동 시 즉시 null 무음 사망
+- 나머지는 정상: MinoBoss / MidBoss_FireKnight / SpikeBallTrap / ThrownProjectile / EnemyBase = PlayerLocator 사용
+**⑥ 팀원이 DemonBoss 에 예열(state 8)을 독자 추가** — cleaveWindup 0.25 / smashWindup 0.3 / castWindup 0.35, 공격별 개별 쿨타임 분리
+- 우리가 잡몹에 넣은 윈드업과 개념 동일. 충돌 아니고 오히려 일관. 다만 데몬 예고가 기존 대비 0.25~0.35초 더 길어졌음
+**팀 공지 대상**: DemonBoss 의 RealPlayer 하드코딩(PlayerLocator 복원 제안) / C-C 연계(ComboB1) 사문화(parryCooldown 0.5 == parryFollowupDelay 0.5)
+### 검증
+해당 없음 (파일 수정 없음)
+### 커밋
+해당 없음(무수정)
+
+
+## [기록] AdventureScene3 적 배치 사용자 수동 조정 반영 — 2026-08-09 10:11
+### 프롬프트
+폰트 빼고 넣어
+> 맥락: push 후 미커밋 3건(폰트 SDF / AdventureScene3 / LOG) 중 폰트만 제외하고 커밋하라는 지시
+### 조작 내역
+- 사용자가 에디터에서 직접 조정한 AdventureScene3 적 배치를 커밋에 포함. **내 작업 아님, 되돌리지 않음**
+  KnightEnemy_22 x22→**25.79** / KnightEnemy_31 x31→**39.63** / KnightEnemy_40 x40→**61.26** / KnightEnemy_47 **삭제** / ArcherEnemy_58 복제본 x**42.32**(y 0.06) 추가
+- 최종 배치 8마리: 기사 12, 25.79, 39.63, 55(y2), 61.26(y2.16) / 아처 17, 42.32, 58(y2)
+  → 기사 6→**5마리**, 아처는 2기 유지(위치 58→42.32·58). 내가 계산했던 x=15 최악 지점(동시 3마리)은 배치가 벌어져 더 완화됨
+- **DOSIyagiBoldface SDF.asset(2.02MB)은 의도적으로 제외.** TMP 글리프 아틀라스가 자동 재생성되어 상시 modified 로 뜨는 파일. 빌드는 빌드 시점 상태로 구워지므로 영향 없고, 커밋하면 병합 충돌만 늘어난다
+### 검증
+- 커밋 전 씬 dirty=False 확인(FAIL#16 — 에디터 미저장분이 있으면 낡은 파일을 커밋하게 됨)
+- 커밋 시점 배치를 씬에서 재실측해 위 좌표 기록
+- push 완료 상태 확인: main...origin/main 격차 0 (18커밋 반영, 4e226656)
+### 실패와 수정
+- 없음. 다만 STATE.md '인계 요약'의 5번(SlashProjectile → NHNDemo.MonsterHealth 클론 실패 위험)이 **낡은 정보**임을 확인. MonsterHealth 는 추적 중인 Assets/Player/Scripts/MonsterHealth.cs 에 있고, gitignore 로 빠지는 .cs 는 에디터 도구 2개뿐이며 이를 참조하는 코드는 없다. STATE 갱신 필요
