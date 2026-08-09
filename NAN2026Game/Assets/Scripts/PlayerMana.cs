@@ -28,7 +28,13 @@ namespace NAN2026
             mp = Mathf.Min(config.maxMp, mp + config.parryGain);
             Refresh();
         }
+        public void MpHeal(int n)
+        {
+            if (config == null) return;
+            mp = Mathf.Min(config.maxMp, mp + n);
+            Refresh();
 
+        }
         public static void RewardParry(Component playerContext)
         {
             if (playerContext == null) return;

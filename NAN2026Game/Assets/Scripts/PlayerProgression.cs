@@ -1,6 +1,7 @@
 using UnityEngine;
 using NAN2026.Core;
 using NAN2026.Showroom;
+using NAN2026;
 
 /// <summary>
 /// 플레이어 경험치/레벨/증강 효과를 관리하는 순수 데이터·로직 계층.
@@ -14,6 +15,7 @@ public sealed class PlayerProgression : MonoBehaviour
     [SerializeField] private LevelProgressionConfig levelConfig;
     [SerializeField] private AugmentConfig augmentConfig;
     [SerializeField] private GameObject canvas;
+    [SerializeField] private PlayerMana playerMana;
     private PlayerHealth health;
     private PlayerController2D controller;
 
@@ -125,17 +127,11 @@ public sealed class PlayerProgression : MonoBehaviour
             case AugmentType.Heal:
                 if (health != null) health.Heal(Mathf.RoundToInt(magnitude));
                 break;
-            //case AugmentType.ManaHeal:
-            //    if (health != null) mana.Heal(Mathf.RoundToInt(magnitude));
-            //    break;
+            case AugmentType.ManaHeal:
+                if (playerMana != null) playerMana.MpHeal(Mathf.RoundToInt(magnitude));
+                break;
             case AugmentType.ManaUp:
-                //manaUp += magnitude;
-                break;
-            case AugmentType.UnlockSkill1:
-                if (controller != null) controller.AddSkill("Skill1");
-                break;
-            case AugmentType.UnlockSkill2:
-                if (controller != null) controller.AddSkill("Skill2");
+                if (playerMana != null) playerMana.config.parryGain += Mathf.RoundToInt(magnitude);
                 break;
         }
     }
