@@ -15,6 +15,7 @@ namespace NAN2026
         protected int hits;
         protected float nextAtk;
         protected bool dealtThisSwing;
+        private float lockedFace = 1f;   // 방향 고정 시점에 얼려둔 정면. 이후 스프라이트와 판정이 같은 값을 쓴다
         protected SpriteRenderer sr;
         protected Transform player;
         private Coroutine flashCo;
@@ -101,6 +102,8 @@ namespace NAN2026
             // 공격 예열: 제자리에서 색상 점멸로 경고. 이 시간이 플레이어의 반응 시간이다.
             if (state == EnemyStateLogic.Windup)
             {
+                // 예열 동안은 계속 겨눈다. 여기서 안 돌면 1.2초간 옛 방향으로 굳는다
+                if (player != null) sr.flipX = FlipFor(EnemyStateLogic.FaceSign(transform.position.x, player.position.x));
                 Anim(idleFrames, true);
                 if (sr != null && config.windupFlashSpeed > 0f)
                     sr.color = Color.Lerp(Color.white, config.windupFlashColor,
@@ -127,7 +130,10 @@ namespace NAN2026
 
             float dx = Mathf.Abs(player.position.x - transform.position.x);
             float face = EnemyStateLogic.FaceSign(transform.position.x, player.position.x);
-            if (state != EnemyStateLogic.Attack) sr.flipX = FlipFor(face);
+            bool faceLocked = state == EnemyStateLogic.Attack
+                && EnemyStateLogic.FaceLocked(stateT / config.attackDur, FaceLockFrac);
+            if (faceLocked) face = lockedFace;             // 보이는 방향과 맞는 방향을 일치시킨다
+            else { lockedFace = face; sr.flipX = FlipFor(face); }
 
             if (state == EnemyStateLogic.Attack) { DoAttack(dx, face); return; }
 
@@ -333,6 +339,10 @@ namespace NAN2026
             flashing = false;
             flashCo = null;
         }
+
+        /// 공격 모션 중 방향을 고정하기 시작하는 지점(frac).
+        /// 기본은 타격창이 열리는 순간 — 칼이 나가는 방향으로 굳는다.
+        protected virtual float FaceLockFrac { get { return config.hitWinS; } }
 
         protected virtual void SetState(int s) { state = s; stateT = 0f; dealtThisSwing = false; }
 

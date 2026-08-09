@@ -250,5 +250,34 @@ namespace NAN2026.Tests
             Assert.AreEqual(10f, EnemyStateLogic.ReflectSpeed(10f, 0f), 0.0001f);
             Assert.AreEqual(10f, EnemyStateLogic.ReflectSpeed(10f, -2f), 0.0001f);
         }
+    
+        [Test]
+        public void 방향은_고정시점_전까지_추적한다()
+        {
+            // 아처: fireFrac 0.75 까지는 계속 겨누고, 활을 놓는 순간 고정
+            Assert.IsFalse(EnemyStateLogic.FaceLocked(0.00f, 0.75f));
+            Assert.IsFalse(EnemyStateLogic.FaceLocked(0.74f, 0.75f));
+            Assert.IsTrue(EnemyStateLogic.FaceLocked(0.75f, 0.75f));
+            Assert.IsTrue(EnemyStateLogic.FaceLocked(1.00f, 0.75f));
+        }
+
+        [Test]
+        public void 기사는_타격창이_열릴_때_방향이_굳는다()
+        {
+            Assert.IsFalse(EnemyStateLogic.FaceLocked(0.39f, 0.40f));
+            Assert.IsTrue(EnemyStateLogic.FaceLocked(0.40f, 0.40f));
+        }
+
+        [Test]
+        public void 화살은_플레이어_몸높이_안에서만_패링된다()
+        {
+            // 발끝 0, 몸높이 2.0 기준. 총구 높이 0.8 은 통과
+            Assert.IsTrue(EnemyStateLogic.WithinBodyHeight(0.8f, 0f, 2.0f));
+            Assert.IsTrue(EnemyStateLogic.WithinBodyHeight(0f, 0f, 2.0f));
+            Assert.IsTrue(EnemyStateLogic.WithinBodyHeight(2.0f, 0f, 2.0f));
+            // 1.5u 점프로 넘긴 화살(상대 -0.7)은 제외
+            Assert.IsFalse(EnemyStateLogic.WithinBodyHeight(0.8f, 1.5f, 2.0f));
+            Assert.IsFalse(EnemyStateLogic.WithinBodyHeight(2.1f, 0f, 2.0f));
+        }
     }
 }

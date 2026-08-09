@@ -67,6 +67,20 @@ namespace NAN2026.Core
         /// 예열 종료 여부.
         /// 공격 전용 fps. 0 이하면 공용 fps 를 쓴다.
         /// 걷기·대기 속도를 건드리지 않고 휘두름만 늦추기 위해 분리한다.
+        /// 공격 방향을 고정할 시점인가.
+        /// 이 지점 이후로는 스프라이트도 판정도 같은 방향을 쓴다 — 보이는 것과 맞는 것이 어긋나지 않게.
+        public static bool FaceLocked(float frac, float lockFrac)
+        {
+            return frac >= lockFrac;
+        }
+
+        /// 화살이 플레이어 몸 높이 안을 지나는가. footY 는 플레이어 발끝.
+        /// 점프로 넘긴 화살까지 패링되면 서 있기만 해도 다 막히므로 세로를 본다.
+        public static bool WithinBodyHeight(float arrowY, float footY, float bodyHeight)
+        {
+            return arrowY >= footY && arrowY <= footY + bodyHeight;
+        }
+
         /// 패링 성공으로 들어간 그로기가 끝났는가.
         public static bool GroggyFinished(float elapsed, float dur)
         {

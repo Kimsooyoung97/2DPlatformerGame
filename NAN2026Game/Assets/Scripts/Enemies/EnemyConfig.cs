@@ -38,6 +38,11 @@ namespace NAN2026
         public float windupFlashSpeed = 12f;
         public Color windupFlashColor = new Color(1f, 0.55f, 0.2f);
 
+        [Tooltip("화살이 이 거리 안까지 접근하면 닿기 전에도 매 프레임 패링을 접수한다")]
+        public float arrowParryZone = 1.5f;
+        [Tooltip("화살이 플레이어 발끝 기준 이 높이 안을 지날 때만 패링 대상. 점프로 넘긴 화살 제외")]
+        public float arrowParryHeight = 2.0f;
+
         [Header("패링 보상")]
         [Tooltip("패링 성공 시 무방비로 굳는 시간. 플레이어 3연타(0.40+0.40+0.55=1.35초)가 다 들어가야 보상이 된다")]
         public float groggyDuration = 1.6f;

@@ -7289,3 +7289,40 @@ Secen3다음에는 Secen4 진행하도록 했는데
 해당 없음 (파일 수정 없음)
 ### 커밋
 해당 없음(무수정)
+
+
+## [수정] 화살 전방위 패링 + 접근 존 + 발사 시점까지 조준 — 2026-08-09 10:31
+### 프롬프트
+전방위 + B(접근 존 1.5u + Stay)만 해도 충분할거 같아. 화살 속도는 괜찮은거 같은데
+> 맥락: 직전 [조사]의 화살 패링 개선안 중 ①전방위·B(접근존 1.5u+Stay) 채택, 화살 감속(10→7)은 반려.
+> 아처 역방향 발사 수정은 그 앞 프롬프트에서 이미 지시된 사항이라 함께 처리
+### 조작 내역
+**순수 로직 (EnemyStateLogic) — BossRangeLogic 은 이번에도 무수정**
+- `FaceLocked(frac, lockFrac)` / `WithinBodyHeight(arrowY, footY, bodyHeight)`
+**① 화살 전방위 패링 (기사와 계약 일치)**
+- ArcherArrow 가 `IsParryWindowActive()` 를 리플렉션으로 우선 호출, 없으면 기존 TryParry 로 폴백
+- 판정 창구를 `TryParryNow()` 하나로, 성공 처리를 `OnParried()` 하나로 통일 (접근 존이든 접촉이든 결과 동일)
+- 기사에만 적용했던 전방위가 화살에 누락돼 **등 뒤 화살은 타이밍이 맞아도 실패**하던 것을 해소
+**② 접근 존 1.5u + Stay**
+- Update 에서 `TryEarlyParry()`: 진행 방향 앞 1.5u 이내 + 플레이어 몸높이(발끝~2.0u) 안이면 **매 프레임 패링 접수**
+- `gap * dir.x <= 0` 로 이미 지나친 화살은 제외
+- `OnTriggerStay2D` 를 반사 전에도 적용 → 겹쳐 있는 0.181초 동안도 접수
+- 세로 검사를 넣은 이유: 점프로 넘긴 화살까지 패링되면 서 있기만 해도 다 막힌다
+- EnemyConfig 신규: `arrowParryZone 1.5` / `arrowParryHeight 2.0` (FAIL#32 앵커 규칙 적용)
+**③ 발사 시점까지 조준 (아처 역방향 발사 해소)**
+- 원인: Windup 블록 early return 으로 flipX 갱신 미도달 + `if (state != Attack)` 조건 → **1.22초간 방향 동결**
+- Windup 블록 안에서도 플레이어를 향해 회전
+- `FaceLockFrac` virtual 신설 — 기본 `hitWinS`(기사=칼 나가는 순간), ArcherEnemy 는 `fireFrac`(활 놓는 순간)로 오버라이드
+- 고정 시점 이후에는 얼려둔 `lockedFace` 를 **스프라이트와 판정 양쪽에** 사용 → 보이는 방향과 맞는 방향이 항상 일치
+  (이전에는 스프라이트만 고정되고 판정·발사 방향은 매 프레임 추적해 서로 어긋나 있었다)
+### 검증
+- 컴파일 성공, read_console error 0건
+- EditMode **241/241 통과** (신규 3: 고정시점 전 추적 / 기사 타격창 고정 / 몸높이 판정)
+- 리플렉션 실행: FaceLocked(0.74,0.75)=False·(0.75,0.75)=True / WithinBodyHeight(0.8,0,2.0)=True·점프1.5u(0.8,1.5,2.0)=False
+- ArcherArrow.Launch 인자 12개, TryParryNow·OnParried·TryEarlyParry·Reflect·OnTriggerStay2D 전부 존재
+- FaceLockFrac: EnemyBase virtual 있음 / ArcherEnemy 오버라이드 확인
+- **입력 허용 폭 0.350 → 0.681초 (+95%)** = 창 0.35 + 접근존 0.150 + 겹침 0.181
+- **방향 동결 1.22초 → 0.23초** (아처, 발사 후 잔여 모션만) / 기사 1.30초 → 0.45초
+- **사용자 눈 판정 필요**: (1) 아처가 쏠 때 플레이어를 보는지 (2) 등 뒤 화살이 패링되는지 (3) 닿기 전에 눌러도 인정되는지 (4) 점프로 넘긴 화살이 패링 안 되는지 (5) 기사가 휘두르는 도중 도는 게 어색하지 않은지
+### 실패와 수정
+- 없음 (execute_code 지역변수명 충돌 1회는 도구 스크립트 문제, 프로젝트 코드 무관)
