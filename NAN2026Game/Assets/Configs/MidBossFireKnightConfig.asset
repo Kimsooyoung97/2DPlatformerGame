@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NAN2026.MidBossFireKnightConfig
   maxHp: 20
   aggroRange: 8
-  attackRange: 3
+  attackRange: 2.4
   walkSpeed: 2.2
   frontDeadZone: 1
   normalWindup: 0.25
@@ -22,21 +22,21 @@ MonoBehaviour:
   normalWinEnd: 6
   normalDamage: 1
   normalCooldown: 1.4
-  normalHitReach: 2.2
+  normalHitReach: 4
   normalFrontOnly: 1
   fireWindup: 0.3
-  fireWinStart: 5
-  fireWinEnd: 8
+  fireWinStart: 7
+  fireWinEnd: 11
   fireDamage: 1
   fireCooldown: 2
-  fireHitReach: 4
+  fireHitReach: 7
   fireFrontOnly: 1
   bombWindup: 0.35
   bombWinStart: 4
   bombWinEnd: 6
   bombDamage: 1
   bombCooldown: 2.2
-  bombHitReach: 1
+  bombHitReach: 5.5
   bombFrontOnly: 1
   wheelWindup: 0.3
   wheelWin1Start: 3
@@ -45,7 +45,7 @@ MonoBehaviour:
   wheelWin2End: 8
   wheelDamagePerTick: 1
   wheelCooldown: 2.5
-  wheelHitReach: 2.8
+  wheelHitReach: 4
   wheelFrontOnly: 0
   fpsIdle: 10
   fpsWalk: 12

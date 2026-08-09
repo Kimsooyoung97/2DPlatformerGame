@@ -39,6 +39,7 @@ namespace NAN2026
         private SpriteRenderer playerSr;
         private float lastParryPress = -999f;
         private float lastConsumed = -999f;
+        private float hitInvulnUntil; // 최근 피격 후 재경직 면역 마감 시각
 
         private bool ParryBuffered()
         {
@@ -210,7 +211,12 @@ namespace NAN2026
             HitFeedback();
             if (hp <= 0) { SetState(7); return; }
             bool attacking = state == 2 || state == 3 || state == 4 || state == 5; // 공격 판정·모션 중엔 경직 없음
-            if (state != 8 && !attacking) SetState(6);
+            bool recentlyHit = Time.time < hitInvulnUntil;
+            if (state != 8 && !attacking && !recentlyHit)
+            {
+                SetState(6);
+                hitInvulnUntil = Time.time + config.hitReStagger; // Config 필드로
+            }
         }
 
         private void HitFeedback()

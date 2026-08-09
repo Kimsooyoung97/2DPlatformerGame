@@ -7,23 +7,32 @@ namespace NAN2026.Core
     {
         /// wasEngaged=true면 이미 추적/공격 중이었다는 뜻 — chaseStopDistance를
         /// 넘어서기 전까지는 attackRange 밖이라도 Patrol로 돌아가지 않고 Chase를 유지한다.
+        ///
+        /// heightDiffToPlayer: Mathf.Abs(player.y - self.y). X축 거리가 attackRange
+        /// 안이어도 높이차가 attackHeightRange를 넘으면(다른 발판/층) 공격 판정에 넣지 않는다.
+        /// 예전엔 이 파라미터가 없어서, 플레이어가 위/아래 다른 발판으로 도망가도 X거리만
+        /// 가까우면 계속 Attack으로 판정되는 버그가 있었다.
         public static EnemyAIState DetermineState(
             float distanceToPlayer,
+            float heightDiffToPlayer,
             bool wasEngaged,
             float aggroRange,
             float attackRange,
-            float chaseStopDistance)
+            float chaseStopDistance,
+            float attackHeightRange)
         {
+            bool inAttackRange = distanceToPlayer <= attackRange && heightDiffToPlayer <= attackHeightRange;
+
             if (wasEngaged)
             {
                 if (distanceToPlayer > chaseStopDistance) return EnemyAIState.Patrol;
-                if (distanceToPlayer <= attackRange) return EnemyAIState.Attack;
+                if (inAttackRange) return EnemyAIState.Attack;
                 return EnemyAIState.Chase;
             }
 
             if (distanceToPlayer <= aggroRange)
             {
-                return distanceToPlayer <= attackRange ? EnemyAIState.Attack : EnemyAIState.Chase;
+                return inAttackRange ? EnemyAIState.Attack : EnemyAIState.Chase;
             }
 
             return EnemyAIState.Patrol;
