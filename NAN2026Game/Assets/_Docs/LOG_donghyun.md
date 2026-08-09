@@ -6624,3 +6624,31 @@ SPEC.md "범위 밖: 저장"과 정면 충돌하는 요청이라 진행 전 명�
 - run_tests 완료 직후 find_gameobjects 호출이 "No Unity Editor instances found"로 실패 —
   FAIL.md #31(H3 계열 도구 환경 불안정)과 유사한 일시적 연결 끊김으로 추정. refresh_unity
   재호출로 즉시 복구됨, 재시도 전 별도 조치 불필요했음
+
+
+## [수정] 세이브포인트 엔터가 무조건 시작지점으로 이동하던 버그 수정 — 2026-08-10 (세션 시간)
+### 프롬프트
+지금 엔터키를 누름면 무조건 시작지점으로 간다
+### 원인
+CheckpointTrigger.Update()가 Enter 입력을 감지해 CheckpointTravelMenu.Open()을 호출하는데,
+같은 프레임 안에서 CheckpointTravelMenu.Update()도 똑같은 kb.enterKey.wasPressedThisFrame을
+또 읽어서 selectedIndex=0(="시작 지점", Open()에서 항상 0으로 초기화됨)을 그 자리에서 바로
+확정(TravelTo)해버림 — 위/아래로 고를 틈도 없이 한 번의 엔터가 "열기"와 "확정"을 동시에
+처리하던 것.
+### 조작 내역
+- CheckpointTravelMenu.cs: openedFrame(int) 필드 추가. Open()에서 Time.frameCount를 기록,
+  Update() 맨 앞에서 Time.frameCount == openedFrame이면 그 프레임의 입력 처리를 통째로
+  건너뛰도록 가드 추가.
+### 검증
+- refresh_unity(compile=request): 컴파일 에러 0건
+- **재생 모드 불안정 재발**(FAIL.md H3 계열): refresh_unity(wait_for_ready) 2회 연속
+  타임아웃 -> execute_code로 직접 확인해보니 isPlaying=True로 예상 밖에 켜져있었음(원인
+  특정 못함) -> 정지 후 재확인, 재컴파일해서 정상 상태로 복구.
+- run_tests(EditMode): 229/229 통과
+- **실측 검증**: play mode 진입 -> Open() 호출 직후, 같은 execute_code 호출(=같은 프레임) 안에서
+  Update()를 리플렉션으로 강제 재호출 -> isOpen이 여전히 true로 유지됨을 확인(즉시 확정되지
+  않음 = 수정 성공). 실제 키보드 wasPressedThisFrame 신호 자체는 리플렉션으로 재현 불가하지만,
+  가드 조건(Time.frameCount 비교)이 프레임 경과 여부만으로 판단하므로 이 결과로 충분히 검증됨.
+- manage_scene(save): UITestScene 저장 성공
+### 실패와 수정
+없음(재생 모드 불안정은 위에 이미 기록, 조치 완료)

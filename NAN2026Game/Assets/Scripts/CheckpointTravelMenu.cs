@@ -27,6 +27,12 @@ namespace NAN2026
         // 다른 씬으로 이동해야 할 때, 씬 로드가 끝난 뒤 어디로 옮길지 기억해두는 값.
         private CheckpointRecord pendingTravel;
 
+        // Open()을 부른 그 프레임엔 입력 처리를 건너뛴다. CheckpointTrigger가 같은 Enter
+        // 입력으로 Open()을 호출하는데, 그 직후 같은 프레임에 이 Update()도 돌면서 같은
+        // wasPressedThisFrame을 또 읽어 selectedIndex=0(시작 지점)으로 즉시 확정해버리는
+        // 버그가 실측으로 확인됐다 — 한 번의 엔터가 열기+확정을 동시에 처리해버림.
+        private int openedFrame = -1;
+
         private void Awake()
         {
             // PersistentSingleton과 마찬가지로, 새로 로드된 씬에 이 컴포넌트를 가진 중복
@@ -62,6 +68,7 @@ namespace NAN2026
             playerHealth = health;
             selectedIndex = 0;
             isOpen = true;
+            openedFrame = Time.frameCount;
         }
 
         public void Close()
@@ -73,6 +80,7 @@ namespace NAN2026
         private void Update()
         {
             if (!isOpen || playerHealth == null) return;
+            if (Time.frameCount == openedFrame) return; // 방금 연 그 프레임의 입력은 무시(열기+확정 동시발동 방지)
 
             var list = playerHealth.Checkpoints;
             if (list.Count == 0) { Close(); return; }
