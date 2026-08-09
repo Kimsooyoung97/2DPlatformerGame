@@ -90,6 +90,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 946586124018522108, guid: 25ab37668c412a441a40028cc08d8847, type: 3}
       insertIndex: -1
       addedObject: {fileID: 3981064155916394084}
+    - targetCorrespondingSourceObject: {fileID: 946586124018522108, guid: 25ab37668c412a441a40028cc08d8847, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1732925314786726380}
   m_SourcePrefab: {fileID: 100100000, guid: 25ab37668c412a441a40028cc08d8847, type: 3}
 --- !u!1 &1125174316984553807 stripped
 GameObject:
@@ -141,3 +144,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WorldHealthBar
   config: {fileID: 11400000, guid: 89a303bd3a5767342bd8d4769ad6fc24, type: 2}
   target: {fileID: 266129181860655792}
+--- !u!114 &1732925314786726380
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1125174316984553807}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1e5b1fd5697c024f8eb2a72bf930c09, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MonsterSoundPlayer
+  hitClip: {fileID: 8300000, guid: dc3a5a3c485e45147b4aebab17548f2f, type: 3}
+  hitVolume: 0.7
+  hitPitchJitter: 0.08
+  deathClip: {fileID: 8300000, guid: aefb679c27e8b534f89154e7b7b6e326, type: 3}
+  deathVolume: 0.85
+  deathPitch: 1

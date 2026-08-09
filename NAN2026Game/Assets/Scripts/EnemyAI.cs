@@ -42,6 +42,10 @@ public sealed class EnemyAI : MonoBehaviour
     private float rightBoundX;
     private float heightGapTimer;
 
+    // 피격 넉백 중엔 AI 로직(Patrol/Chase/Attack)을 완전히 건너뛴다 — 컨트롤러가
+    // ApplyKnockback()으로 걸어둔 속도를 우리가 다시 Input으로 덮어쓰지 않기 위함.
+    private float knockbackUntil;
+
     public EnemyAIState CurrentState => state;
 
     private void Awake()
@@ -70,13 +74,18 @@ public sealed class EnemyAI : MonoBehaviour
         if (selfHealthForXp != null)
         {
             selfHealthForXp.OnDied += HandleDied;
+            selfHealthForXp.OnDamaged += HandleDamaged;
             if (config != null) selfHealthForXp.SetMaxHealth(config.maxHealth);
         }
     }
 
     private void OnDestroy()
     {
-        if (selfHealthForXp != null) selfHealthForXp.OnDied -= HandleDied;
+        if (selfHealthForXp != null)
+        {
+            selfHealthForXp.OnDied -= HandleDied;
+            selfHealthForXp.OnDamaged -= HandleDamaged;
+        }
     }
 
     private void HandleDied()
@@ -84,6 +93,19 @@ public sealed class EnemyAI : MonoBehaviour
         if (player == null || config == null) return;
         PlayerProgression progression = player.GetComponentInParent<PlayerProgression>();
         if (progression != null) progression.AddXp(config.xpReward);
+    }
+
+    // 피격 시 실제 물리 넉백을 건다. MonsterController2D.FixedUpdate가 매 스텝 Input
+    // 기준으로 속도를 되돌리기 때문에(MiddleBossAttackPatterns.cs와 동일 원인), 컨트롤러
+    // 안의 ApplyKnockback()이 그 기간만 우회하도록 캡슐화돼 있다 — 여기선 그냥 호출만 한다.
+    private void HandleDamaged(int damage, Vector2 direction)
+    {
+        if (config == null || controller == null || config.knockbackForce <= 0f) return;
+
+        Vector2 dir = direction.sqrMagnitude > 0.0001f ? direction.normalized : Vector2.up;
+        controller.Input = Vector2.zero;
+        controller.ApplyKnockback(dir * config.knockbackForce, config.knockbackDuration);
+        knockbackUntil = Time.time + config.knockbackDuration;
     }
 
     // 몬스터와 플레이어가 서로 몸으로 밀거나 막지 않고 통과하도록 물리 충돌만 무시한다.
@@ -133,6 +155,11 @@ public sealed class EnemyAI : MonoBehaviour
         if (config == null || controller == null || animation == null)
             return;
 
+        // 넉백 중엔 AI가 개입하지 않는다 — MonsterController2D 쪽에서 이미 물리적으로
+        // 밀려나는 중이고, 여기서 Input을 세팅하면 그 즉시 넉백 속도를 덮어써버린다.
+        if (Time.time < knockbackUntil)
+            return;
+
         if (attackOverride != null && attackOverride.IsBusy)
         {
             controller.Input = Vector2.zero;
@@ -155,7 +182,8 @@ public sealed class EnemyAI : MonoBehaviour
         }
 
         float distance = Mathf.Abs(player.position.x - transform.position.x);
-        state = EnemyAILogic.DetermineState(distance, engaged, config.aggroRange, config.attackRange, config.chaseStopDistance);
+        float heightDiff = Mathf.Abs(player.position.y - transform.position.y);
+        state = EnemyAILogic.DetermineState(distance, heightDiff, engaged, config.aggroRange, config.attackRange, config.chaseStopDistance, config.attackHeightRange);
         engaged = state != EnemyAIState.Patrol;
 
         switch (state)
