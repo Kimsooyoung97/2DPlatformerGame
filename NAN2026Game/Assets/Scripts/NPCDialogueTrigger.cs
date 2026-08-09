@@ -1,22 +1,47 @@
-using Unity.VisualScripting;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+
 /// <summary>
-/// 플레이어가 범위 안에 들어오면 대화 UI를 띄우고, 벗어나면 닫습니다.
-/// 지금은 형태 확인용이라 대사 진행(다음 줄 넘기기) 기능은 없습니다.
+/// NPC 대화. 범위 안에서 Enter 로 시작하고, Enter 를 누를 때마다 다음 대사로 넘어갑니다.
+/// 대사마다 화자(NPC/주인공)를 지정하면 이름과 초상화가 자동으로 바뀝니다.
 /// </summary>
 [RequireComponent(typeof(Collider2D))]
 public class NPCDialogueTrigger : MonoBehaviour
 {
+    public enum Speaker { NPC, Player }
+
+    [System.Serializable]
+    public class Line
+    {
+        public Speaker speaker = Speaker.NPC;
+        [TextArea(2, 4)] public string text = "";
+    }
+
     [Header("대화 UI")]
     [SerializeField] private GameObject dialogueRoot;
     [SerializeField] private TMPro.TMP_Text speakerLabel;
     [SerializeField] private TMPro.TMP_Text bodyLabel;
+    [Tooltip("화자에 따라 그림이 바뀌는 초상화 Image")]
+    [SerializeField] private UnityEngine.UI.Image portraitImage;
+    [Tooltip("대사가 끝났을 때만 깜빡이는 ▼ 표시")]
+    [SerializeField] private GameObject moreHint;
 
-    [Header("내용")]
-    [SerializeField] private string speakerName = "마을 주민";
-    [TextArea(2, 4)]
-    [SerializeField] private string message = "여어, 모험가 양반!\n공주님이 잡혀갔다는 소문 들었나?";
+    [Header("초상화")]
+    [SerializeField] private Sprite npcPortrait;
+    [SerializeField] private Sprite playerPortrait;
+
+    [Header("이름")]
+    [SerializeField] private string npcName = "제임스";
+    [SerializeField] private string playerName = "주인공";
+
+    [Header("대사 (위에서 아래 순서)")]
+    [SerializeField] private List<Line> lines = new List<Line>();
+
+    [Header("타이핑 연출")]
+    [Tooltip("한 글자당 걸리는 시간(초). 0이면 즉시 표시")]
+    [SerializeField] private float charInterval = 0.03f;
 
     [Header("애니메이터")]
     [SerializeField] private Animator animator;
@@ -26,7 +51,14 @@ public class NPCDialogueTrigger : MonoBehaviour
     [SerializeField] private GameObject interactHint;
 
     private bool _inRange;
-    private bool isOpen;
+    private bool _isOpen;
+    private int _index;
+    private bool _typing;
+    private Coroutine _typeRoutine;
+
+    public bool InRange { get { return _inRange; } }
+    public bool IsOpen { get { return _isOpen; } }
+
     private void Reset()
     {
         var col = GetComponent<Collider2D>();
@@ -40,39 +72,124 @@ public class NPCDialogueTrigger : MonoBehaviour
 
     private void Start()
     {
-        isOpen = false;
+        _isOpen = false;
         if (dialogueRoot != null) dialogueRoot.SetActive(false);
         if (interactHint != null) interactHint.SetActive(false);
     }
+
     private void Update()
     {
-        if (dialogueRoot.activeSelf && isOpen)
+        bool enter = Keyboard.current != null && Keyboard.current.enterKey.wasPressedThisFrame;
+
+        if (_isOpen)
         {
-            if (Keyboard.current != null && Keyboard.current.enterKey.wasPressedThisFrame)
-            {
-                Hide();
-                isOpen = false;
-                return;
-            }
-            
+            if (enter) Advance();
+            return;
         }
+
         if (_inRange)
         {
-            if (interactHint != null) interactHint.SetActive(true);
-
-            if (!isOpen && Keyboard.current != null && Keyboard.current.enterKey.wasPressedThisFrame)
-            {
-                Show();
-                isOpen = true;
-                return;
-            }
+            if (interactHint != null && !interactHint.activeSelf) interactHint.SetActive(true);
+            if (enter) Open();
         }
-        else 
+        else if (interactHint != null && interactHint.activeSelf)
         {
             interactHint.SetActive(false);
         }
-        
-        
+    }
+
+    // ---------------- 대화 흐름 ----------------
+
+    private void Open()
+    {
+        if (lines == null || lines.Count == 0)
+        {
+            Debug.LogWarning("[NPCDialogueTrigger] 대사가 비어 있습니다.");
+            return;
+        }
+
+        _isOpen = true;
+        _index = 0;
+        if (animator != null && !string.IsNullOrEmpty(talkingBool)) animator.SetBool(talkingBool, true);
+        if (interactHint != null) interactHint.SetActive(false);
+        if (dialogueRoot != null) dialogueRoot.SetActive(true);
+        ShowLine(_index);
+    }
+
+    /// <summary>타이핑 중이면 즉시 완성, 아니면 다음 대사. 마지막이면 닫는다.</summary>
+    private void Advance()
+    {
+        if (_typing)
+        {
+            CompleteTyping();
+            return;
+        }
+
+        _index++;
+        if (_index >= lines.Count) { Close(); return; }
+        ShowLine(_index);
+    }
+
+    private void ShowLine(int i)
+    {
+        var line = lines[i];
+        bool isPlayer = line.speaker == Speaker.Player;
+
+        if (speakerLabel != null) speakerLabel.text = isPlayer ? playerName : npcName;
+        if (portraitImage != null)
+        {
+            var spr = isPlayer ? playerPortrait : npcPortrait;
+            portraitImage.sprite = spr;
+            portraitImage.enabled = (spr != null);
+        }
+
+        if (moreHint != null) moreHint.SetActive(false);
+
+        if (_typeRoutine != null) StopCoroutine(_typeRoutine);
+        if (charInterval <= 0f)
+        {
+            if (bodyLabel != null) bodyLabel.text = line.text;
+            _typing = false;
+            if (moreHint != null) moreHint.SetActive(true);
+        }
+        else
+        {
+            _typeRoutine = StartCoroutine(TypeText(line.text));
+        }
+    }
+
+    private IEnumerator TypeText(string full)
+    {
+        _typing = true;
+        if (bodyLabel != null) bodyLabel.text = "";
+
+        for (int c = 0; c < full.Length; c++)
+        {
+            if (bodyLabel != null) bodyLabel.text = full.Substring(0, c + 1);
+            float t = 0f;
+            while (t < charInterval) { t += Time.deltaTime; yield return null; }
+        }
+
+        _typing = false;
+        if (moreHint != null) moreHint.SetActive(true);
+    }
+
+    private void CompleteTyping()
+    {
+        if (_typeRoutine != null) StopCoroutine(_typeRoutine);
+        _typing = false;
+        if (bodyLabel != null && _index < lines.Count) bodyLabel.text = lines[_index].text;
+        if (moreHint != null) moreHint.SetActive(true);
+    }
+
+    private void Close()
+    {
+        _isOpen = false;
+        _typing = false;
+        if (_typeRoutine != null) StopCoroutine(_typeRoutine);
+        if (animator != null && !string.IsNullOrEmpty(talkingBool)) animator.SetBool(talkingBool, false);
+        if (dialogueRoot != null) dialogueRoot.SetActive(false);
+        if (moreHint != null) moreHint.SetActive(false);
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -85,7 +202,8 @@ public class NPCDialogueTrigger : MonoBehaviour
     {
         if (!IsPlayer(other)) return;
         _inRange = false;
-        Hide();
+        if (_isOpen) Close();
+        if (interactHint != null) interactHint.SetActive(false);
     }
 
     private bool IsPlayer(Collider2D c)
@@ -94,22 +212,4 @@ public class NPCDialogueTrigger : MonoBehaviour
         if (c.CompareTag("Player")) return true;
         return c.GetComponentInParent<PlayerController2D>() != null;
     }
-
-    private void Show()
-    {
-        if (animator != null && !string.IsNullOrEmpty(talkingBool)) animator.SetBool(talkingBool, true);
-        if (dialogueRoot == null) return;
-        if (speakerLabel != null) speakerLabel.text = speakerName;
-        if (bodyLabel != null) bodyLabel.text = message;
-        dialogueRoot.SetActive(true);
-    }
-
-    private void Hide()
-    {
-        if (animator != null && !string.IsNullOrEmpty(talkingBool)) animator.SetBool(talkingBool, false);
-        if (interactHint != null) interactHint.SetActive(false);
-        if (dialogueRoot != null) dialogueRoot.SetActive(false);
-    }
-
-    public bool InRange { get { return _inRange; } }
 }
