@@ -365,15 +365,15 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
     private void SpawnComboBDamage(float dir, Vector3 pos)
     {
         if (basicEffectPrefab == null) return;
-        var go = Instantiate(basicEffectPrefab, pos, Quaternion.identity);
+        var go = Instantiate(basicEffectPrefab, pos + new Vector3(0f, effectConfig.comboBHitOffsetY, 0f), Quaternion.identity);
         var sr2 = go.GetComponent<SpriteRenderer>();
         if (sr2 != null) sr2.enabled = false; // 시각은 VSlashFx가 담당 — 판정만 사용
         var ep = go.GetComponent<EffectProjectile>();
-        int baseDamage = AttackDamageLogic.DamageForComboV("ComboV1", effectConfig.comboVDamage);
+        int baseDamage = effectConfig.comboBDamage;
         int bonus = progression != null ? Mathf.RoundToInt(progression.DamageBonus) : 0;
         if (ep != null)
             ep.Launch(dir, 0f, effectConfig.comboVHitLifetime, null, effectConfig.frameRate,
-                baseDamage + bonus, effectConfig.comboVHitboxSize, true);
+                baseDamage + bonus, effectConfig.comboBHitboxSize, true);
     }
 
     private void SpawnAttackEffect(string attackName)
@@ -428,7 +428,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
         int baseDamage = AttackDamageLogic.DamageForComboV(attackName, effectConfig.comboVDamage);
         int damageBonus = progression != null ? Mathf.RoundToInt(progression.DamageBonus) : 0;
 
-        var go = Instantiate(basicEffectPrefab, pos, Quaternion.identity);
+        var go = Instantiate(basicEffectPrefab, pos + new Vector3(0f, effectConfig.comboBHitOffsetY, 0f), Quaternion.identity);
         var sr2 = go.GetComponent<SpriteRenderer>();
         if (sr2 != null) sr2.enabled = false; // 시각 효과는 VSlashFx가 이미 재생 중 — 판정만 담당
         var ep = go.GetComponent<EffectProjectile>();
