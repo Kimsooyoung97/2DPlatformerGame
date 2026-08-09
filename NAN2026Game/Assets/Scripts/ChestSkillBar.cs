@@ -59,7 +59,7 @@ namespace NAN2026
                     config.slotSize * 0.5f);
 
                 var img = go.GetComponent<Image>();
-                img.sprite = config.icon;
+                img.sprite = config.GetIcon(i);
                 img.color = config.slotEmptyTint;
                 img.raycastTarget = false;
                 img.preserveAspect = true;
@@ -73,7 +73,7 @@ namespace NAN2026
                 fr.anchorMin = Vector2.zero; fr.anchorMax = Vector2.one;
                 fr.offsetMin = Vector2.zero; fr.offsetMax = Vector2.zero;
                 var fimg = fgo.GetComponent<Image>();
-                fimg.sprite = config.icon;
+                fimg.sprite = config.GetIcon(i);
                 fimg.color = config.tint;
                 fimg.raycastTarget = false;
                 fimg.preserveAspect = true;

@@ -26,6 +26,10 @@ MonoBehaviour:
   scaleTo: 0.3
   targetHeight: 0.9
   icon: {fileID: 21300000, guid: 7735453aa2eb56247abe9127a84240e8, type: 3}
+  icons:
+  - {fileID: 21300000, guid: 7735453aa2eb56247abe9127a84240e8, type: 3}
+  - {fileID: 21300000, guid: 2c09b0acec67c1e41a72cf2315333d04, type: 3}
+  - {fileID: 21300000, guid: 295f74c620f200b429dbf6f32479edf9, type: 3}
   worldSize: 1.1
   sortingOrder: 940
   tint: {r: 1, g: 1, b: 1, a: 1}

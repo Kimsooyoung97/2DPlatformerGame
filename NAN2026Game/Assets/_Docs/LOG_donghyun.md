@@ -7448,3 +7448,38 @@ git diff HEAD로 정확히 뭐가 빠졌는지 확인 후 동일 내용을 scrip
   직후엔 재확인이 필요함을 재확인. 다음부터는 연결 끊김/타임아웃 직후 이어지는 작업 전에
   직전에 수정했던 파일들의 핵심 내용이 실제로 디스크에 남아있는지 먼저 grep으로 확인하는
   습관 필요
+
+
+## [수정] ChestRewardConfig 아이콘 하나로 통일된 문제 — 슬롯별 icons[3] 배열로 분리 — 2026-08-10
+### 프롬프트
+[수정] ChestRewardConfig 의 icon이 하나로 통일되어 있어서 잘못짜져있다 1번=번개 / 2번=가로베기 /
+3번=나선환 아이콘을 각각 다르게 → Config에 icons[3] 배열을 추가하고 슬롯별로 뿌리는 소소한
+코드 작업 프로젝트에 이미 Skill1·Skill2·Skill3.jpeg가 Resources에 있으니 바로 쓸 수 있다
+### 조사
+ChestRewardConfig.icon(단일 Sprite)을 쓰는 곳 3군데 확인:
+- ChestSkillReward.cs(rewardSlot 0/1/2 보유, SkillRewardFlyer.Spawn에 슬롯 전달)
+- ChestSkillReward.cs 안 SkillRewardFlyer(날아가는 아이콘 연출) — config.icon 직접 참조
+- ChestSkillBar.cs(좌하단 슬롯 UI, 슬롯 인덱스 i로 반복문 도는데 전부 config.icon 하나만 씀)
+실측: Assets/Configs/ChestRewardConfig.asset의 icon(폴백)이 이미 Skill1로 박혀있어서
+"전부 번개로 통일"된 증상과 일치.
+### 조작 내역
+- ChestRewardConfig.cs: icons(Sprite[3]) 필드 추가 + GetIcon(int slot) 헬퍼(슬롯에 개별
+  아이콘 없으면 기존 icon으로 폴백)
+- ChestSkillReward.cs: config.icon 참조 2곳을 config.GetIcon(slot)/cfg.GetIcon(ownerSlot)으로 교체
+- ChestSkillBar.cs: 슬롯 생성 루프의 img.sprite/fimg.sprite를 config.GetIcon(i)로 교체
+- Assets/Configs/ChestRewardConfig.asset: icons[0..2]에 Resources/Skill1·2·3.jpeg를
+  AssetDatabase.LoadAssetAtPath<Sprite>로 로드해 대입, SetDirty+SaveAssets
+### 검증
+- refresh_unity(compile=request) -> read_console(filter=CS[0-9]): 0건 (무관한 UnityEditor.
+  Graphs 내부 예외 1건 발견했으나 확인 후 무시)
+- 애셋 재읽기 검증: icons[0/1/2] = Skill1/Skill2/Skill3, GetIcon(0/1/2) 동일하게 반환 확인
+- **실측 검증(SkillRewardFlyer)**: play mode에서 ownerSlot=0 인스턴스 생성 -> Init() 리플렉션
+  호출 -> SpriteRenderer.sprite=Skill1 확인. ownerSlot=2로 동일 절차 -> Skill3 확인(서로 다름)
+- **실측 검증(ChestSkillBar)**: 씬에 이미 존재하는 인스턴스(DontDestroyOnLoad, UI Canvas
+  소속으로 추정)의 slots[0..2]/fills[0..2].sprite가 각각 Skill1/Skill2/Skill3으로 정확히
+  분리된 것 확인
+- run_tests(EditMode): 236/236 통과(전체 테스트 수가 229->236으로 늘었는데 이번 변경과 무관 —
+  팀원 쪽 신규 테스트 추가로 추정, 실패 0건)
+- manage_scene(save): AdventureScene1 저장 성공
+### 실패와 수정
+없음

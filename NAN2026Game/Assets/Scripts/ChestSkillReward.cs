@@ -48,7 +48,7 @@ namespace NAN2026
 
         public static void Spawn(int slot, Vector3 pos, Transform player, ChestRewardConfig config)
         {
-            if (config == null || config.icon == null)
+            if (config == null || config.GetIcon(slot) == null)
             {
                 // 아이콘이 없으면 연출을 건너뛰고 슬롯만 채운다 — 보상 자체는 잃지 않는다
                 if (config != null) ChestRewardEvents.ReportSlot(slot, config.slotCapacity);
@@ -67,10 +67,11 @@ namespace NAN2026
             target = player;
             origin = transform.position;
             sr = gameObject.AddComponent<SpriteRenderer>();
-            sr.sprite = cfg.icon;
+            Sprite slotIcon = cfg.GetIcon(ownerSlot);
+            sr.sprite = slotIcon;
             sr.color = cfg.tint;
             sr.sortingOrder = cfg.sortingOrder;
-            float spriteWorld = cfg.icon.rect.width / cfg.icon.pixelsPerUnit;
+            float spriteWorld = slotIcon.rect.width / slotIcon.pixelsPerUnit;
             baseScale = spriteWorld > 0f ? cfg.worldSize / spriteWorld : 1f;
             transform.localScale = Vector3.one * baseScale;
         }

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace NAN2026
 {
@@ -35,7 +35,19 @@ namespace NAN2026
         public float targetHeight = 0.9f;
 
         [Header("보상 아이콘 - 표시")]
+        [Tooltip("슬롯별 개별 아이콘이 없거나 인덱스 범위를 벗어났을 때 쓰는 기본값(폴백)")]
         public Sprite icon;
+        [Tooltip("슬롯별 아이콘. index 0=1번(번개) / 1=2번(가로베기) / 2=3번(나선환)")]
+        public Sprite[] icons = new Sprite[3];
+
+        /// <summary>슬롯 인덱스에 맞는 아이콘을 돌려준다. 그 슬롯에 개별 아이콘이 없으면
+        /// 공용 icon으로 폴백한다(연출이 아예 안 뜨는 것보단 낫다).</summary>
+        public Sprite GetIcon(int slot)
+        {
+            if (icons != null && slot >= 0 && slot < icons.Length && icons[slot] != null)
+                return icons[slot];
+            return icon;
+        }
         [Tooltip("아이콘 월드 한 변 길이(유닛)")]
         public float worldSize = 1.1f;
         public int sortingOrder = 940;
