@@ -7803,3 +7803,18 @@ AdventureScene1 해도 번개스킬은 물론 이펙트도 아무것도 없는�
 - 실제 크기감·궤적은 사용자 재생
 ### 실패와 수정
 - 없음
+
+
+## [구현] 게임오버 화면 UI — 2026-08-10 00:37
+### 프롬프트
+GameOverBg, GameOver(글자) 이미지 넣었다 → 게임오버 화면 구성
+### 조작 내역
+- 이미지 임포트 설정: GameOverBg(2752x1536)·GameOver(1024x559) Sprite/Single/Point/알파투명
+- GameOverPanelFx.cs 신설: unscaledDeltaTime 기반(컨트롤러가 timeScale=0으로 멈추므로) 배경 페이드 0.7s → 로고 0.35s 지연 후 페이드+40px 상승 → 1.4s 후 안내문구 점멸
+- 영속 UI Canvas의 기존 GameOverPanel에 BG/Logo/Hint 구성(로고 760x415 @+180, 안내 '아무 키나 눌러 다시 도전' DOSIyagi 한글 SDF), 팀 임시 요소(Image·Text (TMP))는 비활성 보존
+- 사망 감지·표시·재시작은 팀 GameOverController(OnPlayerDied 구독·오입력 0.3s 무시·anyKeyDown) 그대로 사용
+### 검증
+- 컴파일 0, 재로드 검증: BG·Logo·Hint 배선 True, 패널 비활성(런타임에 컨트롤러가 활성화)
+- 실제 연출은 사용자 재생(사망 시)
+### 실패와 수정
+없음
