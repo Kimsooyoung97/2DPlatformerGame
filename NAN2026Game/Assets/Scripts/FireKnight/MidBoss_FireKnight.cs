@@ -502,7 +502,7 @@ namespace NAN2026
             if (rangeBands == null) BuildRangeGizmos();
 
             float bx = transform.position.x;
-            float by = transform.position.y;
+            float by = transform.position.y + config.rangeBandYOffset;
             float h = config.rangeBandHeight;
 
             SetRangeRect(rangeBands[0], bx - config.aggroRange, bx + config.aggroRange, by - h * 0.5f, by + h * 0.5f);
@@ -531,7 +531,7 @@ namespace NAN2026
         {
             if (config == null) return;
             float bx = transform.position.x;
-            float by = transform.position.y;
+            float by = transform.position.y + config.rangeBandYOffset;
             float h = config.rangeBandHeight;
             Gizmos.color = Color.yellow;
             Gizmos.DrawWireCube(new Vector3(bx, by, 0f), new Vector3(config.aggroRange * 2f, h, 0f));

@@ -81,6 +81,7 @@ namespace NAN2026
         public bool showRangesInGame = true;  // 게임 뷰에 공격 범위 띠 표시
         public bool showRangeLabels = true;   // 거리·상태 텍스트 라벨
         public float rangeBandHeight = 3f;    // 표시용 띠 높이 (판정과 무관, 보기용)
+        public float rangeBandYOffset = -2.5f; // 캔버스 pivot이 캐릭터 몸통보다 위에 있어서 보정용(보기용, 판정과 무관)
 
     }
 }

@@ -7627,3 +7627,22 @@ demonboss는 거리 +프레임 구간 판정에 개발자가 시각적으로 그
 - manage_scene(save): UITestScene 저장 성공
 ### 실패와 수정
 없음(FireKnight 범위 내). LevelUpSkillManager.cs 이슈는 이번 작업 범위 밖이라 미수정.
+
+
+## [수정] FireKnight 범위 표시 Y 오프셋 추가 — 2026-08-09 (세션 시간)
+### 프롬프트
+넣어줘
+(선행 진단: transform.position=SpriteRenderer.bounds.center로 pivot 자체는 Center로 정확함을 실측
+확인. 다만 288x128 캔버스 중 캐릭터가 아래쪽에만 그려져 있어 pivot이 시각적으로 몸통보다 위에 있는
+것처럼 보임 — bombF/wheelF처럼 무기가 머리 위로 올라가는 포즈까지 담을 수 있게 캔버스가 크게 잡힌
+것으로 추정. 판정(dx, X축만 사용)에는 영향 없음, 순수 표시용 기즈모 위치만 보정 필요했음.)
+### 조작 내역
+- MidBossFireKnightConfig.cs: rangeBandYOffset(float, 기본 -2.5) 추가.
+- MidBoss_FireKnight.cs: LateUpdate()·OnDrawGizmosSelected() 양쪽의 `by` 계산에
+  `+ config.rangeBandYOffset` 적용(문자열 치환 2곳, 둘 다 확인).
+### 검증
+- refresh_unity(compile=request) -> read_console(types=error): 0건
+- run_tests(EditMode): 250/250 통과
+- manage_scene(save): UITestScene 저장 성공
+### 실패와 수정
+- 파일이 LF 개행이라 CRLF 기준 문자열 치환이 처음에 안 먹힘 — LF로 재시도해서 해결.
