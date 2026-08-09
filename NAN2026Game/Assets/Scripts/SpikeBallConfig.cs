@@ -29,6 +29,10 @@ namespace NAN2026
         public float maxTravel = 40f;
         [Tooltip("플레이어가 스파이크보다 아래에 있을 때만 작동. Scene2 는 false")]
         public bool onlyBelow = false;
+        [Tooltip("조준 높이: 플레이어 발밑에서 몇 유닛 위를 노리는가")]
+        public float aimHeight = 0.4f;
+        [Tooltip("이동 중인 표적을 예측 조준한다(보트 탑승 구간용). Scene2 는 false")]
+        public bool leadTarget = false;
 
         [Header("격돌 이펙트(할로우나이트식)")]
         public float clashDuration = 0.16f;

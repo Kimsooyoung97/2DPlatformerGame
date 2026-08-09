@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using NAN2026;
@@ -63,9 +63,10 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
     private float activeAttackLunge;
     public static float AttackSpeedMul = 1f; // 그로기 버스트 공속 배율(평시 1)
     public static bool InputLocked = false;  // 연출 락: 입력만 무시(컨트롤러는 계속 구동)
+    public static bool JumpLocked = false;   // 탈것(보트) 위에서는 점프 금지
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-    static void ResetStaticsOnPlay() { InputLocked = false; AttackSpeedMul = 1f; } // DisableDomainReload 대응
+    static void ResetStaticsOnPlay() { InputLocked = false; AttackSpeedMul = 1f; JumpLocked = false; } // DisableDomainReload 대응
     private float attackTimer;
     private bool parryHeld;
     private float parryEndTimer;
@@ -269,7 +270,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
             // 기존에 Shift로 홀드해야 하던 달리기를 기본 동작으로 변경 — 방향키만 눌러도 항상 달린다.
             runHeld = true;
             // 점프는 방향키 위쪽만 (Space 제거)
-            if (kb.upArrowKey.wasPressedThisFrame) jumpQueued = true;
+            if (kb.upArrowKey.wasPressedThisFrame && !JumpLocked) jumpQueued = true;
             // 대쉬(이동기, 공격 아님): Left Shift. 땅에서는 사용할 수 없고 공중에서만
             // 가능하다. 이미 대쉬 중이면 재시작하지 않고, 착지 전까지 maxAirDashes(기본 1회)까지만 허용한다.
             if (kb.leftShiftKey.wasPressedThisFrame && !dashing && !grounded
@@ -579,7 +580,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
         if (jumpQueued)
         {
             jumpQueued = false;
-            if (PlayerLocomotionLogic.CanJump(attacking, jumpsUsed, config.maxJumps))
+            if (!JumpLocked && PlayerLocomotionLogic.CanJump(attacking, jumpsUsed, config.maxJumps))
             {
                 vy = config.jumpVelocity;
                 jumpsUsed++;

@@ -21,9 +21,11 @@ MonoBehaviour:
   damage: 1
   deflectSpeed: 9
   respawnDelay: 3
-  killPlaneY: 41.5
-  maxTravel: 14
+  killPlaneY: 27
+  maxTravel: 16
   onlyBelow: 1
+  aimHeight: 0.4
+  leadTarget: 1
   clashDuration: 0.16
   clashLines: 8
   clashRadius: 1.3

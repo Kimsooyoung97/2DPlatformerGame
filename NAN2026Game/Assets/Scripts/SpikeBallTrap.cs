@@ -56,6 +56,10 @@ namespace NAN2026
             // 패링 목표를 채우면 돌진 중이던 것도 멈추고 사라진다. 리스폰도 하지 않는다.
             if (NAN2026.SpikeParryEvents.CombatSealed) { if (phase != 3) Break(false); return; }
             if (config == null || player == null) return;
+            // 플레이어 실측 속도(보트는 transform 이동이라 rigidbody 속도로는 안 잡힌다)
+            if (hasLastPos && Time.deltaTime > 0f)
+                playerVel = (Vector2)(player.position - lastPlayerPos) / Time.deltaTime;
+            lastPlayerPos = player.position; hasLastPos = true;
             if (phase == 3)
             {
                 if (Time.time >= respawnAt)
@@ -92,7 +96,16 @@ namespace NAN2026
             if (p >= 2 && phase != 2)
             {
                 float dx, dy;
-                SpikeBallLogic.LaunchDir(transform.position.x, transform.position.y, player.position.x, player.position.y + 0.4f, out dx, out dy);
+                Vector2 aim = new Vector2(player.position.x, player.position.y + config.aimHeight);
+                if (config.leadTarget && config.launchSpeed > 0f)
+                {
+                    // 비행 시간만큼 표적을 앞질러 노린다. 속도는 발사 속도로 상한을 둔다
+                    Vector2 v = playerVel;
+                    if (v.magnitude > config.launchSpeed) v = v.normalized * config.launchSpeed;
+                    float flight = Vector2.Distance(transform.position, aim) / config.launchSpeed;
+                    aim += v * flight;
+                }
+                SpikeBallLogic.LaunchDir(transform.position.x, transform.position.y, aim.x, aim.y, out dx, out dy);
                 dir = new Vector2(dx, dy);
                 phase = 2; SetAlpha(1f);
                 return;
@@ -110,6 +123,7 @@ namespace NAN2026
 
         bool resolved;
         float parryReach = 1.5f;
+        Vector3 lastPlayerPos; bool hasLastPos; Vector2 playerVel;   // 예측 조준용 실측 속도
         System.Reflection.MethodInfo windowActive;
         void ResolveHit()
         {

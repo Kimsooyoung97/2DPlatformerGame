@@ -6832,3 +6832,54 @@ Calling function TakeDamage with 1 parameter but the function requires 2.
 - 상자 3개를 3대 때리면 부서지고 스킬 아이콘이 떠올라 플레이어에게 빨려 들어가는지
 - 좌하단 슬롯이 한 칸씩 채워지는지(3칸). 슬롯은 재생 중에만 생성된다
 - 천장 위(y55) 루트로 지나갈 때 스파이크가 반응하지 않는지(onlyBelow)
+
+
+## [수정] 스파이크를 보트 구간 천장(y41)으로 이설 + 보트 속도 1.5배 + 탑승 중 점프 금지 — 2026-08-10 04:22
+### 프롬프트
+x94 y41  ~ x  :115 y:41에 Scene2에 썼던것처럼 스파이크 구체 붙이고 구현해라는게 전혀 없다, 그리고 보트 배의 속도를 1.5배로 올려주고 보트에 올라타면 점프는 불가능하게 만들어줘
+
+### 조작 내역
+**오진 정정**
+- 직전 [구현]에서 y41 을 '플레이어가 딛는 바닥 윗면'으로 읽고 천장을 y54 로 잡아 스파이크를 y53.5 에 달았다.
+  실제로는 **y41 슬래브가 보트 항해 구간의 천장**이었다(보트 갑판 y28.69, 슬래브 밑면 y41.0/40.91).
+  x94~115 를 지나는 것은 위쪽 도보 루트가 아니라 배를 탄 플레이어다.
+- 슬래브 밑면을 x 마다 레이캐스트로 실측해 볼 반지름(0.42)+0.03 만큼 띄워 붙였다
+  → (94, 40.55) (104.5, 40.46) (115, 40.46), 지형 겹침 0
+
+**예측 조준 추가 (없으면 무조건 빗나간다)**
+- 낙차 11.81u / launchSpeed 10 → 비행 1.18초. 그 사이 보트가 3.10u 전진하므로
+  기존의 '현재 위치 조준'으로는 스파이크가 항상 뒤에 떨어져 패링 판정 자체가 성립하지 않는다.
+- SpikeBallConfig 에 aimHeight(0.4, 기존 하드코딩 이관) / leadTarget(false) 추가.
+- SpikeBallTrap 에 플레이어 실측 속도 추적 추가 — 보트는 transform 이동이라 rigidbody 속도로는 안 잡힌다.
+  발사 시 비행시간만큼 앞질러 조준(속도는 launchSpeed 로 상한).
+- 기본값이 false 라 Scene2 자산은 무변경(재확인함)
+
+**보트**
+- BoatRideConfig.sailSpeed 1.750 → 2.625 (x1.5). 항해 33.5u 가 19.1초 → 12.8초
+- PlayerController2D: `public static bool JumpLocked` 추가 + ResetStaticsOnPlay 동봉(DisableDomainReload 대응).
+  입력 수집(upArrow)과 실행(CanJump) 두 곳 모두 게이트 — 탑승 직전에 큐에 들어간 점프가 새는 것을 막는다.
+- BoatRide: `SetJumpLock(aboard && transform.position.x < targetX)` + OnDisable 안전핀(FAIL#27)
+
+### 검증
+- EditMode 236/236 통과
+- read_console error 0 (남은 1건은 기존 'AnimationClip Portal must be marked as Legacy', 무관)
+- 스파이크 3기 지형 겹침 0건 (OverlapCircleAll), 위 슬래브까지 0.03u
+- BoatRide.ComputeWaterEndX 를 에디터에서 재현 → 물 행 y셀 27, 끝 x셀 114, targetX 112.80.
+  스파이크 x 94 / 104.5 / 115 전부 항해 사정권(112.80 + 4.95) 안
+- 간격 10.5u > 발사 반경 4.95u x 2 → 한 번에 1기만 발사. 보트 기준 약 4초 간격
+- 경고 점멸(9u) → 발사(4.95u) 사이 1.54초 예고
+- Scene2 원본 SpikeBallConfig.asset: killPlaneY 2.6 / maxTravel 40 / onlyBelow False / leadTarget False / aimHeight 0.4 — 무변경
+- 테스트 후 DeathDog 20마리 생존(FAIL#12)
+
+### 실패와 수정
+- BoatRide.cs 치환 시 앵커 문자열을 LF 로 만들었는데 파일이 CRLF 라 매칭 실패.
+  줄 리스트 기반 편집(FindIndex + InsertRange)으로 전환해 해결
+- 점프를 '탑승 중 무조건 금지'로 만들면 종점에서 못 내린다. 실측: 종점 갑판 y28.69 에서
+  다음 발판(x120, y30)까지 가로 5.3u·세로 1.3u — 점프 없이 도달 불가.
+  그래서 `transform.position.x < targetX` 조건을 붙여 **항해 중에만** 잠그도록 했다
+
+### 눈으로 봐야 판정되는 항목
+- 배를 타고 x94/104.5/115 을 지날 때 천장 스파이크가 점멸 후 낙하하는지, 스페이스 패링이 붙는지
+- 예측 조준이 실제로 배 위 플레이어를 맞히는지(빗나가면 launchSpeed 나 launchMultiplier 조정 필요)
+- 항해 중 위쪽 방향키로 점프가 안 되는지, 종점 도착 후에는 다시 되는지
+- 보트가 12.8초로 체감상 답답하지 않은지
