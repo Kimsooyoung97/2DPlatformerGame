@@ -17,7 +17,7 @@ public sealed class LevelUpSkillManager : MonoBehaviour
     [SerializeField] private Image[] cardBackgrounds;
     [SerializeField] private Button[] choiceButtons;
     [SerializeField] private TMP_Text[] choiceTexts;
-
+    [SerializeField] private Image[] skillImage;
     private void Awake()
     {
         if (panel != null) panel.SetActive(false);
@@ -95,12 +95,16 @@ public sealed class LevelUpSkillManager : MonoBehaviour
         switch (type)
         {
             case AugmentType.DamageUp:
+                skillImage[idx].sprite = Resources.Load<Sprite>("DamageUp");
                 return "공격 데미지\n+" + m;
             case AugmentType.Heal:
+                skillImage[idx].sprite = Resources.Load<Sprite>("Heal");
                 return "체력 회복\n+" + m;
             case AugmentType.ManaUp:
+                skillImage[idx].sprite = Resources.Load<Sprite>("ManaUp");
                 return "마나 수급량\n+" + m;
             case AugmentType.ManaHeal:
+                skillImage[idx].sprite = Resources.Load<Sprite>("ManaHeal");
                 return "마나 회복\n+" + m;
             default: return string.Empty;
         }

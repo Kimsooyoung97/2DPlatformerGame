@@ -1,8 +1,7 @@
+using NAN2026;
 using NAN2026.Showroom;
-using Unity.VectorGraphics;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.SceneManagement;
 
 // 플레이어 HP. 전역 네임스페이스 — 팀 스크립트(OrkanBoss·Spike·Checkpoint2D·OrbProjectile) 계약 준수.
 // 사망: 체크포인트 있으면 그 지점 부활, 없으면 씬 재시작 (SPEC: 죽으면 처음부터)
@@ -15,7 +14,7 @@ public class PlayerHealth : MonoBehaviour
     [Header("Death")]
     [SerializeField] private float respawnDelay = 0.2f;
     [SerializeField] private float spawnGrace = 0.5f;
-    [SerializeField] private float fallKillY = -5f;
+    [SerializeField] private float fallKillY = -18f;
 
     [Header("Hazards")]
     [SerializeField] private string hazardNameContains = "Spikes";
@@ -36,6 +35,10 @@ public class PlayerHealth : MonoBehaviour
     private float damageInvulnerableUntil;
     private float rollInvulnerableUntil;
     private int maxHealthBonus;
+
+    // OnGUI 디버그 표시용 — 증강으로 늘어난 수치를 보여주기 위해서만 참조한다(전투 로직엔 관여 안 함).
+    private PlayerProgression progression;
+    private PlayerMana mana;
 
     public int Deaths { get { return deaths; } }
     public bool IsDying { get { return dying; } }
@@ -67,10 +70,20 @@ public class PlayerHealth : MonoBehaviour
     /// GameOverController 가 구독 시점에 켠다.</summary>
     public bool SuppressRespawnOnDeath { get; set; }
 
+    /// <summary>외부(GameOverController 등)에서 명시적으로 체크포인트 부활을 트리거할 때 쓴다.
+    /// SuppressRespawnOnDeath=true 노선(게임오버 패널 등)에서는 Kill()이 자동으로 Respawn을
+    /// 예약하지 않으므로, 호출자가 원하는 타이밍(예: 엔터키 입력)에 직접 이걸 부른다.</summary>
+    public void RespawnNow()
+    {
+        Respawn();
+    }
+
     private void Awake()
     {
         body = GetComponent<Rigidbody2D>();
         visuals = GetComponentsInChildren<SpriteRenderer>(true);
+        progression = GetComponent<PlayerProgression>();
+        mana = GetComponent<PlayerMana>();
 
         foreach (MonoBehaviour behaviour in GetComponents<MonoBehaviour>())
         {
@@ -102,7 +115,7 @@ public class PlayerHealth : MonoBehaviour
 
         // Falling out of the world still resets you, even while invincible.
         if (!dying && transform.position.y < fallKillY)
-            Kill();
+            Respawn();
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -205,18 +218,8 @@ public class PlayerHealth : MonoBehaviour
         Invoke(nameof(Respawn), delay);
     }
 
-        /// <summary>외부(GameOverController 등)에서 명시적으로 체크포인트 부활을 트리거할 때 쓴다.
-    /// SuppressRespawnOnDeath=true 노선(게임오버 패널 등)에서는 Kill()이 자동으로 Respawn을
-    /// 예약하지 않으므로, 호출자가 원하는 타이밍(예: 엔터키 입력)에 직접 이걸 부른다.</summary>
-    public void RespawnNow()
+    private void Respawn()
     {
-        Respawn();
-    }
-
-private void Respawn()
-    {
-        UnityEngine.SceneManagement.Scene current = SceneManager.GetActiveScene();
-        SceneManager.LoadScene(current.buildIndex);
         transform.position = checkpoint;
         transform.rotation = Quaternion.identity;
         if (body != null)
@@ -287,6 +290,18 @@ private void Respawn()
         GUI.Box(new Rect(Screen.width - width - 16f, 50f, width, 28f),
             "DEATHS   " + deaths, style);
 
+        // 증강으로 늘어난 수치 표시 — 전투 로직엔 관여 안 하고 보여주기만 함.
+        if (progression != null)
+        {
+            GUI.Box(new Rect(Screen.width - width - 16f, 154f, width, 28f),
+                "ATK +" + progression.DamageBonus.ToString("F1"), style);
+        }
+        if (mana != null && mana.config != null)
+        {
+            GUI.Box(new Rect(Screen.width - width - 16f, 186f, width, 28f),
+                "MP GAIN " + mana.config.parryGain, style);
+        }
+
         if (invincible)
         {
             Color previous = GUI.color;
@@ -295,6 +310,7 @@ private void Respawn()
                 "INVINCIBLE  (F2)", style);
             GUI.color = previous;
         }
+
     }
 
 }
