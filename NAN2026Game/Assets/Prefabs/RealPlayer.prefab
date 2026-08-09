@@ -721,6 +721,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NAN2026.SkillOrbCaster
   config: {fileID: 11400000, guid: e0990ca9caad5834f91129b061e9437d, type: 2}
   orbSprite: {fileID: 21300000, guid: 996ea0a8a1a149f469d8b286364ced5f, type: 3}
+  orbFrames:
+  - {fileID: -3231430200900864307, guid: e77bdab8a328a104c89970a40a8e9678, type: 3}
+  - {fileID: -5973904824397065639, guid: e77bdab8a328a104c89970a40a8e9678, type: 3}
+  - {fileID: 2705884630628759931, guid: e77bdab8a328a104c89970a40a8e9678, type: 3}
+  - {fileID: -3429295090346879350, guid: e77bdab8a328a104c89970a40a8e9678, type: 3}
+  - {fileID: -195626202969866518, guid: e77bdab8a328a104c89970a40a8e9678, type: 3}
+  - {fileID: -4926145010122968484, guid: e77bdab8a328a104c89970a40a8e9678, type: 3}
+  - {fileID: -7737874821041375663, guid: e77bdab8a328a104c89970a40a8e9678, type: 3}
+  - {fileID: -638718420141415963, guid: e77bdab8a328a104c89970a40a8e9678, type: 3}
+  - {fileID: 197301128072248517, guid: e77bdab8a328a104c89970a40a8e9678, type: 3}
+  - {fileID: 7058876713671093697, guid: e77bdab8a328a104c89970a40a8e9678, type: 3}
+  - {fileID: 7534374894123231742, guid: e77bdab8a328a104c89970a40a8e9678, type: 3}
+  - {fileID: 7588126878396215438, guid: e77bdab8a328a104c89970a40a8e9678, type: 3}
+  - {fileID: -6021090808734320753, guid: e77bdab8a328a104c89970a40a8e9678, type: 3}
+  - {fileID: -9167021138241908841, guid: e77bdab8a328a104c89970a40a8e9678, type: 3}
+  - {fileID: -2534107101581631383, guid: e77bdab8a328a104c89970a40a8e9678, type: 3}
+  - {fileID: 5008722801022919741, guid: e77bdab8a328a104c89970a40a8e9678, type: 3}
   spinSpeed: 360
 --- !u!1 &6114823860119314469
 GameObject:

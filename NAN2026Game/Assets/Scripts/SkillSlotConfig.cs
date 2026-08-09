@@ -16,7 +16,8 @@ namespace NAN2026
         public float life = 2.5f;
         public int damage = 2;
         public float fps = 14f;
-        public float hitboxSize = 0.6f;
+        public float hitboxSize = 0.6f;      // 원형 투사체 반지름
+        public Vector2 hitbox2D = new Vector2(3f, 1.2f); // 검기 판정 크기(예전 값)
         public bool piercing = false;
         public float scale = 1f;
     }

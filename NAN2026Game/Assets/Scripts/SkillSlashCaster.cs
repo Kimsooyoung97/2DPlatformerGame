@@ -35,7 +35,7 @@ namespace NAN2026
             var ep = go.GetComponent<EffectProjectile>();
             if (ep != null)
                 ep.Launch(dir, config.speed, config.life, frames, config.fps, config.damage,
-                    new Vector2(config.hitboxSize, config.hitboxSize), config.piercing);
+                    config.hitbox2D, config.piercing);
         }
     }
 }

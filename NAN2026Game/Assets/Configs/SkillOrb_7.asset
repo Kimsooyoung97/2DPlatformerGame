@@ -19,7 +19,8 @@ MonoBehaviour:
   speed: 10
   life: 3
   damage: 3
-  fps: 14
-  hitboxSize: 0.6
+  fps: 16
+  hitboxSize: 0.45
+  hitbox2D: {x: 3, y: 1.2}
   piercing: 0
-  scale: 1.2
+  scale: 1.3

@@ -7,7 +7,8 @@ namespace NAN2026
     public class SkillOrbCaster : MonoBehaviour
     {
         public SkillSlotConfig config;
-        public Sprite orbSprite;
+        public Sprite orbSprite;      // 단일 이미지(폴백)
+        public Sprite[] orbFrames;    // 나선환 프레임 시트
         public float spinSpeed = 360f;
         private float lastCast = -999f;
         private PlayerMana mana;
@@ -23,7 +24,8 @@ namespace NAN2026
         {
             var kb = PlayerController2D.InputLocked ? null : Keyboard.current;
             if (kb == null || !kb.digit7Key.wasPressedThisFrame) return;
-            if (config == null || orbSprite == null) return;
+            bool hasFrames = orbFrames != null && orbFrames.Length > 0;
+            if (config == null || (orbSprite == null && !hasFrames)) return;
             if (Time.time - lastCast < config.cooldown) return;
             if (mana != null && !mana.TryUseMp(config.mpCost)) return;
             lastCast = Time.time;
@@ -32,7 +34,7 @@ namespace NAN2026
             go.transform.position = transform.position + new Vector3(dir * config.spawnForward, config.spawnHeight, 0f);
             go.transform.localScale = Vector3.one * config.scale;
             var osr = go.AddComponent<SpriteRenderer>();
-            osr.sprite = orbSprite;
+            osr.sprite = hasFrames ? orbFrames[0] : orbSprite;
             osr.sortingOrder = 60;
             var col = go.AddComponent<CircleCollider2D>();
             col.isTrigger = true;
@@ -41,7 +43,7 @@ namespace NAN2026
             rb.bodyType = RigidbodyType2D.Kinematic;
             rb.useFullKinematicContacts = true; // FAIL: Kinematic 트리거 접촉 보장
             var fly = go.AddComponent<SkillOrbFlight>();
-            fly.Init(new Vector2(dir * config.speed, 0f), config.life, config.damage, spinSpeed);
+            fly.Init(new Vector2(dir * config.speed, 0f), config.life, config.damage, spinSpeed, hasFrames ? orbFrames : null, config.fps);
         }
     }
 
@@ -49,16 +51,27 @@ namespace NAN2026
     public class SkillOrbFlight : MonoBehaviour
     {
         private Vector2 vel;
-        private float life, spin;
+        private float life, spin, animT, fps;
         private int damage;
+        private Sprite[] frames;
+        private SpriteRenderer sr;
 
-        public void Init(Vector2 velocity, float lifeSec, int dmg, float spinSpeed)
-        { vel = velocity; life = lifeSec; damage = dmg; spin = spinSpeed; }
+        public void Init(Vector2 velocity, float lifeSec, int dmg, float spinSpeed, Sprite[] animFrames, float animFps)
+        {
+            vel = velocity; life = lifeSec; damage = dmg; spin = spinSpeed;
+            frames = animFrames; fps = animFps;
+            sr = GetComponent<SpriteRenderer>();
+        }
 
         private void Update()
         {
             transform.position += (Vector3)(vel * Time.deltaTime);
-            transform.Rotate(0f, 0f, spin * Time.deltaTime);
+            if (frames != null && frames.Length > 0 && sr != null)
+            {
+                animT += Time.deltaTime * fps;
+                sr.sprite = frames[((int)animT) % frames.Length];
+            }
+            else transform.Rotate(0f, 0f, spin * Time.deltaTime); // 단일 이미지면 회전으로 대체
             life -= Time.deltaTime;
             if (life <= 0f) Destroy(gameObject);
         }
