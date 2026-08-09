@@ -54,6 +54,17 @@ public class PlayerHealth : MonoBehaviour
     /// 화면 전환을 시작할 수 있다. 체크포인트 재시작 로직(Respawn)과는 무관하게 별도로 발생한다.</summary>
     public event System.Action OnPlayerDied;
 
+    /// <summary>부활이 끝난 순간 통지한다. 사망 연출(PlayerHurtDeathFx)이 원상복구 시점으로 쓴다.</summary>
+    public event System.Action OnPlayerRespawned;
+
+    /// <summary>true 면 Kill() 이 스프라이트를 즉시 끄지 않는다. 사망 연출을 보여줄 때 켠다.</summary>
+    public bool SuppressDeathHide { get; set; }
+
+    /// <summary>true 면 Kill() 이 체크포인트 부활을 예약하지 않는다.
+    /// 게임오버→타이틀 노선에서 부활과 게임오버가 같은 시점에 경합하는 것을 막는다.
+    /// GameOverController 가 구독 시점에 켠다.</summary>
+    public bool SuppressRespawnOnDeath { get; set; }
+
     private void Awake()
     {
         body = GetComponent<Rigidbody2D>();
@@ -61,7 +72,8 @@ public class PlayerHealth : MonoBehaviour
 
         foreach (MonoBehaviour behaviour in GetComponents<MonoBehaviour>())
         {
-            if (behaviour != this && behaviour.GetType().Name == "PixelPlayerController")
+            // FAIL#24 계열: 이름 하나만 보면 프리팹 교체 시 조용히 무력화된다. 실제 사용 중인 두 컨트롤러를 모두 인정.
+            if (behaviour != this && (behaviour.GetType().Name == "PixelPlayerController" || behaviour.GetType().Name == "PlayerController2D"))
             {
                 movementController = behaviour;
                 break;
@@ -174,11 +186,21 @@ public class PlayerHealth : MonoBehaviour
         dying = true;
         deaths++;
         SetControllerEnabled(false);
-        SetVisible(false);
+        if (!SuppressDeathHide)
+            SetVisible(false);
 
         OnPlayerDied?.Invoke();
 
-        Invoke(nameof(Respawn), respawnDelay);
+        // 게임오버 노선(타이틀 복귀)에서는 부활을 예약하지 않는다.
+        if (SuppressRespawnOnDeath)
+            return;
+
+        // 사망 연출이 있으면 그 길이만큼 부활을 미룬다(연출이 잘리지 않도록).
+        float delay = respawnDelay;
+        var fx = GetComponent<NAN2026.PlayerHurtDeathFx>();
+        if (fx != null)
+            delay = NAN2026.Core.PlayerFxLogic.RespawnDelay(respawnDelay, fx.DeathDuration);
+        Invoke(nameof(Respawn), delay);
     }
 
     private void Respawn()
@@ -199,6 +221,8 @@ public class PlayerHealth : MonoBehaviour
 
         graceUntil = Time.time + spawnGrace;
         dying = false;
+
+        OnPlayerRespawned?.Invoke();
     }
 
     /// <summary>Returns every trap in the scene to its untriggered state.</summary>

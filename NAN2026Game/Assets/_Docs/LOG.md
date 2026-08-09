@@ -6234,6 +6234,672 @@ Window 01 A, Break 02 (1), Window 02 B 등등 창문들도 다 빛나
 해당 없음
 ### 커밋
 해당 없음(무수정)
+
+
+## [조사] 플레이어 피격/사망 연출 — 현행 HP 경로와 신규 시트 실측 — 2026-08-09 06:35
+### 프롬프트
+[조사] ...death, hurt 스프라이트 시트를 추가하였다. 현재 player에 피격을 당했을때 피가 깎이는 기능 구현되어 있지? 그때 hurt 이펙트가 나와야 하고 death는 피가 없으면 죽음으로 변경되게 해야해. player 프리펩화 했는거 보이지 거기에 적용시켜서 어느 씬이든 Player만 있으면 다 적용되도록 해줄 수 있겠니?
+### 조사 결과
+**1. HP 감소는 이미 동작한다 (PlayerHealth.cs)**
+- `TakeDamage(float)` → currentHealth 차감 → `OnHealthChanged(현재,최대)` 이벤트 → 0 이하면 `Kill()`
+- PlayerCombatConfig: maxHealth 10 / hitInvulnerabilityDuration 0.6s / knockbackDistance 0.25 / parryCounterDamage 2 / rollInvincibilityDuration 0.25
+- 무시 조건: dying · invincible(F2) · spawnGrace · 피격 후 0.6s 무적 · 백스텝 무적
+**2. 그러나 피격·사망 '연출'은 전혀 없다**
+- `Kill()`은 SetVisible(false)로 **스프라이트를 그냥 끄고** 0.2s 뒤 Respawn(체크포인트 부활, HP 만땅). 사망 모션 없음
+- Animator(Player_Preview) 상태 19개 전수: Idle/Walk/Run/Slash/Combo2/Combo3/JumpRise/JumpApex/JumpFall/Land/ParryStart/ParryEnd/Roll/Backstep/ComboV1/ComboV2/ComboB1/ComboB2/ComboB3 — **Hurt·Death 상태 없음**. 파라미터도 0개(코드에서 Play(상태명) 직접 호출 방식)
+- 즉 추가 작업은 '연결'이 아니라 '신설'이다
+**3. 잠재 버그 발견** — `SetControllerEnabled()`가 이름으로 `PixelPlayerController`만 찾는데, RealPlayer 프리팹에는 그 컴포넌트가 없고 `PlayerController2D`가 붙어 있다. 따라서 **사망 중에도 조작이 안 잠긴다**(FAIL#24와 동일한 이름 의존 계열)
+**4. 신규 시트 실측**
+- `hurt.png` 2752x1536 — **전면 불투명, 배경 흰색(255,255,255)**. 배경 제외 시 콘텐츠 14.1%. **가로 4덩어리 x 세로 1덩어리 = 4프레임** (x 143~665 / 786~1320 / 1456~1891 / 2087~2475, y 497~1135)
+  · 기존 Knight_SpriteSheet.png(동일 2752x1536)는 알파 27.1%로 배경이 제거돼 있음 → hurt.png는 **배경 제거 선행 필요**
+- `death.png` 765x1024 — 알파 있음(23.3%). **2열 x 3행 = 6프레임이지만 격자가 불균등**
+  · 셀 bbox: (341x160)(350x113) / (266x285)(322x197) / (210x288)(269x277) — 균등 격자 슬라이스 불가, 블롭 단위 rect 산출 필요
+- 두 시트 모두 기존 플레이어 시트(프레임 257x464 @PPU 480)와 해상도 체계가 달라 **PPU를 프레임 실측으로 재산정해야 함**(FAIL#10·#11)
+**5. '어느 씬이든' 범위**
+- PlayerHealth·Animator는 `Assets/Prefabs/RealPlayer.prefab`에 있으므로 프리팹에 넣으면 Scene2·3·4·Test1에 자동 전파됨
+- **단 AdventureScene1만 구형 `Player_Knight!!!!.prefab` 인스턴스** — 여기는 자동 적용 안 됨(팀 영역, 어제 [수정]에서도 동일 지적)
+### 검증
+해당 없음
+### 실패와 수정
+없음
+### 커밋
+해당 없음(무수정)
+
+
+## [구현] 플레이어 피격·사망 스프라이트 연출 (프리팹 부착 · 전 씬 적용) — 2026-08-09 06:45
+### 프롬프트
+사망 연출 >> 체크포인트 부활로 갈거야. 일단 death 새로운 스프라이트 시트로 넣었으니 구현해줄래?AdventureScene3 구현해줄래? 그리고 테스트 해볼려고 하니깐 추가로 4번 누르면 hurt 5번 누르면 death 스프라이트 이미지만 재생되게 해줘 .실제로 죽거나 피격당해서 재생하는건 player 프리펩에 붙여서 주고
+### 조작 내역
+**시트 반입·가공**
+- hurt.png: 흰 배경(255,255,255) 전면 불투명 → 가장자리 flood fill 로 배경만 제거(85.8% 투명화). 캐릭터 내부 흰 픽셀은 보존됨. → Assets/Sprites_AI/Player/Player_Hurt.png
+- death.png: 알파 보유 → 그대로 복사. → Player_Death.png
+- 슬라이스: 균등 격자가 아니라 **블롭 bbox 기반 rect**. 프레임마다 콘텐츠 중심 x 정렬 + 하단 정렬, 공통 rect 크기 사용
+  · Player_Hurt 4프레임 (공통 rect 539x619)
+  · Player_Death 6프레임 (공통 rect 350x288). 시각적 읽기 순서(위→아래, 좌→우) = 서있음→누움. 콘텐츠 높이 288/277/285/197/160/113 로 단조 감소 확인
+- PPU 실측 산정(FAIL#10): 기준 IDLE_0 몸통 447px @PPU480 → 월드 1.397u(scale 1.5). 이에 맞춰 Hurt PPU 664.70 / Death PPU 309.26. 피벗 (0.5, 0)=발끝
+**로직·컴포넌트**
+- 신규 순수 로직 NAN2026.Core/PlayerFxLogic.cs: ShouldPlayHurt / ShouldPlayDeath / Duration / RespawnDelay
+- 신규 PlayerFxConfig(SO) + 자산: hurtFps 12·hurtHold 0.05 / deathFps 7·deathHold 0.45 / lockInputOnDeath / enableDebugKeys
+- 신규 PlayerHurtDeathFx: PlayerHealth 이벤트 구독(OnHealthChanged→hurt, OnPlayerDied→death, OnPlayerRespawned→복구)
+  · **Animator 가 매 프레임 sprite 를 덮어쓰므로 연출 중 Animator.enabled=false 로 소유권 확보**, 종료 시 복구
+  · 사망 중 PlayerController2D.InputLocked=true, 부활 시 해제
+  · 디버그 키 4=hurt / 5=death — **연출만 재생(previewOnly)**, 실제 피해·부활·입력락 없음
+**PlayerHealth 수정 4곳**
+- OnPlayerRespawned 이벤트 추가 / SuppressDeathHide 프로퍼티 추가
+- Kill(): SuppressDeathHide 면 즉시 SetVisible(false) 하지 않음(사망 모션이 보이도록). 부활 지연을 PlayerFxLogic.RespawnDelay(설정값, 연출길이)로 확장 → 실제 1.307초
+- Respawn() 끝에 OnPlayerRespawned 발화
+- **버그 수정**: SetControllerEnabled 가 이름으로 PixelPlayerController 만 찾아 RealPlayer(=PlayerController2D)에서는 사망 중 조작이 안 잠기던 문제 — 두 이름 모두 인정하도록 수정(FAIL#24 계열)
+### 검증
+- 컴파일 0, read_console error/exception 0건
+- EditMode 198/198 통과 (PlayerFxLogicTests 7개 신규, 실패 0)
+- 리플렉션 실행 검증: ShouldPlayHurt(10,9)=True / ShouldPlayHurt(1,0)=False(죽는 타격은 hurt 아님) / Duration(6,7,0.45)=1.307
+  PlayerHealth 이벤트 3종(OnHealthChanged·OnPlayerDied·OnPlayerRespawned) · SuppressDeathHide 존재 확인
+- 프리팹 재읽기: RealPlayer.prefab 에 PlayerHurtDeathFx 부착, config OK, hurtFrames 4 / deathFrames 6 (Player_Death_0~5 순서 확인)
+- **전 씬 전파 확인**: Scene2·Scene3·Scene4·Test1 = ★적용(hurt4/death6/config OK). **Scene1만 미적용**(구형 Player_Knight!!!!.prefab 인스턴스, 팀 영역)
+- **사용자 눈 판정 필요**: (1) 4번 키 hurt·5번 키 death 재생 (2) 실제 피격 시 hurt, HP 0 시 death→1.3초 뒤 부활 (3) death 6프레임 순서가 서있음→누움으로 맞는지(뒤집혔으면 프리팹 deathFrames 배열 역순 배치) (4) 연출 중 캐릭터 크기·발 위치가 튀지 않는지
+### 실패와 수정
+- 없음. 다만 **키 충돌 있음**: PlayerController2D 가 digit4 를 ComboB3 에 이미 쓰고 있어 4번 누르면 콤보도 함께 큐잉된다. 디버그 키라 방치했고 PlayerFxConfig.enableDebugKeys 로 끌 수 있음(제출 전 OFF 대상)
+### 제출 전 OFF 목록 추가
+PlayerFxConfig.enableDebugKeys
+
+
+## [조사] death 프레임 겹침 · hurt 이물 프레임 원인 규명 — 2026-08-09 07:00
+### 프롬프트
+[조사]death는 갑자기 크기가 작아지면서 프레임 겹치는 문제가 발생하고 hurt는 마지막 프레임에서 갑자기 칼을 드는 프레임이 끼여있는데 이거 문제점을 찾아봐.
+(모션 테스트.mp4 첨부 — 영상은 열람 불가, 시트 픽셀 실측으로 대조함)
+### 조사 결과
+**1. death 프레임 겹침 — 내 슬라이스 버그 확정**
+- 전 프레임에 공통 rect 350x288 을 적용하고 콘텐츠 하단에 정렬했는데, death.png 는 행 간격이 좁다
+  · 행 밴드 y 55~214 / 321~643 / 681~968, 행간 여유 107px·38px
+- f5(하단 우, 콘텐츠 113px) rect = (384, 88, 350, 288) → y 88~375 까지 덮음. 중단 우 블롭(Y321~517)의 **하단 55px 이 그대로 끼어듦**
+- rect 내부 세로 덩어리 실측: f0~f4 는 1개(정상), **f5 만 2개 [0~112 | 233~287]** → 이웃 혼입 확정
+- 공통 rect 자체가 불가능한 구조: 하단 행은 위 여유가 266px 뿐인데 최대 프레임 높이는 288px. **단일 rect 크기로는 어떤 값을 써도 겹치거나 잘린다**
+**2. death '갑자기 작아짐' — 두 요인 중첩**
+- (a) 시트 자체의 진행: √불투명면적 178.6→180.6→199.7→167.6→163.8→**151.5**, 가로세로비 0.73→0.97→0.93→1.63→2.13→**3.10**. 쓰러지며 납작해지는 것 자체는 정상
+- (b) **내가 rect x 를 프레임마다 '콘텐츠 중심'으로 재정렬한 것**이 문제. 쓰러지며 몸이 옆으로 뻗는데 rect 가 그 중심을 따라가 버려서, 월드 기준 앵커가 프레임마다 이동한다 → 제자리에서 눕지 않고 튀어 보임
+**3. hurt 마지막 프레임 — 슬라이스는 정상, 시트 내용 문제**
+- 4개 rect 모두 내부 세로·가로 덩어리 1개씩. 이웃 혼입 없음
+- 프레임별 √불투명면적 397.8 / 381.8 / 385.7 / 382.4 → 스케일 일관됨(FAIL#10 해당 없음)
+- 즉 **원본 hurt.png 의 4번째 그림 자체가 칼 드는 포즈**다. 생성 단계 산출물 문제이지 임포트 문제가 아님
+**4. 수정 방향(실행 안 함)**
+- death: 공통 rect 폐기 → 프레임별 실제 bbox 로 rect 지정. 피벗은 각 프레임의 '접지점' 기준으로 개별 지정해 앵커 이동 제거
+- hurt: 4번째 프레임 제외하고 3프레임 재생하거나, 시트를 다시 뽑는다
+### 검증
+해당 없음
+### 실패와 수정
+- 어제 [구현]에서 '공통 rect + 하단정렬'을 택한 것이 원인. 불균등 배치 시트에는 부적합했다 — FAIL 등재 대상
+### 커밋
+해당 없음(무수정)
+
+
+## [수정] death 재슬라이스 · hurt 3프레임 축소 — 2026-08-09 07:04
+### 프롬프트
+[수정] death 는 재슬라이스하고 hurt는 3프레임으로 작성해봐
+### 조작 내역
+- **공통 rect 방식 폐기 → 프레임별 정확 bbox rect**. death.png 는 행간 여유(107px·38px)가 최대 프레임 높이(288px)보다 좁아 단일 rect 크기로는 구조적으로 겹침을 피할 수 없었음
+- **피벗을 접지점 기준으로 개별 산정**: 각 프레임 bbox 하단 12% 대역의 가로 무게중심 = 접지점. 이전에는 rect 중앙(0.5)이라 쓰러지며 몸이 옆으로 뻗을 때 앵커가 같이 이동해 튀어 보였음
+  · death pivotX: 0.488 / 0.658 / 0.705 / 0.577 / 0.539 / 0.484
+  · hurt pivotX: 0.708 / 0.603 / 0.625
+- hurt: 4번째 프레임(칼 드는 포즈, 원화 자체가 다른 동작)을 제외하고 **앞 3프레임만** 슬라이스·배선
+- PPU 재산정: death 309.23(최대 288px) / hurt 660.34(최대 615px) — 둘 다 최대 높이 = 월드 1.397u@scale1.5 기준 유지
+- RealPlayer.prefab 배열 재배선: hurtFrames 4→3, deathFrames 6 유지
+### 검증
+- 컴파일 0. read_console error: 테스트 결과 저장 로그 1건 + Portal/WarpPortal AnimationClip Legacy 경고 2건(**팀 기존 이슈, 이번 변경과 무관**). 우리 변경분 에러 0
+- EditMode 198/198 통과, 실패 0
+- **rect 상호 겹침 0건** (death 6개 · hurt 3개 전수 교차 검사)
+- **프레임별 rect 내부 세로 덩어리 전수 1개** — 이전 f5의 [0~112 | 233~287] 2덩어리 혼입 해소 확인
+- 스프라이트 월드 크기: death 1.02x1.40 → 1.30x1.34 → 1.29x1.38 → 1.56x0.96 → 1.65x0.78 → 1.70x0.55 (서있음→누움 단조 진행)
+  hurt 1.19x1.40 / 1.22x1.39 / 0.99x1.38 (높이 일정)
+- 재생 길이: hurt 3/12+0.05=0.300초, death 6/7+0.45=1.307초(부활 지연 동일)
+- **사용자 눈 판정 필요**: (1) death 겹침 사라졌는지 (2) 쓰러질 때 캐릭터가 제자리에서 눕는지 — 아직 옆으로 미끄러지면 접지점 규칙(하단 12% 무게중심)이 이 원화에 안 맞는 것이므로 고정 피벗이나 프레임별 수동 오프셋으로 전환 (3) hurt 3프레임이 자연스러운지
+### 실패와 수정
+- 어제 [구현]의 '공통 rect + 콘텐츠 중심 정렬' 선택이 원인이었음. FAIL 등재
+
+
+## [조사] hurt '칼 드는 프레임' 재조사 — 키 충돌이 진짜 원인 — 2026-08-09 07:08
+### 프롬프트
+[조사]내 생각에는 hurt는 프레임 문제가 아니고 4번을 누르면 끝난다음에 3번을 자동으로 진행해서 생기는 문제 같은데?
+### 조사 결과
+**사용자 가설이 맞다. 내 직전 진단(‘원본 4번째 그림이 칼 드는 포즈’)이 틀렸다.**
+- PlayerController2D.cs:304 `if (kb.digit4Key.wasPressedThisFrame) QueueAttack("ComboB3", config.combo2Duration, ...)`
+  · 주석 301줄: '2/3/4 숫자키 = testParry 3동작 개별 발동' — 팀이 이미 쓰던 테스트 키였다
+- PlayerHurtDeathFx.cs:73 도 같은 digit4 를 미리보기에 썼다 → **한 번 누르면 두 동작이 동시에 발동**
+- 타이밍 대조
+  · hurt FX 길이 3/12+0.05 = **0.300초** (4프레임 시절엔 4/12+0.05 = 0.383초)
+  · ComboB3 지속 = combo2Duration = **0.400초**
+  · FX 가 끝나며 `anim.enabled = true` 로 Animator 를 되돌리는 순간, ComboB3 가 아직 **0.10초 남아 있어** 칼 모션이 그대로 노출된다
+  · `lockInputOnHurt=false` 라 미리보기 중 컨트롤러 입력이 막히지 않는 것도 조건에 기여
+- 사용자가 말한 '3번'은 키 3이 아니라 **ComboB3**(이름에 3이 들어감). 증상 해석은 정확했다
+- digit5 는 PlayerController2D 에서 미사용(PixelPlayerController 에만 있고 RealPlayer 프리팹엔 그 컴포넌트가 없음) → **death 미리보기는 충돌 없음**. 사용자가 death 쪽은 문제 삼지 않은 것과 일치
+**결과적으로 어제 hurt 4→3 프레임 축소는 잘못된 근거로 한 조치**다. 4번째 프레임은 정상일 가능성이 높다(프레임별 √불투명면적 397.8/381.8/385.7/382.4 로 스케일 일관, rect 혼입 0건이었음)
+**빈 키 조사**: digit8·digit9·F4~F7 미사용. F1(MapViewer) F2·F3(PlayerHealth) digit1(PlayerSkill) digit2~4(PlayerController2D) 사용 중
+**수정 방향(실행 안 함)**
+1. 미리보기 키를 충돌 없는 키로 이전(예: F6=hurt, F7=death) — 근본 해결
+2. hurt 프레임 4개로 복원
+3. 또는 미리보기 중 `PlayerController2D.InputLocked` 를 켜서 컨트롤러 입력 자체를 차단
+### 검증
+해당 없음
+### 실패와 수정
+- 직전 [조사]에서 '슬라이스는 정상이니 원화가 문제'라고 단정했으나, **같은 키에 두 기능이 붙어 있는지 확인하지 않았다**. 내가 [구현] 당시 키 충돌을 인지하고 보고까지 해놓고도 원인 후보에서 제외한 것이 오진의 원인. FAIL 등재 대상
+### 커밋
+해당 없음(무수정)
+
+
+## [수정] 미리보기 키 이전(5=hurt, 6=death) · hurt 4프레임 복원 — 2026-08-09 07:12
+### 프롬프트
+[수정]hurt를 5번 death를 6번으로 옮기고 hurt 프레임 4개로 복원해, InputLocked를 키면 다른 스킬이나 키에는 영향 끼치는건 없나?
+### 조작 내역
+- PlayerHurtDeathFx 디버그 키 이전: hurt digit4→**digit5**, death digit5→**digit6**. digit2~4 는 PlayerController2D 가 ComboB1~B3 에 선점 중
+- hurt 4프레임 복원: 직전 [조사]로 4번째 프레임이 정상임이 밝혀져 3→4 재슬라이스. 프레임별 정확 bbox + 접지점 피벗 방식 유지, PPU 664.64(최대 619px)
+- lockInputOnHurt 는 false 유지 — 아래 조사 결과 때문
+### InputLocked 영향 범위 조사 (사용자 질문)
+- 실체는 PlayerController2D.cs:260 한 줄 `var kb = InputLocked ? null : Keyboard.current;` 뿐인 **전역 static**
+- 차단: 방향키 이동 / ↑점프 / Shift 대시 / Z 콤보 / X 스킬 / C 스킬전환 / 숫자 2·3·4 / L / Ctrl 구르기·백스텝 / Space 패링. **PlayerSkill.cs:29 도 같은 플래그를 봐서 digit1 스킬도 차단**
+- 미차단: PlayerHealth F2·F3, OneWayDropThrough ↓+Space 하향점프, PlayerHurtDeathFx 디버그 키 — 각자 Keyboard.current 를 직접 읽음. **락 중에도 하향점프가 된다**
+- 컨트롤러는 계속 구동되어 중력·관성·애니메이션 유지. parryHeld 자가 회복 라인 있어 홀드 갇힘은 이미 방지됨
+- **최대 위험: 참조 카운트가 없다.** DemonBoss·SecondSceneBoss·Scene2Director·IntroSequencer·PlayerHurtDeathFx 가 같은 플래그를 공유하므로 **나중에 false 로 푸는 쪽이 이긴다**. 연출 락 중 피격 → hurt FX 종료가 연출 락을 해제해버릴 수 있음. 그래서 hurt 에는 켜지 않는다
+### 검증
+- 컴파일 0, read_console 우리 변경분 에러 0
+- EditMode 198/198 통과, 실패 0
+- hurt rect 상호 겹침 0건, 프레임별 내부 덩어리 전수 1개
+- 프리팹 재읽기: hurtFrames 4(Player_Hurt_0~3) / deathFrames 6(Player_Death_0~5)
+- 월드 크기 hurt 1.18x1.39 / 1.22x1.39 / 0.98x1.37 / 0.88x1.40 (높이 일정), 재생 길이 4/12+0.05 = 0.383초
+- **사용자 눈 판정 필요**: 5번=hurt 단독 재생(칼 모션 끼어들지 않음) / 6번=death / 실제 피격·사망 동작
+### 실패와 수정
+- 없음
+### 제출 전 OFF 목록
+PlayerFxConfig.enableDebugKeys (5·6 미리보기)
+
+
+## [조사] 플레이어 피격 피드백 보강 — 기존 부품 재고 조사 — 2026-08-09 07:16
+### 프롬프트
+[조사]잘되네. 근데 모션이 작아서 피격을 당했는지 사실 구분이 조금 어려운데 다른 유명한 2D 게임은 피격 모션을 어떻게 표시하니? 물론 사운드를 넣을거지만 그래도 좀 부족해 보여.
+### 조사 결과
+**핵심: 필요한 부품이 이미 프로젝트에 있는데 플레이어 피격에 연결만 안 되어 있다.**
+- `FeelConfig`(SPEC 단일기준 모듈) 자산 존재: Assets/Settings/FeelConfig.asset. 필드 보유 — hitStopDuration / knockbackForce·Duration / invincibilityDuration / **screenShakeAmplitude·Duration** / attackStartup·Recovery / inputBufferTime / **hitFlashDuration·Interval**
+  · 참조하는 코드는 HitFlashOnSlash, HitFlashBlinker 둘뿐. **플레이어 피격 경로에서는 아무도 안 씀**
+- `NAN2026.Core.HitFlashBlinker`(순수 로직, EditMode 테스트 보유) 이미 구현됨 — IsVisible/IsFinished. 사용처는 HitFlashOnSlash 하나뿐(적 피격용)
+- 히트스톱 선례 다수: SpikeBallTrap(수명 보정·OnDestroy 안전핀까지 완비), ExecutionerBoss(HitStop 코루틴, timeScale 0.05), PrincessBossAttackPatterns
+- 넉백: MonsterHealth 는 `transform.position += dir * knockbackDistance` 로 적용 중. **PlayerCombatConfig.knockbackDistance=0.25 는 선언만 되어 있고 PlayerHealth.TakeDamage 에서 사용되지 않음**
+- 카메라 흔들림: Scene1·1_1·2·3 의 CM_PlayerCamera 에 **CinemachineImpulseListener 이미 부착**. 다만 프로젝트 전체에 ImpulseSource 는 0개 → 흔들림을 쏘는 쪽이 없다. Scene4·Test1 은 Listener 도 없음
+- 현재 플레이어 피격 시 실제로 일어나는 일: HP 차감 + 0.6s 무적 + hurt 스프라이트 4프레임(0.383초). **그게 전부**. 점멸·정지·넉백·흔들림·팝업 전무
+**2D 액션 게임의 통상적 피격 표현(참고)**
+- 히트스톱(수 프레임 정지) / 화면 흔들림 / 피격 대상 백색 또는 적색 플래시 / 무적 시간 동안 깜빡임 / 넉백 / 히트 파티클·스파크 / 데미지 수치 팝업 / 저체력 시 화면 가장자리 붉은 비네트 / 짧은 슬로모션
+- 통설: 사운드·히트스톱·플래시 3종이 체감 기여도가 가장 크고 구현 비용이 낮다
+**투입 대비 효과 순 제안(실행 안 함)**
+1. 적색 플래시 + 무적 0.6s 깜빡임 — HitFlashBlinker 재사용, 신규 코드 최소. 무적 시간을 시각화하는 부수 효과도 큼
+2. 히트스톱 0.05~0.08s — SpikeBallTrap 의 안전핀 패턴 그대로 이식(FAIL: 수명<히트스톱이면 timeScale 영구 0)
+3. 넉백 0.25u — 이미 config 에 값이 있고 MonsterHealth 에 선례 있음
+4. 화면 흔들림 — Listener 는 있으나 Source 신규 필요. Scene4·Test1 은 Listener 부착도 선행되어야 함
+5. 데미지 팝업 — 데몬/미노에서 쓰던 TextMesh 팝업 재사용 가능
+### 검증
+해당 없음
+### 실패와 수정
+없음
+### 커밋
+해당 없음(무수정)
+
+
+## [구현] 플레이어 피격 피드백 4종 — 플래시·깜빡임 / 히트스톱 / 넉백 / 화면흔들림 — 2026-08-09 07:25
+### 프롬프트
+[구현]1,2,3,4를 실행하되 무적은 0.45초로 두자
+### 조작 내역
+- 신규 순수 로직 NAN2026.Core/HitFeedbackLogic.cs: KnockbackSign / KnockbackStep / HitStopFinished / ClampHitStop
+- 신규 PlayerHitFeedback (RealPlayer 프리팹 부착 → 전 씬 자동 적용). PlayerHealth.OnHealthChanged 구독
+  · **플래시+깜빡임**: 기존 NAN2026.Core.HitFlashBlinker 재사용. 무적과 동일한 0.45초 동안 0.06초 간격 점멸 + 적색 틴트
+  · **히트스톱**: Time.timeScale=0 → unscaledTime 으로 복구. SpikeBallTrap 선례대로 **OnDestroy 안전핀** 포함(FAIL: 수명<히트스톱이면 timeScale 영구 0)
+  · **넉백**: 총 이동량이 정확히 knockbackForce 가 되도록 선형 감쇠 적분(테스트로 검증). unscaledDeltaTime 사용해 히트스톱 중에도 진행
+  · **화면 흔들림**: CinemachineImpulseSource 를 프리팹에 추가, 리플렉션으로 GenerateImpulseWithForce/GenerateImpulse 호출(StatueEnemy 선례와 동일 방식으로 asmdef 의존 회피)
+- 카메라 보강: Scene4 CM_PlayerCamera / Test1 CM_Cam 에 **CinemachineImpulseListener 신규 부착**(Scene1·2·3 은 이미 보유)
+- 수치는 전부 **FeelConfig(SPEC 단일 기준 모듈)** 소유. 지금까지 값이 전부 0 이라 아무도 안 쓰던 자산을 실사용으로 전환
+  hitStopDuration 0.06 / knockbackForce 0.25 / knockbackDuration 0.12 / invincibilityDuration 0.45 / screenShakeAmplitude 0.35 / screenShakeDuration 0.25 / hitFlashDuration 0.45 / hitFlashInterval 0.06
+- **무적 0.6 → 0.45**: PlayerCombatConfig.hitInvulnerabilityDuration. 근거는 직전 대화 — 적 쿨다운(1.5~2.0초)이 무적보다 길어 단일 적에는 무의미하고, 데몬 5발 확산 같은 동시 다발에서만 작동하므로 0.4 미만은 위험
+- 넉백 방향은 가해자 위치를 모르므로 **바라보는 반대쪽**으로 민다(TakeDamage 가 float 하나만 받는 SendMessage 계약이라 소스 좌표가 없음). HitFeedbackLogic 은 소스 좌표를 받는 경로도 이미 지원
+### 검증
+- 컴파일 0, read_console error 0건
+- EditMode 207/207 통과 (HitFeedbackLogicTests 9개 신규, 실패 0)
+- 리플렉션 실행 검증: KnockbackSign(false,10,0,+1)=-1(앞을 보면 뒤로) / ClampHitStop(0.5,0.45)=0.1125(상한 작동) / ClampHitStop(0.06,0.45)=0.06
+- 넉백 적분 테스트: dt 0.002 로 0.12초 적분 시 총 이동량이 0.25±0.02 로 수렴
+- 자산 재읽기: FeelConfig 8개 필드 · PlayerCombatConfig.hitInvulnerabilityDuration=0.45 확인
+- 프리팹 재읽기: CinemachineImpulseSource + PlayerHitFeedback 부착, feel=FeelConfig 배선
+- 전 씬 Listener 재로드 검증 5/5 (Scene1·2·3 기존 / Scene4·Test1 신규)
+- **사용자 눈 판정 필요**: (1) 피격 시 적색 점멸이 0.45초 무적과 같이 끝나는지 (2) 히트스톱 0.06 이 답답하지 않은지 (3) 넉백 0.25u 방향·거리 (4) 화면 흔들림 세기 0.35 가 과하지 않은지. 전부 FeelConfig 에서 재생 중 조절 가능
+### 실패와 수정
+- 없음
+
+
+## [조사] 피격 카메라 흔들림 실제 세기 — 2026-08-09 07:30
+### 프롬프트
+[조사] 지금 피격 당했을때 카메라 떨림 어느정도지?
+### 조사 결과
+- 재생 중이라 씬 열기·저장은 하지 않음(FAIL#5). 프리팹 직렬화값 + 재생 중 씬의 Listener 실측으로 확인
+**신호 발생 측 — RealPlayer.prefab / CinemachineImpulseSource (전부 Unity 기본값)**
+- DefaultVelocity = (0, -1, 0) → **수직 1단위 아래로 치는 신호**
+- ImpulseShape = Bump / ImpulseDuration 0.2 / ImpulseType Uniform(거리 감쇠 없음)
+- TimeEnvelope: Attack 0.0 · Sustain 0.2 · Decay 0.7 · ScaleWithImpact true → **신호 총 길이 약 0.9초**
+- AmplitudeGain 1.0 / FrequencyGain 1.0 / ImpactRadius 100 / DissipationDistance 100
+**호출 측**
+- `GenerateImpulseWithForce(0.35)` — FeelConfig.screenShakeAmplitude 를 force 로 전달
+- 즉 실효 신호 = DefaultVelocity(0,-1,0) x 0.35 = **아래로 0.35단위 충격**
+**수신 측 — CM_PlayerCamera / CinemachineImpulseListener (기본값)**
+- Gain 1.0 / AmplitudeGain 1.0 / FrequencyGain 1.0 / Duration 1.0 / UseCameraSpace true / Use2DDistance false
+**결론: 피격 시 카메라가 세로로 약 0.35u 크기의 Bump 를 맞고 약 0.9초에 걸쳐 감쇠한다.**
+- 화면 기준 체감: 카메라 orthographic size 대비 비율로 환산해야 정확하나, 0.35u 는 플레이어 키(1.4u)의 25% 수준 변위라 **작지 않다**
+- 다만 감쇠가 0.9초로 길어 '툭 치고 끝'이 아니라 **여운이 길게 남는** 형태
+**조정 가능 지점(실행 안 함)**
+1. 세기: FeelConfig.screenShakeAmplitude (현재 0.35)
+2. 길이: 프리팹 ImpulseDefinition.TimeEnvelope.DecayTime (현재 0.7) — 짧게 하려면 0.2~0.3
+3. 방향: DefaultVelocity 가 (0,-1,0) 수직 고정. 좌우 흔들림을 섞으려면 (0.5,-1,0) 등
+4. **FeelConfig.screenShakeDuration(0.25)은 선언만 되어 있고 코드에서 사용하지 않음** — 실제 길이는 프리팹의 TimeEnvelope 가 결정. 문서-구현 불일치
+### 검증
+해당 없음
+### 실패와 수정
+없음
+### 커밋
+해당 없음(무수정)
+
+
+## [수정] 화면 흔들림 단축 · 넉백 증가 — 2026-08-09 07:34
+### 프롬프트
+[수정]너무 오래 흔들린다. 그리고 넉백 거리를 좀 더 줄수 있니?
+### 조작 내역
+- 흔들림 길이: RealPlayer.prefab / CinemachineImpulseSource 의 시간 봉투 단축
+  · ImpulseDuration 0.20 → **0.12**
+  · TimeEnvelope.SustainTime 0.20 → **0.04**, DecayTime 0.70 → **0.20**, AttackTime 0 유지
+  · 신호 총 길이 **0.90초 → 0.24초**. 무적 0.45초보다 짧아져 '툭 치고 끝'이 됨
+  · 세기(screenShakeAmplitude 0.35)는 그대로 — 요청은 길이였음
+- 넉백 강화: FeelConfig.knockbackForce 0.25 → **0.55**, knockbackDuration 0.12 → **0.16**
+  · 거리를 2.2배 늘리면서 시간도 함께 늘려 속도가 과격해지지 않게 함(0.25/0.12=2.08u/s → 0.55/0.16=3.44u/s)
+  · HitFeedbackLogic.KnockbackStep 이 총 이동량을 knockbackForce 와 일치시키므로 값만 바꾸면 그대로 반영
+- FeelConfig.screenShakeDuration 0.25 → **0.24**: 직전 [조사]에서 '선언만 되고 코드가 안 쓴다'고 지적한 필드. 실제 봉투 길이와 값을 일치시켜 문서-구현 괴리를 없앰(여전히 코드가 읽지는 않음, 표기용)
+### 검증
+- 컴파일 0, EditMode 207/207 통과, 실패 0
+- 프리팹 재읽기: ImpulseDuration 0.12 / Attack 0 / Sustain 0.04 / Decay 0.20
+- FeelConfig 재읽기: hitStop 0.06 / knockForce 0.55 / knockDur 0.16 / invinc 0.45 / shakeAmp 0.35 / shakeDur 0.24 / flashDur 0.45 / flashInt 0.06
+- **사용자 눈 판정 필요**: (1) 흔들림이 0.24초로 짧아진 체감 (2) 넉백 0.55u 가 과하지 않은지 — 벽·낭떠러지 근처에서 밀려 떨어지지 않는지 확인 필요
+### 실패와 수정
+- 없음
+### 주의
+- 프리팹 변경이라 **재생 중에는 반영되지 않는다**. 정지 후 다시 재생해야 새 봉투가 적용됨. FeelConfig(넉백)는 SO 라 재생 중에도 즉시 반영
+
+
+## [조사] 잡몹 증원 설계 타당성 — 몰림·동시사격 문제 — 2026-08-09 07:38
+### 프롬프트
+[조사]무적시간을 우리 초기 시간 너가 설정해 시간으로 늘려주고 knight와 archoer 5개씩만 더 늘리자. 그리고 archer은 공격 반경에 들어오더라도 한꺼번에 화살 날리지말고 일정 간격을 두고 랜덤하게 날리게 하고 Knight도 자기 일정 반경에 내가 들어오면 일정 반경까지만 들어오게 하고 그 외에는 Idle 상태로 있게 하고 싶은데 합리적이니? 그렇지 않으면 수십마리가 몰릴거 같아서.
+### 조사 결과
+**결론: 세 가지 우려 전부 타당하다. 그냥 우려가 아니라 현재 코드에 실재하는 결함이다.**
+**1. 몰림 — 실재. 게다가 더 나쁘다**
+- EnemyBase.Update 67줄: `transform.position += face * walkSpeed * dt` 뿐. **정지 거리도, 개체 간 분리도 없다**
+- Decide 는 `dx<=attackRange && 쿨다운 완료` 일 때만 Attack, **쿨다운 중에는 dx 가 0 이어도 Walk 를 반환**한다 → 적이 플레이어를 향해 계속 걸어와 **관통해 지나간다**
+- 콜라이더가 isTrigger=true 인 Kinematic 이라 적끼리 충돌하지 않음 → 6마리가 **같은 좌표에 완전히 겹친다**
+- 즉 증원하면 '몰릴 것 같다'가 아니라 **한 점에 포개진다**
+**2. 동시 사격 — 실재**
+- ArcherEnemy 에 Random 사용 0건. attackCooldown 2.0 고정, 발사 시점은 attackDur 진행률 0.75 고정
+- 아처들이 비슷한 시점에 사거리(10u)에 들어오면 **첫 발이 동기화되고, 쿨다운이 동일해 이후 영구히 동기화**된다 → 2초마다 화살 벽
+- 회피 설계가 성립하지 않음. 데몬 5발 확산은 각도가 달라 틈이 있었지만 이건 같은 높이 수평탄이라 틈이 없다
+**3. 무적 0.45 → 0.6 복귀 — 타당**
+- 적이 2마리에서 12마리가 되면 동시 피격원이 급증한다. 무적은 단일 적에는 무의미하고(쿨다운 1.5~2.0초 > 무적) **다중 적 상황에서만 작동**하므로, 증원과 무적 연장은 같은 방향의 조치다
+**4. 추가로 짚어야 할 것 — 전투 분량**
+- 12마리 x 5대 = **60타**. SPEC 플레이 시간 3~5분 기준으로 잡몹 처치에만 상당 시간이 소요된다. hitsToDie 를 3으로 낮추거나 배치를 구간별로 쪼개는 편이 안전
+**권장 설계(실행 안 함)**
+- Knight: `stopDistance`(예 1.4u) 신설 — 그 안으로는 접근 금지. 사거리 밖이면 Walk, stopDistance~attackRange 사이면 대기(Idle), 쿨다운 완료 시 Attack
+- Knight: 개체 간 최소 간격(예 1.0u) — 앞 개체가 있으면 멈춤. Physics2D.OverlapCircle 대신 같은 타입 캐시 순회로 충분
+- Archer: 최초 진입 시 `Random.Range(0, fireStagger)` 초기 지연 + 쿨다운에 `± jitter` 편차. 두 값 모두 Config 신설
+- 무적: PlayerCombatConfig.hitInvulnerabilityDuration 0.45 → 0.6, FeelConfig.hitFlashDuration 도 0.6 으로 동기화(깜빡임=무적 길이 규칙 유지)
+- 배치: Scene3 복도 바닥 y=0.04 구간(x 0~48)에 Knight, 그 뒤 x 52~60(y=2.04)·64~84(y=3.04) 구간 활용. 한 화면에 6마리가 동시에 보이지 않게 분산
+### 검증
+해당 없음
+### 실패와 수정
+- 어제 [구현] 시 잡몹을 1마리씩만 배치해 다중 개체 문제를 검증하지 않았다. 분리·정지거리 없는 추적은 다수 배치 시 반드시 겹친다 — 설계 단계에서 걸렀어야 함
+### 커밋
+해당 없음(무수정)
+
+
+## [구현] 잡몹 증원 12마리 + 군집 제어 + 무적 0.6초 복귀 — 2026-08-09 07:53
+### 프롬프트
+[구현]앞서 조사한것을 바탕으로 진행하자.Knight 정지거리, 간격, 상태 너가 조사를 통해 권고사항 수치를 적용하자. Archor 상태 또한 랜덤으로 공격할 수 있도록 진행하고 적군을 늘리는 만큼 무적시간을 0.6초로 늘리고 너무 몰리지 않도록 너가 권장한 수치로 배치하자.
+### 조작 내역
+**순수 로직 NAN2026.Core/EnemyStateLogic 확장 (+5 함수)**
+- `DecideWithHold` — 사거리 안이면 쿨다운 완료 시에만 Attack, **쿨다운 중에는 Idle**. 기존 Decide 는 Walk 를 반환해 적이 플레이어를 관통·중첩했다(실측: Decide(1.5,10,2,false)=1 Walk → DecideWithHold=0 Idle)
+- `MoveStep` — stopDistance 안쪽으로 파고들지 못하게 이번 프레임 이동량을 남은 여유로 클램프
+- `BlockedByNeighbor` — 진행 방향 앞 separation 안에 동료가 있으면 정지
+- `JitteredCooldown` / `InitialDelay` — 쿨다운 편차와 최초 랜덤 지연. 난수를 인자로 받아 순수 함수 유지(테스트 가능)
+**EnemyConfig +4 필드**: stopDistance / separation / fireStagger / cooldownJitter
+**EnemyBase 변경**
+- 판단을 DecideWithHold 로 교체, 이동을 MoveStep + BlockedAhead 로 게이트
+- 정적 All 리스트로 개체 간 분리 판정 (RuntimeInitializeOnLoadMethod 리셋 동봉 — DisableDomainReload 대응)
+- Start 에서 `nextAtk = Time.time + InitialDelay(fireStagger, Random.value)` → 첫 공격 산개
+- 공격 종료 시 `NextAttackAt()` 으로 지터 쿨다운 적용 (근접·원거리 공통)
+- **접지 기준을 config.groundY → 인스턴스 spawnY 로 변경**. Config 는 단일 값이라 다층 배치(y=0.04/2.04/3.04)가 불가능했다
+**수치**
+- Knight: stopDistance 1.4 / separation 1.0 / fireStagger 0.8 / cooldownJitter 0.6
+- Archer: stopDistance 6.0(원거리는 붙지 않는다) / separation 1.6 / fireStagger 1.6 / cooldownJitter 1.2
+- 무적 0.45 → **0.6** (PlayerCombatConfig.hitInvulnerabilityDuration), FeelConfig.invincibilityDuration·hitFlashDuration 도 0.6 으로 동기화(깜빡임=무적 길이 규칙 유지)
+**배치 — Scene3, 각 6마리 (기존 2마리 제거 후 재배치)**
+- Knight x = 12 / 22 / 31 / 40 / 47 (y=0.04), 55 (y=2.04)
+- Archer x = 17 / 26 / 35 / 44 (y=0.04), 58 (y=2.04), 67 (y=3.04)
+- 근접·원거리를 교대 배치. 인접 간격 3~9u, 카메라 가시폭 24u(orthoSize 6.75, 16:9) 기준 **한 화면 최대 4마리** 수준
+### 검증
+- 컴파일 0, read_console error/exception 0건
+- EditMode 217/217 통과 (EnemyStateLogicTests 10개 신규, 실패 0)
+- 리플렉션 실행 검증: DecideWithHold(1.5,10,2,false)=0(Idle) vs Decide=1(Walk) / MoveStep(1.45,1.4,2,0.1)=0.05 / BlockedByNeighbor(10,10.5,+1,1.0)=True / JitteredCooldown(2,0.6,0)=1.7·(2,0.6,1)=2.3
+- Config 재읽기: Knight stop1.4 sep1.0 stagger0.8 jitter0.6 / Archer stop6.0 sep1.6 stagger1.6 jitter1.2 / 무적 0.6 / flashDuration 0.6
+- 씬 재로드 검증: 12마리(Knight 6 / Archer 6) 전원 생존, config 배선·스프라이트 배열 전수 정상, 배치 y 가 각 지점 바닥(0.04/2.04/3.04)과 일치
+- 테스트 후 씬 생존 재확인: dirty=False, 적 12마리
+- **사용자 눈 판정 필요**: (1) Knight 들이 겹치지 않고 1.4u 앞에서 멈추는지 (2) 쿨다운 중 파고들지 않고 대기하는지 (3) Archer 화살이 동시에 안 날아오는지 (4) 한 화면에 너무 많이 보이지 않는지 (5) 무적 0.6초 체감
+### 실패와 수정
+- 없음
+### 미결
+- hitsToDie 는 5 유지. 조사에서 3 을 권고했으나 이번 명령에 포함되지 않아 임의 변경하지 않았다. 12마리 x 5대 = 60타가 3~5분 플레이에 과하면 조정 필요
+
+
+## [구현] 잡몹 전용 사거리 표시 + Knight 사거리 실측 교정 — 2026-08-09 08:01
+### 프롬프트
+보스는 보스에만 적용하고 Knight는 따로 적용하는게 좋을거 같은데
+> 맥락: 직전 질문 'knight의 공격범위가 너무 긴거 같은데 게임 씬에서 직접 볼 수 있나?' 에 대해, DemonBoss 의 범위 표시를 공유·리팩터하지 말고 EnemyBase 에 별도 구현하라는 결정
+### 조작 내역
+**사거리 실측 → 교정**
+- Knight ATTACK3 6프레임 픽셀 실측(96px 격자, 중앙 48, PPU 25.714): 타격창(frac 0.40~0.70)인 f4·f5 의 **칼끝 도달 1.21u**
+- 기존 attackRange 1.8 → 그림보다 **0.59u 길었다**. 콜라이더 반폭(Knight 0.45 + Player 0.42=0.87)을 빼도 몸 사이 0.93u 가 벌어진 상태에서 맞았음
+- attackRange 1.8 → **1.25** (칼끝 1.21 과 0.04 차이), stopDistance 1.4 → **1.0**
+  · stopDistance 를 같이 내리지 않으면 정지거리(1.4) > 사거리(1.25) 가 되어 **영원히 공격 불가** 상태가 된다. 기존 1.4/1.8 도 아슬아슬한 조합이었음
+**범위 표시 — EnemyBase 에 별도 구현 (DemonBoss 무수정)**
+- EnemyConfig +3 필드: showRangesInGame / showRangeLabels / rangeBandHeight(1.8)
+- LateUpdate 에서 LineRenderer 3종(useWorldSpace=true)
+  · 노랑 = aggroRange (|dx| 판정이라 좌우 대칭)
+  · 파랑 = stopDistance (좌우 대칭)
+  · 빨강 = attackRange (정면 판정이라 바라보는 쪽만, BossRangeLogic.BandMinX/MaxX 사용)
+- 타격 시간창이 열리면 빨강 띠가 굵어지고(0.06→0.16) 밝은 노랑으로 전환
+- 머리 위 라벨: dx / atk 사거리와 적중 여부(O·X) / stop / 현재 상태(IDLE·WALK·ATK 진행률·HURT·DEAD)
+- **표시와 실판정이 같은 함수(BossRangeLogic.InHitBand/BandMinX/BandMaxX/WindowOpen)를 쓴다** — 데몬 때와 동일 원칙
+- 보스 쪽 시각화는 클리브·스매시 이중 사거리에 양방향 옵션까지 있어 잡몹과 형태가 다르므로 공유하지 않음
+### 검증
+- 컴파일 0, read_console error/exception 0건
+- EditMode 217/217 통과, 실패 0
+- 타입 로드 확인: EnemyBase 신규 멤버 MakeBand·BuildBands·DestroyBands·SetRect·LateUpdate / EnemyConfig 신규 필드 3종
+- Config 재읽기: Knight atkRange=1.25 stop=1.0 aggro=10 show=True bandH=1.8 / Archer atkRange=10 stop=6 aggro=14 show=True
+- 관계 검증: stop(1.0) < attackRange(1.25) 유지 — 역전 시 공격 불가 상태를 코드가 아니라 수치로 방지
+- DemonBoss.cs 미수정 확인
+- 테스트 후 씬 생존: dirty=False, 적 12마리
+- **사용자 눈 판정 필요**: (1) 빨강 띠가 칼끝과 맞는지 (2) 띠가 굵어지는 순간과 실제 피격 순간이 일치하는지 (3) 12마리 띠가 화면을 너무 어지럽히지 않는지 — 어지러우면 showRangeLabels 만 꺼도 됨
+### 실패와 수정
+- 없음
+### 제출 전 OFF 목록 추가
+KnightEnemyConfig.showRangesInGame · showRangeLabels / ArcherEnemyConfig.showRangesInGame · showRangeLabels
+
+
+## [조사] EnemyBase 와 팀 보스 코드의 충돌 가능성 · Archer 판정 기준 — 2026-08-09 08:05
+### 프롬프트
+[조사]보스는 다른 팀원이 만들었는데, 너가 지금 구현한건 EnemyBase니깐 충돌은 일어날 일 없다는거지? Archor은 똑같은 기준을 적용하는거야?
+### 조사 결과
+**1. EnemyBase 자체는 격리되어 있다 — 맞다**
+- EnemyBase 를 상속하는 클래스는 **ArcherEnemy, KnightEnemy 2개뿐**. 보스는 하나도 상속하지 않는다
+- 팀 보스 파일 최근 커밋 작성자 실측: MidBossController=NoImpMe / OrkanBoss=NoImpMe / MidBossAI·MiddleBossAttackPatterns·PrincessBossAttackPatterns·LichAttackPattern=worldgreatkim(우리) / DemonBoss·SecondSceneBoss=우리
+- EnemyBase·EnemyConfig·KnightEnemy·ArcherEnemy·ArcherArrow·IPlayerDamageable 는 전부 우리가 신설한 파일. 팀이 건드린 이력 없음
+**2. 그러나 '충돌 위험 0' 은 아니다 — 공유 파일이 있다**
+- `BossRangeLogic.cs` — DemonBoss 와 EnemyBase 가 함께 참조. 우리 파일이라 팀 충돌은 없지만, **여기를 고치면 데몬과 잡몹이 동시에 영향**받는다
+- `EffectProjectile.cs` / `SlashProjectile.cs` — 잡몹 피격을 위해 IPlayerDamageable 분기를 넣은 파일. 8/8 에 NoImpMe 병합 이력 있음. **팀이 같은 파일을 만지면 충돌 지점**
+- `PlayerHealth.cs` — 8/8 NoImpMe 가 'GameOverPanel 표시 및 타이틀씬 복귀' 로 수정한 이력. 우리가 오늘 SuppressDeathHide·OnPlayerRespawned 를 추가했다. **가장 위험한 공유 파일**
+- `PlayerCombatConfig.asset` — 8/8 NoImpMe '수정 커밋' 이력. 오늘 무적 0.45→0.6 변경
+- `RealPlayer.prefab` — 오늘 컴포넌트 3종 추가. 팀이 플레이어 프리팹을 교체한 전례가 있어(어제 사건) 재발 시 배선 유실 위험
+- 즉 **EnemyBase 계열은 안전, 플레이어·디스패처 계열은 병합 시 확인 필요**
+**3. Archer 는 '절반만' 같은 기준이다**
+- 공통(EnemyBase 상속): DecideWithHold 상태 판단 / MoveStep 정지거리 / BlockedAhead 간격 / InitialDelay·JitteredCooldown 산개 / 피격 5회 사망 / 범위 표시
+- **다른 점: 타격 판정 자체가 없다**. ArcherEnemy 는 DoAttack 을 오버라이드해 `ShouldFire` 로 화살만 생성하고 끝난다(17~27줄). 근접용 `BossRangeLogic.InHitBand` 를 호출하지 않는다
+- 실제 피해는 ArcherArrow 의 트리거 충돌이 결정한다. 즉 attackRange 10 은 **'쏘기 시작하는 거리'** 일 뿐 명중 판정과 무관
+- **결과적으로 범위 표시가 아처에서는 오해를 준다**: 빨강 띠와 라벨의 O/X 는 근접 타격 밴드 기준이라, 아처에게는 의미 없는 값이 표시된다(항상 O 에 가깝게 뜸)
+**4. 수정 후보(실행 안 함)**
+- 아처 표시를 '발사 개시 거리' 로 이름·색을 바꾸고 O/X 라벨은 숨긴다. 또는 ArcherEnemy 에서 showRangeLabels 를 기본 false 로
+- 병합 대비: 팀에 `PlayerHealth.cs` `EffectProjectile.cs` `SlashProjectile.cs` `RealPlayer.prefab` 을 우리가 오늘 대폭 수정했다고 사전 공지
+### 검증
+해당 없음
+### 실패와 수정
+없음
+### 커밋
+해당 없음(무수정)
+
+
+## [조사] 사망 연출→게임오버 전환 가능성 · BossRangeLogic 공유 구조 — 2026-08-09 08:12
+### 프롬프트
+[조사]사망 연출 > 게임 오버 > 타이틀 복귀로 수정하려고 하면 해결되나? 그리고 2번째 위험상황인 BossRange를 공유한다는게 이해가 잘안된다.
+### 조사 결과
+**Q1. 순서를 바꾸면 해결되나 — 절반만. 고칠 곳이 세 군데다**
+- ① GameOverController.HandlePlayerDied 가 **즉시** `Time.timeScale = 0` 을 건다. 이걸 사망 연출 길이(1.307초)만큼 미뤄야 한다. **팀원 파일 수정 필요**
+- ② PlayerHurtDeathFx 는 `t += Time.deltaTime`(81줄, scaled) 을 쓴다. timeScale 0 이면 프레임 0 에서 정지. `Time.unscaledDeltaTime` 으로 바꾸면 timeScale 과 무관하게 재생된다 — ①을 못 고칠 때의 대안이 되지만, 패널이 먼저 뜨므로 연출이 가려진다
+- ③ **부활 경로가 남아 있다.** PlayerHealth.Kill() 194줄 `Invoke(nameof(Respawn), delay)` 가 여전히 예약된다
+  · 실측: 프리팹 respawnDelay=0.2, DeathDuration=6/7+0.45=1.307 → 실제 지연 **1.307초**
+  · GameOverController 도 1.307초 뒤 timeScale=0 을 걸면 **같은 시점에 부활과 게임오버가 경합**한다. Respawn 은 dying=false, 체력 만땅, 위치 복귀까지 하므로 패널 뒤에서 플레이어가 되살아난다
+  · 따라서 게임오버 노선으로 가려면 Kill() 에서 **Invoke 예약 자체를 하지 않아야** 한다(게임오버 핸들러 존재 시)
+- 배선 현황: Scene3·4·Test1 은 playerHealth 배선됨(충돌 발생), **Scene2 는 playerHealth=NULL** 이라 게임오버가 아예 동작하지 않음(팀 배선 누락), Scene1 은 컴포넌트 없음
+**Q2. BossRangeLogic '공유' 의 실체**
+- 이건 팀과의 충돌이 아니다. **우리 파일 하나를 데몬 보스와 잡몹이 함께 쓴다**는 뜻이다
+- 함수 6개: BandMinX / BandMaxX / InHitBand / InHitBandBothSides / WindowOpen / FracUntilWindow
+- 호출처 실측
+  · DemonBoss.cs 10곳 — 클리브·스매시 실판정(152·163·225·233줄) + 범위 표시(372~381줄)
+  · EnemyBase.cs 6곳 — 잡몹 실판정(202·203줄) + 범위 표시(150·151·154·164줄)
+  · BossRangeLogicTests.cs 다수
+- 위험의 형태: 예컨대 `InHitBand` 의 deadZone 처리나 경계 포함(<=) 을 바꾸면 **데몬 보스 판정과 잡몹 12마리 판정이 동시에 바뀐다**. 잡몹만 손보려다 보스 난이도가 함께 변할 수 있다
+- 반대로 이 구조의 이점: 표시와 판정이 같은 함수를 쓰므로 '그림과 판정이 어긋나는' FAIL 이 구조적으로 재발하지 않는다. 그래서 **분리하지 말고 유지하되, 이 파일을 고칠 때는 데몬·잡몹을 함께 재생 확인**하는 것이 맞다
+- 안전장치: BossRangeLogicTests 가 경계·데드존·표시-판정 일치(201점 순회)를 고정하고 있어, 규약을 깨는 수정은 테스트가 먼저 잡는다
+### 검증
+해당 없음
+### 실패와 수정
+없음
+### 커밋
+해당 없음(무수정)
+
+
+## [조사] BossRangeLogic 분리 타당성 · EnemyBase 상속 근거 — 2026-08-09 08:15
+### 프롬프트
+[조사]분리하고 같은 함수 적용하면 안되는거야? 상속받는게 편해서 이렇게 하는건가?
+### 조사 결과
+**전제 정리: 두 가지가 섞여 있다. 서로 다른 이야기다**
+- (가) `BossRangeLogic` — **static 유틸 클래스 공유**. 상속이 아니다. DemonBoss 와 EnemyBase 가 각각 호출할 뿐
+- (나) `EnemyBase` — **추상 클래스 상속**. KnightEnemy·ArcherEnemy 만 상속. DemonBoss 는 상속하지 않는다
+**(가) 분리(복제)해도 되는가 — 된다. 다만 손해다**
+- 실측 규모: BossRangeLogic **49줄, 함수 6개, 전부 순수 산술**. 상태도 의존성도 없다(BossFacingLogic.TargetInFront 만 참조)
+- 복제 시 비용: 파일 2개 + 테스트 2벌(BossRangeLogicTests 86줄)을 이중 관리. 한쪽 버그 수정이 다른 쪽에 전파되지 않아 **시간이 지나면 두 판정이 갈라진다**
+- 우리 FAIL 이력은 '공유해서' 생긴 게 아니라 **'표시와 판정이 갈라져서'** 생겼다(#25 death 겹침, 데몬 사거리 2배 미달). 복제는 그 갈라짐을 조장하는 방향
+- 실제 위험도 재평가: 6개 함수 의미가 고정적이고(경계 <=, 데드존, 정면 판정) BossRangeLogicTests 가 경계·데드존·표시-판정 일치(201점 순회)를 잠그고 있다. **규약을 깨는 수정은 테스트가 먼저 잡는다** → 위험을 과장했음
+- 다만 **이름은 실제로 문제**다. 잡몹이 쓰는데 `BossRangeLogic` 이라 오해를 준다. 개명(예: HitBandLogic)이 복제보다 나은 처방이나, DemonBoss 10곳·EnemyBase 6곳·테스트 20곳을 건드려야 해 마감 전 이득이 작다
+**(나) 상속이 '편해서' 인가 — 아니다. 공유 비율이 근거다**
+- 직접 선언 멤버 실측
+  · EnemyBase 메서드 16 / 필드 17 (공통)
+  · KnightEnemy 메서드 **1개**(FlipFor) / 필드 0
+  · ArcherEnemy 메서드 4개(FlipFor·SetState·DoAttack·Fire) / 필드 2
+  → 두 잡몹이 공유하는 코드가 90% 이상. 상속을 안 쓰면 상태머신·애니·피격·사망·산개·범위표시를 **두 벌 복제**해야 한다
+- DemonBoss 를 EnemyBase 에 넣지 않은 이유: 직접 선언 메서드 **37개 / 필드 38개**, 536줄. 상태가 9개(transform 인트로·windup·cleave·smash·cast·hit·groggy·death)이고 패링·그로기·버스트·투사체 확산까지 있다. 잡몹의 5상태 골격에 억지로 맞추면 EnemyBase 가 보스 전용 분기로 오염된다
+**결론(실행 안 함)**
+- (가) 복제하지 말고 현행 유지. 규칙 하나만: **BossRangeLogic 수정 시 데몬·잡몹 양쪽 재생 확인**. 마감 후 여유 있으면 개명
+- (나) 상속 구조는 근거가 있다. 유지
+### 검증
+해당 없음
+### 실패와 수정
+- 직전 [조사]에서 BossRangeLogic 공유를 '2번째 위험 상황' 으로 올렸으나, 테스트가 잠그고 있는 49줄짜리 순수 함수라 위험도를 과대평가했다. 실제 위험은 이름 오해 수준
+### 커밋
+해당 없음(무수정)
+
+
+## [조사] 팀 충돌 지점 전수 · 사망 노선 전환 시 잔여 문제 — 2026-08-09 08:21
+### 프롬프트
+[조사]그럼 팀원 코드와 충돌이 일으킬 수 있는 부분은 사망 관련 로직이라는거지? 사망 연출 >> 게임오버 >>타이틀로만 바꾸면 문제 될 부분은 없니?
+### 조사 결과
+**Q1. 충돌 지점 전수 — 사망 로직만은 아니다**
+- 방법: 우리가 08-08 이후 수정한 파일(1,212개) ∩ 팀원이 한 번이라도 수정한 파일(7,177개) = **교집합 202개**
+- 그중 178개는 Map/Showroom/Medieval/sy/AWT_*.asset (타일 팔레트 자동생성물, 실질 무해)
+- **실제로 의미 있는 충돌 후보 24개**
+  · 코드: PlayerHealth.cs / PlayerController2D.cs / EffectProjectile.cs / SlashProjectile.cs / DemonBoss.cs / DemonBossConfig.cs / DemonProjectile.cs / EnemyAI.cs / MidBossAI.cs / MidBossMeleeHitbox.cs / MiddleBossAttackPatterns.cs / PrincessBossAttackPatterns.cs / SpikeProjectile.cs
+  · 자산: PlayerCombatConfig / MovementConfig / PlayerSkillConfig / MidBossPatternConfig / DemonBossConfig
+  · 프리팹: RealPlayer.prefab / Player_Knight!!!!.prefab / TP_Medieval.prefab
+  · 씬: AdventureScene2·3·4 / AdventureScene_Test1
+- 다만 **동작이 정면으로 모순되는 건 사망 로직 하나뿐**이다. 나머지는 '같은 파일을 각자 다른 줄에서 고친' 형태라 병합 충돌 가능성일 뿐 설계 모순은 아니다
+**Q2. 노선 전환 시 남는 문제 — 4건**
+- ① **타이틀 씬이 얼어붙는다.** GameOverController 는 `Time.timeScale = 0` 을 걸고 `SceneManager.LoadScene(TitleScene)` 을 호출하는데, **어디서도 1 로 되돌리지 않는다.** TitleScreen.cs 에 timeScale 코드 없음(실측). PauseMenu 는 있지만 타이틀 씬에 없다면 무의미. → 타이틀 복귀 후 모든 것이 정지
+- ② **부활 경로가 이중으로 남는다.** PlayerHealth.Kill() 194줄의 `Invoke(Respawn, 1.307)` 를 게임오버 노선에선 예약하지 않아야 한다
+- ③ **낙사는 게임오버를 우회한다.** 97~98줄 `if (!dying && y < fallKillY) Respawn();` — Kill() 을 거치지 않고 곧장 부활한다. 죽으면 타이틀인데 떨어지면 공짜 부활이라 규칙이 어긋난다
+- ④ **체크포인트 시스템이 사문화된다.** Checkpoint2D.cs:31 이 SetCheckpoint 를 호출하고 있으나, 게임오버 노선에선 부활 자체가 없어 의미를 잃는다. OrbProjectile.cs:71 은 health.Kill() 직접 호출 → 게임오버로 이어짐(의도 확인 필요)
+- 배선 결손: **Scene2 는 GameOverController.playerHealth 가 NULL** 이라 그 씬에서만 게임오버가 안 뜬다. Scene1 은 컴포넌트 자체가 없다
+**전환 시 수정 대상 정리(실행 안 함)**
+1. GameOverController.HandlePlayerDied — timeScale=0 을 사망 연출 길이만큼 지연 (**팀원 파일**)
+2. GameOverController.Update — LoadScene 직전 `Time.timeScale = 1f` (**팀원 파일**, ① 해결)
+3. PlayerHealth.Kill() — 게임오버 핸들러 존재 시 Invoke(Respawn) 예약 안 함 (② 해결)
+4. PlayerHealth.Update() 낙사 처리 — Respawn() → Kill() 로 통일할지 결정 (③)
+5. Scene2 UI Canvas 의 playerHealth 배선 (배선 결손)
+### 검증
+해당 없음
+### 실패와 수정
+없음
+### 커밋
+해당 없음(무수정)
+
+
+## [조사] 게임오버 모순만 부분 수정 시 안전성 — 2026-08-09 08:24
+### 프롬프트
+[조사]사실 아직 체크 포인트를 할지, 낙사당하면 어떻게 할지 이건 못정했어. 그래서 너가 말한 중대한 모순인 게임 오버 부분만 고치고 나머지는 팀원들이랑 토론 후에 결정할게. 충돌이 뜨는건 아니잖아.
+### 조사 결과
+**결론: 맞다. 낙사·체크포인트를 미뤄도 충돌도 오류도 나지 않는다. 다만 '게임 규칙 불일치' 는 남는다**
+**1. 경로 독립성 실측 — 미뤄도 되는 근거**
+- Respawn 호출처는 딱 2곳이고 서로 독립이다
+  · 낙사: PlayerHealth 98줄 `Respawn();` — Kill() 을 거치지 않는 **직접 호출**
+  · 사망: 194줄 `Invoke(nameof(Respawn), delay);` — Kill() 안의 예약
+- 따라서 194줄만 손대면 **낙사 경로는 그대로 살아 있고 컴파일·런타임 어디에도 영향이 없다**
+- Checkpoint2D.SetCheckpoint 도 계속 동작한다(값만 기록). 사망 부활이 없어져 활용처가 줄 뿐, 죽은 코드가 되진 않는다(낙사 부활이 그 값을 쓴다)
+**2. 병합 충돌 관점 — 발생하지 않는다**
+- git 충돌은 같은 줄을 동시에 고칠 때 난다. 미결로 남기는 것은 **아무 줄도 안 고치는 것**이므로 충돌 원인이 되지 않는다
+- 실제 충돌 위험은 우리가 고치는 쪽에 있다: GameOverController.cs 는 팀원 파일이고 **UI Canvas.prefab 에 들어 있는 프리팹 컴포넌트**다(실측). 팀원이 같은 파일을 만지면 그때 충돌
+**3. 최소 수정 3곳 — 이 조합이 모순 해소의 하한선**
+- [A] PlayerHealth.Kill() 189~194 — 게임오버 핸들러가 있으면 Invoke(Respawn) 을 예약하지 않는다. **안 고치면 부활과 게임오버가 같은 시점에 경합**하므로 선택 사항이 아니다
+- [B] GameOverController.HandlePlayerDied 43~46 — panel ON + `Time.timeScale = 0` 을 사망 연출 길이(1.307초)만큼 지연. 안 고치면 death 애니가 프레임 0 에서 정지
+- [C] GameOverController.Update 56줄 — `SceneManager.LoadScene` 직전에 `Time.timeScale = 1f`. **이건 전환과 무관하게 이미 존재하는 버그**다(TitleScreen.cs 에 timeScale 복구 없음 — 실측). 지금도 게임오버→타이틀 시 화면이 멈춘다
+**4. 미루면 남는 것 — 오류가 아니라 규칙 불일치**
+- 적에게 죽으면 게임오버→타이틀, **낙사하면 체크포인트 부활**. 플레이어 입장에서 일관성이 없다
+- 다만 이는 팀 논의로 정할 게임 디자인 사안이고, 미결 상태로도 빌드·플레이는 정상 동작한다
+**5. 배선 결손(별건)**
+- Scene2 의 GameOverController.playerHealth = NULL → 그 씬만 게임오버 미동작. Scene1 은 컴포넌트 없음. 코드 수정과 무관하게 남는 문제
+### 검증
+해당 없음
+### 실패와 수정
+없음
+### 커밋
+해당 없음(무수정)
+
+
+## [조사] 마감 D-1 잔여 작업 전수 정리 — 즉시 수정 vs 팀 논의 — 2026-08-09 08:30
+### 프롬프트
+[조사]일단 그 부분도 아직 팀원들과 정하지 않은 부분이라서 보류할게. 그럼 지금 당장 고쳐야 하는것과 팀원들과 수정을 진행하기 위해 토론해야 할것들이 뭐가 남았는지 정리해줘.
+### 조사 결과
+**A. 제출을 막는 것 — 즉시 조치 (팀 논의 불필요)**
+1. **빌드 타깃이 StandaloneWindows64**. SPEC 은 WebGL. 전환 필요. WebGL 모듈은 설치돼 있음(실측 True)
+2. **WebGL 빌드 리허설 0회**. Builds 폴더 없음. 마감 전 최소 1회 성공 확인 필수
+3. **Brotli 압축 + decompressionFallback=False**. GitHub Pages 는 Content-Encoding 헤더를 못 주므로 브라우저 로딩 실패 위험. fallback=true 또는 Gzip/Disabled 로 변경
+4. **씬 전이 사슬 단절** — AdventureScene3 → `SecondScene_1`(프로젝트에 없는 씬). Scene3 클리어 시 런타임 예외. AdventureScene4 는 진입 전이도 이후 전이도 없음(고아 씬)
+5. **디버그 표시 7개 ON** — ArcherEnemyConfig(2) · KnightEnemyConfig(2) · DemonBossConfig(2) · MidBossConfig(1) · MinoBossConfig(1) · PlayerFxConfig(1). 제출 빌드에 그대로 노출
+6. **미푸시 커밋 12개**. push 는 사람만 실행
+**B. 팀 논의 필요 (동작·규칙을 바꾸는 결정)**
+1. **사망 노선** — 게임오버→타이틀 vs 체크포인트 부활. 현재 두 로직이 동시에 걸려 death 애니가 프레임 0 에서 정지하고 부활과 게임오버가 경합. 팀원 파일(GameOverController.cs, UI Canvas.prefab 소속) 수정 필요
+2. **timeScale 복구** — 게임오버 후 타이틀→재시작 시 timeScale 0 이 유지돼 게임 전체 정지. 전 씬에 PauseMenu 미배치라 자가 복구 없음(실측). 사망 노선과 함께 결정
+3. **낙사 처리** — 현재 Kill() 을 우회해 곧바로 체크포인트 부활. 사망 노선과 규칙이 어긋남
+4. **체크포인트 유지 여부** — Checkpoint2D 가 동작 중이나 게임오버 노선에서는 사문화
+5. **Scene2 GameOverController.playerHealth = NULL** (실측) — 그 씬만 게임오버 미동작. 배선을 채울지, 사망 노선 결정 후로 미룰지
+6. **Test1 Stage_Wall one-way** — 벽이 옆에서 통과됨. 팀원이 고치기로 함(보류 중)
+7. **AdventureScene1 만 구형 Player_Knight!!!!.prefab** — 사망 연출·피격 피드백 미적용(실측: 사망연출=없음). RealPlayer 로 교체할지 팀 확인
+8. **GitHub Pages 배포처** — private 저장소는 무료 계정에서 Pages 불가. public 전환 / 빌드 전용 public 저장소 / itch.io 중 택일. SPEC 은 GitHub Pages 명시라 변경 시 범위 결정
+**C. 우리 쪽 잔무 (독립 진행 가능)**
+1. **AI 활용 기술 문서** 미작성. LOG.md 항목 491개가 재료
+2. **hitsToDie 5 유지** — 12마리 x 5대 = 60타. 3~5분 플레이 대비 과할 수 있음. Config 값이라 즉시 조정 가능
+3. **FAIL.md 번호 중복 4건** — #11×2, #16×2, #17×2, #24×2 (총 26종). 재번호 필요
+4. **Archer 범위 표시 오해 소지** — attackRange 10 은 '발사 개시 거리' 이고 명중은 화살 충돌이 결정. 라벨의 O/X 가 무의미
+5. **PR 미생성** — 포크→upstream. 자동 병합 불가 상태
+6. ProjectVersion.txt 는 추적 중임을 확인(실측). clone 시 버전 미인식 문제는 해소됨
+### 검증
+해당 없음
+### 실패와 수정
+없음
+### 커밋
+해당 없음(무수정)
+
+
+## [수정] Scene3 → Scene4 전이 사슬 복구 — 2026-08-09 08:33
+### 프롬프트
+Secen3다음에는 Secen4 진행하도록 했는데
+> 맥락: 직전 [조사]의 A-4(씬 전이 단절) 에 대해 'Scene3 다음이 무엇인가' 를 답한 것. AdventureScene3 → AdventureScene4 로 확정
+### 조작 내역
+- 원인 실측: Scene3 의 `Portal` 오브젝트(72.30, 10.18) 하나에 **컴포넌트 2개가 동시에** 붙어 있었다
+  · `Portal`(팀 코드, 닿으면 즉시 이동) = "AdventureScene4" — **이미 올바름**
+  · `PortalUpKey`(우리 코드, ↑/W 입력 시 이동) = "SecondScene_1" — **존재하지 않는 씬**
+- 위험도: ↑ 키는 PlayerController2D 의 **점프 키**다. 포탈 트리거(BoxCollider2D 71.80~72.80) 안에서 점프하면 PortalUpKey 가 발동해 없는 씬을 로드 → 런타임 예외
+- 조치: PortalUpKey.nextSceneName 을 "AdventureScene4" 로 정정. 컴포넌트 삭제는 하지 않음(수동 배치 오브젝트 훼손 금지 규약)
+### 검증
+- EditMode 217/217 통과, 실패 0
+- 디스크 재로드 검증: Portal="AdventureScene4" / PortalUpKey="AdventureScene4" 양쪽 일치, dirty=False
+- 전 빌드 씬 전이 사슬 재점검 (빌드 목록 대조 포함)
+    TitleScene → OpeningScene → AdventureScene1 → AdventureScene2 → AdventureScene3 → AdventureScene4
+    빌드 목록에 없는 대상 0건 (이전에는 SecondScene_1 1건)
+- 테스트 후 씬 생존 확인: dirty=False
+- **사용자 눈 판정 필요**: Scene3 포탈에서 Scene4 로 실제 넘어가는지, 넘어간 뒤 플레이어가 정상 위치에 스폰되는지
+### 실패와 수정
+- 없음
+### 남은 것
+- **AdventureScene4 는 여전히 이후 전이가 없다**(고아 종점). 데몬 보스 격파 후 무엇을 할지 미정 — 엔딩 씬 / 타이틀 복귀 / 그대로 종료 중 택일 필요
+
+
+## [수정] 사망 노선 게임오버 일원화 · hitsToDie 3 · FAIL 번호 중복 해소 — 2026-08-09 08:40
+### 프롬프트
+[수정] 사망 연출 >> 게임오버 >> 타이틀로 변경 / `hitsToDie` 5 → 3 여부 / FAIL.md 번호 중복 4건 해결
+### 조작 내역
+**① 사망 노선 일원화 (3파일)**
+- `PlayerHealth` — `SuppressRespawnOnDeath` 프로퍼티 신설. Kill() 에서 이 값이 true 면 **Invoke(Respawn) 예약 자체를 하지 않는다**. 부활과 게임오버가 같은 시점에 경합하던 문제 해소
+- `GameOverController`(팀원 파일) — 3곳 수정
+  · OnEnable/OnDisable 에서 `playerHealth.SuppressRespawnOnDeath` 를 켜고 끈다. 게임오버가 배선된 씬에서만 부활이 꺼진다(미배선 씬은 기존 동작 유지)
+  · HandlePlayerDied → `ShowAfterDeathSequence()` 코루틴으로 교체. 사망 연출 길이만큼 기다린 뒤 패널 ON + timeScale=0. 대기는 **WaitForSecondsRealtime** — 치명타 시 PlayerHitFeedback 히트스톱으로 timeScale 이 0 일 수 있어 scaled 대기는 멈춘다
+  · 대기 시간은 `PlayerHurtDeathFx.DeathDuration`(현재 1.307초)을 우선 사용, 없으면 신설 `minDeathSequenceDelay`
+  · Update — `SceneManager.LoadScene` 직전에 **`Time.timeScale = 1f`** 복구. 복구가 없어 타이틀에서 재시작한 게임이 정지 상태로 뜨던 기존 버그도 함께 해소
+- `PlayerHurtDeathFx` — 연출 진행을 `Time.deltaTime` → **`Time.unscaledDeltaTime`** 으로 변경. 히트스톱·게임오버 정지에 영향받지 않고 재생된다
+**② hitsToDie 5 → 3** (KnightEnemyConfig / ArcherEnemyConfig). 12마리 x 3대 = **36타**(이전 60타). 3~5분 플레이 대비 분량 조정
+**③ FAIL.md 번호 중복 4건 해소** — 뒤쪽 항목에 새 번호를 주고 구번호를 병기해 기존 LOG 참조가 깨지지 않게 함
+  · #11(시트 기준선 픽셀 오염) → **#28 (구 #11)**
+  · #16(IgnoreCollision) → **#29 (구 16)** — 미저장 편집 보호가 #16 유지(STATE·LOG 다수 참조)
+  · #17(입력 분기 replace) → **#30 (구 #17)**
+  · #24(run_tests 정지) → **#31 (구 #24)** — 이름 기반 Find 가 #24 유지(LOG 다수 참조)
+### 검증
+- 컴파일 0, read_console error/exception 0건
+- EditMode 217/217 통과, 실패 0
+- 타입 로드 확인: PlayerHealth.SuppressRespawnOnDeath 존재=True / GameOverController 에 ShowAfterDeathSequence 추가 확인
+- Config 재읽기: Knight hitsToDie=3, Archer hitsToDie=3
+- FAIL.md 재검증: **중복 번호 없음**, 총 30종, 번호 범위 1~31
+- **사용자 눈 판정 필요**: (1) 죽으면 사망 6프레임이 끝까지 재생된 뒤 게임오버 패널이 뜨는지 (2) 아무 키 → 타이틀 → 다시 시작 시 게임이 정상 속도인지 (3) 잡몹이 3대에 죽는지
+### 실패와 수정
+- 없음
+### 팀 공지 필요
+- `GameOverController.cs`(팀원 파일, Assets/Prefab/UI Canvas.prefab 소속)를 3곳 수정했다
+- **AdventureScene2 는 GameOverController.playerHealth 가 NULL** 이라 그 씬에서만 게임오버가 뜨지 않는다(배선 결손, 미해결)
+- 낙사(fallKillY)는 여전히 Kill() 을 우회해 체크포인트 부활한다 — 팀 논의 대기
+
+
+## [수정] AdventureScene2 게임오버 배선 결손 복구 — 2026-08-09 08:44
+### 프롬프트
+[수정]AdventureScene2 는 GameOverController.playerHealth 가 비어 있으니 그 씬도 게임 오버가 뜨도록 수정해라
+### 조작 내역
+- 대상: AdventureScene2 / `UI Canvas`(프리팹 인스턴스) 의 GameOverController
+- 변경 전 실측: playerHealth=**NULL** / gameOverPanel=GameOverPanel(정상) / titleSceneName="TitleScene"(정상) → **playerHealth 하나만 결손**
+- 씬의 `Player`(RealPlayer 프리팹 인스턴스) 의 PlayerHealth 를 배선. 프리팹 자체가 아니라 **인스턴스 오버라이드**로 기록(씬 오브젝트 참조는 프리팹 자산에 저장 불가)
+- 부수 효과: OnEnable 에서 `playerHealth.SuppressRespawnOnDeath = true` 가 걸리므로, Scene2 도 직전 커밋의 게임오버 노선(사망 연출 → 패널 → 타이틀)을 그대로 탄다
+### 검증
+- EditMode 217/217 통과, 실패 0
+- 전 빌드 씬 재로드 검증
+    TitleScene / OpeningScene : 컴포넌트 없음(정상 — 게임플레이 씬 아님)
+    AdventureScene2 : playerHealth=OK panel=OK title="TitleScene"  ← 이번 수정
+    AdventureScene3 : playerHealth=OK panel=OK title="TitleScene"
+    AdventureScene4 : playerHealth=OK panel=OK title="TitleScene"
+    **AdventureScene1 : 컴포넌트 자체가 없음** (미해결)
+- 테스트 후 배선 생존 확인, 씬 dirty=False
+- **사용자 눈 판정 필요**: Scene2 에서 죽었을 때 사망 연출 후 게임오버 패널이 뜨는지
+### 실패와 수정
+- 없음
+### 남은 불일치
+- **AdventureScene1 에는 GameOverController 가 아예 없다.** 그 씬에서 죽으면 SuppressRespawnOnDeath 가 false 로 남아 기존 체크포인트 부활 경로를 탄다 — 씬마다 사망 결과가 다르다
+- Scene1 은 플레이어도 구형 `Player_Knight!!!!.prefab` 이라 사망 연출·피격 피드백도 없다. 두 문제가 같은 씬에 겹쳐 있음 — 팀 논의 대상
+
 ## [구현] MidBoss_FireKnight 패링/피격/보스공격데미지 연동 — 2026-08-09 (세션 시간)
 ### 프롬프트
 [구현] 움직이고 공격하는것까지 확인 완료됐다 이제 플레이어가 보스 공격을 패링(MinoBoss와 똑같은 로직사용), 플레이어가 보스를 공격했을 때 보스 피격(공격중엔 경직당하지 않음), 보스가 플레이어를 공격하면 데미지를 추가해야한다
@@ -6250,3 +6916,619 @@ Window 01 A, Break 02 (1), Window 02 B 등등 창문들도 다 빛나
 - git status --porcelain: 스크립트 3개 + 씬 1개 변경 확인
 ### 실패와 수정
 없음
+
+
+## [조사] 잡몹 3건 — 점프 회피 불가 / 패링 미연동 / 연출 중 정지 — 2026-08-09 09:00
+### 프롬프트
+[조사]knight가 player점프 했을때 범위보다 공격 범위가 넓어서 힘드네. 그리고 궁수와 기사의 공격시 패링도 가능하도록 넣었어? 우리의 목표는 최대한 쉬운 난이도를 지향해. 그리고 Scene3 연출이 진행될 동안은 적들도 전혀 움직이면 안돼.
+### 조사 결과
+**① 점프해도 맞는 이유 — 판정에 세로 좌표가 아예 없다**
+- `BossRangeLogic.InHitBand`(21~27줄)은 **수평거리 + 정면 여부만** 본다. y 를 한 번도 참조하지 않는다
+- `EnemyBase.DoAttack`(202~203줄)도 그 함수만 호출 → 플레이어가 머리 위로 점프해도 x 만 가까우면 피격
+- 실측: jumpVelocity 10.5 / gravityScale 2.5 → 중력 24.5, **점프 최고점 약 2.25u**
+- Knight 콜라이더 상단은 y=1.40. 즉 점프 정점(≈2.2u)은 적 키의 약 1.6배 높이인데도 판정이 따라온다
+- 데몬 보스도 같은 구조지만(수직 제한 없음) 보스는 덩치가 커서 덜 드러났다. 잡몹 12마리에서 체감이 커짐
+**② 패링 — 잡몹에는 전혀 연동돼 있지 않다**
+- EnemyBase / KnightEnemy / ArcherEnemy / ArcherArrow 4파일 모두 `TryParry`·`ParryClashFx`·`RewardParry` 참조 0건
+- 반면 보스·함정은 전부 연동돼 있다: DemonBoss, DemonProjectile, MinoBoss, PrincessBossAttackPatterns, SpikeBallTrap, ThrownProjectile, SpikeProjectile, EnemyAI, MidBossMeleeHitbox, MidBoss_FireKnight
+- 즉 **잡몹만 패링 불가**. 플레이어는 보스에선 패링으로 대응하다가 잡몹 구간에서만 대응 수단을 잃는다. SPEC 의 '패링 = 핵심 메커니즘' 과도 어긋난다
+- 연동 방식은 확립돼 있다: MinoBoss 처럼 `PlayerController2D.TryParry(GameObject)`(171줄)를 리플렉션으로 잡아 타격 순간 호출 → 성공 시 데미지 취소 + ParryClashFx + PlayerMana.RewardParry
+- 잡몹은 EnemyBase.DoAttack 1곳, ArcherArrow 명중 1곳 = **2곳만 손대면 전부 적용**
+**③ 연출 중 적 정지 — 현재 전혀 막히지 않는다**
+- `EnemyBase` 는 `PlayerController2D.InputLocked` 를 참조하지 않는다(실측 False)
+- IntroSequencer 는 76줄에서 `InputLocked = !on` 으로 **플레이어 입력만** 막는다. 적은 그동안 계속 접근·공격한다
+- Scene3 은 토치 인트로가 완주 보장(스킵 제거)이라 그 시간 동안 잡몹 12마리가 자유롭게 움직인다
+**④ 난이도 하향 관점 정리 (현재 수치)**
+- Knight: attackRange 1.25 / damage 1 / cooldown 1.5 / hitsToDie 3
+- Archer: attackRange 10 / damage 1 / cooldown 2.0 / hitsToDie 3
+- 플레이어: HP 10, 무적 0.6s
+- 가장 큰 체감 난이도 요인은 수치가 아니라 **①(회피 불가)** 와 **③(연출 중 피격)** 이다. 둘 다 '피할 방법이 없는' 종류라 수치 조정보다 우선한다
+**수정 방향(실행 안 함)**
+1. 판정에 세로 조건 추가 — `InHitBand` 에 y 인자를 받는 오버로드 또는 EnemyConfig 에 `attackHeight` 신설. 기존 보스 호출부는 건드리지 않도록 오버로드가 안전
+2. 잡몹 패링 연동 — EnemyBase.DoAttack + ArcherArrow 2곳
+3. EnemyBase.Update 선두에 연출 게이트 — InputLocked 이면 Idle 애니만 재생하고 이동·공격 중단
+### 검증
+해당 없음
+### 실패와 수정
+- 잡몹 구현 시 패링 연동을 '요청에 없어 범위 방어' 로 뺐는데, SPEC 이 패링을 핵심 메커니즘으로 규정하므로 기본 요구사항으로 봤어야 했다
+### 커밋
+해당 없음(무수정)
+
+
+## [수정] 잡몹 3건 — 세로 판정 1.2 · 패링 연동 · 연출 중 정지 — 2026-08-09 09:06
+### 프롬프트
+[수정] 세로판정 1.2로 수정하고, 잡몬 패링 연동, 연출동안 적들 Idle 상태만 진행하도록 수정 해
+### 조작 내역
+**① 세로 판정 — BossRangeLogic.InHitBand 8인자 오버로드 신설**
+- 기존 5인자 버전은 그대로 두고 오버로드를 추가. **DemonBoss 10개 호출부를 건드리지 않는다**(보스 난이도 불변)
+- 규칙: 수평 판정 통과 후 `|targetFootY - selfFootY| > attackHeight` 면 빗나감. attackHeight ≤ 0 이면 기존 동작(제한 없음)
+- 위쪽뿐 아니라 **아래쪽도 제외** — 다층 배치(Scene3 y=0.04/2.04/3.04)에서 층이 다른 적에게 맞지 않게
+- EnemyConfig.attackHeight = **1.2** (Knight·Archer). 실측 점프 정점 2.25u 기준 체공의 68% 가 안전 구간
+**② 잡몹 패링 연동**
+- EnemyConfig 에 `clashConfig`(SpikeBallConfig) 신설 — 보스·함정과 **같은 자산** 사용
+- EnemyBase: Start 에서 플레이어의 `TryParry(GameObject)` 를 리플렉션으로 확보(MinoBoss·DemonBoss 와 동일 계약).
+  DoAttack 타격 성립 시 `TryParried()` 를 먼저 호출 → 성공하면 **데미지 취소 + ParryClashFx + PlayerMana.RewardParry**
+- ArcherArrow: Launch 시그니처에 clashConfig 추가, 플레이어 명중 시 동일 절차. 화살은 패링 시 소멸
+- 이로써 SPEC 의 '패링 = 핵심 메커니즘' 이 잡몹 구간에도 성립. MP 도 잡몹 패링으로 수급된다
+**③ 연출 중 적 정지**
+- EnemyBase.Update 에 `PlayerController2D.InputLocked` 게이트 추가. 락 중에는 Idle 로 되돌리고 이동·공격 판단을 건너뛴다
+- 단 **이미 공격 모션 중이면 그 모션은 끝까지 재생**한다(중간에 얼면 부자연스럽고, 타격창은 어차피 다음 프레임부터 막힘)
+- 적용 범위: IntroSequencer(Scene3 토치 인트로) / Scene2Director / DemonBoss 그로기 대시 / 사망 연출 — InputLocked 를 쓰는 모든 연출
+### 검증
+- 컴파일 0, read_console error/exception 0건
+- EditMode **224/224 통과**, 실패 0 (BossRangeLogicTests 세로 판정 7개 신규)
+- 리플렉션 실행 검증: InHitBand 오버로드 2개 확인 / 같은높이(0,0,1.2)=True / 뛰어넘음(0,2.25,1.2)=False / 낮은점프(0,0.5,1.2)=True / 경계(0,1.2,1.2)=True
+- EnemyBase.TryParried 존재 확인, EnemyConfig 신규 필드 attackHeight:Single / clashConfig:SpikeBallConfig
+- Config 재읽기: Knight·Archer 모두 attackHeight=1.2, clashConfig=SpikeBallConfig
+- **사용자 눈 판정 필요**: (1) 점프로 Knight 공격을 넘길 수 있는지 (2) Space 패링으로 Knight 근접·Archer 화살을 막고 격돌 FX·MP 가 오르는지 (3) Scene3 토치 인트로 동안 적 12마리가 완전히 멈춰 있는지
+### 실패와 수정
+- 잡몹 최초 구현 때 패링을 '요청에 없음' 으로 제외한 판단 착오를 이번에 정정. SPEC 이 핵심 메커니즘으로 규정한 요소는 요청 없어도 기본 요구사항으로 봐야 한다
+
+
+## [조사] Knight 공격이 패링하기 어려운 원인과 처방 — 2026-08-09 09:10
+### 프롬프트
+[조사] 현재 Knight의 공격 속도가 빨라서 패링을 하기에는 다소 어렵다. 어떤 방식이 좋을까?
+### 조사 결과
+**원인: 예고 시간이 인간 반응속도보다 짧다**
+- 예고 시간 = 공격 개시 → 타격창 시작. 플레이어가 보고 반응할 수 있는 유일한 구간
+- 실측 비교
+  · **Knight  dur 0.50s / 창 0.40~0.70 → 예고 0.20s** / 창 길이 0.15s
+  · Archer   dur 0.92s / 창 0.45~0.65 → 예고 0.41s (실제로는 화살 비행 1.00s 가 추가 유예)
+  · Demon 클리브 dur 1.25s → **예고 0.75s** / 창 0.28s
+  · Demon 스매시 dur 1.50s → **예고 0.93s** / 창 0.35s
+- 일반적인 시각 반응속도가 0.20~0.25초다. **Knight 의 0.20s 는 '보고 나서 누르는 것' 이 원리상 불가능**하고, 위치를 외워 미리 누르는 수밖에 없다. 데몬 보스는 0.75~0.93s 로 3~4배 여유가 있다
+- 패링 창 자체는 넉넉하다: MovementConfig.parryWindow **0.35s**, parryCooldown 0.5s. 즉 창이 좁은 게 아니라 **예고가 없는 것**이 문제
+**부차 요인**
+- 잡몹에는 **윈드업(예열) 상태가 없다.** Idle → 바로 Attack 진입
+- 반면 MinoBoss(atk1Windup 0.25 / atk2Windup 0.30 / dashWindup 0.50 + windupFlashSpeed 12 색상 펄스)와 DemonBoss(BeginWindup → state 8 에서 idle 유지 + 플래시)는 **예열 상태를 별도로 둔다**
+- SpikeBallTrap 도 phase 1 에서 blinkHz 로 점멸 경고 후 발사 — 프로젝트 전반이 '경고 후 타격' 문법을 쓰는데 잡몹만 빠져 있다
+- 12마리가 산개해 동시에 달려들므로, 예고 없는 공격이 여러 방향에서 겹치면 패링 대상 선택 자체가 불가능하다
+**처방 후보(실행 안 함)**
+- **A. 윈드업 상태 신설(권장)** — EnemyConfig 에 `attackWindup`(0.45~0.6) + `windupFlashSpeed` 추가. Idle 프레임 유지한 채 색상 펄스로 경고 후 공격 진입. MinoBoss·DemonBoss 코드 구조를 그대로 이식하면 되고, 예고 시간이 0.20 → 0.65~0.80s 로 늘어 보스와 같은 감각이 된다. 애니메이션 속도는 안 건드리므로 모션이 굼떠 보이지 않는다
+- B. attackDur 연장 (0.50 → 1.0) — 예고 0.40s. 구현 0분이지만 **공격 모션 전체가 절반 속도**가 되어 굼떠 보인다
+- C. hitWinS 를 뒤로 (0.40 → 0.70) — 예고 0.35s. 공짜지만 칼이 이미 휘둘러진 뒤에 판정이 나므로 그림과 어긋난다(FAIL#25 계열 재발)
+- D. attackCooldown 연장 — 공격 빈도만 줄 뿐 **반응 시간 문제는 그대로**
+- E. parryWindow 확대 — 이미 0.35s 로 충분하고, 늘리면 보스전까지 쉬워진다
+**권장: A 단독.** 예고를 만드는 유일한 방법이고, 프로젝트에 선례가 둘 있어 위험이 낮다. 필요하면 A + D(쿨다운 1.5 → 2.0)로 밀도까지 낮출 수 있다
+### 검증
+해당 없음
+### 실패와 수정
+- 잡몹 구현 시 보스에 있는 윈드업 문법을 옮기지 않았다. '패링 가능' 은 판정 연결만으로 성립하지 않고 **예고 시간이 함께 있어야** 성립한다
+### 커밋
+해당 없음(무수정)
+
+
+## [수정] 잡몹 공격 예열 신설 + 쿨다운·산개 확대 — 2026-08-09 09:17
+### 프롬프트
+[수정] 윈드업 상태 신설하고 쿨다운도 적용시켜, 그리고 Knight도 Archor처럼 공격 시간이 랜덤으로 만들어 줄 수 있니?
+### 조작 내역
+**① 예열(Windup) 상태 신설 — MinoBoss·DemonBoss 문법 이식**
+- NAN2026.Core/EnemyStateLogic: 상태 상수 `Windup = 5` 추가, 순수 함수 `WindupFinished(elapsed, dur)` / `FlashPulse01(elapsed, speed)` 신설
+  · FlashPulse01 은 Mathf.PingPong 과 동일한 삼각파를 UnityEngine 비의존으로 재현 → EditMode 테스트 가능
+- EnemyConfig: `attackWindup` / `windupFlashSpeed` / `windupFlashColor` 3필드 추가
+- EnemyBase: 공격 진입을 `SetState(Attack)` → **`SetState(Windup)`** 으로 변경. 예열 중에는 idle 프레임 유지 + 색상 펄스 경고, 종료 시 색 원복 후 Attack 진입
+- 연출 락(InputLocked) 중에는 예열도 취소하고 Idle 로 되돌린다(색 원복 포함)
+- TakeDamage 진입 시 색을 흰색으로 되돌려 예열 점멸 색이 피격 플래시와 섞이지 않게 함
+**② 쿨다운 연장 + ③ 공격 시점 랜덤화**
+- Knight 는 이미 지터가 있었으나 Archer 의 절반이었음(jitter 0.6 vs 1.2, stagger 0.8 vs 1.6) → **Archer 수준 이상으로 상향**
+- Knight: attackCooldown 1.5 → **2.0**, cooldownJitter 0.6 → **1.2**, fireStagger 0.8 → **1.6**
+- Archer: attackCooldown 2.0 → **2.5**, cooldownJitter 1.2 → **1.4**, fireStagger 1.6 → **2.0**
+**결과 수치 (실측 재계산)**
+- Knight 예고 **0.20초 → 0.75초** (예열 0.55 + 모션 내 0.20). 데몬 클리브(0.75초)와 동일 감각
+- Archer 예고 0.41초 → **0.71초** (+ 화살 비행 1.0초 유예는 별도)
+- 공격 사이클: Knight 2.45~3.65초(평균 3.05) / Archer 3.02~4.42초(평균 3.72). 이전 Knight 평균 2.0초 대비 **밀도 약 34% 감소**
+- 사이클 폭이 1.2~1.4초로 넓어져 다수 개체가 동기화되지 않는다
+### 검증
+- 컴파일 0, read_console error/exception 0건
+- EditMode **227/227 통과**, 실패 0 (예열·삼각파 테스트 3개 신규)
+- 리플렉션 실행 검증: Windup 상수=5 / WindupFinished(0.3,0.55)=False·(0.55,0.55)=True / FlashPulse01 (0,12)=0·(1/12,12)=1·(2/12,12)=0 — 삼각파 주기 정상
+- EnemyConfig 신규 필드 3종 타입 확인(attackWindup:Single, windupFlashSpeed:Single, windupFlashColor:Color)
+- Config 재읽기 후 예고·사이클 재계산값 위와 같이 확인
+- **사용자 눈 판정 필요**: (1) 공격 전 주황 점멸이 보이는지 (2) 그 점멸을 보고 Space 패링이 되는지 (3) 12마리 공격이 뭉치지 않고 흩어지는지 (4) 예열 0.55초가 답답하지 않은지 — 답답하면 0.45, 더 쉽게는 0.7
+### 실패와 수정
+- 없음
+
+
+## [조사] 아처 화살 사거리 + 기사 휘두름 속도 + 난이도 포화율 — 2026-08-09 09:28
+### 프롬프트
+[조사] 궁수는 화살 사거리 찾아. 그리고 기사는 공격 휘두르는 프레임에서 속도를 줄이는게 나을거 같아. 여전히 어려운데
+### 조사 결과
+**① 아처 사거리 체인 (실측)**
+- aggroRange 14u → attackRange(사격 시작) 10u → stopDistance 6u. 화살 arrowSpeed 10u/s x arrowLife 4s = **최대 비행 40u**
+- ArcherArrow 는 플레이어 명중 또는 Tilemap/Composite 충돌로만 소멸. 화면 밖 자동 소멸 없음
+- 카메라 ortho 6.75 x aspect 1.778 → **가시 반폭 12.0u**. 사격 시작 10u = 화면 가장자리 83% 지점 (카메라 댐핑 고려 시 사실상 화면 밖)
+- 화살 비행 40u = 화면 반폭의 3.3배 → 도망쳐도 4초간 추격. 뒤쪽 아처도 face 를 뒤집어 등 뒤에서 쏨
+- 도달 시간: 10u 사격 시 1.00초 / 6u 정지 후 0.60초
+**② 기사 휘두름 프레임 (픽셀 실측, ATTACK3.png PPU 25.71)**
+- attackFrames 6개 / fps 12 = 0.500초 == attackDur 0.50. **프레임 잘림·루프 없음, 이미 정확히 동기**
+- 검 최대 돌출 f2·f3·f4 = **1.244u** (f0 0.51 / f1 0.39 / f5 0.54)
+- attackRange 1.25u ≒ 실측 1.244u → 사거리는 정직. 타격창 frac 0.40~0.70 = 프레임 2.4~4.2 = 뻗은 f2~f4 와 정확히 일치
+- **휘두름 시작 → 타격까지 0.200초.** 여기가 어려움의 실체 (예열 0.55 포함 총예고 0.75초)
+- 제약: `fps` 는 idle/walk/attack 공용 필드 → 낮추면 걷기·대기까지 느려짐. **attackFps 신설 필요**
+  attackFps 6→지속1.000·타격0.400·총예고0.95 / 7→0.857·0.343·0.89 / 8→0.750·0.300·**0.85** / 9→0.667·0.267·0.82
+**③ '여전히 어렵다' 의 정량 원인 — 동시 교전 포화**
+- 배치 실측: 기사 x=12,22,31,40,47,55 / 아처 x=17,26,35,44,58,67 (플레이어 시작 x=3)
+- 최악 지점 **x=21.0 → 기사 3 + 아처 2 = 동시 5마리**, 초당 공격 1.52회
+- 플레이어 무적 0.6초 → 흡수 한계 1.67회/초. **포화율 91%** = 사실상 상시 피격
+- 시뮬레이션: 기사 aggro 10→7, 아처 사격 10→7 로 낮추면 동시 4마리 / 1.19회 / **포화율 72%**
+- 개별 공격 타이밍(윈드업)은 이미 고쳤으나, **동시 교전 수를 줄이지 않으면 체감은 안 바뀐다**
+**제시한 방안(미실행)**: (1) 기사 attackFps 8 신설 (2) 아처 attackRange 10→7 + arrowLife 4→1.2 (3) 기사 aggroRange 10→7 (4) 동시 공격 토큰 N=2 (신규 코드, 마감 리스크)
+### 검증
+해당 없음 (파일 수정 없음)
+### 커밋
+해당 없음(무수정)
+
+
+## [수정] 난이도 완화 4종 + 아처 2기 제한 — 2026-08-09 09:35
+### 프롬프트
+[수정]조사를 통해 도달한 권장 순서로 진행하고 1~4번 모두 진행해줘.  그리고 전체 궁수의 수를 2명으로 제한해줘.
+### 조작 내역
+**1. 아처 arrowLife 4 → 1.2** (10u/s x 1.2s = 비행 12u). 화면 밖 추격·등 뒤 저격 제거. 사격 최대 7u 대비 여유 5u
+**2. 아처 attackRange 10 → 7**. 가시 반폭 11.95u 기준 화면 가장자리 83% → **59% 지점**에서 사격 → 윈드업 점멸이 실제로 보임
+**3. 기사 aggroRange 10 → 7**. 동시 교전 기사 3 → 2
+**4. 기사 attackFps 8 신설** (휘두름만 감속)
+- NAN2026.Core/EnemyStateLogic: `AttackFps(attackFps, baseFps)`(0 이하면 공용 fps) / `DurationForFrames(frameCount, fps)` 순수 함수 2개 신설
+- EnemyConfig: `attackFps` 필드 추가(0 = 공용 fps)
+- EnemyBase: `Anim(arr, loop, fps)` 오버로드 + `SwingFps` 프로퍼티 신설. DoAttack(기본·ArcherEnemy 오버라이드) 이 SwingFps 사용
+  → **fps 는 idle/walk/attack 공용이라 그냥 낮추면 걷기·대기까지 느려진다.** 공격 전용 fps 를 분리한 이유
+- Knight attackDur 0.50 → **0.75** (6프레임 / 8fps 와 정확히 일치시켜 잘림 방지)
+- Knight hitWinE 0.70 → **0.60** — 창은 비율이라 지속이 늘면 실시간도 늘어난다. 0.15초로 **유지**하기 위한 보정(늘리면 되레 어려워짐)
+- Archer 는 attackFps 0 유지(11프레임/12fps = 0.917 ≒ attackDur 0.92, 이미 정합)
+**5. 아처 6기 → 2기 (AdventureScene3)**
+- 15개 조합 전수 시뮬레이션 → 포화율 최소(55%) 군에서 배치 간격 기준 선정. x=17(첫 원거리 소개) / x=58(y=2 고지대, KnightEnemy_55 와 엄호 조합)
+- 삭제 4기 **복원용 좌표 기록**: ArcherEnemy_26 (26.00, 0.04, 0) / _35 (35.00, 0.04, 0) / _44 (44.00, 0.04, 0) / _67 (67.00, 3.04, 0)
+  전부 루트 배치, scale 1, 프리팹 Assets/Prefabs/Enemies/ArcherEnemy.prefab, 위치 외 오버라이드 없음. 모두 이전 [구현]에서 코드로 배치한 개체(사용자 수동 배치분 아님)
+### 검증
+- 컴파일 성공, read_console error 0건 (중간에 CS0579 Duplicate 'Tooltip' 1회 발생 → 즉시 수정)
+- EditMode **230/230 통과**, 실패 0 (신규 3: 공격fps 0이면 공용fps, 양수면 그값, 프레임수·fps→지속시간)
+- 리플렉션 정합성 검증: Knight attackFps 8 → 실효 8fps, 6프레임 지속 **0.750초 == attackDur 0.750 일치** / Archer 0 → 실효 12fps, 11프레임 0.917 ≒ 0.920 일치
+- 기사 타격창 실시간 = (0.60-0.40) x 0.75 = **0.150초** (변경 전 0.150초와 동일)
+- 기사 휘두름→타격 0.200 → **0.300초**, 예열 포함 총예고 0.75 → **0.85초**
+- 씬 저장 확인(SaveScene=True, dirty=False), 저장 후 재집계 **기사 6 / 아처 2 = 8마리**
+- 포화율 시뮬레이션: 변경 전 x=21 동시 5마리 1.52회/초 **91%** → 변경 후 x=15 동시 3마리 0.87회/초 **52%**
+  (기사 사이클도 모션 감속으로 3.05 → 3.30초)
+- **사용자 눈 판정 필요**: (1) 기사 휘두름이 느려진 게 보이는지, 끊겨 보이지는 않는지(8fps) (2) 0.85초 예고로 패링이 되는지 (3) 아처가 화면 안에서 쏘는지 (4) 화살이 화면 밖까지 안 따라오는지 (5) 아처 2기가 너무 허전하지 않은지
+### 실패와 수정
+- EnemyConfig 에 attackFps 삽입 시 기존 attackWindup 의 [Tooltip] 바로 아래에 새 [Tooltip] 을 넣어 **CS0579 Duplicate 'Tooltip'** 발생. 속성 블록 앞으로 이동해 해결. → 교훈: 필드 삽입 앵커는 `public` 선언줄이 아니라 **그 앞에 붙은 속성([Header]/[Tooltip]) 블록의 시작**을 기준으로 잡아야 한다
+
+
+## [조사] 패링 성공률이 낮은 원인 5가지 — 2026-08-09 09:41
+### 프롬프트
+[조사] 속도는 느려졌는데 패링 성공 확률을 좀 높이고 쉽은데
+### 조사 결과
+실측 수치: MovementConfig.parryWindow 0.35 / parryCooldown 0.50(하한 0.30) / parryFollowupDelay 0.50 / parryEndDuration 0.22
+**원인 A. 판정이 타격창의 '첫 프레임'에서 단 한 번만 내려진다 (우리 코드)**
+- EnemyBase.DoAttack: `!dealtThisSwing && WindowOpen && InHitBand` 가 처음 참이 되는 프레임에 즉시 확정
+- 따라서 hitWinS~hitWinE 를 넓혀도 무의미. 누를 수 있는 구간 = 창 0.35초 그대로
+- 창 동안 매 프레임 패링을 묻고 **창 끝에서 확정**하면 0.35 → 0.50초 (+43%). 우리 파일만 고치면 됨
+**원인 B. 방향 판정으로 조용히 실패 (등 뒤 공격은 패링 불가)**
+- TryParry → IsAttackerInFront(playerX, attackerX, sr.flipX). flipX 는 **이동 입력이 있을 때만** 갱신
+- 기사는 좌우 양쪽에서 접근해 정지거리 1.0u 에 붙는다 → 뒤쪽 기사 공격은 타이밍이 맞아도 무조건 실패
+- PlayerController2D 에 **public bool IsParryWindowActive()** 가 이미 있음(116행). 잡몹만 이쪽을 호출하면 방향 무시 전방위 패링 가능 — **팀 파일 무수정**
+**원인 C. 공격 중 Space 가 통째로 씹힌다 (선입력 버퍼 없음)**
+- 324행 게이트 `attackTimer <= 0f`. 공격에는 QueueAttack 큐가 있는데 패링에는 없음
+- Z 3연타 = 0.40+0.40+0.55 = **1.35초** 무입력 구간. 기사 총예고 0.85초보다 길다 → 콤보 시작 시 예열이 뜨면 **구조적으로 패링 불가**
+- 가로베기 0.60 / 백스텝 0.35 도 동일. 단 수정 대상이 팀원 활선 파일 PlayerController2D.cs → D-1 병합 리스크
+**원인 D. 패링 쿨다운 0.50초**
+- 동시 3마리 기준 적 공격 간격 1.15초. 0.5초 안에 2연타가 오면 두 번째는 시도조차 못 함. 하한이 0.30 이므로 자산 값만 0.30 으로 내리면 됨
+**원인 E. C-C 연계(ComboB1)는 죽은 코드 — 확인 결과 무해**
+- parryCooldown 0.50 == parryFollowupDelay 0.50 이라 324행 `>= t0+0.50` 과 326행 `<= t0+0.50` 이 동시 성립하는 순간이 없음
+- 즉 '패링 직후 Space 가 칼질로 바뀌는' 함정은 실제로는 발생하지 않는다. 다만 팀이 설계한 연계 기능 자체가 미작동 상태 (팀 공지 대상)
+**입력 허용 폭 정량**: 현재 0.35초 → (A 적용) 0.50초 → (A+창 0.50) **0.65초, +86%**
+**제시한 방안(미실행)**: A(창 끝 확정, 우리 파일) / B(IsParryWindowActive 호출, 우리 파일) / D(쿨다운 0.50→0.30, 자산값) / 창 0.35→0.50(자산값) / C(선입력 버퍼, 팀 파일 — 보류 권장)
+### 검증
+해당 없음 (파일 수정 없음)
+### 커밋
+해당 없음(무수정)
+
+
+## [수정] 패링 판정을 창 끝으로 + 전방위 패링 — 2026-08-09 09:56
+### 프롬프트
+[수정]`hitWinE 0.80` + 원인 B(전방위 패링)로 진행해라
+### 조작 내역
+**A. 판정 시점을 타격창의 '첫 프레임' → '끝' 으로**
+- NAN2026.Core/EnemyStateLogic: `SwingResolve(frac, winStart, winEnd, alreadyResolved)` 신설 — 0=대기 / 1=패링 접수 / 2=데미지 확정
+- **BossRangeLogic 은 DemonBoss 와 공유하므로 손대지 않았다.** 새 함수는 우리 전용인 EnemyStateLogic 에만 추가
+- EnemyBase.DoAttack 재작성: 창이 열린 동안 매 프레임 패링만 접수하고(성공 시 즉시 확정), 창이 닫히는 프레임에 패링이 없었으면 그때 데미지
+- 창 마지막 프레임(act==2)에서도 패링을 한 번 더 인정
+- KnightEnemyConfig.hitWinE 0.60 → **0.80** (창 실시간 0.150 → 0.300초)
+- Archer 는 DoAttack 을 오버라이드해 화살만 발사하므로 hitWin 미사용 → 무변경
+**B. 전방위 패링 (등 뒤 공격도 패링 가능)**
+- 원인: TryParry → IsAttackerInFront(…, sr.flipX). flipX 는 이동 입력 시에만 갱신되어 뒤쪽 잡몹 공격은 타이밍이 맞아도 무조건 실패
+- EnemyBase 가 `PlayerController2D.IsParryWindowActive()`(이미 존재하는 public 메서드)를 리플렉션으로 잡아 우선 호출. 없으면 기존 TryParry 로 폴백
+- **팀원 파일 PlayerController2D.cs 무수정.** 호출부만 우리 쪽에서 교체
+### 검증
+- 컴파일 성공, read_console error 0건
+- EditMode **234/234 통과** (신규 4: 창 전 대기 / 창 안 패링 접수 / 창 끝 데미지 확정 / 이미 확정 시 무시)
+- 리플렉션 해석 확인: IsParryWindowActive 찾음(반환 Boolean, 인자 0개) / TryParry 폴백도 찾음(Boolean, 인자 1개)
+- SwingResolve 실행: frac 0.00→0, 0.39→0, 0.40→1, 0.60→1, 0.79→1, 0.80→2, 1.00→2, 확정후→0
+- 데미지 확정 시점 **0.600초 = 프레임 f4, 검 돌출 1.244u** — 검이 뻗어 있는 구간(f2~f4, 0.250~0.625초) 안. 시각 어긋남 없음
+- **누를 수 있는 구간 0.350 → 0.650초 (+86%)** (parryWindow 0.35 + 창 0.300)
+- **격리 확인**: git diff 결과 BossRangeLogic.cs / DemonBoss.cs / MinoBoss.cs / PlayerController2D.cs / MovementConfig.asset **전부 무변경**. 보스 패턴·팀원 코드 영향 0
+- **사용자 눈 판정 필요**: (1) 늦게 눌러도 패링이 되는지 (2) 등 뒤 기사 패링이 되는지 (3) 검이 스쳐 지나가는 헛나감이 거슬리는지 (4) 데미지가 0.15초 늦게 들어오는 게 느껴지는지
+### 실패와 수정
+- 없음. 단, 커밋 직전 AdventureScene3.unity 에 **내가 하지 않은 변경**을 발견(KnightEnemy_22 x=22→25.79 이동, KnightEnemy_47 삭제, ArcherEnemy_58 복제본 x=42.32 추가). 사용자 에디터 수동 편집으로 판단해 **이번 커밋에서 씬 파일을 제외**하고 그대로 두었다
+
+
+## [조사] 보스 3종 vs 오늘 변경분 충돌·난이도·패링 타이밍 감사 — 2026-08-09 10:02
+### 프롬프트
+[조사] DemonBoss, MinoBoss,Midboss와 관련해서 팀원 변경사항과 오늘 수정했던 사항과 충돌이 전혀 없지? 난이도가 변한다거나 패링 타이밍이 변한다거나
+### 조사 결과
+**결론: 병합 충돌 0, 보스 패링 타이밍 불변. 단 보스전 난이도는 이미 바뀌어 있고, FAIL#24 재발 1건 발견.**
+**① 병합 충돌 — 없음**
+- upstream 재fetch 후 `HEAD..upstream/main` 비어 있음 = 받을 커밋 0. 팀 작업(PR #54~#57)이 이미 우리 HEAD 에 전부 병합됨
+- `git merge-tree --write-tree HEAD upstream/main` → **CONFLICT 0건**
+- 팀원 오늘 커밋 `1d4da5fc feat: FireKnight 패링/피격/보스공격데미지 연동` 이 EffectProjectile.cs·SlashProjectile.cs 를 건드렸으나 이미 병합 완료
+**② BossRangeLogic 공유 — 안전 확인**
+- 오늘 `a19d20c5` 에서 8인자 InHitBand 오버로드를 **추가만** 했다(기존 5인자 시그니처 무변경)
+- 호출부 실측: DemonBoss.cs = 5인자 1곳 / 8인자 **0곳**. EnemyBase.cs = 5인자 1곳 / 8인자 1곳 → 오결합 없음
+**③ 보스 패링 타이밍 — 불변**
+- MovementConfig.asset **오늘 변경 이력 없음**. parryWindow 0.35 / parryCooldown 0.5 / 하한 0.3 / followupDelay 0.5 / endDuration 0.22 그대로
+- 오늘의 '창 끝 판정'과 '전방위 패링'은 **EnemyBase.cs 안에서만** 동작. 보스는 각자 ResolveHit / MidBossMeleeHitbox / DemonProjectile 경로를 쓰므로 영향 0
+- MidBossMeleeHitbox 는 `pc.TryParry(bossObject)` 직접 호출(정면 판정 유지) — 우리 전방위 패링은 잡몹 전용
+**④ 보스전 난이도 — 이미 변했다 (충돌 아님, 전역 의도 변경)**
+  FeelConfig(7822431f·49b15709·78520b3a) 와 PlayerCombatConfig 는 **공격원을 가리지 않는다**. 데몬·미노·미드보스 피격에도 전부 적용:
+  - invincibilityDuration **0.6초** (0.45 → 0.6), hitInvulnerabilityDuration 0.6
+  - hitStopDuration 0.06 (timeScale 정지) / knockbackForce 0.55 / screenShake 0.35 x 0.24초 / hitFlash 0.6초
+  - PlayerHurtDeathFx 사망 연출 + GameOverController 대기 → **모든 보스 사망도 게임오버→타이틀 노선**
+  → 보스 DPS 상한이 1/0.6 = 1.67회/초로 묶임. 보스전이 함께 쉬워진 것은 사실이며, 사용자 목표(최대한 쉬움)와는 일치
+**⑤ 발견된 위험 — FAIL#24 재발 (팀원 커밋)**
+- `a9689dc1 PC-064\Administrator 프리팹 수정` 이 DemonBoss.cs 의 우리 PlayerLocator 를 **`GameObject.Find("RealPlayer")` 로 되돌림**
+- 씬별 실측: RealPlayer 이름 = Test1 / Scene3 / **Scene4** / Player 이름 = Scene1 / 1_1 / **Scene2** / Test / Test 1
+- 데몬은 Scene4 에만 있으므로 **지금은 동작한다.** 그러나 프리팹 교체·씬 이동 시 즉시 null 무음 사망
+- 나머지는 정상: MinoBoss / MidBoss_FireKnight / SpikeBallTrap / ThrownProjectile / EnemyBase = PlayerLocator 사용
+**⑥ 팀원이 DemonBoss 에 예열(state 8)을 독자 추가** — cleaveWindup 0.25 / smashWindup 0.3 / castWindup 0.35, 공격별 개별 쿨타임 분리
+- 우리가 잡몹에 넣은 윈드업과 개념 동일. 충돌 아니고 오히려 일관. 다만 데몬 예고가 기존 대비 0.25~0.35초 더 길어졌음
+**팀 공지 대상**: DemonBoss 의 RealPlayer 하드코딩(PlayerLocator 복원 제안) / C-C 연계(ComboB1) 사문화(parryCooldown 0.5 == parryFollowupDelay 0.5)
+### 검증
+해당 없음 (파일 수정 없음)
+### 커밋
+해당 없음(무수정)
+
+
+## [기록] AdventureScene3 적 배치 사용자 수동 조정 반영 — 2026-08-09 10:11
+### 프롬프트
+폰트 빼고 넣어
+> 맥락: push 후 미커밋 3건(폰트 SDF / AdventureScene3 / LOG) 중 폰트만 제외하고 커밋하라는 지시
+### 조작 내역
+- 사용자가 에디터에서 직접 조정한 AdventureScene3 적 배치를 커밋에 포함. **내 작업 아님, 되돌리지 않음**
+  KnightEnemy_22 x22→**25.79** / KnightEnemy_31 x31→**39.63** / KnightEnemy_40 x40→**61.26** / KnightEnemy_47 **삭제** / ArcherEnemy_58 복제본 x**42.32**(y 0.06) 추가
+- 최종 배치 8마리: 기사 12, 25.79, 39.63, 55(y2), 61.26(y2.16) / 아처 17, 42.32, 58(y2)
+  → 기사 6→**5마리**, 아처는 2기 유지(위치 58→42.32·58). 내가 계산했던 x=15 최악 지점(동시 3마리)은 배치가 벌어져 더 완화됨
+- **DOSIyagiBoldface SDF.asset(2.02MB)은 의도적으로 제외.** TMP 글리프 아틀라스가 자동 재생성되어 상시 modified 로 뜨는 파일. 빌드는 빌드 시점 상태로 구워지므로 영향 없고, 커밋하면 병합 충돌만 늘어난다
+### 검증
+- 커밋 전 씬 dirty=False 확인(FAIL#16 — 에디터 미저장분이 있으면 낡은 파일을 커밋하게 됨)
+- 커밋 시점 배치를 씬에서 재실측해 위 좌표 기록
+- push 완료 상태 확인: main...origin/main 격차 0 (18커밋 반영, 4e226656)
+### 실패와 수정
+- 없음. 다만 STATE.md '인계 요약'의 5번(SlashProjectile → NHNDemo.MonsterHealth 클론 실패 위험)이 **낡은 정보**임을 확인. MonsterHealth 는 추적 중인 Assets/Player/Scripts/MonsterHealth.cs 에 있고, gitignore 로 빠지는 .cs 는 에디터 도구 2개뿐이며 이를 참조하는 코드는 없다. STATE 갱신 필요
+
+
+## [구현] 패링 보상 — 기사 그로기 / 아처 화살 반사 — 2026-08-09 10:19
+### 프롬프트
+[구현] 패링 성공시 kight는 그로기가 뜨게 하게 archer은 화살이 되돌아가서 피격이 되게 한다.
+### 조작 내역
+**순수 로직 (NAN2026.Core/EnemyStateLogic) — MonoBehaviour 밖에 먼저 작성**
+- `Groggy = 6` 상태 상수 / `GroggyFinished(elapsed, dur)` / `ReflectLife(remainingLife, minLife)` / `ReflectSpeed(speed, mul)`
+- **BossRangeLogic 은 DemonBoss 와 공유하므로 이번에도 손대지 않았다**
+**EnemyConfig 신규 필드 6종**
+- groggyDuration 1.6 / groggyFlashSpeed 6 / groggyFlashColor(금색 1,0.9,0.3)
+- reflectOnParry true / reflectSpeedMul 1.4 / reflectMinLife 1.5
+- FAIL#32 적용: 삽입 앵커를 `public` 선언줄이 아니라 `[Header("패링")]` 블록 시작줄로 잡아 속성 분리 사고 회피
+**기사 그로기 (EnemyBase)**
+- Hurt 블록 바로 뒤에 Groggy 상태 블록 신설. hurtFrames 를 loop=false 로 재생해 마지막 프레임에서 굳고, 금빛 펄스
+- 배치 위치를 InputLocked 게이트보다 **앞**에 두어 연출이 시작돼도 그로기 보상이 취소되지 않게 함
+- DoAttack: `if (act != 0) { if (inBand && TryParried()) { EnterGroggy(); return; } ... }` — 창 어느 시점의 패링이든 그로기
+- `EnterGroggy()`: nextAtk = NextAttackAt() + groggyDuration → 그로기 직후 즉시 반격당하지 않음
+- **TakeDamage 중 `state == Groggy` 면 Hurt 로 전이하지 않는다** — 때리면 그로기가 끊기던 문제를 미리 차단
+- `flashing` 플래그 신설: 피격 빨간 플래시가 도는 동안은 금빛 틴트를 양보(피격 피드백이 묻히지 않게)
+**아처 화살 반사 (ArcherArrow)**
+- 패링 성공 시 파괴하지 않고 `Reflect()`: dir 반전, 속도 x1.4, 수명은 최소 1.5초 보장, 스프라이트 flipX
+- 시전자 무시 조건을 `!reflected` 로 한정 → 되돌아온 화살은 쏜 아처에게 꽂힌다
+- 반사 후에는 EnemyBase(기사·아처 무관)에게 TakeDamage, 플레이어는 다시 때리지 않음, 타일맵 충돌 시 소멸
+- `OnTriggerStay2D` 추가: 지척 패링 시 반사 시점에 이미 시전자와 겹쳐 있어 Enter 가 다시 오지 않는 문제 대비
+- Launch 시그니처에 반사 3파라미터를 **기본값으로** 추가 → 기존 호출부 무영향
+### 검증
+- 컴파일 성공, read_console error 0건
+- EditMode **238/238 통과** (신규 4: 그로기 상수 고유성 / 그로기 종료판정 / 반사 최소수명 / 반사속도 배율 0 처리)
+- 리플렉션 실행: Groggy=6(Windup=5와 충돌 없음) / GroggyFinished(1.59,1.6)=False·(1.6,1.6)=True / ReflectLife(0.2,1.5)=1.5·(3.0,1.5)=3 / ReflectSpeed(10,1.4)=14·(10,0)=10
+- ArcherArrow.Launch 인자 10개 확인, OnTriggerEnter2D·OnTriggerStay2D·Reflect 전부 존재. EnemyBase.EnterGroggy 존재
+- **신규 Config 필드 직렬화 실측**: 기존 자산 2개 모두 초기값 그대로 반영(groggyDuration 1.6 / reflectOnParry True 등). 0으로 깔리는 Unity 함정 없음
+- **그로기 길이 타당성**: Z 3연타 0.40+0.40+0.55 = 1.35초 < 그로기 1.60초 → 콤보가 잘리지 않고 다 들어감(여유 0.25초). hitsToDie 3 이므로 **패링 1회 = 기사 1마리 처치 가능**
+- **반사 도달 검증**: 10x1.4 = 14u/s x 최소수명 1.5초 = 최대 21u 비행. 아처 사격 거리 최대 7u 대비 3배 여유
+- **물리 구성 실측**: Knight/Archer 프리팹 모두 BoxCollider2D(trigger) + Kinematic Rigidbody2D(useFullKinematicContacts=True). 화살도 동일 → FAIL#6(양쪽 Kinematic 트리거) 조건 충족
+- **사용자 눈 판정 필요**: (1) 기사 패링 시 금빛으로 굳는 게 보이는지 (2) 그 동안 3연타가 다 들어가는지 (3) 패링한 화살이 되돌아가 아처에게 꽂히는지 (4) 반사 화살이 기사에게도 맞는지 (5) 그로기 1.6초가 너무 길지 않은지
+### 실패와 수정
+- execute_code 안에서 지역변수 `t2` 를 중복 선언해 컴파일 실패 1회 → 파일별로 호출을 쪼개 해결(도구 스크립트 문제, 프로젝트 코드와 무관)
+
+
+## [조사] 화살 패링 난이도 + 아처 역방향 발사 원인 — 2026-08-09 10:24
+### 프롬프트
+[조사]화살 패링 판정은 좀 어렵네. 개선 방안 생각해보고 화살을 쏠때 무조건 player를 바라보고 쏴야지 지금은 뒤돌고 있는데도 화살을 쏘고 있어.
+### 조사 결과
+**문제 2 (역방향 발사) — 원인 확정: 화살은 정확하고 스프라이트만 안 돈다**
+- EnemyBase 102행 Windup 블록이 early return → 130행 `sr.flipX = FlipFor(face)` 에 도달하지 못함
+- 130행 자체도 `if (state != Attack)` 조건이라 공격 모션 중에도 갱신 안 됨
+- 방향이 얼어붙는 시간 = 예열 0.30 + 모션 0.92 = **1.22초**. 플레이어 7u/s 면 그 사이 8.5u 이동 → 아처를 지나쳐도 옛 방향 유지
+- 그러나 DoAttack 은 132행에서 **매 프레임 재계산한 face** 를 받고 ArcherEnemy.Fire(face) 가 그걸 쓴다 → **화살 방향은 플레이어 쪽으로 정확**
+- 결론: 시각과 판정이 어긋난 상태. 기사도 같은 구조(공격 중 flipX 고정)
+- 방안 (a) 예열 중에는 계속 회전, 공격 진입 시 고정 (b) 발사 시점(frac 0.75)까지 회전 후 고정 (c) 항상 회전
+  → (b) 가 '쏠 때는 무조건 플레이어를 본다' 요구에 정확히 대응하고, 발사 방향과 스프라이트가 항상 일치
+**문제 1 (화살 패링이 어렵다) — 원인 3가지**
+- ① **방향 판정이 남아 있다**: ArcherArrow 는 아직 `TryParry(gameObject)` 사용 → IsAttackerInFront 통과 필요. 기사에만 전방위(IsParryWindowActive)를 적용했고 화살은 누락. **등 뒤 화살은 타이밍이 맞아도 실패**
+- ② **판정이 OnTriggerEnter2D 1프레임뿐**: 겹침이 0.181초나 지속되는데 진입 순간에만 묻는다. 기사에 적용한 '창 끝 확정'의 화살판이 없음
+- ③ **읽을 시간이 짧다**: 화살 10u/s, 사격 7u → 비행 0.70초
+**실측 기준값**: 플레이어 콜라이더 0.832 x 1.515u / 화살 0.977u → 겹침 지속 (0.977+0.832)/10 = **0.181초**
+**입력 허용 폭 시뮬레이션 (현재 0.350초 기준)**
+-  A. Stay 판정 추가(겹침 내내 접수)      → **0.531초 (+52%)**
+-  B. 접근 존 1.5u + Stay                → **0.681초 (+95%)**
+-  C. 접근 존 2.5u + Stay                → **0.781초 (+123%)**
+-  D. C + 화살 10→7u/s                   → **0.966초 (+176%)**, 비행 0.70→1.00초로 눈으로 읽을 시간도 증가
+**권고 조합**: ①(전방위, 기사와 일관) + A/B(접근 존 1.5u + Stay) + 화살 7u/s. 전부 ArcherArrow.cs·ArcherEnemyConfig 안이며 보스·팀원 파일 무관
+### 검증
+해당 없음 (파일 수정 없음)
+### 커밋
+해당 없음(무수정)
+
+
+## [수정] 화살 전방위 패링 + 접근 존 + 발사 시점까지 조준 — 2026-08-09 10:31
+### 프롬프트
+전방위 + B(접근 존 1.5u + Stay)만 해도 충분할거 같아. 화살 속도는 괜찮은거 같은데
+> 맥락: 직전 [조사]의 화살 패링 개선안 중 ①전방위·B(접근존 1.5u+Stay) 채택, 화살 감속(10→7)은 반려.
+> 아처 역방향 발사 수정은 그 앞 프롬프트에서 이미 지시된 사항이라 함께 처리
+### 조작 내역
+**순수 로직 (EnemyStateLogic) — BossRangeLogic 은 이번에도 무수정**
+- `FaceLocked(frac, lockFrac)` / `WithinBodyHeight(arrowY, footY, bodyHeight)`
+**① 화살 전방위 패링 (기사와 계약 일치)**
+- ArcherArrow 가 `IsParryWindowActive()` 를 리플렉션으로 우선 호출, 없으면 기존 TryParry 로 폴백
+- 판정 창구를 `TryParryNow()` 하나로, 성공 처리를 `OnParried()` 하나로 통일 (접근 존이든 접촉이든 결과 동일)
+- 기사에만 적용했던 전방위가 화살에 누락돼 **등 뒤 화살은 타이밍이 맞아도 실패**하던 것을 해소
+**② 접근 존 1.5u + Stay**
+- Update 에서 `TryEarlyParry()`: 진행 방향 앞 1.5u 이내 + 플레이어 몸높이(발끝~2.0u) 안이면 **매 프레임 패링 접수**
+- `gap * dir.x <= 0` 로 이미 지나친 화살은 제외
+- `OnTriggerStay2D` 를 반사 전에도 적용 → 겹쳐 있는 0.181초 동안도 접수
+- 세로 검사를 넣은 이유: 점프로 넘긴 화살까지 패링되면 서 있기만 해도 다 막힌다
+- EnemyConfig 신규: `arrowParryZone 1.5` / `arrowParryHeight 2.0` (FAIL#32 앵커 규칙 적용)
+**③ 발사 시점까지 조준 (아처 역방향 발사 해소)**
+- 원인: Windup 블록 early return 으로 flipX 갱신 미도달 + `if (state != Attack)` 조건 → **1.22초간 방향 동결**
+- Windup 블록 안에서도 플레이어를 향해 회전
+- `FaceLockFrac` virtual 신설 — 기본 `hitWinS`(기사=칼 나가는 순간), ArcherEnemy 는 `fireFrac`(활 놓는 순간)로 오버라이드
+- 고정 시점 이후에는 얼려둔 `lockedFace` 를 **스프라이트와 판정 양쪽에** 사용 → 보이는 방향과 맞는 방향이 항상 일치
+  (이전에는 스프라이트만 고정되고 판정·발사 방향은 매 프레임 추적해 서로 어긋나 있었다)
+### 검증
+- 컴파일 성공, read_console error 0건
+- EditMode **241/241 통과** (신규 3: 고정시점 전 추적 / 기사 타격창 고정 / 몸높이 판정)
+- 리플렉션 실행: FaceLocked(0.74,0.75)=False·(0.75,0.75)=True / WithinBodyHeight(0.8,0,2.0)=True·점프1.5u(0.8,1.5,2.0)=False
+- ArcherArrow.Launch 인자 12개, TryParryNow·OnParried·TryEarlyParry·Reflect·OnTriggerStay2D 전부 존재
+- FaceLockFrac: EnemyBase virtual 있음 / ArcherEnemy 오버라이드 확인
+- **입력 허용 폭 0.350 → 0.681초 (+95%)** = 창 0.35 + 접근존 0.150 + 겹침 0.181
+- **방향 동결 1.22초 → 0.23초** (아처, 발사 후 잔여 모션만) / 기사 1.30초 → 0.45초
+- **사용자 눈 판정 필요**: (1) 아처가 쏠 때 플레이어를 보는지 (2) 등 뒤 화살이 패링되는지 (3) 닿기 전에 눌러도 인정되는지 (4) 점프로 넘긴 화살이 패링 안 되는지 (5) 기사가 휘두르는 도중 도는 게 어색하지 않은지
+### 실패와 수정
+- 없음 (execute_code 지역변수명 충돌 1회는 도구 스크립트 문제, 프로젝트 코드 무관)
+
+
+## [조사] BGM 이중 재생 + 벽 열림 조건 전환 — 2026-08-09 10:38
+### 프롬프트
+[조사] 노래 지금 2개로 겹쳐서 들리는거 확인해주고 벽이 열리는 조건이 특정 몬스터 하나 죽였을때 활성화 되잖아? 그거 지우고 1층에 배치된 전체 몬스터 해치웠을때 열리게 하고 싶어.
+### 조사 결과
+**① BGM 이중 재생 — 확인됨. 원인 규명 완료**
+- 재생 중 AudioSource 실측: **2개가 동시에 루프**
+  · `IntroDirector` clip=**전투소리** loop=True vol 0.55 playOnAwake=False — IntroSequencer 가 코드로 Play
+  · `UI Canvas/BGM` clip=**1스테이지** loop=True vol 0.40 **playOnAwake=True** — 씬에 직접 배치(프리팹 아님), 0프레임부터 자동 재생
+- IntroSequencer.MuteWorldAudio 는 인트로 동안 `bgm` 외 전 소스를 volume 0 으로 죽였다가 **끝나면 원래 볼륨으로 복원**한다
+  → 인트로 중엔 안 겹치다가 끝나는 순간부터 둘 다 루프 → **영구 중첩**
+- 해결안 (a) UI Canvas/BGM 의 playOnAwake 를 끄고 IntroSequencer.bgm 슬롯을 그쪽으로 배선 → BGM 소유자 1개, 인트로 후 페이드인 유지
+  (b) IntroDirector 의 clip 을 비우고 1스테이지만 사용 (인트로 BGM 큐 상실)
+  (c) MuteWorldAudio 복원 대상에서 BGM 계열 제외 (코드 수정, 다른 씬 영향)
+  → (a) 권장: 인스펙터 배선만으로 끝나고 연출 타이밍이 유지된다
+**② 벽 열림 조건 — 현재 구조**
+- `KeyMonsterGate` 가 **KeyMonster(x 60.06, y 2.16)** 에 부착. `NHNDemo.MonsterHealth.OnDied` → `GateCollapseSequencer.Play()`
+- 배선: health=KeyMonster / gateObject=Locked / collapseSequencer=GateDirector
+- 벽 `Locked` 실측: 월드 x **18~63**, y **2~9** (타일맵). GateAnchor (47.5, 5.0)
+- **KeyMonster 는 2층(y 2.16)** 에 있다. 즉 지금 조건은 '1층 몬스터'와 무관
+**③ 층별 배치 실측 (재생 중 기준, 전원 생존 상태)**
+- **1층 (y -1~1) 6마리**: Knight 12 / Archer 17 / Knight 25.79 / Knight 39.63 / Archer 42.32 / Knight 44.99
+- 2층 (y 1~5) 4마리: Knight 55 / Archer 58 / **KeyMonster 60.06** / Knight 61.26
+- 3층·보스 (y 5+) 3마리: Statue_Knight_L·R / MiddleBoss 74.65
+**④ 구현 시 걸림돌 — EnemyBase 에 사망 통지가 없다**
+- 우리 잡몹(KnightEnemy/ArcherEnemy)은 `EnemyBase` 이고 **이벤트가 하나도 없다**. 사망 시 deathLinger 후 Destroy 만 한다
+- 반면 KeyMonster/MiddleBoss 는 팀 시스템 `NHNDemo.MonsterHealth` 의 `OnDied` 이벤트를 쓴다 — **두 체력 체계가 섞여 있음**
+- 다행히 1층 6마리는 전부 EnemyBase 계열이라 한 체계만 보면 된다
+- EnemyBase 에 private static `All` 목록이 이미 있고 OnDestroy 에서 자기를 제거한다 → 폴링으로 생존 수를 셀 수 있다
+**설계안(미실행)**
+- A안 명시 목록: 인스펙터에 6마리를 끌어다 놓고 전멸 시 Play(). 확실하지만 적을 추가·이동할 때마다 재배선 필요
+- B안 **y 밴드 자동 수집**: 시작 시 y 가 지정 범위인 적을 모아 전멸 감시. 사용자가 배치를 자주 바꾸므로 재배선 불필요 — **권장**
+- C안 사각 영역(x·y): 1층 중 특정 구간만. 더 정밀하지만 수치 2개 추가
+**반드시 같이 처리해야 할 위험**
+- 소프트락: 1층 적이 도달 불가 위치에 있거나 씬 밖으로 떨어지면 벽이 영영 안 열린다. 실패 안전장치 필요
+- STATE 미결 항목 `GateTestTrigger 제거` 와 충돌 — 제출 전 제거하면 수동 개방 수단이 사라진다. 제거 시점을 조율해야 함
+### 검증
+해당 없음 (파일 수정 없음). isPlaying=True 상태라 씬 열기·테스트는 수행하지 않음
+### 커밋
+해당 없음(무수정)
+
+
+## [조사] x=49 단차 옆면 관통 — 잡몹이 지형을 전혀 보지 않음 — 2026-08-09 10:44
+### 프롬프트
+[조사]49,1 49,0 위치의 옆면을 보면 적들이 통과할 수도 있을거 같은데 조사해봐.
+### 조사 결과
+**지목하신 지점의 정체 — x=49 에서 바닥이 2칸 솟는 단차**
+- Stage_Ground 셀 실측: x 44~48 은 y -1 까지만 채워짐(표면 y **0**), x 49~62 는 y 1 까지 채워짐(표면 y **2**)
+- (49,0)·(49,1) 타일이 그 단차의 **수직 옆면**이다. 물리적으로는 Stage_Ground 의 Composite 콜라이더에 포함돼 있다
+- 즉 '1층/2층' 이 아니라 **같은 통로의 낮은 단(x<49, y0) / 높은 단(x>=49, y2)** 이었다. 앞선 [조사]의 층 구분 표현을 정정한다
+- 참고: Stage_Wall 타일맵은 콜라이더가 아예 없다(장식 전용)
+**관통 여부 — 예. 그리고 이 지점만의 문제가 아니다**
+- EnemyBase 147행: `transform.position += new Vector3(face * step, 0f, 0f)` — **직접 transform 이동**
+- Rigidbody2D 는 Kinematic 이고 MovePosition 을 쓰지 않는다 → 물리 충돌 해석이 개입할 여지가 없다
+- BlockedAhead 는 `All`(동료 잡몹) 목록만 검사한다. **지형·벽·단차를 전혀 보지 않는다**
+- 잡몹의 이동 제약은 stopDistance / separation / snapToGround **셋뿐**
+- => (49,0) 옆면뿐 아니라 **맵의 어떤 벽이든 통과한다**
+**snapToGround 와 결합된 실제 증상**
+- snapToGround=True 라 y 는 매 프레임 spawnY 로 고정된다. 낮은 단 적(y 0.04)은 x 가 49 를 넘어가도 y 0.04 를 유지
+- 결과: **높은 단 지형 속에 박힌 채 플레이어를 따라온다** (시각적으로 땅에 파묻힘)
+- 세로 판정 attackHeight 1.2 이므로, 플레이어가 높은 단(y 2)에 있으면 상대 높이차 약 1.96 > 1.2 → 적은 플레이어를 때리지 못한다
+- 반대로 플레이어 공격(EffectProjectile / SlashProjectile)은 **세로 제한이 없다** — OnTriggerEnter2D 로 IPlayerDamageable 을 찾을 뿐이라, 히트박스가 닿기만 하면 맞는다
+**게이트 조건(직전 [조사])과의 연결 — 소프트락 위험 재평가**
+- 낮은 단 적 6마리(x 12·17·25.79·39.63·42.32·44.99)는 전원 x<49 배치라 지금은 정상
+- 그러나 플레이어가 높은 단으로 올라가면 이들이 따라와 지형에 박힌다. 플레이어 공격에 세로 제한이 없어 **때릴 수는 있으나**, 파묻힌 적은 보이지 않아 '어디 있는지 모르는' 상태가 된다
+- => 앞서 제안한 안전장치 중 **잔여 카운트·위치 표시(2번)** 의 필요성이 이 조사로 더 커졌다. 단순 편의가 아니라 소프트락 회피 수단이다
+**대응 후보(미실행)**
+- (가) 이동에 지형 검사 추가: 진행 방향으로 짧은 Raycast/BoxCast 를 쏴 solid 지형이면 정지. EnemyBase 안에서 끝나고 보스 무관. 다만 한 칸 단차에도 멈춰 서 있게 되어 '벽 앞에서 버둥거림'이 생길 수 있다
+- (나) 순찰 범위 제한: 개체별 x 이동 하한·상한을 두어 자기 구역을 벗어나지 않게 한다. 지형 무관하게 확실하고 계산이 싸다
+- (다) 그대로 두고 잔여 표시로 보완: 마감 D-1 기준 최소 변경
+### 검증
+해당 없음 (파일 수정 없음)
+### 커밋
+해당 없음(무수정)
+
+
+## [수정] Scene3 BGM 단일화(전투소리) + 잡몹 순찰 범위 제한 — 2026-08-09 10:55
+### 프롬프트
+[수정] 1. BGM재생은 AdventureScene3에서는 전투소리 음악을 재생2. 순찰 범위 제안으로 문제상황을 예방하자.
+### 조작 내역
+**1. BGM 단일화 — Scene3 는 전투소리만**
+- 원인: `UI Canvas/BGM`(clip 1스테이지, **playOnAwake=True**)과 IntroSequencer 가 코드로 켜는 `IntroDirector`(clip 전투소리)가 둘 다 루프 → 인트로 종료 후 영구 중첩
+- `UI Canvas/BGM` 은 **팀 프리팹 Assets/Prefab/UI Canvas.prefab 소속**이었다(초기 조회에서 '씬 직접'으로 잘못 봤고 재확인함)
+- 따라서 프리팹 자체를 고치지 않고 **Scene3 인스턴스 오버라이드로 playOnAwake=false** 만 적용
+  · 오버라이드 기록 확인: `BGM.m_PlayOnAwake=0` 1건
+  · 프리팹 원본은 playOnAwake=True 유지 → **다른 씬 영향 0**
+- clip 과 오브젝트는 그대로 뒀다(되돌리기 쉽게). Scene3 의 BGM 소유자는 IntroDirector(전투소리) 하나
+**2. 순찰 범위 제한 — 지형 관통 예방**
+- 배경: 잡몹은 `transform.position +=` 로 직접 움직여 물리 충돌이 없고, BlockedAhead 는 동료만 본다 → 어떤 벽이든 통과
+- 접근: 벽 충돌을 새로 넣는 대신(단차마다 버둥거림 발생) **배치 지점이 속한 '같은 단' 밖으로 못 나가게** 막는다
+- 순수 로직: `PatrolStep(selfX, step, moveSign, minX, maxX)` — 경계를 넘는 걸음을 잘라내고 실제 허용량 반환(항상 0 이상, 안쪽 복귀는 항상 허용)
+  `SameLevel(surfaceY, footY, tolerance)` — UnityEngine 비의존(Mathf 대신 직접 계산)
+- EnemyBase: Start 에서 `ComputePatrolBounds()` → 좌우로 patrolProbeStep 간격 훑으며 지면이 끊기거나(낭떠러지) 높이가 tolerance 를 넘으면(단차) 거기서 경계 확정
+- EnemyConfig 신규: `patrolRange 6` / `patrolProbeStep 0.5` / `patrolLevelTolerance 0.6`. **0 이면 제한 없음(옛 동작)**
+### 검증
+- 컴파일 성공, read_console error 0건
+- EditMode **245/245 통과** (신규 4: 범위 안 정상 / 경계에서 잘림 / 경계 밖에서도 안쪽 복귀 허용 / 같은 단 허용오차)
+- **실제 지형 레이캐스트로 9마리 전원 순찰 경계 시뮬레이션**
+  · 낮은 단(y 0.04) 6마리: 최대 도달 x 18.00 / 23.00 / 31.79 / 45.63 / **48.99** / 48.32 → **전원 x=49 단차 앞에서 정지 ✓**
+  · 높은 단(y 2.04~2.16) 3마리: 49.00~61.00 / 52.00~62.50 / 55.26~62.76 (자기 단 안)
+- 씬 저장 확인(SaveScene=True, dirty=False)
+- **사용자 눈 판정 필요**: (1) Scene3 에서 전투소리만 들리는지 (2) 적이 단차를 안 뚫는지 (3) 순찰 폭 12u 가 좁아 적이 안 따라오는 느낌은 아닌지 (4) 다른 씬 BGM 이 그대로인지
+### 실패와 수정
+- **GroundLevelAt 1차 구현 오류**: '트리거가 아니고 EnemyBase/PlayerHealth 도 아닌 콜라이더'를 지면으로 인정했더니, 팀 몬스터 **KeyMonster 의 non-trigger BoxCollider2D** 가 지면으로 잡혀 KnightEnemy_40 의 순찰 폭이 7.50u → **2.00u 로 잘못 잘렸다**
+  · 시뮬레이션에서 발견 → 판정을 **타일맵 계열(CompositeCollider2D / TilemapCollider2D)만 인정** 으로 교체해 해소
+  · 교훈: 지면 판정을 '제외 목록'으로 짜면 새 오브젝트가 생길 때마다 뚫린다. **허용 목록(타일맵만)** 으로 짜야 한다
+
+
+## [구현] 1·2단 전멸 시 돌무더기 방어막 붕괴 + 잔여 표시 — 2026-08-09 11:06
+### 프롬프트
+1,2단에 배치된 몬스터 모두 처치하면 돌무더기 방어막이 무너지도록 변경가능하니?
+> 맥락: 질문에 이어 선택지 확인 — KeyMonster는 '아예 제거', 잔여 적 수는 '표시함' 선택
+### 조작 내역
+**지형 확인 (설계 타당성)**
+- Locked(돌무더기 방어막) 실제 점유 셀 = **x 46~48, y 6~8 (3x3)**. 2단(y2)에서 보스 구역(y10, MiddleBoss·석상)으로 올라가는 길을 막고 있다
+- 플레이어 점프 높이 2.25u x 2단 점프 → x=49 의 2u 단차 통과 가능 = 2단 도달 가능
+**KeyMonster 처리 — 삭제가 아니라 비활성화**
+- 사용자 지시는 '아예 제거' 였으나, 규약의 '수동 배치한 씬 오브젝트를 코드로 삭제' 금지에 걸린다. 팀 프리팹 DeathDog1 Variant 인스턴스이기도 하다
+- **SetActive(false)** 로 처리: 스폰·행동·렌더가 모두 멈춰 게임 상 결과는 제거와 동일하고, 체크박스 하나로 되돌릴 수 있다
+- 좌표 기록(복원용): KeyMonster pos (60.06, 2.16, 0.00) scale (0.40, 0.40, 1.00), 프리팹 Assets/Prefab/DeathDog1 Variant.prefab
+- 씬 전수 검사 결과 KeyMonster 를 슬롯으로 참조하는 다른 컴포넌트는 **없음**(KeyMonsterGate 는 자기 자신에 부착) → 배선 유실 없음
+**전멸 게이트 신설**
+- 순수 로직 GateCollapseLogic 에 3함수 추가: `InClearBand(y, minY, maxY)` / `ShouldOpen(remaining, collected, alreadyOpened)` / `TickDue(elapsed, interval)`
+- GateConfig 신규 수치: clearMinY -1 / clearMaxY 5 / clearCheckInterval 0.25 / showRemainingLabel true / labelFadeSeconds 1.5
+- **Assets/Scripts/AreaClearGate.cs 신설** — GateDirector 에 부착, config·sequencer·gateObject 배선 완료
+  · **핵심 판단**: 우리 EnemyBase 와 팀 NHNDemo.MonsterHealth 는 체력 체계가 다르지만 **둘 다 최종적으로 Destroy(gameObject)** 로 끝난다. 그래서 이벤트를 각각 구독하지 않고 **생존 오브젝트 수를 폴링**하는 방식으로 통일했다. 새 적 종류가 늘어도 수집 규칙만 타면 된다
+  · 수집은 Start 가 아니라 **첫 Update** 에서 한다 — 스크립트 실행 순서가 보장되지 않아 EnemyBase 들의 자기 등록이 안 끝났을 수 있다
+  · `ShouldOpen` 은 collected<=0 이면 false — **수집 실패 시 '전멸' 로 오인해 즉시 열리는 사고를 차단**
+  · 비활성 개체는 수집 제외(FindObjectsInactive.Exclude) — 꺼둔 몬스터 때문에 영영 안 열리는 일 방지
+**잔여 표시**
+- ParryMeter 의 라벨 생성 패턴(UI Canvas 하위 Text + Outline, 상단 중앙)을 그대로 재사용
+- '남은 적 n' → 전멸 시 '길이 열렸다!' 로 전환 후 페이드아웃. 값이 바뀔 때만 갱신
+### 검증
+- 컴파일 성공, read_console error 0건
+- EditMode **250/250 통과** (신규 5: 구간 판정 / 전멸 개방 / 재개방 차단 / 대상 0마리 차단 / 폴링 간격)
+- **수집 대상 실측 9마리**: 1단 6(x 12·17·25.79·39.63·42.32·44.99) + 2단 3(x 55·58·61.26)
+- 제외 확인: KeyMonster 비활성이라 미수집 ✓ / MiddleBoss y 10.19 는 구간(-1~5) 밖이라 미수집 ✓
+- 씬 저장 확인(SaveScene=True, dirty=False), GateDirector 최종 구성 = GateCollapseSequencer + GateTestTrigger + AreaClearGate(배선 OK)
+- KeyMonster 오브젝트가 씬에 그대로 남아있고 activeSelf=False 임을 확인 — 삭제하지 않았음을 증명
+- **사용자 눈 판정 필요**: (1) 상단에 '남은 적 9' 가 뜨는지 (2) 잡을 때마다 줄어드는지 (3) 마지막 1마리를 잡으면 방어막 붕괴 연출이 도는지 (4) KeyMonster 가 안 보이는지 (5) 라벨 위치가 다른 UI 와 겹치지 않는지
+### 실패와 수정
+- 테스트 삽입 시 마지막 중괄호 짝을 잘못 잡아 **메서드 안에 [Test] 메서드를 중첩**시켜 CS0106 5건 발생. 해당 파일은 기존 스타일이 `[Test] public void`(한 줄)이라 내 계산이 어긋났다 → 39행 이후를 통째로 재작성해 해소
+  교훈: 테스트 파일 말미 삽입은 '마지막에서 두 번째 중괄호' 휴리스틱에 의존하지 말고, 삽입 후 반드시 컴파일로 확인한다
+- KeyMonsterGate 컴포넌트 자체는 남아 있으나 부착 대상이 비활성이라 무해. 제출 후 정리 대상
+
+
+## [수정] 사거리 표시 OFF + KeyMonster 집계 제외 구조화 — 2026-08-09 11:12
+### 프롬프트
+[수정] 적들의 공격범위들을  게임 화면에서 볼 수 있는 표시들을 지워주고, 자연 몬스터 셀때 keyMonster도 포함시키는거 같은데 이거 수정해줘.
+### 조작 내역
+**① 게임 화면 사거리 표시 OFF (제출 전 필수 항목 소진)**
+- ArcherEnemyConfig / KnightEnemyConfig / DemonBossConfig 의 `showRangesInGame`·`showRangeLabels` 6개 값을 전부 **True → False**
+- 코드는 그대로 두고 값만 껐다. 튜닝이 다시 필요하면 체크박스 하나로 복구된다
+**② KeyMonster 집계 제외 — '지금 안 세어짐' 이 아니라 '구조적으로 안 세어짐' 으로**
+- 실측 결과 현재는 이미 9마리만 집계되고 있었다(KeyMonster 비활성이라 FindObjectsInactive.Exclude 에 걸러짐)
+- 그러나 **활성 상태에 기댄 배제**였다 — 누군가 KeyMonster 를 다시 켜면 즉시 10마리가 된다. 그 취약함을 없앴다
+- GateConfig 신규 `countTeamMonsters = false`: 팀 체계(NHNDemo.MonsterHealth)는 **기본적으로 세지 않는다**. 집계 대상은 우리 잡몹(EnemyBase)뿐
+- 켜더라도 `KeyMonsterGate` 컴포넌트가 붙은 개체는 제외 — 열쇠 장치는 적이 아니다
+### 검증
+- 컴파일 성공, read_console error 0건
+- EditMode **250/250 통과**
+- 사거리 플래그 재읽기: Archer·Knight·Demon 전부 showRangesInGame=False, showRangeLabels=False 확인
+- **KeyMonster 를 일부러 활성화해 재현 검증**: 비활성 상태 9마리 / **강제 활성 상태에서도 9마리** → 활성 여부와 무관하게 제외됨 확인 후 원래 상태(activeSelf=False)로 복구
+- 집계 명단 실측: ArcherEnemy_17, ArcherEnemy_58, ArcherEnemy_58 (1), KnightEnemy_12, KnightEnemy_22, KnightEnemy_31, KnightEnemy_31 (1), KnightEnemy_40, KnightEnemy_55
+- **사용자 눈 판정 필요**: (1) 게임 화면에 사거리 띠·라벨이 사라졌는지 (2) '남은 적 9' 로 시작하는지
+### 남은 디버그 플래그 (요청 범위 밖이라 건드리지 않음)
+- `MinoBossConfig.showParryDebug = True` — 패링 PERFECT/MISS 팝업
+- `PlayerFxConfig.enableDebugKeys = True` — 5=hurt / 6=death 미리보기 키
+  둘 다 제출 전 OFF 대상이지만, 지금 끄면 사용자의 테스트 수단이 사라지므로 지시를 기다린다
+### 실패와 수정
+- 없음
+
+
+## [수정] LOG·FAIL 병합 충돌 구조적 해소 (.gitattributes union) — 2026-08-09 11:25
+### 프롬프트
+Assets/_Docs/LOG.md Assets/_Docs/FAIL.md
+이거는 우리선에서 못 고치나? 왜 계속 오류가 나는거야? gitignore해서 그래?
+### 조작 내역
+**원인 규명 — gitignore 때문이 아니다**
+- `git check-ignore` 출력 없음 = 무시 대상 아님. `git ls-files` 로 둘 다 **추적 중** 확인. 추적되기 때문에 병합 대상이고, 그래서 충돌한다
+- 저장소에 `.gitattributes` 가 **아예 없었다** → 모든 파일이 기본 3-way 병합
+- 구조적 원인: 양쪽이 **파일 끝에** 서로 다른 내용을 덧붙인다. git 은 어느 쪽이 먼저인지 판단할 근거가 없어 사람에게 넘긴다. 오류가 아니라 정상 동작
+- LOG.md 누적 커밋 484개 — 매 작업마다 양쪽이 덧붙이는 구조라 충돌 빈도가 높을 수밖에 없었다
+**조치 — 저장소 루트에 .gitattributes 신설**
+```
+NAN2026Game/Assets/_Docs/LOG.md   merge=union
+NAN2026Game/Assets/_Docs/FAIL.md  merge=union
+NAN2026Game/Assets/_Docs/ASSET_CREDITS.md merge=union
+```
+- `union` 은 git 내장 병합기다(별도 driver 설정 불필요). 충돌 표시 대신 **양쪽 줄을 모두 남긴다**
+- 우리가 그동안 손으로 하던 '양쪽 다 살리기' 를 git 이 대신하는 것이라 결과물이 달라지지 않는다
+- ASSET_CREDITS.md 도 같은 append-only 구조라 함께 넣었다(과거 충돌 마커가 커밋된 전례 있음)
+### 검증
+- `git check-ignore -v` → 출력 없음(무시 대상 아님 확인)
+- `git check-attr merge` 실행 결과:
+  · LOG.md → **merge: union** / FAIL.md → **merge: union** / ASSET_CREDITS.md → **merge: union**
+  · EnemyBase.cs → merge: unspecified → **코드 파일은 영향 없음** 확인
+- 실제 병합 재현은 하지 않았다 — 검증하려면 임시 브랜치와 checkout 이 필요한데 checkout 은 사람만 실행하는 규약
+### 남은 주의
+- union 은 내용을 잃지 않지만 **중복은 만들 수 있다**. 양쪽이 같은 자리를 고치면 두 줄이 다 남는다
+  · FAIL.md 는 번호를 붙이므로 병합 후 번호 중복이 생길 수 있다(과거 c4ab41c5 에서 겪은 문제). 병합 뒤 번호만 훑어보면 된다
+- `.gitattributes` 는 **병합을 실행하는 컴퓨터에** 있어야 작동한다. 커밋했으므로 pull 받은 사람은 자동 적용
+- 씬 파일(*.unity)은 이번에 손대지 않았다. `-merge`(binary 취급)로 자동 병합을 막는 선택지가 있으나 팀 합의 사항
+### 실패와 수정
+- 없음

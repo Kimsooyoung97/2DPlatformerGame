@@ -29686,6 +29686,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 404533043710044527, guid: b7df9596408bfdc4d87c04f66f254534, type: 3}
+      propertyPath: playerHealth
+      value: 
+      objectReference: {fileID: 1739690756}
     - target: {fileID: 3190514065756840723, guid: b7df9596408bfdc4d87c04f66f254534, type: 3}
       propertyPath: m_Pivot.x
       value: 0

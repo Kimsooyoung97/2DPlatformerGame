@@ -12,18 +12,21 @@ namespace NAN2026
 
         protected override bool FlipFor(float face) { return face < 0f; }
 
+        /// 활을 놓는 순간까지는 플레이어를 계속 겨눈다. 그 이후에만 방향을 고정한다.
+        protected override float FaceLockFrac { get { return config.fireFrac; } }
+
         protected override void SetState(int s) { base.SetState(s); firedThisDraw = false; }
 
         protected override void DoAttack(float dx, float face)
         {
-            Anim(attackFrames, false);
+            Anim(attackFrames, false, SwingFps);
             float frac = stateT / config.attackDur;
             if (EnemyStateLogic.ShouldFire(frac, config.fireFrac, firedThisDraw))
             {
                 firedThisDraw = true;
                 Fire(face);
             }
-            if (frac >= 1f) { nextAtk = Time.time + config.attackCooldown; SetState(EnemyStateLogic.Idle); }
+            if (frac >= 1f) { nextAtk = NextAttackAt(); SetState(EnemyStateLogic.Idle); }
         }
 
         private void Fire(float face)
@@ -34,7 +37,9 @@ namespace NAN2026
                 + new Vector3(config.muzzleOffset.x * face, config.muzzleOffset.y, 0f);
             var a = go.AddComponent<ArcherArrow>();
             a.Launch(arrowSprite, new Vector2(face, 0f), config.arrowSpeed, config.arrowLife, config.arrowDamage,
-                     sr != null ? sr.sortingOrder : 0);
+                     sr != null ? sr.sortingOrder : 0, config.clashConfig,
+                     config.reflectOnParry, config.reflectSpeedMul, config.reflectMinLife,
+                     config.arrowParryZone, config.arrowParryHeight);
         }
     }
 }
