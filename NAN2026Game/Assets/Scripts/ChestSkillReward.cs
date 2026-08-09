@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using NAN2026.Core;
 
 namespace NAN2026
@@ -7,16 +7,28 @@ namespace NAN2026
     public static class ChestRewardEvents
     {
         public static int Collected;
+        public static bool[] Unlocked = new bool[8];    // 슬롯별 해금 상태(순서 무관)
         public static System.Action<int> OnCollected;   // 채워진 슬롯 번호
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void ResetStaticsOnPlay() { Collected = 0; OnCollected = null; }
+        static void ResetStaticsOnPlay() { Collected = 0; Unlocked = new bool[8]; OnCollected = null; }
 
         public static void Report(int capacity)
         {
             int slot = ChestRewardLogic.NextSlot(Collected, capacity);
-            if (slot < 0) return;
-            Collected = slot + 1;
+            ReportSlot(slot, capacity);
+        }
+
+        /// 상자마다 지정된 슬롯을 연다(순서와 무관). slot<0이면 순차 채움으로 되돌아간다.
+        public static void ReportSlot(int slot, int capacity)
+        {
+            if (slot < 0) { Report(capacity); return; }
+            if (slot >= Unlocked.Length) return;
+            if (Unlocked[slot]) return;
+            Unlocked[slot] = true;
+            int n = 0;
+            for (int i = 0; i < Unlocked.Length; i++) if (Unlocked[i]) n++;
+            Collected = n;
             if (OnCollected != null) OnCollected(slot);
         }
     }
@@ -24,6 +36,8 @@ namespace NAN2026
     // 상자에서 떠올라 플레이어에게 흡수되는 스킬 아이콘
     public class SkillRewardFlyer : MonoBehaviour
     {
+        public int ownerSlot = -1; // 이 아이콘이 열 슬롯(상자에서 전달)
+
         private ChestRewardConfig cfg;
         private Transform target;
         private SpriteRenderer sr;
@@ -32,17 +46,19 @@ namespace NAN2026
         private float t;
         private bool reported;
 
-        public static void Spawn(Vector3 pos, Transform player, ChestRewardConfig config)
+        public static void Spawn(int slot, Vector3 pos, Transform player, ChestRewardConfig config)
         {
             if (config == null || config.icon == null)
             {
                 // 아이콘이 없으면 연출을 건너뛰고 슬롯만 채운다 — 보상 자체는 잃지 않는다
-                if (config != null) ChestRewardEvents.Report(config.slotCapacity);
+                if (config != null) ChestRewardEvents.ReportSlot(slot, config.slotCapacity);
                 return;
             }
             var go = new GameObject("SkillRewardFlyer");
             go.transform.position = pos;
-            go.AddComponent<SkillRewardFlyer>().Init(player, config);
+            var fly = go.AddComponent<SkillRewardFlyer>();
+            fly.ownerSlot = slot;
+            fly.Init(player, config);
         }
 
         private void Init(Transform player, ChestRewardConfig config)
@@ -83,7 +99,7 @@ namespace NAN2026
 
             if (phase == ChestRewardLogic.PhaseDone)
             {
-                if (!reported) { reported = true; ChestRewardEvents.Report(cfg.slotCapacity); }
+                if (!reported) { reported = true; ChestRewardEvents.ReportSlot(ownerSlot, cfg.slotCapacity); }
                 Destroy(gameObject);
             }
         }
@@ -97,6 +113,9 @@ namespace NAN2026
     [DisallowMultipleComponent]
     public class ChestSkillReward : MonoBehaviour
     {
+        [Header("이 상자가 여는 스킬 슬롯 (0=1번, 1=2번, 2=3번 / -1이면 순서대로)")]
+        public int rewardSlot = -1;
+
         [Header("참조")]
         public ChestRewardConfig config;
         [Tooltip("피격 판정을 맡는 자식의 MonsterHealth. 비우면 자식에서 찾는다")]
@@ -166,7 +185,7 @@ namespace NAN2026
 
             var p = PlayerLocator.Find();
             Vector3 from = spawnAnchor != null ? spawnAnchor.position : home;
-            SkillRewardFlyer.Spawn(
+            SkillRewardFlyer.Spawn(rewardSlot, 
                 from + Vector3.up * (config != null ? config.spawnHeight : 0f),
                 p != null ? p.transform : null,
                 config);

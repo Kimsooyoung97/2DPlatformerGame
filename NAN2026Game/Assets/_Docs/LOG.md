@@ -7946,3 +7946,18 @@ X 145 부근 몬스터가 아래로 떨어지며 바닥에 끼인다. 2·3층 �
 
 - 추가: EnemyAIConfig 4종 설정 완료(잡몹 DeathDog·Lich 앞0.55/깊이1.2/마스크 전체). **보스 2종(MiddleBoss·PrincessBoss)은 edgeProbeAhead=0으로 감지 비활성** — 패턴 이동이 막히는 것 방지
 - 검증: DeathDogAIConfig=0.55 LichAIConfig=0.55 MiddleBossAIConfig=0.00 PrincessBossAIConfig=0.00 
+
+
+## [구현] 상자별 스킬 슬롯 지정 — 2026-08-10 05:31
+### 프롬프트
+y45 상자=1번 스킬(좌하단 첫 아이콘), y55 상자=3번 스킬(세 번째 아이콘), 나머지 상자=2번 스킬
+### 조작 내역
+- ChestRewardEvents 확장: Collected 누계 방식 → **슬롯별 Unlocked[] 플래그** 병행. ReportSlot(slot,capacity) 신설(slot<0이면 기존 순차 채움 유지), 정적 리셋에 플래그 포함
+- ChestSkillReward에 rewardSlot 필드(0=1번/1=2번/2=3번, -1=순차) 신설 → SkillRewardFlyer.Spawn(slot,...)·ownerSlot으로 전달해 흡수 시점에 해당 슬롯 해금
+- SkillGate.IsUnlocked을 누계 비교 → 플래그 조회로 전환(순서 무관 해금 지원)
+- Scene1 배정: BOX@y44.7→슬롯0 / Chest (1)@y55.0→슬롯2 / Chest (2)@y32.0→슬롯1
+### 검증
+- 컴파일 0, 디스크 재로드 검증: BOX=0 · Chest (1)=2 · Chest (2)=1
+- 실제 해금·아이콘 점등은 사용자 재생
+### 실패와 수정
+- static 메서드에서 인스턴스 필드(rewardSlot) 참조 오류 1회 → 파라미터(slot)로 정정

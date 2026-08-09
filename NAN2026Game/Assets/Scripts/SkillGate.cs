@@ -20,7 +20,9 @@ namespace NAN2026
         /// 상자에서 아이콘을 몇 개 먹었는지로 해금 판정
         public static bool IsUnlocked(int slot)
         {
-            return slot >= 0 && slot < Slots && ChestRewardEvents.Collected > slot;
+            if (slot < 0 || slot >= Slots) return false;
+            var f = ChestRewardEvents.Unlocked;
+            return f != null && slot < f.Length && f[slot]; // 슬롯별 해금 플래그
         }
 
         public static bool IsReady(int slot)
