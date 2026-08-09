@@ -6665,3 +6665,114 @@ Calling function TakeDamage with 1 parameter but the function requires 2.
 - **사용자 눈 판정 필요**: (1) 7번이 적에 맞아도 안 끊기는지 (2) 적이 실제로 피해를 입는지 (3) 잡몹(기사·아처)에게도 대미지가 들어가는지 (4) 넉백 방향이 자연스러운지
 ### 실패와 수정
 - 없음
+
+
+## [조사] 스킬 이펙트가 어색하고 안 맞는 원인 — 2026-08-10 03:24
+### 프롬프트
+[조사]이거보면 뭔가 이펙트가 날라가도 어색하고 게임이 재미가 없어. 이펙트에 좀만 벗어나도 적이 안맞기도 하고. 어떻게 개선하는게 좋을까?
+> 첨부된 화면 녹화는 재생할 수 없어 수치 실측으로 대체함
+### 조사 결과
+**그림 크기와 판정 크기가 양쪽 다 어긋나 있다. 방향이 서로 반대다.**
+```
+[6번 검기]  보이는 크기 0.32x0.44 x scale 3 = 0.96 x 1.32
+            판정 크기                       = 3.00 x 1.20
+            → 판정이 그림보다 3배 넓다. 안 보이는데 맞는다
+[7번 오브]  보이는 크기 1.24x1.33 x scale 1.3 = 1.61 x 1.73
+            판정 지름                        = 0.91
+            → 판정이 그림의 53%. 가장자리로 스치면 안 맞는다  ← 체감의 정체
+```
+**6번 검기는 애니메이션이 아예 안 돈다**
+- `SkillSlashCaster.frames` 배열 크기 **0** → `EffectProjectile.Update` 의 `frames.Length > 0` 조건이 거짓
+- 프리팹 Skill1 의 기본 스프라이트 `FX2_0` **정지 이미지 한 장**이 그대로 날아간다. '어색하다'의 직접 원인
+- 쓸 수 있는 시트가 이미 있다: `Assets/Art/FX/Slash_BASIC.png`(6장), `Slash_POWERED.png`(6장)
+**적이 크다**: DeathDog 콜라이더 2.00 x 2.50. 판정이 작으면 큰 적을 스치는 일이 잦다
+**개선 방향(미실행)**
+- ① 7번 판정을 그림에 맞춘다: `hitboxSize` 0.35 → **0.62** (x scale 1.3 = 지름 1.61, 그림과 일치)
+- ② 6번에 프레임 시트 연결: `frames` 에 Slash_BASIC 6장 배선 → 날아가는 동안 애니메이션. 판정도 그림에 맞춰 축소(3.00 → 1.2 정도)하거나, 반대로 **그림을 키운다**(scale 3 → 6 이면 1.92x2.64)
+- ③ 타격감 보강 — 이게 '재미없다' 의 본질일 수 있다. 현재 스킬 명중 시 **히트스톱·화면흔들림·피격 플래시가 전혀 없다**. 플레이어 피격에는 4종(플래시·히트스톱·넉백·흔들림)을 다 넣었는데 적 피격에는 없다
+  · EnemyBase 는 `FlashRed` 가 있지만 MonsterHealth 계열(DeathDog)에는 무엇이 있는지 미확인
+- ④ 판정을 살짝 후하게: 그림과 정확히 같게 맞추기보다 **10~20% 크게** 두는 것이 액션게임 관례다. '맞은 것 같은데 안 맞음' 이 '아슬하게 맞음' 보다 훨씬 나쁘게 체감된다
+- 권장 순서: **① → ② → ③**. ①②는 Config·배선이라 즉시, ③은 코드가 필요
+### 검증
+해당 없음 (파일 수정 없음)
+### 커밋
+해당 없음(무수정)
+
+
+## [조사] Scene3 군집 제어를 Scene1 에 적용 가능한가 — 2026-08-10 03:26
+### 프롬프트
+[조사]Scene3 보면 캐릭터 배치와 캐릭터끼리 뭉치지 않도록 배치하도록 한 조치사항 확인 가능하지? Scene1에도 적용하고싶은데
+### 조사 결과
+**Scene3 에 넣은 군집 제어 3종 (EnemyBase 전용)**
+- `stopDistance` — 플레이어 앞 일정 거리에서 정지. 파고들어 겹치지 않는다 (기사 1.0 / 아처 6.0)
+- `separation` — 진행 방향 앞에 동료가 이 거리 안이면 멈춘다. `BlockedAhead()` 가 정적 `All` 목록을 훑는다 (기사 1.0 / 아처 1.6)
+- `fireStagger` + `cooldownJitter` — 첫 공격과 재공격 시점을 개체마다 흩뿌려 동시 타격을 막는다 (기사 1.6/1.2, 아처 2.0/1.4)
+- 추가로 `patrolRange 6` 이 자기 단 밖으로 못 나가게 막는다
+**Scene1 은 다른 시스템이다 — 그대로 옮길 수 없다**
+- Scene1 적: `EnemyAI` + `MonsterController2D` + `MonsterHealth` (팀 NHNDemo/PixelFantasy 계열) **3마리**
+  · DeathDog1 Variant x=41.9 / DeathDog1 Variant (1) x=-25.2 / DeathDog2 Variant x=-19.7
+  · 그 외 MidBoss_FireKnight x=218.8
+- 우리 `EnemyBase` 와 **코드를 전혀 공유하지 않는다**. `stopDistance`/`separation`/`fireStagger` 는 EnemyBase 안에만 있다
+**팀 EnemyAIConfig 에 대응 항목이 있는지 확인 결과**
+```
+있음:  aggroRange 4 / attackRange 0.85 / chaseStopDistance 6 / patrolRadius 1
+       attackCooldown 3 / patrolSpeed 1.1 / chaseSpeed 0.8
+없음:  separation (동료 간격)  ← 뭉침 방지의 핵심
+       cooldownJitter / fireStagger (공격 시점 분산)
+```
+- `chaseStopDistance` 는 이름이 비슷하나 뜻이 다르다 — '이 거리를 넘으면 추격 포기' 이지 '이 거리에서 멈춤' 이 아니다
+- `patrolRadius 1` 은 우리 `patrolRange` 와 같은 역할을 이미 한다
+**현실 평가: Scene1 은 지금 뭉칠 일이 거의 없다**
+- 적이 **3마리뿐**이고, 가장 가까운 둘(-25.2 / -19.7)도 5.5u 떨어져 있다. Scene3 는 9마리가 좁은 통로에 있었다
+- `aggroRange 4` 로 매우 짧아 동시에 달려드는 상황 자체가 드물다
+**개선 방향(미실행)**
+- A안 **적을 우리 잡몹으로 교체**: Scene1 에 KnightEnemy/ArcherEnemy 배치. 군집 제어가 그대로 따라온다. 다만 아트가 바뀌고 팀원 씬을 크게 건드린다
+- B안 **팀 EnemyAI 에 separation 추가**: `EnemyAIConfig` 에 필드 하나, `EnemyAI` 이동부에 동료 간격 검사 추가. 팀원 활선 파일 수정이라 D-day 병합 리스크
+- C안 **배치로만 해결**: 적 3마리를 더 벌려 놓고 `aggroRange` 를 유지. 코드 0, 위험 0
+- 권장: **C안**. 3마리 / 5.5u 간격에 aggroRange 4 면 뭉침은 이론상 거의 없다. 실제로 뭉치는 장면을 보셨다면 그 지점을 알려주시면 원인을 따로 재겠다
+### 검증
+해당 없음 (파일 수정 없음)
+### 커밋
+해당 없음(무수정)
+
+
+## [구현] Scene1 DeathDog3 3마리 배치 — 2026-08-10 03:42
+### 프롬프트
+일단 다 배치해놓고 결정할라니깐 DeathDog3를 넣어줘
+> 맥락: 직전 [조사]에서 Scene1 배치 10마리가 DeathDog2 x6 / DeathDog1 x4 / DeathDog3 x0 으로 확인됨
+### 조작 내역
+- execute_code: PrefabUtility.InstantiatePrefab("Assets/Prefab/DeathDog3 Variant.prefab") x3
+- 배치 위치: 비어 있던 구간 x -19.7~39.9(59.6u)에 균등 → x 0 / 13 / 26
+- Y 는 Physics2D.RaycastAll 로 실측한 지면(27.91) + 0.75 (기존 개체 평균 오프셋)
+- 기존 수동 배치 개체는 이동·삭제하지 않음
+### 검증
+- 종류별 집계: DeathDog1 x4 / DeathDog2 x6 / DeathDog3 x3 = 13마리
+- 신규 3마리 간격 13.0 / 13.0 / 13.9u → aggroRange 4 기준 해당 구간 동시 교전 1마리
+- 동시 교전 시뮬레이션(x -50~240, 0.5u): 최악 x=77.0 에서 3마리 (기존 밀집 구간 때문)
+### 실패와 수정
+없음
+
+## [구현] Scene1 구간 B 몬스터 6마리 배치 — 2026-08-10 03:42
+### 프롬프트
+보트 물 구역에는 몬스터 배치하면 안되고 일단 몇마리 더 배치해봐
+### 조작 내역
+- 배치 전 구간 B(x 116~238) 지면을 2u 간격 레이캐스트로 실측 → 계단식 지형 확인
+- 평탄대 3곳만 사용: x148~170(y46) / x172~188(y48) / x190~230(y34.9)
+- 회피 지점: 보트 79.3(물), Chest 170, SavePoint2 181.1, MidBoss 218.8, Portal 228
+- InstantiatePrefab x6 — DeathDog3 x3(150/176/196), DeathDog1 x2(162/208), DeathDog2 x1(187)
+- 각 지점마다 OverlapBox(0.80x1.00) 사전 검사로 지형 관통 여부 확인 후 생성
+### 검증
+- 6마리 전원 "겹침 없음" (OverlapBox 미검출)
+- 전체 19마리 / DeathDog1 x6 / DeathDog2 x7 / DeathDog3 x6
+- 컴포넌트 검사: 19마리 전원 EnemyAI + MonsterHealth 보유, Missing 스크립트 0
+- 동시 교전 최악 x=77.0 → 3마리 (구간 B 신규 배치 구간은 최대 1마리)
+- 씬 저장: EditorSceneManager.SaveScene → True (Assets/Scenes/ActiveScene/AdventureScene1.unity)
+### 실패와 수정
+- 검증 코드에서 NHNDemo.EnemyAI 로 타입 참조 → CS0234. GetType().Name 문자열 비교로 교체해 통과.
+  씬 데이터에는 영향 없음(검증 전용 코드)
+- LOG 경로를 C:\Users\edwin\Dev\NAN2026Game\Assets 로 가정 → DirectoryNotFound.
+  실제는 NAN2026Game\NAN2026Game\Assets (중첩). Application.dataPath 로 교체
+### 미해결(사용자 판단 대기)
+- x=62.5 DeathDog2 가 지면 대비 -4.00 (지형에 박힘) — 기존 수동 배치라 손대지 않음
+- x 39.9~83.6 구간 9마리가 2.3~7.6u 간격 → 이 구간만 동시 3마리. 간격 조정 여부 대기
+- 위 두 [구현]은 같은 씬 파일을 연속 수정했고 중간 저장이 없어 커밋 1개를 공유한다
