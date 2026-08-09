@@ -300,10 +300,16 @@ namespace NAN2026
 
             if (player != null) SetFacing(player.position.x < transform.position.x);
 
-            if (normalReady) BeginWindup(2, config.normalWindup);
-            else if (fireReady) BeginWindup(3, config.fireWindup);
-            else if (bombReady) BeginWindup(4, config.bombWindup);
-            else BeginWindup(5, config.wheelWindup);
+            // 고정 우선순위(Normal>Fire>Bomb>Wheel) 대신, 준비된 공격 중 쿨타임이 가장 먼저 끝난
+            // (가장 오래 대기한) 걸 고른다. 고정 순위면 쿨타임 짧은 Normal이 거의 항상 이겨서
+            // 쿨타임 긴 Wheel 등은 영영 안 나가는 문제가 있었음.
+            int best = -1; float bestNext = float.MaxValue;
+            if (normalReady && nextNormal < bestNext) { best = 2; bestNext = nextNormal; }
+            if (fireReady && nextFire < bestNext) { best = 3; bestNext = nextFire; }
+            if (bombReady && nextBomb < bestNext) { best = 4; bestNext = nextBomb; }
+            if (wheelReady && nextWheel < bestNext) { best = 5; bestNext = nextWheel; }
+
+            BeginWindup(best, best == 2 ? config.normalWindup : best == 3 ? config.fireWindup : best == 4 ? config.bombWindup : config.wheelWindup);
         }
 
         // 공격 예열: idle 프레임 유지한 채 색상 플래시로 경고, 지속 후 실제 공격 state 진입
@@ -482,18 +488,19 @@ namespace NAN2026
         }
 
         // 현재 state에 대응하는 (히트리치, 색상, 판정 창 안인지)를 판정 로직과 동일하게 계산
-        private bool GetActiveAttackRange(out float reach, out Color col, out bool inWin)
+        private bool GetActiveAttackRange(out float reach, out Color col, out bool inWin, out bool frontOnly)
         {
-            reach = 0f; col = Color.white; inWin = false;
+            reach = 0f; col = Color.white; inWin = false; frontOnly = false;
             if (cur == null || cur.Length == 0) return false;
             int idx = Mathf.Min((int)animT, cur.Length - 1);
-            if (state == 2) { reach = config.normalHitReach; col = new Color(1f, 0.6f, 0.2f, 0.7f); inWin = idx >= config.normalWinStart && idx <= config.normalWinEnd; return true; }
-            if (state == 3) { reach = config.fireHitReach; col = new Color(1f, 0.35f, 0.1f, 0.7f); inWin = idx >= config.fireWinStart && idx <= config.fireWinEnd; return true; }
-            if (state == 4) { reach = config.bombHitReach; col = new Color(0.8f, 0.2f, 1f, 0.7f); inWin = idx >= config.bombWinStart && idx <= config.bombWinEnd; return true; }
+            if (state == 2) { reach = config.normalHitReach; col = new Color(1f, 0.6f, 0.2f, 0.7f); inWin = idx >= config.normalWinStart && idx <= config.normalWinEnd; frontOnly = config.normalFrontOnly; return true; }
+            if (state == 3) { reach = config.fireHitReach; col = new Color(1f, 0.35f, 0.1f, 0.7f); inWin = idx >= config.fireWinStart && idx <= config.fireWinEnd; frontOnly = config.fireFrontOnly; return true; }
+            if (state == 4) { reach = config.bombHitReach; col = new Color(0.8f, 0.2f, 1f, 0.7f); inWin = idx >= config.bombWinStart && idx <= config.bombWinEnd; frontOnly = config.bombFrontOnly; return true; }
             if (state == 5)
             {
                 reach = config.wheelHitReach; col = new Color(0.2f, 0.8f, 1f, 0.7f);
                 inWin = (idx >= config.wheelWin1Start && idx <= config.wheelWin1End) || (idx >= config.wheelWin2Start && idx <= config.wheelWin2End);
+                frontOnly = config.wheelFrontOnly;
                 return true;
             }
             return false;
@@ -521,11 +528,21 @@ namespace NAN2026
             SetRangeRect(rangeBands[0], bx - config.aggroRange, bx + config.aggroRange, by - h * 0.5f, by + h * 0.5f);
             SetRangeRect(rangeBands[1], bx - config.attackRange, bx + config.attackRange, by - h * 0.5f, by + h * 0.35f);
 
-            bool active = GetActiveAttackRange(out float reach, out Color col, out bool inWin);
+            bool active = GetActiveAttackRange(out float reach, out Color col, out bool inWin, out bool frontOnly);
             rangeBands[2].gameObject.SetActive(active);
             if (active)
             {
-                SetRangeRect(rangeBands[2], bx - reach, bx + reach, by - h * 0.5f, by + h * 0.2f);
+                float faceSign = Facing();
+                float minX, maxX;
+                if (frontOnly)
+                {
+                    // FrontOnly면 판정도 보스가 바라보는 쪽 + frontDeadZone만큼만 유효하므로
+                    // 띠도 그 쪽만 그린다(판정과 표시가 어긋나지 않게).
+                    if (faceSign > 0f) { minX = bx - config.frontDeadZone; maxX = bx + reach; }
+                    else { minX = bx - reach; maxX = bx + config.frontDeadZone; }
+                }
+                else { minX = bx - reach; maxX = bx + reach; }
+                SetRangeRect(rangeBands[2], minX, maxX, by - h * 0.5f, by + h * 0.2f);
                 HighlightRangeBand(rangeBands[2], inWin, col);
             }
 
@@ -540,6 +557,21 @@ namespace NAN2026
         }
 
         // 씬 뷰(에디터 전용): 노랑=인지 / 파랑=공격개시 / 각 공격 리치(고정 색)
+        private void DrawReachGizmo(float bx, float by, float height, float reach, bool frontOnly)
+        {
+            float minX, maxX;
+            if (frontOnly)
+            {
+                float faceSign = Facing();
+                if (faceSign > 0f) { minX = bx - config.frontDeadZone; maxX = bx + reach; }
+                else { minX = bx - reach; maxX = bx + config.frontDeadZone; }
+            }
+            else { minX = bx - reach; maxX = bx + reach; }
+            float cx = (minX + maxX) * 0.5f;
+            float w = maxX - minX;
+            Gizmos.DrawWireCube(new Vector3(cx, by, 0f), new Vector3(w, height, 0f));
+        }
+
         private void OnDrawGizmosSelected()
         {
             if (config == null) return;
@@ -551,13 +583,13 @@ namespace NAN2026
             Gizmos.color = new Color(0.35f, 0.7f, 1f);
             Gizmos.DrawWireCube(new Vector3(bx, by, 0f), new Vector3(config.attackRange * 2f, h * 0.7f, 0f));
             Gizmos.color = new Color(1f, 0.6f, 0.2f);
-            Gizmos.DrawWireCube(new Vector3(bx, by, 0f), new Vector3(config.normalHitReach * 2f, h * 0.4f, 0f));
+            DrawReachGizmo(bx, by, h * 0.4f, config.normalHitReach, config.normalFrontOnly);
             Gizmos.color = new Color(1f, 0.35f, 0.1f);
-            Gizmos.DrawWireCube(new Vector3(bx, by, 0f), new Vector3(config.fireHitReach * 2f, h * 0.35f, 0f));
+            DrawReachGizmo(bx, by, h * 0.35f, config.fireHitReach, config.fireFrontOnly);
             Gizmos.color = new Color(0.8f, 0.2f, 1f);
-            Gizmos.DrawWireCube(new Vector3(bx, by, 0f), new Vector3(config.bombHitReach * 2f, h * 0.3f, 0f));
+            DrawReachGizmo(bx, by, h * 0.3f, config.bombHitReach, config.bombFrontOnly);
             Gizmos.color = new Color(0.2f, 0.8f, 1f);
-            Gizmos.DrawWireCube(new Vector3(bx, by, 0f), new Vector3(config.wheelHitReach * 2f, h * 0.25f, 0f));
+            DrawReachGizmo(bx, by, h * 0.25f, config.wheelHitReach, config.wheelFrontOnly);
         }
 
 // 근접 판정(ResolveMeleeHit)이 패링 성공을 알려올 때 호출 — 그로기 카운터 공유

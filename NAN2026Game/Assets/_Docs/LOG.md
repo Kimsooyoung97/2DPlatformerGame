@@ -7671,3 +7671,33 @@ fireknight를 중간으로 두고 hit reach 크기만큼 양옆으로 벌어지�
 - manage_scene(save): UITestScene 저장 성공
 ### 실패와 수정
 없음
+
+
+## [수정] FireKnight range band FrontOnly 반영 + Wheel 공격 안 나가는 문제 수정 — 2026-08-09 (세션 시간)
+### 프롬프트
+front only를 켰는데 range band는 보스 뒤까지 있는데 이건 무슨 경우지?
+그리고 wheel attack 공격이 나오지 않는다
+### 조작 내역
+- **원인 1 (range band)**: LateUpdate()의 활성 공격 리치 띠(rangeBands[2])와 OnDrawGizmosSelected()가
+  FrontOnly 플래그를 안 보고 항상 좌우 대칭(bx-reach ~ bx+reach)으로 그리고 있었음 — 판정
+  (ResolveMeleeHit 호출부의 InFront() 체크)과 표시가 어긋나 있었음.
+- **원인 2 (Wheel 안 나감)**: TryBeginAttack()이 고정 우선순위(Normal>Fire>Bomb>Wheel)였는데,
+  normalCooldown(1.4)이 wheelCooldown(2.5)보다 훨씬 짧아서 Wheel이 쿨타임 다 돌아도 그 시점엔
+  거의 항상 Normal도 이미 준비돼있어 Wheel이 사실상 영구적으로 안 뽑히는 구조였음(실측: config
+  4개 쿨타임 값 확인).
+### 수정
+- MidBoss_FireKnight.cs:
+  - GetActiveAttackRange()에 frontOnly out 파라미터 추가.
+  - LateUpdate(): frontOnly면 Facing() 방향 + frontDeadZone만 반영해 띠를 비대칭으로 그리게 수정.
+  - DrawReachGizmo() 헬퍼 신설, OnDrawGizmosSelected()의 4개 공격 리치 표시도 동일하게 FrontOnly 반영.
+  - TryBeginAttack(): 고정 우선순위 제거, 준비된 공격 중 쿨타임이 가장 먼저 끝난(가장 오래 대기한)
+    걸 고르는 방식으로 교체 — 특정 공격이 영구적으로 안 나가는 걸 방지.
+### 검증
+- refresh_unity(compile=request) -> read_console(filter=CS): 컴파일 에러 0건
+  (script_apply_edits 1건에서 네트워크 오류(WinError 10035) 발생했으나 실제로는 적용됨을
+  파일 재확인으로 확정 — 응답 유실이었을 뿐 반영 자체는 성공)
+- run_tests(EditMode): 250/250 통과
+- manage_scene(save): UITestScene 저장 성공
+### 실패와 수정
+- script_apply_edits 호출 중 네트워크 계층 오류로 성공/실패 여부가 불명확했음 — 파일을 다시 읽어
+  실제 반영 여부를 텍스트로 직접 확인하는 방식으로 검증(재시도 전 상태 재확인 원칙 재확인, FAIL.md #4 계열).
