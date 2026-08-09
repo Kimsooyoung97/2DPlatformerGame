@@ -6971,3 +6971,37 @@ CheckpointTrigger.Update()도 동일한 Enter wasPressedThisFrame을 읽어 Open
   AssetDatabase.FindAssets로 재검색해서 실제 경로(Assets/Scripts/Player/)가 옮겨져 있었음을
   확인 후 정정. 관련 파일(CheckpointTrigger 등) 위치도 전수 재확인해서 다른 파일은 안 옮겨진
   것 확인
+
+
+## [수정] 세이브포인트 중복 방지 + 씬2 스파이크 재진입 시 미생성 버그 수정 — 2026-08-10
+### 프롬프트
+지금 고쳐야할 것이 여러개인데 우선 같은 체크포인트를 한 번 더 오게 되면 중복되지 않게
+해야하고 지금 왜 씬3에서 씬2로 넘어왔는데 씬2의 spike가 생성되지않지?
+
+### 1. 세이브포인트 중복 방지
+- PlayerHealth.cs: duplicateCheckpointRadius(float, 기본 0.5) 필드 추가. SetCheckpoint()에서
+  추가 전에 같은 씬 + 근접 좌표(반경 이내) 기존 항목이 있으면 새로 안 쌓고 조용히 리턴.
+- 검증(실측): 새 지점 추가(+1) -> 완전히 같은 좌표 재호출(변화 없음) -> 반경 안 살짝 다른
+  좌표(변화 없음) -> 확실히 먼 좌표(+1) 순서로 정확히 확인됨.
+
+### 2. 씬3->씬2 재진입 시 스파이크(ThrownWeaponLauncher) 미생성
+- **원인**: ThrownWeaponLauncher.Update() 맨 앞에 `if (SpikeParryEvents.CombatSealed) return;`
+  가 있음. CombatSealed는 static bool이고 [RuntimeInitializeOnLoadMethod(SubsystemRegistration)]
+  로 리셋되는데, 이건 DisableDomainReload 프로젝트 특성상 **Play 세션 시작 시 딱 한 번만** 돌고
+  씬을 다시 로드해도 안 풀린다. 예전엔 씬2를 한 번 클리어(패링 목표 달성)하면 다시 못 돌아오는
+  선형 진행이라 문제가 없었는데, 세이브포인트로 씬 간 자유 왕복이 가능해진 지금은 "이미 클리어한
+  세션 상태"가 재방문 시에도 그대로 남아 스파이크가 영원히 안 나가는 버그가 됨.
+- **실측 재현**: play mode에서 SpikeParryEvents.CombatSealed=true로 강제 설정(씬2를 이미
+  클리어한 상황을 흉내냄) -> SceneManager.LoadScene("AdventureScene2")로 씬3->씬2 재진입을
+  재현 -> 재로드 후에도 CombatSealed=True로 그대로 남아있음을 확인(버그 확정).
+- **수정**: Scene2Director.Start()에 `SpikeParryEvents.CombatSealed = false;` 추가(기존
+  `SpikeParryEvents.Count = 0;` 바로 다음 줄) — 씬이 새로 시작될 때마다 반드시 다시 풀어줌.
+- **재검증**: 같은 재현 시나리오(CombatSealed=true 강제 설정 -> 씬2 재로드) 반복 -> 이번엔
+  재로드 후 CombatSealed=False로 정확히 리셋됨을 확인.
+
+### 검증(공통)
+- refresh_unity(compile=request) -> read_console(types=error): 0건
+- run_tests(EditMode): 229/229 통과
+- manage_scene(save): AdventureScene2 저장 성공
+### 실패와 수정
+없음

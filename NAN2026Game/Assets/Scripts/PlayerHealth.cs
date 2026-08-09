@@ -17,6 +17,8 @@ public class PlayerHealth : MonoBehaviour
     [SerializeField] private float respawnDelay = 0.2f;
     [SerializeField] private float spawnGrace = 0.5f;
     [SerializeField] private float fallKillY = -18f;
+    [Tooltip("이미 저장된 세이브포인트와 이 거리 안이면(같은 씬 기준) 새로 추가하지 않고 중복으로 친다.")]
+    [SerializeField] private float duplicateCheckpointRadius = 0.5f;
 
     [Header("Hazards")]
     [SerializeField] private string hazardNameContains = "Spikes";
@@ -178,6 +180,16 @@ public class PlayerHealth : MonoBehaviour
     {
         checkpoint = position;
         string scene = SceneManager.GetActiveScene().name;
+
+        // 같은 세이브포인트를 다시 밟아도 목록에 중복으로 안 쌓이게 — 같은 씬 + 근접 좌표면
+        // 새 항목을 추가하지 않는다(이미 있는 걸로 충분).
+        for (int i = 0; i < checkpoints.Count; i++)
+        {
+            CheckpointRecord existing = checkpoints[i];
+            if (existing.sceneName == scene && Vector3.Distance(existing.position, position) <= duplicateCheckpointRadius)
+                return;
+        }
+
         checkpoints.Add(new CheckpointRecord(scene, position, scene + " #" + checkpoints.Count));
     }
 
