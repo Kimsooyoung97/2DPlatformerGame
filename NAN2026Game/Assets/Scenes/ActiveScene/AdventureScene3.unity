@@ -43182,8 +43182,29 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 7955019670437265543, guid: abead250eaf98bc47822ad54a6800165, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1421361317}
   m_SourcePrefab: {fileID: 100100000, guid: abead250eaf98bc47822ad54a6800165, type: 3}
+--- !u!1 &1421361316 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7955019670437265543, guid: abead250eaf98bc47822ad54a6800165, type: 3}
+  m_PrefabInstance: {fileID: 1421361315}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1421361317
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1421361316}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c2d8e5cfcaa45ea4f83eea3c4f0950d8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PortalOpen
+  portal: {fileID: 2844415963443426723}
 --- !u!1001 &1432883387
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -78143,6 +78164,7 @@ GameObject:
   - component: {fileID: 1625624064}
   - component: {fileID: 1625624065}
   - component: {fileID: 1625624066}
+  - component: {fileID: 1625624067}
   m_Layer: 0
   m_Name: CM_PlayerCamera
   m_TagString: Untagged
@@ -78300,6 +78322,19 @@ MonoBehaviour:
   AmplitudeGain: 0
   FrequencyGain: 1
   m_NoiseOffsets: {x: 0, y: 0, z: 0}
+--- !u!114 &1625624067
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1625624060}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b14b85b5e2942474da0ca30b4c165cfb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CameraTracking
+  cam: {fileID: 1625624062}
 --- !u!1 &1631214660 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 390456860282783827, guid: 45f562af968c6304a970b66bcaf19902, type: 3}
@@ -82466,6 +82501,10 @@ PrefabInstance:
     - target: {fileID: 7685066566339865185, guid: 18c0c7e958b92354e9ead93fb079b391, type: 3}
       propertyPath: m_Name
       value: Portal
+      objectReference: {fileID: 0}
+    - target: {fileID: 7685066566339865185, guid: 18c0c7e958b92354e9ead93fb079b391, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

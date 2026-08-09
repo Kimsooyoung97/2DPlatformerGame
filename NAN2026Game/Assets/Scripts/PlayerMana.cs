@@ -57,9 +57,10 @@ namespace NAN2026
             if (config == null || config.heartFull == null) return;
             // 독립 루트 캔버스 (플레이어 자식 X — 렌더 안정성) + 해상도 스케일러
             var cgo = new GameObject("MpHud");
+            DontDestroyOnLoad(cgo);
             var canvas = cgo.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvas.sortingOrder = 500;
+            canvas.sortingOrder = 1;
             var scaler = cgo.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1920f, 1080f);
