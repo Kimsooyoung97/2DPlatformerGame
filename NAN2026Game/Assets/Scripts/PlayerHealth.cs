@@ -1,6 +1,8 @@
 using NAN2026.Showroom;
+using Unity.VectorGraphics;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 // 플레이어 HP. 전역 네임스페이스 — 팀 스크립트(OrkanBoss·Spike·Checkpoint2D·OrbProjectile) 계약 준수.
 // 사망: 체크포인트 있으면 그 지점 부활, 없으면 씬 재시작 (SPEC: 죽으면 처음부터)
@@ -213,6 +215,8 @@ public class PlayerHealth : MonoBehaviour
 
 private void Respawn()
     {
+        UnityEngine.SceneManagement.Scene current = SceneManager.GetActiveScene();
+        SceneManager.LoadScene(current.buildIndex);
         transform.position = checkpoint;
         transform.rotation = Quaternion.identity;
         if (body != null)
@@ -291,9 +295,6 @@ private void Respawn()
                 "INVINCIBLE  (F2)", style);
             GUI.color = previous;
         }
-
-        GUI.Label(new Rect(Screen.width - width - 16f, 118f, width, 22f),
-            "   F2 invincible · F3 reset traps");
     }
 
 }
