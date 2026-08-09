@@ -50,6 +50,7 @@ namespace NAN2026
 
         private void Update()
         {
+            if (NAN2026.SpikeParryEvents.CombatSealed) { Destroy(gameObject); return; }   // 날아오던 것도 사라진다
             float dt = Time.deltaTime;
             transform.position += (Vector3)(vel * dt);
             if (spin != 0f) transform.Rotate(0f, 0f, -Mathf.Sign(vel.x) * spin * dt);

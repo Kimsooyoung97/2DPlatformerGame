@@ -6395,3 +6395,172 @@ NAN2026Game/Assets/_Docs/ASSET_CREDITS.md merge=union
 - 팀에 공지 필요: 우리 기록이 LOG.md 에서 더 이상 늘지 않는 이유
 ### 실패와 수정
 - 검증 중 '패링 판정을 타격창 끝으로' 가 누락된 줄 알았으나, 실제 헤더가 '패링 판정을 창 끝으로' 였다. **내 검색어 오류** — 커밋 메시지 문구로 본문을 찾으려 한 탓. 실제 누락 아님
+
+
+## [수정] Scene2 맵 5구간 절단(206→131u) + 보스 등장 시점 지연 — 2026-08-09 20:24
+### 프롬프트
+맵 x : 54 ~81 / x 155 ~ 170세로 방향으로 맵을 자른다음 삭제하고 빈 공간은 나머지 부분으로 서로 붙일 수 있니? 지금 맵이 너무 길고 용량도 커서 줄일려고 해
+> 맥락: 이후 x 91~99·117~125·18~30 추가 절단 지시, 그리고 '스파이크 패링 5회 채우기 전에는 보스가 안 나오게' 지시
+### 조작 내역
+**① 목적 정정 — 용량이 아니라 길이**
+- 실측: 씬 파일 1.88MB, 절단분 약 0.4MB → 빌드 88MB 대비 **0.5% 미만**. 용량 목적으로는 무의미함을 먼저 보고하고 목적을 확인받음
+- 88MB 의 실체는 텍스처(.png 원본 258MB). 용량은 임포트 설정으로 별도 처리해야 한다
+**② 절단 5구간 (오른쪽부터 잘라 좌표 밀림 방지)**
+- x 155~170 → x 54~81 → x 117~125 → x 91~99 → x 18~30
+- 각 구간마다: 타일 제거 → 오른쪽 타일을 폭만큼 당김(타일·색·transform matrix 보존) → 구간 내 오브젝트 삭제 → 오른쪽 오브젝트 이동
+- 이동 대상은 **조상이 이동 집합에 없는 최상위만** 선택. 부모를 옮기면 자식이 따라오므로 이중 이동 방지
+- UI Canvas 하위(BossHealthBar 등)는 화면 좌표라 제외
+- Stage_CameraBounds(BoxCollider2D) size·offset 을 절단 폭만큼 축소
+**③ 보스 등장 지연 (Scene2Director)**
+- 원인: MinoBoss 가 처음부터 activeSelf=True 이고 AI·렌더·콜라이더가 전부 켜져 있어, 패링 5회를 채우기 전에도 보스가 보이고 움직였다
+- `CacheBossParts` / `SetBossRevealed(bool)` 신설. Start 에서 숨기고, Brighten 의 **카메라 팬 직전**에 드러낸다(팬이 빈 자리를 비추지 않도록)
+- **GameObject 자체는 계속 켜둔다** — `GameObject.Find("MinoBoss")` 와 보스에 부착된 핍(자식)이 살아 있어야 하기 때문. 컴포넌트(AI·SpriteRenderer·Collider)만 끈다
+- debugSkipToBoss=true 경로에서는 즉시 드러내도록 분기 추가
+### 검증
+- **맵 길이 206u → 131u (-75u, 36.4%)**. 순수 이동시간 29.4초 → 18.7초
+- **바닥 구멍 전 구간 전수 스캔 → 0개**. 이음새 5곳(x18·41·78·95·105) 표면 높이 전부 20 으로 연속 확인
+- **콜라이더 물리 검증**: 재생성 후 x -3.0~128.0. 레이캐스트로 x=125 바닥 있음 / x=128·132·138·142 없음 → 타일맵 끝(127)과 일치
+- 카메라 바운드 0~200 → 0~125
+- 주요 오브젝트: Player 4.3 / SpikeOrb 17.5·39·44·77·101 / MinoBoss 113.0 / Portal 119.4
+- Global Light 2D 저장 직전 0.03 복구 확인(작업 중 1.0 으로 밝혀뒀음)
+- 리플렉션: Scene2Director 에 CacheBossParts·SetBossRevealed·bossAi·bossSr·bossCol 전부 로드 확인
+- 씬 저장 확인(SaveScene=True, dirty=False)
+- **사용자 눈 판정 필요**: (1) 이음새 5곳이 자연스러운지 (2) 소품이 사라진 구간이 허전하지 않은지 (3) SpikeOrb_2(39)·_3(44) 가 5u 간격으로 몰려 보이는지 (4) 패링 5회 전에 보스가 안 보이는지 (5) 밝아진 뒤 보스가 제대로 나타나는지
+### 실패와 수정
+- **1차 절단에서 1칸 오차**: 구간을 [lo,hi] 양끝 포함으로 지우면서(28칸) 이동은 hi-lo(27칸)만 해 이음새마다 빈 열이 생겼다. 오른쪽 전체를 1칸씩 더 당겨 메웠고, 2차부터는 폭을 **hi-lo+1** 로 계산해 재발 없음
+- **카메라 바운드를 처음에 못 잡음**: 이름에 'bound' 가 들어간 **PolygonCollider2D** 만 찾았는데 실제로는 BoxCollider2D 였다. 컴포넌트 타입을 가정하지 말고 실측할 것
+- **콜라이더가 자동으로 안 줄어듦**: GenerateGeometry() 만으로는 TilemapCollider2D 가 이전 범위를 유지했다. Tilemap.RefreshAllTiles + 콜라이더 enable 토글까지 해야 반영됐다. 레이캐스트로 물리 검증하지 않았으면 보이지 않는 바닥을 남길 뻔했다
+
+
+## [수정] Scene2 주인공 시야광 복구 — 2026-08-09 20:28
+### 프롬프트
+맵은 어두워도 캐릭터 주변은 밝았는데 그 부분이 사라졌어 수정해
+### 조작 내역
+- 원인: `Player/PlayerVisionLight` 의 **GameObject 가 비활성(activeSelf=False)** 이었다. 삭제된 게 아니고 값(intensity 0.55 / outer 4.5 / inner 0.6)도 그대로 남아 있었다
+- 내 맵 절단과는 무관하다 — 시야광 위치 x=4.3 은 절단 구간(18~30, 54~81, 91~99, 117~125, 155~170) 어디에도 안 걸린다
+- 진짜 원인 구조: `IntroSequencer` 가 인트로 암전 중 `SetActive(false)` 로 껐다가 연출 완주 시 `SetActive(true)` 로 켠다.
+  그런데 **AdventureScene2 에는 IntroSequencer 가 0개**다 → 이 씬에는 시야광을 되켜줄 주체가 없다.
+  따라서 한 번 꺼진 채로 저장되면 영구히 꺼진 상태로 플레이된다
+- 조치: `SetActive(true)` 로 복구 후 씬 저장
+### 검증
+- 복구 후 activeSelf=True / activeInHierarchy=True 확인
+- Light2D 값 보존 확인: intensity 0.55, outerRadius 4.5, innerRadius 0.6, enabled=True
+- 로컬 위치 (0.00, 0.40, 0.00) — Player 자식이므로 따라다닌다
+- 현재 씬 IntroSequencer 개수 = 0 실측
+- Global Light 2D = 0.03 유지 확인 (던전 암전 그대로)
+- 씬 저장 확인(SaveScene=True, dirty=False)
+- **사용자 눈 판정 필요**: 재생 시 캐릭터 주변 반경 4.5u 가 밝아지는지
+### 남은 위험
+- 시야광은 `RealPlayer.prefab` 의 자식이고 씬에는 **프리팹 오버라이드**로 저장된다. 프리팹을 교체·재적용하면 다시 꺼질 수 있다
+- 다른 씬(1·3·4)의 시야광 상태는 텍스트 스캔으로 확인 불가했다(프리팹 자식이라 씬 파일에 m_Name 으로 안 나타남). 각 씬을 열어 확인해야 한다
+### 실패와 수정
+- 없음
+
+
+## [조사] 패링 5회 달성 후에도 구체가 날아와 피격되는 현상 — 2026-08-09 20:34
+### 프롬프트
+[조사]스파이크 패링 5번을 채웠음에도 불구하고 그 전에 날라오던 구체가 날라와서 캐릭을 떄리는 현상이 있어 이거 어떻게 고치는게 좋을까?
+### 조사 결과
+**먼저 '구체'의 정체를 갈랐다 — 씬에는 두 계열이 있다**
+- `SpikeBallTrap` 5개(SpikeOrb_1·2·3·4·6): 천장에서 돌진하는 가시구. **콜라이더가 0개**라 `OnTriggerEnter2D` 가 절대 발동하지 않는다. 데미지는 `Update()` 의 조기 패링 경로에서 `ResolveHit()` 로만 난다
+- `ThrownWeaponLauncher` 9개(천장구체_*): `천장구체_투사체`(`ThrownProjectile`)를 생성해 날린다. **피격은 이쪽이다** — ThrownProjectile 77행이 `SendMessage("TakeDamage")`
+**Brighten() 의 정리 코드(149~152행)와 그 한계**
+```
+foreach (ThrownWeaponLauncher) l.enabled = false;      // 새 발사 차단
+foreach (ThrownProjectile)     Destroy(gameObject);    // 비행 중 투사체 제거
+foreach (SpikeBallTrap)        mb.enabled = false;     // 가시구 정지
+```
+**확정된 결함 3건**
+1. **일회성 정리다.** Brighten 시작 순간 딱 한 번만 훑는다. 이후 brightenTime 1.8 + revealHold 1.6 + brightenHold 0.6 = **약 4초** 동안 연출이 이어지는데, 그 사이에 남거나 새로 생긴 것은 다시 걸러지지 않는다
+2. **`FindObjectsByType(FindObjectsSortMode.None)` 은 비활성 오브젝트를 제외한다.** 그 순간 비활성이던 런처·투사체는 정리에서 빠지고, 나중에 활성화되면 되살아난다
+3. **`SwingingBladeTrap`(x 17.5) 은 정리 대상에 아예 없다.** 이름이 다르다는 이유로 세 줄 어디에도 안 걸린다
+**부수 결함**
+- `SpikeBallTrap` 을 `enabled = false` 로만 끄면 phase 2(돌진 중)였던 가시구가 **공중에 멈춘 채 그대로 보인다**. Break 를 태우지 않아 스프라이트가 꺼지지 않는다
+- 스크립트 실행 순서상 `SpikeParryEvents.Report()`(5회 도달)와 `Scene2Director.Update()` 감지 사이에 최소 1프레임 지연이 있다. 그 프레임에 발사된 투사체는 Destroy 되지만, 판정이 같은 프레임에 성립하면 통과할 수 있다
+**개선 방향(미실행)**
+- A안 **차단 플래그 + 지속 정리**: `SpikeParryEvents` 에 `CombatSealed` 정적 플래그를 두고, 런처·트랩이 각자 Update 첫 줄에서 이를 보고 즉시 반환하게 한다. 일회성 훑기가 아니라 **원천 차단**이라 타이밍 구멍이 없다. 투사체도 자기 Update 에서 스스로 소멸
+- B안 **정리 반복**: Brighten 코루틴이 연출 4초 동안 매 프레임 정리를 반복. 간단하지만 매 프레임 FindObjectsByType 이라 비용이 크고 근본 차단은 아니다
+- C안 **정리 범위 보정만**: FindObjectsInactive.Include 로 바꾸고 SwingingBladeTrap 추가, SpikeBallTrap 은 enabled=false 대신 Break 호출. 최소 변경이지만 1번(일회성) 은 남는다
+- 권장: **A + C**. A 가 타이밍 구멍을 막고, C 가 이미 떠 있는 잔존물을 치운다
+### 검증
+해당 없음 (파일 수정 없음)
+### 커밋
+해당 없음(무수정)
+
+
+## [수정] 패링 5회 달성 시 비행 중 구체까지 정지·소멸 — 2026-08-09 20:38
+### 프롬프트
+그냥 패링 5번 채우면 날라오던 구체도 멈추고 사라지게 만들어.
+### 조작 내역
+**접근 전환: 감독이 한 번 훑는 방식 → 각자 스스로 멈추는 방식**
+- 기존 `Brighten()` 은 시작 순간 딱 한 번만 정리했다. 연출이 brightenTime 1.8 + revealHold 1.6 + brightenHold 0.6 = **약 4초** 이어지는 동안 생긴 것은 못 걸렀다
+- `SpikeParryEvents.CombatSealed` 정적 플래그 신설. 목표 달성 순간 켜고, 각 스크립트가 **Update 첫 줄에서** 이를 보고 스스로 처리한다 → 타이밍 구멍이 원천적으로 없다
+- `ResetStaticsOnPlay` 에 `CombatSealed = false` 동봉 (DisableDomainReload 프로젝트 필수)
+**개별 반응**
+- `Scene2Director.Update`: 목표 달성 시 `CombatSealed = true` → 그 다음 Brighten 코루틴 시작
+- `ThrownWeaponLauncher.Update`: 봉인이면 즉시 return → **새 발사 없음**
+- `ThrownProjectile.Update`: 봉인이면 `Destroy(gameObject)` → **날아오던 것이 사라짐** (실제 피격 주체는 이쪽이었다)
+- `SpikeBallTrap.Update`: 봉인이면 phase 3 이 아닌 경우 `Break(false)` → 돌진 중이던 가시구가 **멈추고 스프라이트가 꺼진다**. 리스폰도 하지 않는다
+**일회 정리도 함께 보정**
+- `FindObjectsByType(...)` → `FindObjectsByType(FindObjectsInactive.Include, ...)` 3곳. 기본값이 비활성 제외라 꺼져 있던 개체가 나중에 되살아났다
+- `SwingingBladeTrap` 정리 추가 — 이름이 달라 그동안 세 줄 어디에도 안 걸려 있었다
+### 검증
+- 컴파일 성공, read_console error 0건
+- 리플렉션 실행: `CombatSealed` 필드 존재 확인, **true 로 켠 뒤 `ResetStaticsOnPlay()` 호출 → False 로 돌아옴** (재생 간 상태 잔존 없음)
+- 참조 개소 실측: ThrownWeaponLauncher 1 / ThrownProjectile 1 / SpikeBallTrap 1 / Scene2Director 3
+- `FindObjectsInactive.Include` 3곳 반영, `SwingingBladeTrap` 정리 포함 확인
+- **사용자 눈 판정 필요**: (1) 5회 채운 순간 날아오던 구체가 사라지는지 (2) 돌진 중이던 가시구가 공중에 남지 않는지 (3) 연출 4초 동안 새 투사체가 안 나오는지 (4) 보스전 시작 후 트랩이 되살아나지 않는지
+### 실패와 수정
+- 없음
+
+
+## [수정] 보스 위 중복 핍 제거 + 남은 핍을 보스와 동시 등장 — 2026-08-09 20:44
+### 프롬프트
+[수정]보스 위에 다이아몬드 5개 2개씩 뜨는데 제일 위에 있는 다이아몬드 5개는 아무 의미 없는거 같은데 삭제하고 보스와 같이 뜨게 해야지 처음부터 뜨면 이건 버그야
+### 조작 내역
+**핍이 두 종류였음을 실측으로 확인**
+- `Scene2Director.BuildPips()` → "ParryPips" 노랑(1, 0.85, 0.2), pipOffsetY **5.2**(제일 위), 보스 자식. **스파이크 패링 진행** 표시
+- `MinoBoss.BuildGroggyPips()` → "GroggyPips" 주황(1, 0.55, 0.15), 보스 자식. **보스 그로기 진행** 표시
+**① 위쪽 노란 핍(ParryPips) 제거**
+- 화면 상단 라벨 `스파이크 패링 n / 5` 가 **같은 정보를 이미 표시**한다. 게다가 그 단계에는 보스가 멀리 있어 보이지도 않는다 → 중복이자 무의미
+- `BuildPips()` / `RefreshPips()` 메서드와 `pips` 필드까지 통째로 제거(사문화 방지)
+**② 남은 GroggyPips 를 보스와 동시 등장**
+- 원인: `MinoBoss.Start()` 가 `BuildGroggyPips()` 를 부르는데, 스크립트 실행 순서상 감독이 보스를 숨기기 전에 Start 가 돌면 핍이 먼저 생성돼 **처음부터 보인다**
+- `SetBossRevealed(bool)` 이 보스 자식의 **모든 Renderer** 를 함께 토글하도록 확장. 보스 본체만 숨기면 핍이 허공에 떠 있게 된다
+- 실행 순서 두 경우 모두 안전: Start 가 먼저 돌았으면 그 핍을 숨기고, 나중이면 컴포넌트가 disabled 라 Start 자체가 지연돼 등장 시점에 생성된다
+### 검증
+- 컴파일 성공, read_console error 0건
+- 리플렉션: BuildPips **없음(제거됨)** / RefreshPips **없음(제거됨)** / 필드 pips **없음(제거됨)** / SetBossRevealed·CacheBossParts 있음
+- 소스 잔여 참조: `pips` 0회 (사문화 코드 없음)
+- SetBossRevealed 본문에 `boss.GetComponentsInChildren<Renderer>(true)` 토글 포함 확인
+- **사용자 눈 판정 필요**: (1) 다이아몬드가 한 줄만 뜨는지 (2) 패링 5회를 채우기 전에는 안 보이는지 (3) 보스가 나타날 때 핍도 같이 뜨는지 (4) 그로기 진행에 따라 ◇→◆ 로 차는지
+### 실패와 수정
+- 메서드 제거 시 문자열 치환이 빗나갔다. 소스에는 `'\u25c6'` 유니코드 이스케이프로 적혀 있는데 치환문에는 리터럴 '◆' 를 넣었기 때문. **필드는 이미 지운 뒤라 일시적으로 컴파일이 깨진 상태**였고, 줄 범위 탐색(중괄호 깊이 계산)으로 메서드 전체를 제거해 해소
+  교훈: 소스에 유니코드가 있으면 리터럴로 치환문을 만들지 말고 **줄 번호·중괄호 매칭**으로 다룬다
+
+
+## [구현] RealPlayer·UICanvas DontDestroyOnLoad 싱글톤화 — 2026-08-09 (세션 시간)
+### 프롬프트
+[구현] 현재 씬의 RealPlayer와 UICanvas를 싱글톤으로 유지하며 DontDestroy시켜서 포탈을 타고
+다음 씬을 넘어가도 정보를 들고 있게끔 할거야
+### 조작 내역
+- 신규 재사용 컴포넌트 Assets/Scripts/PersistentSingleton.cs 작성:
+  - singletonId(string)로 개체를 식별, static Dictionary로 중복 감지 → 이미 살아있는 원본이
+    있으면 새로 로드된 씬의 중복 인스턴스를 Destroy, 없으면 DontDestroyOnLoad
+  - DisableDomainReload 프로젝트 규칙(FAIL.md #H3/#28) 준수: RuntimeInitializeOnLoadMethod
+    (SubsystemRegistration)로 static Dictionary를 플레이 세션 시작마다 초기화
+- AdventureScene1의 RealPlayer(singletonId="Player"), UI Canvas(singletonId="UICanvas",
+  실제 오브젝트명 공백 포함 확인)에 컴포넌트 부착
+- 사전 조사: Portal.cs / PortalUpKey.cs 둘 다 SceneManager.LoadScene()만 하고 플레이어 위치
+  재배치 로직이 전혀 없음을 확인 — 이번 요청 범위 밖이라 별도 구현 안 함, 완료 보고에 명시
+### 검증
+- refresh_unity(compile=request) -> read_console(types=error): 0건
+- run_tests(EditMode): 229/229 통과
+- manage_scene(save): AdventureScene1 저장 성공
+- 실측 검증: play mode 진입 -> GameObject.Find("RealPlayer")/("UI Canvas").scene.name이
+  둘 다 정확히 "DontDestroyOnLoad"로 확인됨 -> play mode 정상 종료
+### 실패와 수정
+- LOG.md에 먼저 기록했다가, STATE.md 하단의 "작업 기록은 LOG_donghyun.md에만 쓴다" 지시를
+  뒤늦게 인지하고 LOG.md에서 해당 항목을 제거한 뒤 이 파일에 다시 기록함. 오늘 세션 이전
+  항목들(GameOverController 수정 등)도 LOG.md에 잘못 기록됐을 수 있어 별도로 사용자에게
+  확인 요청함.

@@ -7701,3 +7701,31 @@ front only를 켰는데 range band는 보스 뒤까지 있는데 이건 무슨 �
 ### 실패와 수정
 - script_apply_edits 호출 중 네트워크 계층 오류로 성공/실패 여부가 불명확했음 — 파일을 다시 읽어
   실제 반영 여부를 텍스트로 직접 확인하는 방식으로 검증(재시도 전 상태 재확인 원칙 재확인, FAIL.md #4 계열).
+
+
+## [수정] GameOverController 엔터키 부활 미작동 수정 — 2026-08-09 (세션 시간)
+### 프롬프트
+[조사] 이번엔 mcp 연결해서 확인하는데 Player가 죽으면 GameOverPanel이 나오고 엔터키를 누르면 다시
+리스폰 돼야 하는데 왜 안되는지 찾아봐
+(후속) 고쳐주고 checkpoint 리스폰해줘
+### 조사 결과 (원인)
+GameOverController.Update()가 엔터키 입력은 정확히 감지하지만, 그 다음 Time.timeScale=1f만
+실행하고 끝남. titleSceneName 필드와 using UnityEngine.SceneManagement가 있는데도
+SceneManager.LoadScene() 호출이 파일 전체에 없었음(프로젝트 전체 grep으로 PauseMenu.cs 등
+동일 패턴과 대조해 확정) — 미완성 구현으로 판단. PlayerHealth.Respawn()은 private이라
+외부에서 부를 방법도 없었음.
+### 조작 내역
+- PlayerHealth.cs: private Respawn() 앞에 public RespawnNow() 래퍼 추가(외부에서 명시적
+  부활 트리거용).
+- GameOverController.cs:
+  - 클래스 상단 주석을 "타이틀로 이동"에서 "체크포인트 부활"로 갱신
+  - 이제 안 쓰는 titleSceneName 필드(및 관련 Header/Tooltip) 삭제
+  - Update()의 엔터키 분기에 gameOverPanel.SetActive(false) + playerHealth.RespawnNow() 추가
+  - SuppressRespawnOnDeath=true는 유지(Kill()의 자동 Respawn 예약과 경합 방지 목적 그대로 유효)
+### 검증
+- refresh_unity(compile=request) -> read_console(filter_text=CS): 컴파일 에러 0건
+- run_tests(EditMode): 229/229 통과 (전체 테스트 수가 지난 세션 250에서 줄었는데 이번 변경과
+  무관 — 다른 세션/팀원 작업으로 추정, 실패는 0건)
+- manage_scene(save): AdventureScene1 저장 성공(씬 오브젝트 자체는 변경 없음)
+### 실패와 수정
+없음

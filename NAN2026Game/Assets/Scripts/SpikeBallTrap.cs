@@ -53,6 +53,8 @@ namespace NAN2026
 
         void Update()
         {
+            // 패링 목표를 채우면 돌진 중이던 것도 멈추고 사라진다. 리스폰도 하지 않는다.
+            if (NAN2026.SpikeParryEvents.CombatSealed) { if (phase != 3) Break(false); return; }
             if (config == null || player == null) return;
             if (phase == 3)
             {

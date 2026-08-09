@@ -31,6 +31,7 @@ namespace NAN2026
 
         private void Update()
         {
+            if (NAN2026.SpikeParryEvents.CombatSealed) return;   // 패링 목표 달성 후 새 발사 금지
             if (config == null || player == null || Time.time < nextReady) return;
             int inFlight = ThrownProjectile.Alive + reserved;
             if (inFlight == 0) waveBudget = Random.value < config.twinChance ? 2 : 1; // 새 파도 예산 추첨
