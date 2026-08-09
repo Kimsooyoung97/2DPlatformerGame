@@ -6537,3 +6537,30 @@ foreach (SpikeBallTrap)        mb.enabled = false;     // 가시구 정지
 ### 실패와 수정
 - 메서드 제거 시 문자열 치환이 빗나갔다. 소스에는 `'\u25c6'` 유니코드 이스케이프로 적혀 있는데 치환문에는 리터럴 '◆' 를 넣었기 때문. **필드는 이미 지운 뒤라 일시적으로 컴파일이 깨진 상태**였고, 줄 범위 탐색(중괄호 깊이 계산)으로 메서드 전체를 제거해 해소
   교훈: 소스에 유니코드가 있으면 리터럴로 치환문을 만들지 말고 **줄 번호·중괄호 매칭**으로 다룬다
+
+
+## [구현] RealPlayer·UICanvas DontDestroyOnLoad 싱글톤화 — 2026-08-09 (세션 시간)
+### 프롬프트
+[구현] 현재 씬의 RealPlayer와 UICanvas를 싱글톤으로 유지하며 DontDestroy시켜서 포탈을 타고
+다음 씬을 넘어가도 정보를 들고 있게끔 할거야
+### 조작 내역
+- 신규 재사용 컴포넌트 Assets/Scripts/PersistentSingleton.cs 작성:
+  - singletonId(string)로 개체를 식별, static Dictionary로 중복 감지 → 이미 살아있는 원본이
+    있으면 새로 로드된 씬의 중복 인스턴스를 Destroy, 없으면 DontDestroyOnLoad
+  - DisableDomainReload 프로젝트 규칙(FAIL.md #H3/#28) 준수: RuntimeInitializeOnLoadMethod
+    (SubsystemRegistration)로 static Dictionary를 플레이 세션 시작마다 초기화
+- AdventureScene1의 RealPlayer(singletonId="Player"), UI Canvas(singletonId="UICanvas",
+  실제 오브젝트명 공백 포함 확인)에 컴포넌트 부착
+- 사전 조사: Portal.cs / PortalUpKey.cs 둘 다 SceneManager.LoadScene()만 하고 플레이어 위치
+  재배치 로직이 전혀 없음을 확인 — 이번 요청 범위 밖이라 별도 구현 안 함, 완료 보고에 명시
+### 검증
+- refresh_unity(compile=request) -> read_console(types=error): 0건
+- run_tests(EditMode): 229/229 통과
+- manage_scene(save): AdventureScene1 저장 성공
+- 실측 검증: play mode 진입 -> GameObject.Find("RealPlayer")/("UI Canvas").scene.name이
+  둘 다 정확히 "DontDestroyOnLoad"로 확인됨 -> play mode 정상 종료
+### 실패와 수정
+- LOG.md에 먼저 기록했다가, STATE.md 하단의 "작업 기록은 LOG_donghyun.md에만 쓴다" 지시를
+  뒤늦게 인지하고 LOG.md에서 해당 항목을 제거한 뒤 이 파일에 다시 기록함. 오늘 세션 이전
+  항목들(GameOverController 수정 등)도 LOG.md에 잘못 기록됐을 수 있어 별도로 사용자에게
+  확인 요청함.
