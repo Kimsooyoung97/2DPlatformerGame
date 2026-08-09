@@ -30,6 +30,12 @@ namespace NAN2026
         [Tooltip("이 높이차를 넘어가면(점프) 맞지 않는다. 0이면 세로 제한 없음")]
         public float attackHeight = 1.2f;
 
+        [Header("공격 예열 (= 플레이어 반응 시간)")]
+        [Tooltip("이 시간 동안 제자리에서 색상 점멸로 경고한 뒤 공격에 들어간다")]
+        public float attackWindup = 0.55f;
+        public float windupFlashSpeed = 12f;
+        public Color windupFlashColor = new Color(1f, 0.55f, 0.2f);
+
         [Header("패링")]
         [Tooltip("패링 성공 시 격돌 연출. 보스·함정과 같은 자산을 쓴다")]
         public SpikeBallConfig clashConfig;

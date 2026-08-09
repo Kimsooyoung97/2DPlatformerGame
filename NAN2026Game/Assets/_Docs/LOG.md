@@ -7016,3 +7016,34 @@ Secen3다음에는 Secen4 진행하도록 했는데
 - 잡몹 구현 시 보스에 있는 윈드업 문법을 옮기지 않았다. '패링 가능' 은 판정 연결만으로 성립하지 않고 **예고 시간이 함께 있어야** 성립한다
 ### 커밋
 해당 없음(무수정)
+
+
+## [수정] 잡몹 공격 예열 신설 + 쿨다운·산개 확대 — 2026-08-09 09:17
+### 프롬프트
+[수정] 윈드업 상태 신설하고 쿨다운도 적용시켜, 그리고 Knight도 Archor처럼 공격 시간이 랜덤으로 만들어 줄 수 있니?
+### 조작 내역
+**① 예열(Windup) 상태 신설 — MinoBoss·DemonBoss 문법 이식**
+- NAN2026.Core/EnemyStateLogic: 상태 상수 `Windup = 5` 추가, 순수 함수 `WindupFinished(elapsed, dur)` / `FlashPulse01(elapsed, speed)` 신설
+  · FlashPulse01 은 Mathf.PingPong 과 동일한 삼각파를 UnityEngine 비의존으로 재현 → EditMode 테스트 가능
+- EnemyConfig: `attackWindup` / `windupFlashSpeed` / `windupFlashColor` 3필드 추가
+- EnemyBase: 공격 진입을 `SetState(Attack)` → **`SetState(Windup)`** 으로 변경. 예열 중에는 idle 프레임 유지 + 색상 펄스 경고, 종료 시 색 원복 후 Attack 진입
+- 연출 락(InputLocked) 중에는 예열도 취소하고 Idle 로 되돌린다(색 원복 포함)
+- TakeDamage 진입 시 색을 흰색으로 되돌려 예열 점멸 색이 피격 플래시와 섞이지 않게 함
+**② 쿨다운 연장 + ③ 공격 시점 랜덤화**
+- Knight 는 이미 지터가 있었으나 Archer 의 절반이었음(jitter 0.6 vs 1.2, stagger 0.8 vs 1.6) → **Archer 수준 이상으로 상향**
+- Knight: attackCooldown 1.5 → **2.0**, cooldownJitter 0.6 → **1.2**, fireStagger 0.8 → **1.6**
+- Archer: attackCooldown 2.0 → **2.5**, cooldownJitter 1.2 → **1.4**, fireStagger 1.6 → **2.0**
+**결과 수치 (실측 재계산)**
+- Knight 예고 **0.20초 → 0.75초** (예열 0.55 + 모션 내 0.20). 데몬 클리브(0.75초)와 동일 감각
+- Archer 예고 0.41초 → **0.71초** (+ 화살 비행 1.0초 유예는 별도)
+- 공격 사이클: Knight 2.45~3.65초(평균 3.05) / Archer 3.02~4.42초(평균 3.72). 이전 Knight 평균 2.0초 대비 **밀도 약 34% 감소**
+- 사이클 폭이 1.2~1.4초로 넓어져 다수 개체가 동기화되지 않는다
+### 검증
+- 컴파일 0, read_console error/exception 0건
+- EditMode **227/227 통과**, 실패 0 (예열·삼각파 테스트 3개 신규)
+- 리플렉션 실행 검증: Windup 상수=5 / WindupFinished(0.3,0.55)=False·(0.55,0.55)=True / FlashPulse01 (0,12)=0·(1/12,12)=1·(2/12,12)=0 — 삼각파 주기 정상
+- EnemyConfig 신규 필드 3종 타입 확인(attackWindup:Single, windupFlashSpeed:Single, windupFlashColor:Color)
+- Config 재읽기 후 예고·사이클 재계산값 위와 같이 확인
+- **사용자 눈 판정 필요**: (1) 공격 전 주황 점멸이 보이는지 (2) 그 점멸을 보고 Space 패링이 되는지 (3) 12마리 공격이 뭉치지 않고 흩어지는지 (4) 예열 0.55초가 답답하지 않은지 — 답답하면 0.45, 더 쉽게는 0.7
+### 실패와 수정
+- 없음

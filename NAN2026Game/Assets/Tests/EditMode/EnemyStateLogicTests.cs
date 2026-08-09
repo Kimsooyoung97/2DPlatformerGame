@@ -95,6 +95,31 @@ namespace NAN2026.Tests
             Assert.AreEqual(0f, EnemyStateLogic.InitialDelay(0f, 1f), 0.0001f);
         }
 
+        [Test] public void 예열_종료판정()
+        {
+            Assert.IsFalse(EnemyStateLogic.WindupFinished(0.3f, 0.55f));
+            Assert.IsTrue(EnemyStateLogic.WindupFinished(0.55f, 0.55f));
+            Assert.IsTrue(EnemyStateLogic.WindupFinished(0f, 0f));
+        }
+
+        [Test] public void 점멸_삼각파는_0에서_1_사이를_왕복한다()
+        {
+            Assert.AreEqual(0f, EnemyStateLogic.FlashPulse01(0f, 12f), 0.0001f);
+            Assert.AreEqual(1f, EnemyStateLogic.FlashPulse01(1f / 12f, 12f), 0.0001f);
+            Assert.AreEqual(0f, EnemyStateLogic.FlashPulse01(2f / 12f, 12f), 0.0001f);
+            for (float e = 0f; e < 1f; e += 0.017f)
+            {
+                float v = EnemyStateLogic.FlashPulse01(e, 12f);
+                Assert.GreaterOrEqual(v, 0f);
+                Assert.LessOrEqual(v, 1f);
+            }
+        }
+
+        [Test] public void 점멸속도0이면_고정()
+        {
+            Assert.AreEqual(0f, EnemyStateLogic.FlashPulse01(5f, 0f), 0.0001f);
+        }
+
         [Test] public void 다섯대_맞으면_죽는다()
         {
             Assert.IsFalse(EnemyStateLogic.IsDead(4, 5));

@@ -18,17 +18,20 @@ MonoBehaviour:
   aggroRange: 14
   attackRange: 10
   walkSpeed: 1.2
-  attackCooldown: 2
+  attackCooldown: 2.5
   stopDistance: 6
   separation: 1.6
-  fireStagger: 1.6
-  cooldownJitter: 1.2
+  fireStagger: 2
+  cooldownJitter: 1.4
   attackDur: 0.92
   hitWinS: 0.45
   hitWinE: 0.65
   damage: 1
   frontDeadZone: 0.5
   attackHeight: 1.2
+  attackWindup: 0.3
+  windupFlashSpeed: 10
+  windupFlashColor: {r: 1, g: 0.55, b: 0.2, a: 1}
   clashConfig: {fileID: 11400000, guid: 31b4bd26897983b4fb8fcb4703f841b5, type: 2}
   fps: 12
   snapToGround: 1

@@ -73,12 +73,31 @@ namespace NAN2026
                 if (stateT >= config.hurtLock) SetState(EnemyStateLogic.Idle);
                 return;
             }
+            // 공격 예열: 제자리에서 색상 점멸로 경고. 이 시간이 플레이어의 반응 시간이다.
+            if (state == EnemyStateLogic.Windup)
+            {
+                Anim(idleFrames, true);
+                if (sr != null && config.windupFlashSpeed > 0f)
+                    sr.color = Color.Lerp(Color.white, config.windupFlashColor,
+                                          EnemyStateLogic.FlashPulse01(stateT, config.windupFlashSpeed));
+                if (EnemyStateLogic.WindupFinished(stateT, config.attackWindup))
+                {
+                    if (sr != null) sr.color = Color.white;
+                    SetState(EnemyStateLogic.Attack);
+                }
+                return;
+            }
+
             if (player == null) { player = PlayerLocator.FindTransform(); Anim(idleFrames, true); return; }
 
             // 연출(인트로·컷) 중에는 적도 멈춘다. 플레이어만 묶이면 일방적으로 맞는다.
             if (PlayerController2D.InputLocked)
             {
-                if (state != EnemyStateLogic.Attack) { SetState(EnemyStateLogic.Idle); Anim(idleFrames, true); return; }
+                if (state != EnemyStateLogic.Attack)
+                {
+                    if (sr != null) sr.color = Color.white;
+                    SetState(EnemyStateLogic.Idle); Anim(idleFrames, true); return;
+                }
             }
 
             float dx = Mathf.Abs(player.position.x - transform.position.x);
@@ -88,7 +107,7 @@ namespace NAN2026
             if (state == EnemyStateLogic.Attack) { DoAttack(dx, face); return; }
 
             int want = EnemyStateLogic.DecideWithHold(dx, config.aggroRange, config.attackRange, Time.time >= nextAtk);
-            if (want == EnemyStateLogic.Attack) { SetState(EnemyStateLogic.Attack); return; }
+            if (want == EnemyStateLogic.Attack) { SetState(EnemyStateLogic.Windup); return; }
             if (want == EnemyStateLogic.Walk && !BlockedAhead(face))
             {
                 float step = EnemyStateLogic.MoveStep(dx, config.stopDistance, config.walkSpeed, Time.deltaTime);
@@ -243,6 +262,7 @@ namespace NAN2026
         public void TakeDamage(int amount)
         {
             if (state == EnemyStateLogic.Death) return;
+            if (sr != null) sr.color = Color.white;   // 예열 점멸 색이 남지 않게
             hits++;
             if (flashCo != null) StopCoroutine(flashCo);
             flashCo = StartCoroutine(FlashRed());

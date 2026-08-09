@@ -9,6 +9,7 @@ namespace NAN2026.Core
         public const int Attack = 2;
         public const int Hurt = 3;
         public const int Death = 4;
+        public const int Windup = 5;   // 공격 예열(경고). 이 시간이 곧 플레이어의 반응 시간이다
 
         /// 평상시 상태 결정. distX 는 수평 거리(절대값).
         /// 사거리 안이고 쿨다운이 끝났으면 공격, 인지 범위 안이면 접근, 아니면 대기.
@@ -60,6 +61,21 @@ namespace NAN2026.Core
         {
             if (stagger <= 0f) return 0f;
             return rand01 * stagger;
+        }
+
+        /// 예열 종료 여부.
+        public static bool WindupFinished(float elapsed, float windupDur)
+        {
+            return windupDur <= 0f || elapsed >= windupDur;
+        }
+
+        /// 경고 점멸 세기 0~1. Mathf.PingPong 과 동일한 삼각파(UnityEngine 비의존).
+        public static float FlashPulse01(float elapsed, float speed)
+        {
+            if (speed <= 0f) return 0f;
+            float x = elapsed * speed;
+            float m = x - 2f * (float)System.Math.Floor(x / 2f);   // 0~2 로 접기
+            return m > 1f ? 2f - m : m;
         }
 
         /// 누적 피격 수가 사망 기준에 도달했는가.
