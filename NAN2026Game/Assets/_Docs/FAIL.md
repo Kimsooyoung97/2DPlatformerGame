@@ -138,3 +138,5 @@
 - DH-05 에디터 좌표로 물리 검증을 하면 지면 관련 버그가 재현되지 않는다 — 에디터의 플레이어가 지면 2.82u 위에 떠 있어 OverlapBox 가 '겹침 없음' 을 반환했고, 하마터면 미해결 상태를 해결로 보고할 뻔했다. 방지: 접지 관련 검증은 **레이캐스트로 실제 지면 y 를 찾아 그 기준으로** 재현한다
 
 - DH-06 SendMessage 는 인자를 1개만 넘긴다 — MonsterHealth.TakeDamage(int, Vector2) 를 SendMessage 로 불러 'Failed to call function' 예외가 났고 그 프레임 로직이 끊겨 게임이 멈춘 것처럼 보였다. DontRequireReceiver 는 수신자 부재만 봐주지 **인자 수 불일치는 예외**다. 방지: SendMessage 대상 메서드의 인자 수를 먼저 확인하고, 2개 이상이면 GetComponent 로 직접 호출한다
+
+- SendMessage는 인자를 1개만 전달한다 — TakeDamage(int, Vector2)처럼 2개 이상이면 호출 실패 에러가 나고 Error Pause와 겹치면 에디터가 멈춘다. 대상 시그니처 확인 후 직접 호출할 것

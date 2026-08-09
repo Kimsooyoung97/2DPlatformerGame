@@ -7847,3 +7847,17 @@ Scene1 스파이크 구체 유도되게, 5·6·7 스킬을 1·2·3으로 이동,
 - 실제 유도 궤적·번개 타격은 사용자 재생
 ### 실패와 수정
 없음
+
+
+## [수정] 번개 사용 시 에디터 정지 — SendMessage 인자 불일치 — 2026-08-10 04:55
+### 프롬프트
+지금 번개를 쓰면 화면이 멈추는데 이유가 뭐야?
+### 조작 내역
+- 콘솔 증거: 'Failed to call function TakeDamage of class MonsterHealth' ×2 → Error Pause가 매 호출마다 에디터를 정지시킨 것(화면 멈춤의 실체)
+- 원인: MonsterHealth.TakeDamage(int, Vector2) — 인자 2개인데 SendMessage는 1개만 전달 가능. 직전 커밋에서 번개 피격을 SendMessage로 구현한 것이 화근
+- PlayerSkill.DamageAround: SendMessage → **직접 호출** mon.TakeDamage(damage, 방향벡터)로 교체(넉백 방향은 번개 지점 기준 좌우). SkillOrbCaster는 이미 직접 호출이라 무관
+### 검증
+- 컴파일 0, 콘솔 에러 0
+- 실제 번개 타격·정지 재발 여부는 사용자 재생
+### 실패와 수정
+- SendMessage 사용 전 대상 시그니처 미확인 자인 — FAIL 등재 대상(인자 2개 이상 메서드는 SendMessage 불가)

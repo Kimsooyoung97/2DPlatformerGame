@@ -96,7 +96,10 @@ namespace NAN2026
                 var demon = h.GetComponentInParent<NAN2026.DemonBoss>();
                 if (demon != null) { demon.TakeDamage(config.damage); continue; }
                 var mon = h.GetComponentInParent<NHNDemo.MonsterHealth>();
-                if (mon != null) mon.SendMessage("TakeDamage", config.damage, SendMessageOptions.DontRequireReceiver);
+                // SendMessage는 인자 1개만 넘긴다. TakeDamage(int, Vector2)는 2개라 직접 호출해야 한다
+                // (SendMessage 사용 시 'Failed to call function TakeDamage' 에러 → Error Pause로 에디터 정지)
+                if (mon != null)
+                    mon.TakeDamage(config.damage, new Vector2(Mathf.Sign(center.x - transform.position.x), 0.2f));
             }
         }
 
