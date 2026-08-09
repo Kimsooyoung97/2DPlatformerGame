@@ -48,6 +48,7 @@ namespace NAN2026
         private void OnDestroy()
         {
             if (Instance == this) Instance = null;
+            if (isOpen) Time.timeScale = 1f; // 열린 채로 파괴되는 경우(거의 없지만) timeScale 0에 갇히는 것 방지
         }
 
         private void OnEnable()
@@ -69,12 +70,14 @@ namespace NAN2026
             selectedIndex = 0;
             isOpen = true;
             openedFrame = Time.frameCount;
+            Time.timeScale = 0f; // 메뉴 여는 동안 게임 정지 — 고르는 사이에 몬스터한테 맞거나 하지 않게
         }
 
         public void Close()
         {
             isOpen = false;
             playerHealth = null;
+            Time.timeScale = 1f; // 복구하지 않으면 메뉴 닫은 뒤 게임이 계속 정지 상태로 남는다
         }
 
         private void Update()
@@ -88,6 +91,7 @@ namespace NAN2026
             Keyboard kb = Keyboard.current;
             if (kb == null) return;
 
+            // timeScale=0 이어도 Keyboard 폴링 자체는 스케일과 무관하게 계속 갱신되므로 입력 감지엔 문제 없다.
             if (kb.upArrowKey.wasPressedThisFrame || kb.wKey.wasPressedThisFrame)
                 selectedIndex = (selectedIndex - 1 + list.Count) % list.Count;
             else if (kb.downArrowKey.wasPressedThisFrame || kb.sKey.wasPressedThisFrame)

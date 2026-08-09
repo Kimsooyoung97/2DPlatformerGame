@@ -6652,3 +6652,27 @@ CheckpointTrigger.Update()가 Enter 입력을 감지해 CheckpointTravelMenu.Ope
 - manage_scene(save): UITestScene 저장 성공
 ### 실패와 수정
 없음(재생 모드 불안정은 위에 이미 기록, 조치 완료)
+
+
+## [수정] 세이브포인트 메뉴 열림 시 Time.timeScale=0 정지 — 2026-08-10 (세션 시간)
+### 프롬프트
+UI가 떴을때 timescale을 0으로 만들어야할것같다
+### 조작 내역
+- CheckpointTravelMenu.cs:
+  - Open()에서 Time.timeScale = 0f
+  - Close()에서 Time.timeScale = 1f (TravelTo가 이동 전 항상 Close()를 먼저 부르므로 씬
+    전환 직전에도 자동으로 복구됨)
+  - OnDestroy()에 안전장치 추가: isOpen 상태로 파괴되는 예외 상황에서도 timeScale=0에
+    갇히지 않도록 복구
+- 참고(변경 안 함): GameOverController도 이미 Time.timeScale을 직접 건드리는 별개
+  시스템(FAIL.md #27과 동일 계열의 참조 카운트 없는 전역 상태) — 지금은 두 시스템이 동시에
+  활성화될 상황이 희박해 충돌 리스크를 감수하고 직접 설정 방식으로 감. 나중에 겹치는 사례
+  발견되면 참조 카운트 방식으로 전환 필요
+### 검증
+- refresh_unity(compile=request) -> read_console(types=error): 0건
+- run_tests(EditMode): 229/229 통과
+- **실측 검증**: play mode 진입 -> Time.timeScale 직접 조회 -> Open() 전 1 -> Open() 후 0 ->
+  Close() 후 1 순서로 정확히 변하는 것 확인 -> play mode 정지 후 timeScale=1 유지 확인
+- manage_scene(save): UITestScene 저장 성공
+### 실패와 수정
+없음
