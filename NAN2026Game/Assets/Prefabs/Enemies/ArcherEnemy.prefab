@@ -1,0 +1,224 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1116154232905440386
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7867143816895717147}
+  - component: {fileID: 9106616649650779226}
+  - component: {fileID: 907036633748501901}
+  - component: {fileID: 3986376152894055465}
+  - component: {fileID: 4177022175707966759}
+  m_Layer: 0
+  m_Name: ArcherEnemy
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7867143816895717147
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1116154232905440386}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!212 &9106616649650779226
+SpriteRenderer:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1116154232905440386}
+  m_Enabled: 1
+  m_CastShadows: 0
+  m_ReceiveShadows: 0
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 0
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 40
+  m_MaskInteraction: 0
+  m_Sprite: {fileID: -6662561188355582028, guid: 774dde1c06ddf87499c1fe10af3b1f80, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_FlipX: 0
+  m_FlipY: 0
+  m_DrawMode: 0
+  m_Size: {x: 2.083721, y: 2.083721}
+  m_AdaptiveModeThreshold: 0.5
+  m_SpriteTileMode: 0
+  m_WasSpriteAssigned: 1
+  m_SpriteSortPoint: 0
+  m_BlendShapeWeights: []
+--- !u!50 &907036633748501901
+Rigidbody2D:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1116154232905440386}
+  m_BodyType: 1
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 1
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_GravityScale: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0
+--- !u!61 &3986376152894055465
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1116154232905440386}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0.7}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0}
+    oldSize: {x: 2.083721, y: 2.083721}
+    newSize: {x: 2.083721, y: 2.083721}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Size: {x: 0.9, y: 1.4}
+  m_EdgeRadius: 0
+--- !u!114 &4177022175707966759
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1116154232905440386}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fa4f89d7ef9272e4fa33ee7ee4b202c5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NAN2026.ArcherEnemy
+  config: {fileID: 11400000, guid: 68b0ea73ec6b8264cb366fb83963c6a4, type: 2}
+  idleFrames:
+  - {fileID: -6662561188355582028, guid: 774dde1c06ddf87499c1fe10af3b1f80, type: 3}
+  - {fileID: -8384133353164796306, guid: 774dde1c06ddf87499c1fe10af3b1f80, type: 3}
+  - {fileID: 8157892809927021579, guid: 774dde1c06ddf87499c1fe10af3b1f80, type: 3}
+  - {fileID: 8822561188434709064, guid: 774dde1c06ddf87499c1fe10af3b1f80, type: 3}
+  - {fileID: -3763415408557919777, guid: 774dde1c06ddf87499c1fe10af3b1f80, type: 3}
+  walkFrames:
+  - {fileID: -5666056201178048040, guid: 774dde1c06ddf87499c1fe10af3b1f80, type: 3}
+  - {fileID: 1198664597983521879, guid: 774dde1c06ddf87499c1fe10af3b1f80, type: 3}
+  - {fileID: -3410059007996169259, guid: 774dde1c06ddf87499c1fe10af3b1f80, type: 3}
+  - {fileID: 8868432881024661291, guid: 774dde1c06ddf87499c1fe10af3b1f80, type: 3}
+  - {fileID: 6501951845339567568, guid: 774dde1c06ddf87499c1fe10af3b1f80, type: 3}
+  - {fileID: 3580927358959393698, guid: 774dde1c06ddf87499c1fe10af3b1f80, type: 3}
+  - {fileID: 363487678146076321, guid: 774dde1c06ddf87499c1fe10af3b1f80, type: 3}
+  - {fileID: -2242248867954874862, guid: 774dde1c06ddf87499c1fe10af3b1f80, type: 3}
+  attackFrames:
+  - {fileID: -5635449141053222616, guid: 774dde1c06ddf87499c1fe10af3b1f80, type: 3}
+  - {fileID: 5428419842545532362, guid: 774dde1c06ddf87499c1fe10af3b1f80, type: 3}
+  - {fileID: 7380820248769825456, guid: 774dde1c06ddf87499c1fe10af3b1f80, type: 3}
+  - {fileID: -8865791262242478714, guid: 774dde1c06ddf87499c1fe10af3b1f80, type: 3}
+  - {fileID: -7827515024383386132, guid: 774dde1c06ddf87499c1fe10af3b1f80, type: 3}
+  - {fileID: -7136951510578450429, guid: 774dde1c06ddf87499c1fe10af3b1f80, type: 3}
+  - {fileID: -4273823278308871454, guid: 774dde1c06ddf87499c1fe10af3b1f80, type: 3}
+  - {fileID: 7103877114054022391, guid: 774dde1c06ddf87499c1fe10af3b1f80, type: 3}
+  - {fileID: 2497771075795198326, guid: 774dde1c06ddf87499c1fe10af3b1f80, type: 3}
+  - {fileID: -1150298074524275892, guid: 774dde1c06ddf87499c1fe10af3b1f80, type: 3}
+  - {fileID: 4654007956420206913, guid: 774dde1c06ddf87499c1fe10af3b1f80, type: 3}
+  hurtFrames:
+  - {fileID: 2237303604723874926, guid: 774dde1c06ddf87499c1fe10af3b1f80, type: 3}
+  - {fileID: 4343630076618958594, guid: 774dde1c06ddf87499c1fe10af3b1f80, type: 3}
+  - {fileID: 3141076134476283835, guid: 774dde1c06ddf87499c1fe10af3b1f80, type: 3}
+  - {fileID: -8137692724488423830, guid: 774dde1c06ddf87499c1fe10af3b1f80, type: 3}
+  - {fileID: 1228694021388895162, guid: 774dde1c06ddf87499c1fe10af3b1f80, type: 3}
+  deathFrames:
+  - {fileID: -9054093252577024859, guid: 774dde1c06ddf87499c1fe10af3b1f80, type: 3}
+  - {fileID: 1925756950656873734, guid: 774dde1c06ddf87499c1fe10af3b1f80, type: 3}
+  - {fileID: -4956186763268123100, guid: 774dde1c06ddf87499c1fe10af3b1f80, type: 3}
+  - {fileID: 3799352277432812428, guid: 774dde1c06ddf87499c1fe10af3b1f80, type: 3}
+  - {fileID: -5799320926091292437, guid: 774dde1c06ddf87499c1fe10af3b1f80, type: 3}
+  - {fileID: 428216299828826849, guid: 774dde1c06ddf87499c1fe10af3b1f80, type: 3}
+  arrowSprite: {fileID: 21300000, guid: b01c0dc4ec20e734396f39f20e0e082b, type: 3}

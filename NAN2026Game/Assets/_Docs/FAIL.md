@@ -59,7 +59,7 @@
 - **원인**: 임포트 직후 컴파일 확인 없이 커밋·공유
 - **방지 규칙**: 에셋 팩은 임포트 → 콘솔 에러 0 확인 → 커밋 순서를 지킨다. 스크립트 포함 팩은 특히 주의
 
-- #11 시트 기준선·몸통 측정에 산재 픽셀(먼지·워터마크) 오염 — 최소 y가 아니라 '폭 임계 이상 최대 연속 행 대역'으로 발끝·몸통을 실측할 것 (스킬대기 PPU 2회 오산의 원인)
+- #28 (구 #11) 시트 기준선·몸통 측정에 산재 픽셀(먼지·워터마크) 오염 — 최소 y가 아니라 '폭 임계 이상 최대 연속 행 대역'으로 발끝·몸통을 실측할 것 (스킬대기 PPU 2회 오산의 원인)
 
 ## 12. 저장 전 테스트 실행으로 씬 편집 내용 소실
 - **증상**: execute_code로 씬에 다수 GameObject(Grid/Tilemap/배경 등)를 만든 뒤 저장 없이 refresh_unity → run_tests(EditMode) 순으로 진행하자, 테스트 종료 후 씬이 편집 전 원본 상태로 복귀. GameObject.Find로 확인한 결과 신규 오브젝트가 전부 사라짐. git checkpoint 커밋과 최종 저장 파일이 바이트 단위로 동일해 편집이 아예 반영되지 않았음을 뒤늦게 발견
@@ -85,7 +85,7 @@
 
 - #16 사용자 미저장 타일 편집 소실: OpenScene(Single)·강제 Play 정지가 미저장 편집을 무경고 파괴 → 원인: 열기/정지 전 isDirty 미검사 → 방지: 모든 OpenScene·강제 정지 전 로드된 전 씬 isDirty 검사, dirty면 작업 중단하고 사용자에게 저장 여부 확인. 사용자 편집 세션 중엔 씬 전환 금지
 
-## 16. Physics2D.IgnoreCollision은 물리 밀림만 막지, 캐스트/레이캐스트 쿼리에는 영향 없음
+## 29. (구 16) Physics2D.IgnoreCollision은 물리 밀림만 막지, 캐스트/레이캐스트 쿼리에는 영향 없음
 - **증상**: 몬스터-플레이어 IgnoreCollision을 확인하면 True인데도 실제 플레이에서는 여전히 '막힌다'고 느껴짐
 - **원인**: PlayerController2D의 벽 감지(WallInDirection, Collider2D.Cast 기반)는 IgnoreCollision 설정과 무관하게 동작한다 — IgnoreCollision은 물리 시뮬레이션의 충돌 반응(밀림)만 억제할 뿐, Cast/Raycast 같은 쿼리 API의 히트 결과에는 전혀 영향을 주지 않는다. 즉 두 콜라이더가 서로 안 밀려도 캐스트로는 여전히 '보인다'
 - **방지 규칙**: '몬스터/오브젝트를 안 막히게 해달라'는 요청은 IgnoreCollision 확인만으로 끝내지 말고, 이동을 제어하는 캐스트/레이캐스트 기반 로직(벽 감지, 지면 판정 등)에서도 해당 오브젝트를 제외하고 있는지 함께 확인한다. 컴포넌트(MonsterHealth 등) 또는 레이어 기반으로 캐스트 필터링에서 명시적으로 제외해야 한다
@@ -95,7 +95,7 @@
 - **원인**: 씬에 EventSystem 오브젝트가 아예 없었음. uGUI의 Button/GraphicRaycaster 클릭 파이프라인은 EventSystem이 있어야 마우스/터치 입력을 UI로 라우팅한다 — 리스너가 아무리 정확히 등록돼 있어도 EventSystem이 없으면 그 리스너까지 도달하는 경로 자체가 없다
 - **주의**: onClick.Invoke()로 직접 호출해서 '작동한다'고 검증하면 이 문제를 못 잡는다. Invoke()는 EventSystem/GraphicRaycaster 경로를 건너뛰고 리스너를 바로 실행하기 때문. 실제 클릭 경로까지 검증하려면 UnityEngine.EventSystems.ExecuteEvents.Execute(button.gameObject, pointerEventData, ExecuteEvents.pointerClickHandler)로 재현해야 한다
 - **방지 규칙**: uGUI(Canvas/Button)를 쓰는 씬을 새로 만들거나 넘겨받으면 EventSystem 존재 여부를 가장 먼저 확인한다. 버튼 클릭 검증은 onClick.Invoke()가 아니라 ExecuteEvents.pointerClickHandler로 한다
-- #17 입력 분기 부분 replace 시 기존 else 가지를 덮어써 기능 소실 위험 → 다분기 블록은 중괄호 매칭으로 통째 재작성하고 EditMode로 회귀 확인
+- #30 (구 #17) 입력 분기 부분 replace 시 기존 else 가지를 덮어써 기능 소실 위험 → 다분기 블록은 중괄호 매칭으로 통째 재작성하고 EditMode로 회귀 확인
 
 - #18 큐 소비형 공격을 코드로 캔슬할 때 attackTimer만 0으로 하면 같은 프레임 attacking 로컬이 true로 남아 CanAttack 게이트가 새 큐를 막음 → attacking도 함께 false. 추측 3회보다 Debug.Log 실측이 빨랐음
 
@@ -116,6 +116,16 @@
 - 프리팹 개명 병합 후엔 씬·프리팹의 '슬롯 배선(SerializedProperty)'까지 전수 검사 — 코드 컴파일 통과와 무관하게 유령 참조가 침묵 가드에서 기능을 무음 사망시킴
 
 - EnterPlayMode=DisableDomainReload 프로젝트: 모든 static 상태는 세션 간 생존 — static 필드 추가 시 RuntimeInitializeOnLoadMethod 리셋 동봉 필수 (락 중 정지→다음 세션 입력 봉쇄 사례)
-- #24 run_tests(EditMode) job이 started 5초 만에 progress 0/149에서 완전히 멈춤(수 분간 last_update_unix_ms 불변, stuck_suspected=false로 오탐). editor_is_focused=false인 상태와 동시 관찰 — 이전 세션의 재생모드 불안정(H3)과 같은 계열 툴 환경 문제로 추정. 방지: 멈추면 재시도보다 컴파일 성공(read_console error 0) + 리플렉션 타입 로드 확인으로 대체 검증하고, 실제 회귀 여부는 다음 정상 테스트 실행 때 재확인한다.
+- #31 (구 #24) run_tests(EditMode) job이 started 5초 만에 progress 0/149에서 완전히 멈춤(수 분간 last_update_unix_ms 불변, stuck_suspected=false로 오탐). editor_is_focused=false인 상태와 동시 관찰 — 이전 세션의 재생모드 불안정(H3)과 같은 계열 툴 환경 문제로 추정. 방지: 멈추면 재시도보다 컴파일 성공(read_console error 0) + 리플렉션 타입 로드 확인으로 대체 검증하고, 실제 회귀 여부는 다음 정상 테스트 실행 때 재확인한다.
 
 - #24 이름 기반 GameObject.Find("Player") 의존: 팀이 프리팹을 교체하자 씬별 오브젝트명이 Player/RealPlayer 로 갈라져 우리 코드 10곳이 일제히 null → 보트·데몬·함정이 침묵 무력화. 컴파일·콘솔 모두 무증상. 방지: 플레이어/보스 등 씬 간 참조는 이름이 아니라 **태그 또는 컴포넌트 타입**으로 찾는다(PlayerLocator 경유). 프리팹 교체·개명 병합 직후엔 씬별 오브젝트명과 태그를 전수 실측한다
+
+- #25 불균등 배치 시트에 '공통 rect 크기 + 콘텐츠 중심 정렬' 슬라이스 금지: death.png(2x3 불균등)에서 짧은 프레임의 rect가 위쪽 이웃 블롭을 삼켜 재생 중 두 포즈가 겹쳐 보였고(rect 내부 세로 덩어리 2개), 프레임마다 rect를 콘텐츠 중심에 맞춘 탓에 월드 앵커가 이동해 캐릭터가 튀었다. 방지: (1) 프레임별 **정확 bbox**로 rect를 잡는다 (2) 피벗은 rect 중앙이 아니라 **접지점**(bbox 하단 대역의 가로 무게중심)으로 개별 산정한다 (3) 슬라이스 직후 rect 상호 겹침 0건 + rect 내부 덩어리 1개를 반드시 검증한다
+
+- #26 디버그/테스트 키를 붙이기 전에 기존 바인딩을 전수 조회하지 않음: digit4 는 이미 PlayerController2D 가 ComboB3 에 쓰고 있었는데 hurt 미리보기를 같은 키에 얹어, 한 번 누르면 두 동작이 동시 발동했다. hurt FX(0.30s)가 ComboB3(0.40s)보다 짧아 FX 종료 후 Animator 복귀 시 칼 모션 0.1초가 노출 → '시트에 이물 프레임이 있다'로 오진하고 멀쩡한 4번째 프레임을 삭제까지 했다. 방지: 키 추가 전 프로젝트 전체에서 해당 Key 심볼을 grep 하고, 증상이 '연출 끝나고 뭔가 더 나온다'면 **키 충돌과 애니메이션 소유권 복귀 타이밍**을 1순위로 의심한다
+
+- #27 PlayerController2D.InputLocked 는 참조 카운트 없는 전역 static: 여러 시스템(보스·디렉터·인트로·피격연출)이 공유하므로 나중에 false 로 푸는 쪽이 이긴다. 연출 락 중 다른 시스템이 짧은 락을 걸었다 풀면 연출이 조기 해제된다. 방지: 짧은 연출에는 InputLocked 를 쓰지 않는다. 꼭 필요하면 카운터 방식으로 바꾼 뒤 쓴다
+
+- #32 필드 삽입 앵커를 `public` 선언줄로 잡으면 그 앞 속성 블록 사이를 갈라 CS0579(Duplicate 'Tooltip') 유발 — EnemyConfig 에 attackFps 를 넣다 attackWindup 의 [Tooltip] 바로 아래에 새 [Tooltip] 이 끼어 컴파일 실패. 방지: C# 필드 추가 시 앵커는 선언줄이 아니라 **그 위에 붙은 [Header]/[Tooltip]/XML 주석 블록의 시작줄**로 잡는다
+
+- #33 지면·지형 판정을 '제외 목록'으로 작성하면 새 오브젝트가 생길 때마다 뚫린다 — 순찰 경계 탐침에서 '트리거 아님 + EnemyBase 아님 + PlayerHealth 아님' 을 지면으로 인정했더니 팀 몬스터 KeyMonster 의 non-trigger BoxCollider2D 가 지면으로 잡혀 순찰 폭이 7.5u → 2.0u 로 잘못 잘렸다. 방지: 지형 질의는 **허용 목록**으로 짠다(CompositeCollider2D / TilemapCollider2D 만 인정). 그리고 경계 계산 결과는 반드시 전 개체에 대해 수치로 출력해 눈으로 확인한다

@@ -44,6 +44,14 @@ namespace NAN2026
                 asrc.pitch = config.attackPitch;
                 asrc.PlayOneShot(config.attackClip, config.attackVolume);
             }
+
+            // 대시: Left Shift (공중에서만 실제 발동)
+            if (kb != null && kb.leftShiftKey.wasPressedThisFrame && config.dashClip != null)
+            {
+                source.pitch = config.dashPitch;
+                source.PlayOneShot(config.dashClip, config.dashVolume);
+                source.pitch = 1f;
+            }
         }
     }
 }

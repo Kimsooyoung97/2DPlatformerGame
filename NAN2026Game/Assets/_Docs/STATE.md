@@ -116,3 +116,10 @@
 - 모든 수치는 SO Config 소유. Player 프리팹 수정은 **예외 허가됨**
 - push/pull/reset은 사람만. 나는 add·commit까지
 - '테스트 시작' 선언 시 컴파일 유발 작업 전면 중지(도메인 리로드 렉 방지)
+
+## 기록 파일 분리 (2026-08-09)
+- **내 작업 기록은 이제 `Assets/_Docs/LOG_donghyun.md` 에만 쓴다.** 팀 공용 `LOG.md` 에는 더 이상 추가하지 않는다
+- 이유: 팀원(NoImpMe)도 LOG.md 끝에 덧붙이는 구조라 병합할 때마다 충돌했다(LOG.md 누적 484커밋, 팀원 1164행)
+- 분리 방식: git blame 으로 worldgreatkim 작성분 6370행만 추출. LOG.md 원본은 **무변경**으로 남겨 팀원 영향 0
+- 제출용 'AI 활용 기술 문서' 는 LOG_donghyun.md 하나만 읽으면 된다
+- FAIL.md / ASSET_CREDITS.md 는 **공유가 목적**이라 분리하지 않고 .gitattributes 의 merge=union 으로 자동 병합 처리

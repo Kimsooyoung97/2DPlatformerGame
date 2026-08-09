@@ -12,15 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4db01bf3feaab5b47915a74947492b43, type: 3}
   m_Name: FeelConfig
   m_EditorClassIdentifier: Assembly-CSharp::FeelConfig
-  hitStopDuration: 0
-  knockbackForce: 0
-  knockbackDuration: 0
-  invincibilityDuration: 0
+  hitStopDuration: 0.06
+  knockbackForce: 0.55
+  knockbackDuration: 0.16
+  invincibilityDuration: 0.6
   dashInvincibilityDuration: 0
-  screenShakeAmplitude: 0
-  screenShakeDuration: 0
+  screenShakeAmplitude: 0.35
+  screenShakeDuration: 0.24
   attackStartupTime: 0
   attackRecoveryTime: 0
   inputBufferTime: 0
-  hitFlashDuration: 0.3
-  hitFlashInterval: 0.05
+  hitFlashDuration: 0.6
+  hitFlashInterval: 0.06

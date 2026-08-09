@@ -48,18 +48,16 @@
 - Assets/Cainos/ (Pixel Art Platformer - Village Props, Interactive Pixel Water 등): 유니티 에셋 스토어, 표준 라이선스 (사용자 다운로드)
 - Assets/Sprites_AI/Map_Castle/: 사용자 생성 AI 산출물 (성 안뜰 구간용)
 
-<<<<<<< HEAD
 - Effect_Vol.3 (에셋 팩, Assets/Effect_Vol.3): Effect_1.png 9프레임을 플레이어 스킬 내려찍기 이펙트로 사용. 라이선스: 팀 도입 팩(확인 필요 시 팀 문의)
 - 기사_스킬대기.png (생성형 AI 산출물, Assets/Map): 플레이어 스킬 모션용. 생성 프롬프트 미제공 — 불투명 배경으로 슬라이싱 보류 중
 
 - Forest Platformer Pixel Art Tileset (sanctum pixel, Assets/sanctum_pixel/forest_side_pack): 에셋스토어 구매. 재배포 불가 — gitignore 등재, 각 팀원 개별 임포트 필요. 숲 타일 27종·패럴랙스 배경
-=======
+
 ## sanctum_pixel/forest_side_pack (2026-08-02)
 - 파일: Assets/sanctum_pixel/forest_side_pack/** (Sprites/Background/{sky,sky_cloud,cloud,mountain,pine1,pine2}.png, Sprites/Tileset/forest_tileset.png + Palette 27종, Sprites/Props/{Bush,Pine,Pine_dead,Rock,Tree,Tree_dead,Upper_grass,Flower(5색)}
 - 출처: 프로젝트에 기존 임포트되어 있던 에셋(누가/언제 추가했는지 이번 세션에서는 확인 불가). 사용자 승인 하에 FirstScene 배경(Ground/Platforms/Backdrop/Decoration)에 신규 사용
 - 라이선스: 미확인 (두 Biome 팩과 동일하게 라이선스 확인 전까지 git 커밋에서 제외함)
 - 생성 프롬프트: 해당 없음 (기성 에셋, AI 생성 아님)
->>>>>>> 707c9ff87baa8d651e7b4c541f07bd73fdeaf1c4
 
 - 기사_스킬대기.png·기사_패링(Knight_Parry).png 수정본 교체(2026-08-03): 동일 그림, 생성 단계에서 배경 세심 제거 — 재조립·재분할로 반영
 
@@ -105,3 +103,22 @@
 - Assets/Art/Demon/** (130장): boss_demon_final(boss_demon_slime_FULL_v1.0) 유래 — Sprites_AI 폴더(생성형 AI 산출물, 사용자 반입). 데몬 보스 전 동작+투사체. 생성 프롬프트: 사용자 보관분
 
 - Assets/Map/Showroom/Medieval/Pine_16_Tree.png: 기존 Pine Trees.png(중세 팩)에서 큰 소나무 1그루만 픽셀 추출한 파생본. 원본 라이선스 승계, 신규 창작 아님
+
+
+## Knight 2D Pixel Art — 2026-08-09
+- 파일: Assets/Art/Enemies/Knight/ (IDLE·WALK·RUN·JUMP·ATTACK1~3·DEFEND·HURT·DEATH, with_outline 10파일)
+- 출처: 외부 무료 픽셀아트 에셋 (원본 경로: NHN 대회 에셋/공주를 구하라/Knight 2D/Knight 2D Pixel Art)
+- 라이선스(License.txt 원문 요지): 개인·상업 프로젝트 사용 가능, 수정 가능, 크레딧 권장(필수 아님).
+  **에셋 자체의 재판매·재배포 금지. NFT 전환 금지.**
+- 규격: 프레임 96x84px 균등, 총 67프레임. 임포트 PPU 25.714(본체 36px=1.40u), 피벗 (0.5, 0.2619)=발끝
+- 용도: AdventureScene3 근접 잡몹(KnightEnemy)
+
+## GandalfHardcore Archer — 2026-08-09
+- 파일: Assets/Art/Enemies/Archer/ArcherSheet.png, arrow.png
+- 출처: GandalfHardcore — https://gandalfhardcore.itch.io/ (원본 경로: NHN 대회 에셋/공주를 구하라/Archer)
+- 라이선스(READ ME.txt 원문 요지): 상업·비상업 게임에 포함 가능, 수정 가능.
+  **재판매·리패키징·재배포 금지. AI 학습 사용 금지. 게임 툴·NFT·인쇄물 사용 금지.**
+- 규격: 시트 704x320, 64px 격자 11x5 중 35칸 사용(IDLE5/ATTACK11/WALK8/HURT5/DEATH6).
+  임포트 PPU 30.714(본체 43px=1.40u), 피벗 (0.5, 0)=발끝. arrow 30x5px
+- 용도: AdventureScene3 원거리 잡몹(ArcherEnemy)
+- 주의: 색상 변형 7종(black/blue/brown/green/purple/red/yellow)은 미도입. 팔레트 스왑본으로 픽셀 배치 동일

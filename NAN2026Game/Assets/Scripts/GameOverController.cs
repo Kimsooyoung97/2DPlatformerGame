@@ -20,6 +20,10 @@ public class GameOverController : MonoBehaviour
     [Tooltip("패널이 뜬 직후 이 시간(초) 동안은 키 입력을 무시한다. 죽는 순간 누르고 있던 키로 즉시 씬 전환되는 것을 막는다.")]
     [SerializeField] private float inputIgnoreDuration = 0.3f;
 
+    [Header("사망 연출")]
+    [Tooltip("사망 연출이 끝난 뒤 패널을 띄운다. PlayerHurtDeathFx 가 있으면 그 길이를 우선 사용한다.")]
+    [SerializeField] private float minDeathSequenceDelay = 0f;
+
     private bool _waitingForInput;
     private float _acceptInputAt;
 
@@ -30,16 +34,40 @@ public class GameOverController : MonoBehaviour
 
     private void OnEnable()
     {
-        if (playerHealth != null) playerHealth.OnPlayerDied += HandlePlayerDied;
+        if (playerHealth != null)
+        {
+            playerHealth.OnPlayerDied += HandlePlayerDied;
+            playerHealth.SuppressRespawnOnDeath = true;   // 게임오버 노선: 체크포인트 부활과 경합 방지
+        }
     }
 
     private void OnDisable()
     {
-        if (playerHealth != null) playerHealth.OnPlayerDied -= HandlePlayerDied;
+        if (playerHealth != null)
+        {
+            playerHealth.OnPlayerDied -= HandlePlayerDied;
+            playerHealth.SuppressRespawnOnDeath = false;
+        }
     }
 
     private void HandlePlayerDied()
     {
+        StartCoroutine(ShowAfterDeathSequence());
+    }
+
+    /// 사망 연출을 끝까지 보여준 뒤에 패널을 띄우고 시간을 멈춘다.
+    /// 즉시 timeScale=0 을 걸면 사망 애니메이션이 첫 프레임에서 정지한다.
+    private System.Collections.IEnumerator ShowAfterDeathSequence()
+    {
+        float wait = minDeathSequenceDelay;
+        if (playerHealth != null)
+        {
+            var fx = playerHealth.GetComponent<NAN2026.PlayerHurtDeathFx>();
+            if (fx != null && fx.DeathDuration > wait) wait = fx.DeathDuration;
+        }
+        // 히트스톱으로 timeScale 이 0 일 수 있으므로 실시간 대기
+        if (wait > 0f) yield return new WaitForSecondsRealtime(wait);
+
         if (gameOverPanel != null) gameOverPanel.SetActive(true);
         Time.timeScale = 0;
         _waitingForInput = true;
@@ -53,6 +81,7 @@ public class GameOverController : MonoBehaviour
         if (!AnyKeyPressed()) return;
 
         _waitingForInput = false;
+        Time.timeScale = 1f;   // 복구하지 않으면 타이틀에서 다시 시작한 게임이 정지 상태로 뜬다
         SceneManager.LoadScene(titleSceneName);
     }
 
