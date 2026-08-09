@@ -1,0 +1,5 @@
+# 기록 전용 문서: 양쪽이 파일 끝에 계속 덧붙이는 구조라 기본 3-way 병합으로는 매번 충돌한다.
+# union 병합기는 양쪽 줄을 모두 남긴다 — 우리가 손으로 하던 '양쪽 다 살리기' 를 git 이 대신한다.
+NAN2026Game/Assets/_Docs/LOG.md   merge=union
+NAN2026Game/Assets/_Docs/FAIL.md  merge=union
+NAN2026Game/Assets/_Docs/ASSET_CREDITS.md merge=union

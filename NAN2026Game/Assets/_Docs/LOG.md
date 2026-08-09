@@ -7498,3 +7498,37 @@ Secen3다음에는 Secen4 진행하도록 했는데
   둘 다 제출 전 OFF 대상이지만, 지금 끄면 사용자의 테스트 수단이 사라지므로 지시를 기다린다
 ### 실패와 수정
 - 없음
+
+
+## [수정] LOG·FAIL 병합 충돌 구조적 해소 (.gitattributes union) — 2026-08-09 11:25
+### 프롬프트
+Assets/_Docs/LOG.md Assets/_Docs/FAIL.md
+이거는 우리선에서 못 고치나? 왜 계속 오류가 나는거야? gitignore해서 그래?
+### 조작 내역
+**원인 규명 — gitignore 때문이 아니다**
+- `git check-ignore` 출력 없음 = 무시 대상 아님. `git ls-files` 로 둘 다 **추적 중** 확인. 추적되기 때문에 병합 대상이고, 그래서 충돌한다
+- 저장소에 `.gitattributes` 가 **아예 없었다** → 모든 파일이 기본 3-way 병합
+- 구조적 원인: 양쪽이 **파일 끝에** 서로 다른 내용을 덧붙인다. git 은 어느 쪽이 먼저인지 판단할 근거가 없어 사람에게 넘긴다. 오류가 아니라 정상 동작
+- LOG.md 누적 커밋 484개 — 매 작업마다 양쪽이 덧붙이는 구조라 충돌 빈도가 높을 수밖에 없었다
+**조치 — 저장소 루트에 .gitattributes 신설**
+```
+NAN2026Game/Assets/_Docs/LOG.md   merge=union
+NAN2026Game/Assets/_Docs/FAIL.md  merge=union
+NAN2026Game/Assets/_Docs/ASSET_CREDITS.md merge=union
+```
+- `union` 은 git 내장 병합기다(별도 driver 설정 불필요). 충돌 표시 대신 **양쪽 줄을 모두 남긴다**
+- 우리가 그동안 손으로 하던 '양쪽 다 살리기' 를 git 이 대신하는 것이라 결과물이 달라지지 않는다
+- ASSET_CREDITS.md 도 같은 append-only 구조라 함께 넣었다(과거 충돌 마커가 커밋된 전례 있음)
+### 검증
+- `git check-ignore -v` → 출력 없음(무시 대상 아님 확인)
+- `git check-attr merge` 실행 결과:
+  · LOG.md → **merge: union** / FAIL.md → **merge: union** / ASSET_CREDITS.md → **merge: union**
+  · EnemyBase.cs → merge: unspecified → **코드 파일은 영향 없음** 확인
+- 실제 병합 재현은 하지 않았다 — 검증하려면 임시 브랜치와 checkout 이 필요한데 checkout 은 사람만 실행하는 규약
+### 남은 주의
+- union 은 내용을 잃지 않지만 **중복은 만들 수 있다**. 양쪽이 같은 자리를 고치면 두 줄이 다 남는다
+  · FAIL.md 는 번호를 붙이므로 병합 후 번호 중복이 생길 수 있다(과거 c4ab41c5 에서 겪은 문제). 병합 뒤 번호만 훑어보면 된다
+- `.gitattributes` 는 **병합을 실행하는 컴퓨터에** 있어야 작동한다. 커밋했으므로 pull 받은 사람은 자동 적용
+- 씬 파일(*.unity)은 이번에 손대지 않았다. `-merge`(binary 취급)로 자동 병합을 막는 선택지가 있으나 팀 합의 사항
+### 실패와 수정
+- 없음
