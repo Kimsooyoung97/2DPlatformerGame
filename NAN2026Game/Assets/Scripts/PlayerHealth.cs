@@ -203,7 +203,15 @@ public class PlayerHealth : MonoBehaviour
         Invoke(nameof(Respawn), delay);
     }
 
-    private void Respawn()
+        /// <summary>외부(GameOverController 등)에서 명시적으로 체크포인트 부활을 트리거할 때 쓴다.
+    /// SuppressRespawnOnDeath=true 노선(게임오버 패널 등)에서는 Kill()이 자동으로 Respawn을
+    /// 예약하지 않으므로, 호출자가 원하는 타이밍(예: 엔터키 입력)에 직접 이걸 부른다.</summary>
+    public void RespawnNow()
+    {
+        Respawn();
+    }
+
+private void Respawn()
     {
         transform.position = checkpoint;
         transform.rotation = Quaternion.identity;
