@@ -67,6 +67,25 @@ namespace NAN2026.Core
         /// 예열 종료 여부.
         /// 공격 전용 fps. 0 이하면 공용 fps 를 쓴다.
         /// 걷기·대기 속도를 건드리지 않고 휘두름만 늦추기 위해 분리한다.
+        /// 순찰 범위를 벗어나지 않도록 이번 프레임의 걸음을 잘라낸다. 반환값은 실제 허용 이동량(항상 0 이상).
+        /// 잡몹은 transform 으로 직접 움직여 지형과 충돌하지 않으므로, 애초에 구역 밖으로 못 나가게 막는다.
+        public static float PatrolStep(float selfX, float step, float moveSign, float minX, float maxX)
+        {
+            if (step <= 0f) return 0f;
+            float next = selfX + moveSign * step;
+            float clamped = next < minX ? minX : (next > maxX ? maxX : next);
+            float allowed = (clamped - selfX) * moveSign;
+            return allowed > 0f ? allowed : 0f;
+        }
+
+        /// 탐침 지점의 지면이 자기 발끝과 같은 단인가. 단차를 만나면 거기서 순찰 범위가 끝난다.
+        public static bool SameLevel(float surfaceY, float footY, float tolerance)
+        {
+            float d = surfaceY - footY;
+            if (d < 0f) d = -d;
+            return d <= tolerance;
+        }
+
         /// 공격 방향을 고정할 시점인가.
         /// 이 지점 이후로는 스프라이트도 판정도 같은 방향을 쓴다 — 보이는 것과 맞는 것이 어긋나지 않게.
         public static bool FaceLocked(float frac, float lockFrac)

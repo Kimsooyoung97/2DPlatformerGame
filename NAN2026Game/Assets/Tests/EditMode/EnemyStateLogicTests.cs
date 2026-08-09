@@ -279,5 +279,37 @@ namespace NAN2026.Tests
             Assert.IsFalse(EnemyStateLogic.WithinBodyHeight(0.8f, 1.5f, 2.0f));
             Assert.IsFalse(EnemyStateLogic.WithinBodyHeight(2.1f, 0f, 2.0f));
         }
+    
+        [Test]
+        public void 순찰_범위_안에서는_걸음이_그대로다()
+        {
+            Assert.AreEqual(0.5f, EnemyStateLogic.PatrolStep(45f, 0.5f, 1f, 40f, 48.5f), 0.0001f);
+            Assert.AreEqual(0.5f, EnemyStateLogic.PatrolStep(45f, 0.5f, -1f, 40f, 48.5f), 0.0001f);
+        }
+
+        [Test]
+        public void 순찰_경계에서는_걸음이_잘린다()
+        {
+            // x=48.2 에서 오른쪽 0.5 를 가면 48.7 이지만 경계가 48.5 → 0.3 만 허용
+            Assert.AreEqual(0.3f, EnemyStateLogic.PatrolStep(48.2f, 0.5f, 1f, 40f, 48.5f), 0.0001f);
+            Assert.AreEqual(0f, EnemyStateLogic.PatrolStep(48.5f, 0.5f, 1f, 40f, 48.5f), 0.0001f);
+        }
+
+        [Test]
+        public void 경계밖이어도_안쪽으로는_돌아올_수_있다()
+        {
+            // 경계 밖에 있어도 되돌아오는 방향은 막지 않는다
+            Assert.AreEqual(0.5f, EnemyStateLogic.PatrolStep(49f, 0.5f, -1f, 40f, 48.5f), 0.0001f);
+            Assert.AreEqual(0f, EnemyStateLogic.PatrolStep(49f, 0.5f, 1f, 40f, 48.5f), 0.0001f);
+        }
+
+        [Test]
+        public void 같은_단_판정은_허용오차를_따른다()
+        {
+            // 낮은 단 y0.04 에서 높은 단 y2.0 은 1.96 차이 → 다른 단
+            Assert.IsFalse(EnemyStateLogic.SameLevel(2.0f, 0.04f, 0.6f));
+            Assert.IsTrue(EnemyStateLogic.SameLevel(0.3f, 0.04f, 0.6f));
+            Assert.IsTrue(EnemyStateLogic.SameLevel(-0.5f, 0.04f, 0.6f));
+        }
     }
 }

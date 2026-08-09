@@ -127,3 +127,5 @@
 - #27 PlayerController2D.InputLocked 는 참조 카운트 없는 전역 static: 여러 시스템(보스·디렉터·인트로·피격연출)이 공유하므로 나중에 false 로 푸는 쪽이 이긴다. 연출 락 중 다른 시스템이 짧은 락을 걸었다 풀면 연출이 조기 해제된다. 방지: 짧은 연출에는 InputLocked 를 쓰지 않는다. 꼭 필요하면 카운터 방식으로 바꾼 뒤 쓴다
 
 - #32 필드 삽입 앵커를 `public` 선언줄로 잡으면 그 앞 속성 블록 사이를 갈라 CS0579(Duplicate 'Tooltip') 유발 — EnemyConfig 에 attackFps 를 넣다 attackWindup 의 [Tooltip] 바로 아래에 새 [Tooltip] 이 끼어 컴파일 실패. 방지: C# 필드 추가 시 앵커는 선언줄이 아니라 **그 위에 붙은 [Header]/[Tooltip]/XML 주석 블록의 시작줄**로 잡는다
+
+- #33 지면·지형 판정을 '제외 목록'으로 작성하면 새 오브젝트가 생길 때마다 뚫린다 — 순찰 경계 탐침에서 '트리거 아님 + EnemyBase 아님 + PlayerHealth 아님' 을 지면으로 인정했더니 팀 몬스터 KeyMonster 의 non-trigger BoxCollider2D 가 지면으로 잡혀 순찰 폭이 7.5u → 2.0u 로 잘못 잘렸다. 방지: 지형 질의는 **허용 목록**으로 짠다(CompositeCollider2D / TilemapCollider2D 만 인정). 그리고 경계 계산 결과는 반드시 전 개체에 대해 수치로 출력해 눈으로 확인한다

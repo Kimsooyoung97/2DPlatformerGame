@@ -21,6 +21,7 @@ namespace NAN2026
         private Coroutine flashCo;
         private bool flashing;      // 피격 플래시 중에는 그로기 금빛 틴트를 양보한다
         private float spawnY;
+        private float patrolMinX, patrolMaxX;   // 배치 지점이 속한 '같은 단' 의 좌우 끝
         private Component parryController;                 // PlayerController2D
         private System.Reflection.MethodInfo tryParry;      // TryParry(GameObject)
         private System.Reflection.MethodInfo parryActive;   // IsParryWindowActive() — 방향 검사 없는 판정              // 배치 높이를 접지 기준으로 (config.groundY 고정 시 다층 배치 불가)
@@ -55,9 +56,55 @@ namespace NAN2026
                 }
             }
             spawnY = transform.position.y;
+            ComputePatrolBounds();
             nextAtk = Time.time + EnemyStateLogic.InitialDelay(config.fireStagger, Random.value); // 첫 발 산개
             if (!All.Contains(this)) All.Add(this);
             SetState(EnemyStateLogic.Idle);
+        }
+
+        /// 배치 지점에서 좌우로 훑어 '같은 높이의 지면' 이 이어지는 구간을 순찰 범위로 잡는다.
+        /// 잡몹은 transform 으로 직접 움직여 지형 충돌이 없다 — 그래서 단차를 뚫고 지나가는 대신
+        /// 애초에 자기 단 밖으로 못 나가게 막는다.
+        private void ComputePatrolBounds()
+        {
+            float x0 = transform.position.x;
+            if (config.patrolRange <= 0f) { patrolMinX = float.NegativeInfinity; patrolMaxX = float.PositiveInfinity; return; }
+            patrolMinX = ProbeEdge(-1f);
+            patrolMaxX = ProbeEdge(1f);
+        }
+
+        private float ProbeEdge(float sign)
+        {
+            float x0 = transform.position.x;
+            float limit = x0;
+            float stepSize = config.patrolProbeStep > 0f ? config.patrolProbeStep : 0.5f;
+            for (float d = stepSize; d <= config.patrolRange; d += stepSize)
+            {
+                float x = x0 + sign * d;
+                float surface;
+                if (!GroundLevelAt(x, out surface)) break;                                    // 낭떠러지
+                if (!EnemyStateLogic.SameLevel(surface, spawnY, config.patrolLevelTolerance)) break;  // 단차
+                limit = x;
+            }
+            return limit;
+        }
+
+        /// x 위치의 지면 높이. **타일맵 지형만** 인정한다.
+        /// 컴포넌트 종류로 걸러내면 팀 몬스터(KeyMonster 등)의 non-trigger 콜라이더가
+        /// 지면으로 잡혀 순찰 범위가 엉뚱하게 잘린다 — 실제로 그렇게 잘렸다.
+        private bool GroundLevelAt(float x, out float surfaceY)
+        {
+            surfaceY = 0f;
+            var hits = Physics2D.RaycastAll(new Vector2(x, spawnY + 1.5f), Vector2.down, 4f);
+            for (int i = 0; i < hits.Length; i++)
+            {
+                var c = hits[i].collider;
+                if (c == null || c.isTrigger) continue;
+                if (!(c is CompositeCollider2D) && !(c is UnityEngine.Tilemaps.TilemapCollider2D)) continue;
+                surfaceY = hits[i].point.y;
+                return true;
+            }
+            return false;
         }
 
         protected virtual void OnDestroy() { All.Remove(this); }
@@ -144,6 +191,7 @@ namespace NAN2026
                 float step = EnemyStateLogic.MoveStep(dx, config.stopDistance, config.walkSpeed, Time.deltaTime);
                 if (step > 0f)
                 {
+                    step = EnemyStateLogic.PatrolStep(transform.position.x, step, face, patrolMinX, patrolMaxX);
                     transform.position += new Vector3(face * step, 0f, 0f);
                     Anim(walkFrames, true);
                     return;

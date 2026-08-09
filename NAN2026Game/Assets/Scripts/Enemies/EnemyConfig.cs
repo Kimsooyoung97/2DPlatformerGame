@@ -38,6 +38,14 @@ namespace NAN2026
         public float windupFlashSpeed = 12f;
         public Color windupFlashColor = new Color(1f, 0.55f, 0.2f);
 
+        [Header("순찰 범위")]
+        [Tooltip("배치 지점에서 좌우로 이 거리까지만 움직인다. 0 이면 제한 없음(옛 동작)")]
+        public float patrolRange = 6f;
+        [Tooltip("단차를 찾을 때 훑는 간격")]
+        public float patrolProbeStep = 0.5f;
+        [Tooltip("이 높이차를 넘는 지면은 다른 단으로 보고 거기서 순찰을 끊는다")]
+        public float patrolLevelTolerance = 0.6f;
+
         [Tooltip("화살이 이 거리 안까지 접근하면 닿기 전에도 매 프레임 패링을 접수한다")]
         public float arrowParryZone = 1.5f;
         [Tooltip("화살이 플레이어 발끝 기준 이 높이 안을 지날 때만 패링 대상. 점프로 넘긴 화살 제외")]

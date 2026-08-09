@@ -7401,3 +7401,35 @@ Secen3다음에는 Secen4 진행하도록 했는데
 해당 없음 (파일 수정 없음)
 ### 커밋
 해당 없음(무수정)
+
+
+## [수정] Scene3 BGM 단일화(전투소리) + 잡몹 순찰 범위 제한 — 2026-08-09 10:55
+### 프롬프트
+[수정] 1. BGM재생은 AdventureScene3에서는 전투소리 음악을 재생2. 순찰 범위 제안으로 문제상황을 예방하자.
+### 조작 내역
+**1. BGM 단일화 — Scene3 는 전투소리만**
+- 원인: `UI Canvas/BGM`(clip 1스테이지, **playOnAwake=True**)과 IntroSequencer 가 코드로 켜는 `IntroDirector`(clip 전투소리)가 둘 다 루프 → 인트로 종료 후 영구 중첩
+- `UI Canvas/BGM` 은 **팀 프리팹 Assets/Prefab/UI Canvas.prefab 소속**이었다(초기 조회에서 '씬 직접'으로 잘못 봤고 재확인함)
+- 따라서 프리팹 자체를 고치지 않고 **Scene3 인스턴스 오버라이드로 playOnAwake=false** 만 적용
+  · 오버라이드 기록 확인: `BGM.m_PlayOnAwake=0` 1건
+  · 프리팹 원본은 playOnAwake=True 유지 → **다른 씬 영향 0**
+- clip 과 오브젝트는 그대로 뒀다(되돌리기 쉽게). Scene3 의 BGM 소유자는 IntroDirector(전투소리) 하나
+**2. 순찰 범위 제한 — 지형 관통 예방**
+- 배경: 잡몹은 `transform.position +=` 로 직접 움직여 물리 충돌이 없고, BlockedAhead 는 동료만 본다 → 어떤 벽이든 통과
+- 접근: 벽 충돌을 새로 넣는 대신(단차마다 버둥거림 발생) **배치 지점이 속한 '같은 단' 밖으로 못 나가게** 막는다
+- 순수 로직: `PatrolStep(selfX, step, moveSign, minX, maxX)` — 경계를 넘는 걸음을 잘라내고 실제 허용량 반환(항상 0 이상, 안쪽 복귀는 항상 허용)
+  `SameLevel(surfaceY, footY, tolerance)` — UnityEngine 비의존(Mathf 대신 직접 계산)
+- EnemyBase: Start 에서 `ComputePatrolBounds()` → 좌우로 patrolProbeStep 간격 훑으며 지면이 끊기거나(낭떠러지) 높이가 tolerance 를 넘으면(단차) 거기서 경계 확정
+- EnemyConfig 신규: `patrolRange 6` / `patrolProbeStep 0.5` / `patrolLevelTolerance 0.6`. **0 이면 제한 없음(옛 동작)**
+### 검증
+- 컴파일 성공, read_console error 0건
+- EditMode **245/245 통과** (신규 4: 범위 안 정상 / 경계에서 잘림 / 경계 밖에서도 안쪽 복귀 허용 / 같은 단 허용오차)
+- **실제 지형 레이캐스트로 9마리 전원 순찰 경계 시뮬레이션**
+  · 낮은 단(y 0.04) 6마리: 최대 도달 x 18.00 / 23.00 / 31.79 / 45.63 / **48.99** / 48.32 → **전원 x=49 단차 앞에서 정지 ✓**
+  · 높은 단(y 2.04~2.16) 3마리: 49.00~61.00 / 52.00~62.50 / 55.26~62.76 (자기 단 안)
+- 씬 저장 확인(SaveScene=True, dirty=False)
+- **사용자 눈 판정 필요**: (1) Scene3 에서 전투소리만 들리는지 (2) 적이 단차를 안 뚫는지 (3) 순찰 폭 12u 가 좁아 적이 안 따라오는 느낌은 아닌지 (4) 다른 씬 BGM 이 그대로인지
+### 실패와 수정
+- **GroundLevelAt 1차 구현 오류**: '트리거가 아니고 EnemyBase/PlayerHealth 도 아닌 콜라이더'를 지면으로 인정했더니, 팀 몬스터 **KeyMonster 의 non-trigger BoxCollider2D** 가 지면으로 잡혀 KnightEnemy_40 의 순찰 폭이 7.50u → **2.00u 로 잘못 잘렸다**
+  · 시뮬레이션에서 발견 → 판정을 **타일맵 계열(CompositeCollider2D / TilemapCollider2D)만 인정** 으로 교체해 해소
+  · 교훈: 지면 판정을 '제외 목록'으로 짜면 새 오브젝트가 생길 때마다 뚫린다. **허용 목록(타일맵만)** 으로 짜야 한다
