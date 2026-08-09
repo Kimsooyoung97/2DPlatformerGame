@@ -145,7 +145,7 @@ namespace NAN2026
             if (pendingTravel == null) return;
             if (scene.name != pendingTravel.sceneName) return;
 
-            PlayerHealth health = FindFirstObjectByType<PlayerHealth>();
+            PlayerHealth health = FindAnyObjectByType<PlayerHealth>();
             MovePlayerTo(health, pendingTravel.position);
             pendingTravel = null;
         }
