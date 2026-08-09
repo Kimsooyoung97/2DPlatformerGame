@@ -20,23 +20,23 @@ MonoBehaviour:
   normalHitDelay: 0.3
   normalDamage: 1
   normalCooldown: 1.4
-  normalHitboxLifetime: 0.15
+  normalHitboxLifetime: 0.3
   fireWindup: 0.3
   fireHitDelay: 0.35
   fireDamage: 1
   fireCooldown: 2
-  fireHitboxLifetime: 0.15
+  fireHitboxLifetime: 0.3
   bombWindup: 0.35
   bombHitDelay: 0.4
   bombDamage: 1
   bombCooldown: 2.2
-  bombHitboxLifetime: 0.15
+  bombHitboxLifetime: 0.3
   wheelWindup: 0.3
   wheelHitDelay: 0.3
   wheelTickInterval: 0.25
   wheelDamagePerTick: 1
   wheelCooldown: 2.5
-  wheelHitboxLifetime: 0.15
+  wheelHitboxLifetime: 0.3
   fpsIdle: 10
   fpsWalk: 12
   fpsNormal: 12
@@ -47,7 +47,7 @@ MonoBehaviour:
   fpsDeath: 12
   windupFlashColor: {r: 0.8117648, g: 0.26666668, b: 0.1254902, a: 1}
   windupFlashSpeed: 12
-  parryBuffer: 0.2
+  parryBuffer: 0.35
   groggyNeed: 5
   groggyTime: 3
   groggyFxOffsetY: 3.4

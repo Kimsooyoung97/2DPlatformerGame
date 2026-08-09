@@ -7532,3 +7532,20 @@ NAN2026Game/Assets/_Docs/ASSET_CREDITS.md merge=union
 - 씬 파일(*.unity)은 이번에 손대지 않았다. `-merge`(binary 취급)로 자동 병합을 막는 선택지가 있으나 팀 합의 사항
 ### 실패와 수정
 - 없음
+
+
+## [수정] FireKnight 패링 타이밍 완화 — 2026-08-09 (세션 시간)
+### 프롬프트
+지금 패링 타이밍이 너무 어려운데 좀 더 쉽게 해줘야할 것 같다
+(후속: 범위 확인 질문에 대한 답 "FireKnight만")
+### 조작 내역
+- execute_code: MidBossFireKnightConfig.asset(ScriptableObject) 리플렉션으로 값 직접 수정
+  - parryBuffer: 0.2 -> 0.35 (선입력 허용 폭 확대)
+  - normalHitboxLifetime / fireHitboxLifetime / bombHitboxLifetime / wheelHitboxLifetime: 0.15 -> 0.3 (각 공격 판정 창 2배)
+- 코드(.cs) 변경 없음 — 전부 Config 애셋 수치 조정
+### 검증
+- read_console(types=error): 이번 변경과 무관한 기존 이슈 2건만 존재(확인됨, 불변) — 새 에러 없음
+- run_tests(EditMode): 250/250 통과
+- manage_scene(save): UITestScene 저장 성공
+### 실패와 수정
+없음
