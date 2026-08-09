@@ -6676,3 +6676,28 @@ UI가 떴을때 timescale을 0으로 만들어야할것같다
 - manage_scene(save): UITestScene 저장 성공
 ### 실패와 수정
 없음
+
+
+## [수정] 세이브포인트 메뉴 열림 중 좌우 방향키로 캐릭터 방향 바뀌는 문제 수정 — 2026-08-10 (세션 시간)
+### 프롬프트
+ui가 켜졌을 때 좌우 방향키를 누르면 캐릭터가 방향이 바뀌네?
+### 원인
+Time.timeScale=0은 물리·시간축 로직만 멈추지 Update() 기반 키 입력 처리는 그대로 돈다 —
+PlayerController2D가 계속 방향키를 읽어서 캐릭터가 반응함.
+### 조작 내역
+- CheckpointTravelMenu.cs: PlayerController2D.InputLocked(기존 연출 락 정적 게이트) 연동.
+  - FAIL.md #27 경고(참조 카운트 없는 전역 static, 여러 시스템이 공유하면 나중에 false로
+    푸는 쪽이 이김) 때문에 완전한 카운터 시스템으로 바꾸지 않고 최소 안전장치만 추가:
+    weLockedInput(bool) 필드로 "내가 잠갔을 때만 내가 푼다" — Open() 시점에 이미
+    InputLocked==true(다른 시스템이 잠근 상태)면 손대지 않고, Close()/OnDestroy()에서도
+    우리가 잠갔을 때만 다시 false로 되돌림
+### 검증
+- refresh_unity(compile=request) -> read_console(types=error): 0건
+- run_tests(EditMode): 229/229 통과
+- **실측 검증 1(정상 케이스)**: InputLocked False -> Open() 후 True -> Close() 후 False 확인
+- **실측 검증 2(충돌 방지 케이스)**: PlayerController2D.InputLocked를 미리 true로 만들어
+  다른 시스템이 잠근 상황을 흉내낸 뒤 Open() -> weLockedInput=false(우리가 안 잠갔음 정상
+  인식) -> Close() 후에도 InputLocked=true 유지(우리가 함부로 안 풀었음) 확인
+- manage_scene(save): UITestScene 저장 성공
+### 실패와 수정
+없음

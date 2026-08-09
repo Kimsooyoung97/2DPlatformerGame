@@ -33,6 +33,11 @@ namespace NAN2026
         // 버그가 실측으로 확인됐다 — 한 번의 엔터가 열기+확정을 동시에 처리해버림.
         private int openedFrame = -1;
 
+        // FAIL.md #27: PlayerController2D.InputLocked는 참조 카운트 없는 전역 static이라
+        // 여러 시스템이 동시에 쓰면 나중에 false로 푸는 쪽이 이긴다. 최소 안전장치로,
+        // "내가 잠갔을 때만 내가 푼다" — 이미 다른 시스템이 잠가둔 상태였다면 손대지 않는다.
+        private bool weLockedInput;
+
         private void Awake()
         {
             // PersistentSingleton과 마찬가지로, 새로 로드된 씬에 이 컴포넌트를 가진 중복
@@ -49,6 +54,7 @@ namespace NAN2026
         {
             if (Instance == this) Instance = null;
             if (isOpen) Time.timeScale = 1f; // 열린 채로 파괴되는 경우(거의 없지만) timeScale 0에 갇히는 것 방지
+            if (weLockedInput) { PlayerController2D.InputLocked = false; weLockedInput = false; }
         }
 
         private void OnEnable()
@@ -71,6 +77,11 @@ namespace NAN2026
             isOpen = true;
             openedFrame = Time.frameCount;
             Time.timeScale = 0f; // 메뉴 여는 동안 게임 정지 — 고르는 사이에 몬스터한테 맞거나 하지 않게
+            if (!PlayerController2D.InputLocked)
+            {
+                PlayerController2D.InputLocked = true; // 좌우 방향키 등으로 캐릭터가 방향 바뀌는 것 방지
+                weLockedInput = true;
+            }
         }
 
         public void Close()
@@ -78,6 +89,11 @@ namespace NAN2026
             isOpen = false;
             playerHealth = null;
             Time.timeScale = 1f; // 복구하지 않으면 메뉴 닫은 뒤 게임이 계속 정지 상태로 남는다
+            if (weLockedInput)
+            {
+                PlayerController2D.InputLocked = false;
+                weLockedInput = false;
+            }
         }
 
         private void Update()
