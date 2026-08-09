@@ -6430,3 +6430,28 @@ NAN2026Game/Assets/_Docs/ASSET_CREDITS.md merge=union
 - **1차 절단에서 1칸 오차**: 구간을 [lo,hi] 양끝 포함으로 지우면서(28칸) 이동은 hi-lo(27칸)만 해 이음새마다 빈 열이 생겼다. 오른쪽 전체를 1칸씩 더 당겨 메웠고, 2차부터는 폭을 **hi-lo+1** 로 계산해 재발 없음
 - **카메라 바운드를 처음에 못 잡음**: 이름에 'bound' 가 들어간 **PolygonCollider2D** 만 찾았는데 실제로는 BoxCollider2D 였다. 컴포넌트 타입을 가정하지 말고 실측할 것
 - **콜라이더가 자동으로 안 줄어듦**: GenerateGeometry() 만으로는 TilemapCollider2D 가 이전 범위를 유지했다. Tilemap.RefreshAllTiles + 콜라이더 enable 토글까지 해야 반영됐다. 레이캐스트로 물리 검증하지 않았으면 보이지 않는 바닥을 남길 뻔했다
+
+
+## [수정] Scene2 주인공 시야광 복구 — 2026-08-09 20:28
+### 프롬프트
+맵은 어두워도 캐릭터 주변은 밝았는데 그 부분이 사라졌어 수정해
+### 조작 내역
+- 원인: `Player/PlayerVisionLight` 의 **GameObject 가 비활성(activeSelf=False)** 이었다. 삭제된 게 아니고 값(intensity 0.55 / outer 4.5 / inner 0.6)도 그대로 남아 있었다
+- 내 맵 절단과는 무관하다 — 시야광 위치 x=4.3 은 절단 구간(18~30, 54~81, 91~99, 117~125, 155~170) 어디에도 안 걸린다
+- 진짜 원인 구조: `IntroSequencer` 가 인트로 암전 중 `SetActive(false)` 로 껐다가 연출 완주 시 `SetActive(true)` 로 켠다.
+  그런데 **AdventureScene2 에는 IntroSequencer 가 0개**다 → 이 씬에는 시야광을 되켜줄 주체가 없다.
+  따라서 한 번 꺼진 채로 저장되면 영구히 꺼진 상태로 플레이된다
+- 조치: `SetActive(true)` 로 복구 후 씬 저장
+### 검증
+- 복구 후 activeSelf=True / activeInHierarchy=True 확인
+- Light2D 값 보존 확인: intensity 0.55, outerRadius 4.5, innerRadius 0.6, enabled=True
+- 로컬 위치 (0.00, 0.40, 0.00) — Player 자식이므로 따라다닌다
+- 현재 씬 IntroSequencer 개수 = 0 실측
+- Global Light 2D = 0.03 유지 확인 (던전 암전 그대로)
+- 씬 저장 확인(SaveScene=True, dirty=False)
+- **사용자 눈 판정 필요**: 재생 시 캐릭터 주변 반경 4.5u 가 밝아지는지
+### 남은 위험
+- 시야광은 `RealPlayer.prefab` 의 자식이고 씬에는 **프리팹 오버라이드**로 저장된다. 프리팹을 교체·재적용하면 다시 꺼질 수 있다
+- 다른 씬(1·3·4)의 시야광 상태는 텍스트 스캔으로 확인 불가했다(프리팹 자식이라 씬 파일에 m_Name 으로 안 나타남). 각 씬을 열어 확인해야 한다
+### 실패와 수정
+- 없음
