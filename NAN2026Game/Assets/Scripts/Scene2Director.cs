@@ -29,7 +29,6 @@ namespace NAN2026
         private Component cmCam;
         private System.Reflection.PropertyInfo followProp;
         private Text topLabel;
-        private TextMesh pips;
         private Behaviour bossAi;
         private SpriteRenderer bossSr;
         private Collider2D bossCol;
@@ -49,7 +48,6 @@ namespace NAN2026
             foreach (var mb in FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
                 if (mb.GetType().Name == "CinemachineCamera") { cmCam = mb; followProp = mb.GetType().GetProperty("Follow"); break; }
             BuildTopLabel();
-            BuildPips();
             if (config != null && config.debugSkipToBoss)
             {
                 SpikeParryEvents.Count = config.parryGoal;
@@ -65,7 +63,6 @@ namespace NAN2026
             if (SpikeParryEvents.Count != count)
             {
                 count = Mathf.Min(SpikeParryEvents.Count, config.parryGoal);
-                RefreshPips();
                 UpdateTopLabel();
                 if (count >= config.parryGoal) { done = true; SpikeParryEvents.CombatSealed = true; StartCoroutine(Brighten()); }
             }
@@ -97,28 +94,6 @@ namespace NAN2026
             topLabel.text = count >= config.parryGoal ? "어둠이 걷혔다!" : "스파이크 패링  " + count + " / " + config.parryGoal;
         }
 
-        private void BuildPips()
-        {
-            if (boss == null || config == null) return;
-            var go = new GameObject("ParryPips");
-            go.transform.SetParent(boss, false);
-            go.transform.localPosition = new Vector3(0f, config.pipOffsetY, 0f);
-            pips = go.AddComponent<TextMesh>();
-            pips.fontSize = 48; pips.characterSize = 0.08f;
-            pips.anchor = TextAnchor.MiddleCenter;
-            pips.color = new Color(1f, 0.85f, 0.2f);
-            go.GetComponent<MeshRenderer>().sortingOrder = 900;
-            RefreshPips();
-        }
-
-        private void RefreshPips()
-        {
-            if (pips == null || config == null) return;
-            var sb = new System.Text.StringBuilder();
-            for (int i = 0; i < config.parryGoal; i++) sb.Append(i < count ? '\u25c6' : '\u25c7');
-            pips.text = sb.ToString();
-        }
-
         private void SetPlayerControl(bool on)
         {
             // 입력 게이트 방식: 컨트롤러는 계속 구동(내부 상태·애니 안전), 입력만 차단
@@ -144,6 +119,9 @@ namespace NAN2026
             if (bossAi != null) bossAi.enabled = on;
             if (bossSr != null) bossSr.enabled = on;
             if (bossCol != null) bossCol.enabled = on;
+            // 보스에 붙은 표시물(GroggyPips 등)도 함께. 보스만 숨기면 핍이 허공에 떠 있게 된다.
+            if (boss != null)
+                foreach (var r in boss.GetComponentsInChildren<Renderer>(true)) r.enabled = on;
         }
 
         private IEnumerator Brighten()
