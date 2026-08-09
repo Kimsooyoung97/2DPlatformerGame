@@ -6953,3 +6953,33 @@ Secen3다음에는 Secen4 진행하도록 했는데
 - 잡몹 구현 시 패링 연동을 '요청에 없어 범위 방어' 로 뺐는데, SPEC 이 패링을 핵심 메커니즘으로 규정하므로 기본 요구사항으로 봤어야 했다
 ### 커밋
 해당 없음(무수정)
+
+
+## [수정] 잡몹 3건 — 세로 판정 1.2 · 패링 연동 · 연출 중 정지 — 2026-08-09 09:06
+### 프롬프트
+[수정] 세로판정 1.2로 수정하고, 잡몬 패링 연동, 연출동안 적들 Idle 상태만 진행하도록 수정 해
+### 조작 내역
+**① 세로 판정 — BossRangeLogic.InHitBand 8인자 오버로드 신설**
+- 기존 5인자 버전은 그대로 두고 오버로드를 추가. **DemonBoss 10개 호출부를 건드리지 않는다**(보스 난이도 불변)
+- 규칙: 수평 판정 통과 후 `|targetFootY - selfFootY| > attackHeight` 면 빗나감. attackHeight ≤ 0 이면 기존 동작(제한 없음)
+- 위쪽뿐 아니라 **아래쪽도 제외** — 다층 배치(Scene3 y=0.04/2.04/3.04)에서 층이 다른 적에게 맞지 않게
+- EnemyConfig.attackHeight = **1.2** (Knight·Archer). 실측 점프 정점 2.25u 기준 체공의 68% 가 안전 구간
+**② 잡몹 패링 연동**
+- EnemyConfig 에 `clashConfig`(SpikeBallConfig) 신설 — 보스·함정과 **같은 자산** 사용
+- EnemyBase: Start 에서 플레이어의 `TryParry(GameObject)` 를 리플렉션으로 확보(MinoBoss·DemonBoss 와 동일 계약).
+  DoAttack 타격 성립 시 `TryParried()` 를 먼저 호출 → 성공하면 **데미지 취소 + ParryClashFx + PlayerMana.RewardParry**
+- ArcherArrow: Launch 시그니처에 clashConfig 추가, 플레이어 명중 시 동일 절차. 화살은 패링 시 소멸
+- 이로써 SPEC 의 '패링 = 핵심 메커니즘' 이 잡몹 구간에도 성립. MP 도 잡몹 패링으로 수급된다
+**③ 연출 중 적 정지**
+- EnemyBase.Update 에 `PlayerController2D.InputLocked` 게이트 추가. 락 중에는 Idle 로 되돌리고 이동·공격 판단을 건너뛴다
+- 단 **이미 공격 모션 중이면 그 모션은 끝까지 재생**한다(중간에 얼면 부자연스럽고, 타격창은 어차피 다음 프레임부터 막힘)
+- 적용 범위: IntroSequencer(Scene3 토치 인트로) / Scene2Director / DemonBoss 그로기 대시 / 사망 연출 — InputLocked 를 쓰는 모든 연출
+### 검증
+- 컴파일 0, read_console error/exception 0건
+- EditMode **224/224 통과**, 실패 0 (BossRangeLogicTests 세로 판정 7개 신규)
+- 리플렉션 실행 검증: InHitBand 오버로드 2개 확인 / 같은높이(0,0,1.2)=True / 뛰어넘음(0,2.25,1.2)=False / 낮은점프(0,0.5,1.2)=True / 경계(0,1.2,1.2)=True
+- EnemyBase.TryParried 존재 확인, EnemyConfig 신규 필드 attackHeight:Single / clashConfig:SpikeBallConfig
+- Config 재읽기: Knight·Archer 모두 attackHeight=1.2, clashConfig=SpikeBallConfig
+- **사용자 눈 판정 필요**: (1) 점프로 Knight 공격을 넘길 수 있는지 (2) Space 패링으로 Knight 근접·Archer 화살을 막고 격돌 FX·MP 가 오르는지 (3) Scene3 토치 인트로 동안 적 12마리가 완전히 멈춰 있는지
+### 실패와 수정
+- 잡몹 최초 구현 때 패링을 '요청에 없음' 으로 제외한 판단 착오를 이번에 정정. SPEC 이 핵심 메커니즘으로 규정한 요소는 요청 없어도 기본 요구사항으로 봐야 한다

@@ -27,6 +27,12 @@ namespace NAN2026
         public float hitWinE = 0.65f;
         public int damage = 1;
         public float frontDeadZone = 0.5f;
+        [Tooltip("이 높이차를 넘어가면(점프) 맞지 않는다. 0이면 세로 제한 없음")]
+        public float attackHeight = 1.2f;
+
+        [Header("패링")]
+        [Tooltip("패링 성공 시 격돌 연출. 보스·함정과 같은 자산을 쓴다")]
+        public SpikeBallConfig clashConfig;
 
         [Header("애니메이션")]
         public float fps = 12f;

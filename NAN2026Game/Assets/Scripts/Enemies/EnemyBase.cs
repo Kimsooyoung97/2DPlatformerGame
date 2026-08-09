@@ -18,7 +18,9 @@ namespace NAN2026
         protected SpriteRenderer sr;
         protected Transform player;
         private Coroutine flashCo;
-        private float spawnY;              // 배치 높이를 접지 기준으로 (config.groundY 고정 시 다층 배치 불가)
+        private float spawnY;
+        private Component parryController;                 // PlayerController2D
+        private System.Reflection.MethodInfo tryParry;      // TryParry(GameObject)              // 배치 높이를 접지 기준으로 (config.groundY 고정 시 다층 배치 불가)
         private static readonly System.Collections.Generic.List<EnemyBase> All = new System.Collections.Generic.List<EnemyBase>();
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -32,6 +34,15 @@ namespace NAN2026
             var rb = GetComponent<Rigidbody2D>();
             if (rb != null) rb.useFullKinematicContacts = true; // FAIL#6
             player = PlayerLocator.FindTransform();
+            if (player != null)
+            {
+                foreach (var mb in player.GetComponents<MonoBehaviour>())
+                {
+                    var m = mb.GetType().GetMethod("TryParry",
+                        System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    if (m != null) { parryController = mb; tryParry = m; break; }
+                }
+            }
             spawnY = transform.position.y;
             nextAtk = Time.time + EnemyStateLogic.InitialDelay(config.fireStagger, Random.value); // 첫 발 산개
             if (!All.Contains(this)) All.Add(this);
@@ -63,6 +74,12 @@ namespace NAN2026
                 return;
             }
             if (player == null) { player = PlayerLocator.FindTransform(); Anim(idleFrames, true); return; }
+
+            // 연출(인트로·컷) 중에는 적도 멈춘다. 플레이어만 묶이면 일방적으로 맞는다.
+            if (PlayerController2D.InputLocked)
+            {
+                if (state != EnemyStateLogic.Attack) { SetState(EnemyStateLogic.Idle); Anim(idleFrames, true); return; }
+            }
 
             float dx = Mathf.Abs(player.position.x - transform.position.x);
             float face = EnemyStateLogic.FaceSign(transform.position.x, player.position.x);
@@ -171,6 +188,20 @@ namespace NAN2026
             }
         }
 
+        /// 플레이어가 패링 창을 열고 있으면 데미지를 취소하고 격돌 연출·MP 를 준다.
+        /// 보스·함정과 같은 계약(PlayerController2D.TryParry)을 쓴다.
+        protected bool TryParried()
+        {
+            if (parryController == null || tryParry == null) return false;
+            object r = tryParry.Invoke(parryController, new object[] { gameObject });
+            bool ok = r is bool && (bool)r;
+            if (!ok) return false;
+            if (config.clashConfig != null && player != null)
+                ParryClashFx.Play((transform.position + player.position) * 0.5f + Vector3.up, config.clashConfig);
+            PlayerMana.RewardParry(player);
+            return true;
+        }
+
         /// 진행 방향 앞에 같은 종류의 동료가 separation 안에 있으면 멈춘다(겹침 방지).
         protected bool BlockedAhead(float moveSign)
         {
@@ -200,10 +231,11 @@ namespace NAN2026
             Anim(attackFrames, false);
             float frac = stateT / config.attackDur;
             if (!dealtThisSwing && BossRangeLogic.WindowOpen(frac, config.hitWinS, config.hitWinE)
-                && BossRangeLogic.InHitBand(transform.position.x, player.position.x, config.attackRange, face, config.frontDeadZone))
+                && BossRangeLogic.InHitBand(transform.position.x, player.position.x, config.attackRange, face, config.frontDeadZone,
+                                            transform.position.y, player.position.y, config.attackHeight))
             {
                 dealtThisSwing = true;
-                player.SendMessage("TakeDamage", (float)config.damage, SendMessageOptions.DontRequireReceiver);
+                if (!TryParried()) player.SendMessage("TakeDamage", (float)config.damage, SendMessageOptions.DontRequireReceiver);
             }
             if (frac >= 1f) { nextAtk = NextAttackAt(); SetState(EnemyStateLogic.Idle); }
         }

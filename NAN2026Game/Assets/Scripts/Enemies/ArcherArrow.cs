@@ -8,10 +8,25 @@ namespace NAN2026
         private float speed, life;
         private int dmg;
         private Vector2 dir;
+        private SpikeBallConfig clash;
+        private Transform player;
+        private Component parryController;
+        private System.Reflection.MethodInfo tryParry;
 
-        public void Launch(Sprite spr, Vector2 direction, float spd, float lifeSec, int damage, int sortingOrder)
+        public void Launch(Sprite spr, Vector2 direction, float spd, float lifeSec, int damage, int sortingOrder, SpikeBallConfig clashConfig = null)
         {
-            dir = direction.normalized; speed = spd; life = lifeSec; dmg = damage;
+            dir = direction.normalized; speed = spd; life = lifeSec; dmg = damage; clash = clashConfig;
+            var pgo = PlayerLocator.Find();
+            if (pgo != null)
+            {
+                player = pgo.transform;
+                foreach (var mb in pgo.GetComponents<MonoBehaviour>())
+                {
+                    var m = mb.GetType().GetMethod("TryParry",
+                        System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    if (m != null) { parryController = mb; tryParry = m; break; }
+                }
+            }
             var sr = gameObject.AddComponent<SpriteRenderer>();
             sr.sprite = spr;
             sr.sortingOrder = sortingOrder;
@@ -38,7 +53,19 @@ namespace NAN2026
             var ph = other.GetComponentInParent<PlayerHealth>();
             if (ph != null)
             {
-                ph.SendMessage("TakeDamage", (float)dmg, SendMessageOptions.DontRequireReceiver);
+                bool parried = false;
+                if (parryController != null && tryParry != null)
+                {
+                    object r = tryParry.Invoke(parryController, new object[] { gameObject });
+                    parried = r is bool && (bool)r;
+                }
+                if (parried)
+                {
+                    if (clash != null && player != null)
+                        ParryClashFx.Play((transform.position + player.position) * 0.5f + Vector3.up * 0.8f, clash);
+                    PlayerMana.RewardParry(player);
+                }
+                else ph.SendMessage("TakeDamage", (float)dmg, SendMessageOptions.DontRequireReceiver);
                 Destroy(gameObject);
                 return;
             }

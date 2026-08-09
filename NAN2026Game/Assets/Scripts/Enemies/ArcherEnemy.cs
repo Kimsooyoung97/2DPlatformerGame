@@ -34,7 +34,7 @@ namespace NAN2026
                 + new Vector3(config.muzzleOffset.x * face, config.muzzleOffset.y, 0f);
             var a = go.AddComponent<ArcherArrow>();
             a.Launch(arrowSprite, new Vector2(face, 0f), config.arrowSpeed, config.arrowLife, config.arrowDamage,
-                     sr != null ? sr.sortingOrder : 0);
+                     sr != null ? sr.sortingOrder : 0, config.clashConfig);
         }
     }
 }

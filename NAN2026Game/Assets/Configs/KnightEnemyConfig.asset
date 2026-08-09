@@ -28,6 +28,8 @@ MonoBehaviour:
   hitWinE: 0.7
   damage: 1
   frontDeadZone: 0.5
+  attackHeight: 1.2
+  clashConfig: {fileID: 11400000, guid: 31b4bd26897983b4fb8fcb4703f841b5, type: 2}
   fps: 12
   snapToGround: 1
   groundY: 0.04
