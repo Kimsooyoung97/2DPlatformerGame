@@ -7832,3 +7832,161 @@ GameOverBg, GameOver(글자) 이미지 넣었다 → 게임오버 화면 구성
 - 체감 타이밍은 사용자 재생
 ### 실패와 수정
 없음
+
+
+## [구현] 스킬 키 1·2·3 이전 + 번개 피격 판정 + Scene1 구체 유도 — 2026-08-10 04:52
+### 프롬프트
+Scene1 스파이크 구체 유도되게, 5·6·7 스킬을 1·2·3으로 이동, 1번 번개 범위에 맞은 적 피격
+### 조작 내역
+- 키 이전: PlayerSkill digit5→**digit1**(번개) / SkillSlashCaster digit6→**digit2**(검기) / SkillOrbCaster digit7→**digit3**(나선환)
+- 충돌 해소: PC2D의 digit2·3·4 테스트용 콤보(ComboB1~B3 개별 발동) 3줄 제거 — 주석상 testParry 테스트 입력이었음
+- 번개 피격 신설: PlayerSkill.DamageAround(center) — 번개 소환 지점마다 OverlapBoxAll(config.hitSize)로 MinoBoss/DemonBoss/MonsterHealth 타격, 자기 자신 제외. PlayerSkillConfig에 damage 2·hitSize(1.4,3.0) 신설
+- Scene1 구체 유도: SpikeBallTrap 비행 중 진행 방향을 플레이어 쪽으로 Lerp(homingTurn 3.5, homingSeconds 1.6 이후 직진). SpikeBallConfig·SpikeBallConfig_Scene1 양쪽 적용. 기존 발사 시점 예측 조준은 유지
+### 검증
+- 컴파일 0, Config 재읽기: 유도 3.5/1.6, 번개 대미지 2·판정 (1.4,3.0)·MP 1
+- 실제 유도 궤적·번개 타격은 사용자 재생
+### 실패와 수정
+없음
+
+
+## [수정] 번개 사용 시 에디터 정지 — SendMessage 인자 불일치 — 2026-08-10 04:55
+### 프롬프트
+지금 번개를 쓰면 화면이 멈추는데 이유가 뭐야?
+### 조작 내역
+- 콘솔 증거: 'Failed to call function TakeDamage of class MonsterHealth' ×2 → Error Pause가 매 호출마다 에디터를 정지시킨 것(화면 멈춤의 실체)
+- 원인: MonsterHealth.TakeDamage(int, Vector2) — 인자 2개인데 SendMessage는 1개만 전달 가능. 직전 커밋에서 번개 피격을 SendMessage로 구현한 것이 화근
+- PlayerSkill.DamageAround: SendMessage → **직접 호출** mon.TakeDamage(damage, 방향벡터)로 교체(넉백 방향은 번개 지점 기준 좌우). SkillOrbCaster는 이미 직접 호출이라 무관
+### 검증
+- 컴파일 0, 콘솔 에러 0
+- 실제 번개 타격·정지 재발 여부는 사용자 재생
+### 실패와 수정
+- SendMessage 사용 전 대상 시그니처 미확인 자인 — FAIL 등재 대상(인자 2개 이상 메서드는 SendMessage 불가)
+
+
+## [수정] 2번 ComboB1 복구(+피격판정) · 검기 4번 이사 — 2026-08-10 05:01
+### 프롬프트
+A. ComboB1을 2번으로 되돌리고, 검기는 4번으로 이사
+### 조작 내역
+- PC2D에 digit2 → QueueAttack("ComboB1", comboB1Duration, slashLungeSpeed) 복구 (3·4번 테스트키는 복구하지 않음)
+- **ComboB1 피격 판정 신설**: 기존엔 VSlashFx 시각 효과만 있고 대미지 경로가 없었음 → SpawnComboBDamage(dir,pos)로 투명 히트박스(EffectProjectile, SpriteRenderer 비활성) 소환. 대미지=comboVDamage+진행보너스, 판정=comboVHitboxSize(3.2,1.2), 수명=comboVHitLifetime(0.12)
+- SkillSlashCaster digit2 → **digit4**(검기 이사)
+### 검증
+- 컴파일 0 / 최종 키 배치 코드 확인: 1 번개 · 2 가로베기(판정 O) · 3 나선환 · 4 검기
+- 실제 타격·모션은 사용자 재생
+### 실패와 수정
+- 임시 오버로드 1개 남겼다가 즉시 제거
+
+
+## [수정] ComboB1 판정 상단 보강 — 2026-08-10 05:04
+### 프롬프트
+이펙트 피격판정이 상단은 없는거 같은데
+### 조작 내역
+- 원인: ComboB1 판정을 Z콤보용 comboVHitboxSize(3.2×**1.2**)로 공유 사용 — 가로로만 길어 이펙트 상단이 판정 밖
+- AttackEffectConfig에 ComboB1 전용 필드 신설: comboBHitboxSize(3.4×**3.0**)·comboBHitOffsetY 0.6·comboBDamage 3. 스포너가 전용 값 사용하도록 교체(판정 중심도 0.6 위로)
+### 검증
+- 컴파일 0, 재읽기: 판정=(3.40, 3.00) 오프셋Y=0.60 대미지=3
+- 실제 상단 타격은 사용자 재생
+### 실패와 수정
+- 없음. Z콤보 값과 분리했으므로 이후 두 기술을 독립 조절 가능
+
+
+## [수정] ComboB1 이펙트 축소 + 판정 확장(메이플식) — 2026-08-10 05:08
+### 프롬프트
+이펙트 크기를 30% 줄이고 이펙트 가로 길이 만큼 피격 범위를 늘려줘 / 기존 가로 이펙트 범위보다 좀 더 크게, 약간 메이플처럼
+### 조작 내역
+- 이펙트: comboB1FxScale 신설·분리(Z콤보 comboVFxScale 4.00 불변) 후 4.00→**2.80**(30% 축소, 보이는 크기 2.55x3.58)
+- 판정: comboBHitboxSize (3.40,3.00)→**(4.60,3.22)** — 보이는 폭 2.55보다 약 1.8배 넓게(메이플식 관대한 판정), 세로는 이펙트 높이 90%. 오프셋Y 0.40
+### 검증
+- 이펙트 스케일=2.80 (보이는 크기 2.55x3.58) / 판정=(4.60, 3.23) 오프셋Y=0.40 / Z콤보 스케일=4.00(무영향)
+- 실제 사거리 체감은 사용자 재생
+### 실패와 수정
+없음
+
+
+## [구현] 스킬 해금 게이트 + 아이콘 쿨타임 표시 — 2026-08-10 05:14
+### 프롬프트
+스킬 이모티콘 먹어야만 활성화되게, 각 스킬 쿨타임만큼 좌하단 아이콘이 회색이었다가 조금씩 원래 색으로 차오르게
+### 조작 내역
+- SkillGate.cs 신설(단일 창구): IsUnlocked(slot)=ChestRewardEvents.Collected>slot / Report(slot,cooldown) / Progress(slot) 0~1 / IsReady(slot). DisableDomainReload 대응 정적 리셋 포함
+- 슬롯 매핑 0=1번 번개(PlayerSkill) · 1=2번 가로베기(PC2D ComboB1) · 2=3번 나선환(SkillOrbCaster) — 좌하단 아이콘 순서와 일치. 각 발동부에 해금 검사 + 쿨타임 보고 이식
+- ChestSkillBar 확장: 슬롯마다 Fill 자식 이미지(Image.Type.Filled·Vertical·아래→위) 추가. 잠김이면 바탕 어둡게(0.55배)·fill 0, 해금 시 쿨타임 진행도만큼 원래 색이 차오름
+### 검증
+- 컴파일 0, 슬롯 수=3 / 아이콘=Skill1 / 채운색=RGBA(1.000, 1.000, 1.000, 1.000) / 빈색=RGBA(1.000, 1.000, 1.000, 0.180)
+- 실제 해금·쿨 차오름은 사용자 재생
+### 실패와 수정
+- 없음. 4번 검기는 슬롯 3칸 밖이라 해금 대상에서 제외(요청 범위 밖)
+
+
+## [수정] Scene1 구체 대각선 낙하 복원 — 2026-08-10 05:18
+### 프롬프트
+구체가 바로 위로 내려와서 패링이 힘들다. Scene2는 대각선으로 내려온다 — 확인해봐라
+### 조작 내역
+- 대조 결과 Scene1 전용 Config만 다름: launchMultiplier **0.45**(Scene2 1.10) → 감지 반경 4.5 기준 발사 거리 2.0u에 불과해 플레이어 바로 위에서 떨어짐
+- SpikeBallConfig_Scene1.launchMultiplier 0.45→**1.10**(발사 거리 5.0u, 대각선 진입), homingTurn 3.50→**2.00**(유도 유지하되 대각선 궤적 보존)
+- 유지: onlyBelow=True(천장 트랩 특성), leadTarget=True, maxTravel 16, killPlaneY 27 — 레벨 구조 의존값
+### 검증
+- 재읽기: 발사 배율 0.45 → 1.10 (감지 반경 4.5 기준 발사 거리 2.0u → 5.0u) / 유도 강도 3.50 → 2.00
+- 실제 낙하 각도·패링 난이도는 사용자 재생
+### 실패와 수정
+없음
+
+
+## [수정] 몬스터 낭떠러지 이탈·바닥 끼임 — 2026-08-10 05:24
+### 프롬프트
+X 145 부근 몬스터가 아래로 떨어지며 바닥에 끼인다. 2·3층 몬스터는 떨어지지 말고 자기 자리를 지켜야 한다(메이플처럼)
+### 조작 내역
+- 지형 실측: x144~146 구간은 y44대 발판이 끊긴 절벽 — 추격 중 그대로 걸어 나가 낙하 후 하단 지형에 끼임
+- EnemyAI에 낭떠러지 감지 신설: HasGroundAhead(dir) = 발 앞 edgeProbeAhead 지점에서 아래로 edgeProbeDepth 레이캐스트. 순찰은 발판 끝에서 방향 반전, 추격은 GuardDir로 전진 차단(그 자리 유지)
+- EnemyAIConfig 필드 추가·설정: edgeProbeAhead 0.55 / edgeProbeDepth 1.20 / groundMask 전체
+### 검증
+- 컴파일 0, 지형 단면·발밑 지면 확인(x150·154 몬스터 발밑 지면 True)
+- 실제 낙하 방지·끼임 재발은 사용자 재생
+### 실패와 수정
+- 들여쓰기(4칸) 오추정으로 치환 2회 실패 후 원문 확인하여 정정
+
+- 추가: EnemyAIConfig 4종 설정 완료(잡몹 DeathDog·Lich 앞0.55/깊이1.2/마스크 전체). **보스 2종(MiddleBoss·PrincessBoss)은 edgeProbeAhead=0으로 감지 비활성** — 패턴 이동이 막히는 것 방지
+- 검증: DeathDogAIConfig=0.55 LichAIConfig=0.55 MiddleBossAIConfig=0.00 PrincessBossAIConfig=0.00 
+
+
+## [구현] 상자별 스킬 슬롯 지정 — 2026-08-10 05:31
+### 프롬프트
+y45 상자=1번 스킬(좌하단 첫 아이콘), y55 상자=3번 스킬(세 번째 아이콘), 나머지 상자=2번 스킬
+### 조작 내역
+- ChestRewardEvents 확장: Collected 누계 방식 → **슬롯별 Unlocked[] 플래그** 병행. ReportSlot(slot,capacity) 신설(slot<0이면 기존 순차 채움 유지), 정적 리셋에 플래그 포함
+- ChestSkillReward에 rewardSlot 필드(0=1번/1=2번/2=3번, -1=순차) 신설 → SkillRewardFlyer.Spawn(slot,...)·ownerSlot으로 전달해 흡수 시점에 해당 슬롯 해금
+- SkillGate.IsUnlocked을 누계 비교 → 플래그 조회로 전환(순서 무관 해금 지원)
+- Scene1 배정: BOX@y44.7→슬롯0 / Chest (1)@y55.0→슬롯2 / Chest (2)@y32.0→슬롯1
+### 검증
+- 컴파일 0, 디스크 재로드 검증: BOX=0 · Chest (1)=2 · Chest (2)=1
+- 실제 해금·아이콘 점등은 사용자 재생
+### 실패와 수정
+- static 메서드에서 인스턴스 필드(rewardSlot) 참조 오류 1회 → 파라미터(slot)로 정정
+
+
+## [수정] Scene1 몬스터 즉시 공격 완화 — 2026-08-10 05:34
+### 프롬프트
+Scene1 몬스터가 나 보자마자 바로 공격해서 난이도가 너무 어렵다
+### 조작 내역
+- 원인: 발견 시 attackTimer가 0이라 교전 전환 즉시 첫 타격. EnemyAIConfig.firstAttackDelay 신설 + EnemyAI가 Patrol→교전 전환 순간 attackTimer에 유예 부여
+- 잡몹 튜닝: DeathDog(유예 1.0s·감지 4.0→3.5) / Lich(유예 1.4s·감지 8.0→6.5·사거리 5.0→4.0·쿨 4.0→4.5) — 원거리 리치가 체감 난이도의 주범
+- 보스 2종은 유예 0.6s만 부여하고 감지·사거리 유지(패턴 훼손 방지)
+### 검증
+- 컴파일 0, Config 재읽기(아래 출력)
+- 실제 체감 난이도는 사용자 재생
+### 실패와 수정
+- DetermineState 인자 수 오추정으로 치환 1회 실패 → 원문 확인 후 정정
+
+
+## [수정] 몬스터 바닥 박힘·플레이어 벽 끼임 — 2026-08-10 05:42
+### 프롬프트
+(73,43),(86,43) 구역 몬스터가 아래로 박혀서 움직인다. 옆면 (-32,27)에 걸리고 대시하면 걸리고 가끔 벽을 뚫는다
+### 조작 내역
+- 원인①: Stage_Ground/Wall의 PlatformEffector2D가 colliderMask 전체(-1)로 걸려 있어 **몬스터(Default 레이어)에도 원웨이가 적용** → 아래에서 밀리면 발판을 통과해 지형에 박힌 채 이동. 효과기 colliderMask를 **Player(7) 전용**으로 좁힘 — 몬스터는 이제 바닥을 뚫지 못하고, 플레이어 원웨이 통과는 그대로 유지
+- 원인②: 플레이어 콜라이더에 물리 재질이 없어 기본 마찰(0.4)로 벽에 붙음 → PlayerNoFriction(friction 0·bounciness 0) 생성 후 RealPlayer 프리팹에 적용(벽 끼임·대시 걸림 완화)
+- 이미 박힌 개체 3기 지면 위로 보정(+0.07~0.11)
+- 참고: 플레이어 RB는 Dynamic·Continuous·Interpolate로 이미 관통 방지 설정 — 대시는 속도 기반 이동 확인
+### 검증
+- 씬 저장, 프리팹 재읽기: 마찰재질 PlayerNoFriction(friction 0) 적용 확인
+- 실제 끼임·관통 재발은 사용자 재생
+### 실패와 수정
+- LayerMask.value 접근 오류 1회(codedom) → (int) 캐스팅으로 정정

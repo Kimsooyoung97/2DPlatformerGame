@@ -6566,6 +6566,419 @@ foreach (SpikeBallTrap)        mb.enabled = false;     // 가시구 정지
   확인 요청함.
 
 
+## [수정] 스킬 MP 소모 1로 통일 + 검기 사거리 연장 — 2026-08-10 03:11
+### 프롬프트
+스킬 한번에 MP 하트 소모량은 1만 되어야 하고 6번 이펙트는 적 몬스터에 부딪힐때까지 또는 벽에 부딪힐때까지 끝까지 가야함
+### 조작 내역
+**① MP 소모 전부 1로**
+- PlayerSkillConfig(5번 번개) mpCost 2 → **1**
+- SkillSlash_6(6번 검기)      mpCost 2 → **1**
+- SkillOrb_7(7번 나선환)      mpCost 3 → **1**
+**② 검기가 끝까지 날아가게 — 코드 수정 없이 수치만**
+- 먼저 원인을 확인했다: `EffectProjectile` 에 **충돌 처리가 이미 구현돼 있었다**
+  · 벽·바닥: `if (!other.isTrigger) Destroy(gameObject);` — 트리거가 아닌 콜라이더면 즉시 소멸
+  · 적 명중: `piercing == false` 면 첫 적에서 소멸 (SkillSlash_6 은 piercing False)
+- 즉 일찍 사라지는 원인은 **수명뿐**이었다. life 2초 x speed 9 = 사거리 18u, 화면 반폭 12u 를 조금 넘고 끝
+- SkillSlash_6 life 2 → **8** (사거리 18u → **72u**, 화면 6배)
+- 수명을 무한으로 두지 않은 이유: 벽 없는 구간에서 투사체가 영원히 남아 누적된다. 수명은 **안전핀**으로만 남긴다
+### 검증
+- 재읽기 확인: PlayerSkillConfig 1 / SkillSlash_6 1 / SkillOrb_7 1
+- SkillSlash_6 life 8 x speed 9 = **사거리 72u**, 화면 반폭 11.95u 대비 6배 → 벽·적을 먼저 만난다
+- 코드 변경 0 (EffectProjectile·SkillSlashCaster 무수정)
+- **사용자 눈 판정 필요**: (1) 스킬 3종 모두 하트 1개만 닳는지 (2) 검기가 벽에 닿을 때까지 날아가는지 (3) 적에 맞으면 그 자리에서 사라지는지 (4) 시작 MP 6 으로 6번 쓸 수 있는지
+### 실패와 수정
+- 없음
+
+
+## [조사] 6·7번 투사체가 스폰 직후 소멸하는 원인 — 2026-08-10 03:14
+### 프롬프트
+[조사] 6,7번 모두 투사체가 캐릭터 앞에서 날라갔다가 바로 사라짐.
+### 조사 결과
+**원인 확정: 스폰 순간 콜라이더가 지면을 물고 있어 '벽에 맞았다'로 처리된다. 수명 문제가 아니다.**
+- 두 스킬 모두 `spawnHeight 0.5` 로 플레이어 발끝 위 0.5u 지점에 생성된다
+- 그런데 **`scale` 이 콜라이더까지 배로 키운다** — 이게 간과된 지점
+**6번 검기**
+- `hitbox2D (3.00, 1.20)` x `scale 3` = 월드 **9.00 x 3.60**
+- 박스 하단 = 0.5 - 1.80 = **-1.30** → 발끝보다 1.3u 아래. 지면을 크게 파고든다
+- `EffectProjectile.OnTriggerEnter2D`: `if (!other.isTrigger) Destroy(gameObject)` → 지면(non-trigger)에 즉시 걸림
+**7번 나선환**
+- `radius 0.45` x `scale 1.3` = 월드 반경 **0.59**
+- 원 하단 = 0.5 - 0.59 = **-0.08** → 아슬아슬하게 발끝 아래
+- `SkillOrbFlight.OnTriggerEnter2D`: `CompositeCollider2D 면 Destroy` → Stage_Ground 가 Composite 이라 걸림
+**확인한 지면 콜라이더**: Stage_Ground(Composite+Tilemap), Stage_Wall(Composite+Tilemap), Stage_Solid(Tilemap) — 전부 non-trigger
+**직전 [수정]에서 life 를 8 로 올린 것은 효과가 없었던 이유**: 수명이 아니라 **첫 프레임 충돌**로 죽고 있었다. 사거리 계산(72u)은 맞았지만 전제가 틀렸다
+**개선 방향(미실행)**
+- A안 **스폰 높이 상향**: spawnHeight 0.5 → 1.6 정도. 6번 박스 하단이 1.6-1.8 = -0.2 라 여전히 부족 → **2.0 이상** 필요. 가장 간단하지만 검기가 머리 위에서 나가 어색할 수 있다
+- B안 **판정 박스 축소**: hitbox2D 를 scale 로 나눠서 지정(예: 6번 (1.0, 0.4) x scale 3 = 3.0 x 1.2). 원래 의도한 크기가 3.0x1.2 였을 텐데 scale 이 곱해지는 걸 안 뺀 것으로 보인다 → **가장 근본적**
+- C안 **지면 레이어 무시**: 투사체 콜라이더를 지면과 충돌하지 않는 레이어로. Project Settings 변경이라 규약상 금지
+- D안 **스폰 후 짧은 무적**: 생성 0.05초간 충돌 판정을 끄기. 벽 앞에서 쏘면 벽을 통과해버리는 부작용
+- 권장: **B + A 소폭**. 판정 크기를 의도값으로 되돌리고, 스폰 높이를 0.8 정도로 올려 여유를 준다
+### 검증
+해당 없음 (파일 수정 없음)
+### 커밋
+해당 없음(무수정)
+
+
+## [수정] 6·7번 투사체 즉시 소멸 해소 — scale 중복 적용 제거 — 2026-08-10 03:16
+### 프롬프트
+수정 진행
+> 맥락: 직전 [조사]의 원인(스폰 시 콜라이더가 지면을 물어 '벽 충돌'로 소멸) 확인 후 B+A안 승인
+### 조작 내역
+- 판정 크기에 `scale` 이 **중복으로** 곱해지고 있었다. 의도한 월드 크기가 3.0x1.2 였는데 scale 3 이 또 곱해져 9.0x3.6 이 됐다
+- SkillSlash_6: `hitbox2D` (3.00, 1.20) → **(1.00, 0.40)** — x scale 3 = 월드 3.0 x 1.2 (의도값 복원)
+- SkillOrb_7: `hitboxSize` 0.45 → **0.35** — x scale 1.3 = 월드 반경 0.46
+- 두 스킬 `spawnHeight` 0.5 → **0.9** (여유 확보)
+- **코드 변경 0** — EffectProjectile·SkillOrbCaster·SkillSlashCaster 모두 무수정
+### 검증
+- **1차 물리 테스트가 버그를 재현하지 못했다.** 에디터의 플레이어가 지면 2.82u 위에 떠 있어 겹침이 안 났다 — 그대로 '해결됨'으로 보고했으면 오판이었다
+- 발밑 레이캐스트로 실제 지면(y 25.91)을 찾아 **착지 상태 기준으로 재검사**:
+  · 수정 전: 6번 **Stage_Ground 겹침** / 7번 **Stage_Ground 겹침** → 원인 재현 성공
+  · 수정 후: 6번 **겹침 없음 ✓** / 7번 **겹침 없음 ✓**
+- 재계산: 6번 월드 판정 3.00x1.20 하단 +0.30 / 7번 월드 반경 0.46 하단 +0.45 — 둘 다 발끝 위
+- 최종: SkillSlash_6 mpCost 1 / 사거리 72u, SkillOrb_7 mpCost 1 / 사거리 30u
+- **사용자 눈 판정 필요**: (1) 6·7번이 앞으로 끝까지 날아가는지 (2) 벽에 닿으면 사라지는지 (3) 적에 맞으면 그 자리에서 사라지는지 (4) 판정 크기가 보이는 이펙트와 어울리는지
+### 실패와 수정
+- 직전 [수정]에서 `life` 를 2→8 로 올린 것은 **잘못된 진단**이었다. 수명이 아니라 첫 프레임 지면 충돌로 죽고 있었다. life 8 은 그대로 두되(사거리 확보 목적은 유효), 진짜 원인은 이번에 잡았다
+- **에디터 좌표로 물리 검증을 하면 안 된다** — 플레이어가 공중에 떠 있으면 지면 관련 버그가 재현되지 않는다. 레이캐스트로 실제 접지면을 찾아 그 기준으로 재야 한다
+
+
+## [수정] 7번 오브 적중 시 예외 발생 해소 — SendMessage 인자 수 불일치 — 2026-08-10 03:19
+### 프롬프트
+7번 투사체가 적에 맞으면 갑자기 종료가 돼
+### 조작 내역
+**원인: 콘솔에 그대로 찍혀 있었다**
+```
+Failed to call function TakeDamage of class MonsterHealth
+Calling function TakeDamage with 1 parameter but the function requires 2.
+  NAN2026.SkillOrbFlight:OnTriggerEnter2D (SkillOrbCaster.cs:88)
+```
+- `MonsterHealth.TakeDamage(int damage, Vector2 attackDirection)` 는 **인자 2개**인데 `SendMessage` 는 1개만 넘길 수 있다
+- `SendMessageOptions.DontRequireReceiver` 는 '수신자가 없을 때' 만 봐주고, **인자 수가 안 맞으면 예외**가 난다. 그 프레임 로직이 끊겨 게임이 멈춘 것처럼 보였다
+- 6번 검기(EffectProjectile)는 `monster.TakeDamage(damage, Vector2.right * dir)` 로 **직접 호출**해 멀쩡했다. 7번만 SendMessage 를 썼다
+**조치**
+- `mon.TakeDamage(damage, new Vector2(Mathf.Sign(vel.x), 0f))` 직접 호출로 교체 (EffectProjectile 과 동일 방식, 넉백 방향도 비행 방향으로 전달)
+- 더불어 `IPlayerDamageable` 분기를 앞에 추가했다 — 우리 잡몹(KnightEnemy/ArcherEnemy)은 MonsterHealth 가 아니라 이 인터페이스를 쓴다. 없었으면 7번 오브가 **잡몹에게 대미지를 못 넣고 통과**했을 것이다(FAIL#24 계열)
+### 검증
+- 컴파일 성공, SkillOrbFlight 타입 재로드 확인
+- **프로젝트 전체 SendMessage 사용처 12곳 전수 검사**: SkillOrbCaster 외에는 전부 수신자가 `PlayerHealth.TakeDamage(float)` 로 **인자 1개** → 안전. MonsterHealth 를 SendMessage 로 부르던 곳은 여기 하나뿐이었다
+- 수정 후 명중 분기 순서: MinoBoss → DemonBoss → IPlayerDamageable → MonsterHealth → 타일맵(벽)
+- **사용자 눈 판정 필요**: (1) 7번이 적에 맞아도 안 끊기는지 (2) 적이 실제로 피해를 입는지 (3) 잡몹(기사·아처)에게도 대미지가 들어가는지 (4) 넉백 방향이 자연스러운지
+### 실패와 수정
+- 없음
+
+
+## [조사] 스킬 이펙트가 어색하고 안 맞는 원인 — 2026-08-10 03:24
+### 프롬프트
+[조사]이거보면 뭔가 이펙트가 날라가도 어색하고 게임이 재미가 없어. 이펙트에 좀만 벗어나도 적이 안맞기도 하고. 어떻게 개선하는게 좋을까?
+> 첨부된 화면 녹화는 재생할 수 없어 수치 실측으로 대체함
+### 조사 결과
+**그림 크기와 판정 크기가 양쪽 다 어긋나 있다. 방향이 서로 반대다.**
+```
+[6번 검기]  보이는 크기 0.32x0.44 x scale 3 = 0.96 x 1.32
+            판정 크기                       = 3.00 x 1.20
+            → 판정이 그림보다 3배 넓다. 안 보이는데 맞는다
+[7번 오브]  보이는 크기 1.24x1.33 x scale 1.3 = 1.61 x 1.73
+            판정 지름                        = 0.91
+            → 판정이 그림의 53%. 가장자리로 스치면 안 맞는다  ← 체감의 정체
+```
+**6번 검기는 애니메이션이 아예 안 돈다**
+- `SkillSlashCaster.frames` 배열 크기 **0** → `EffectProjectile.Update` 의 `frames.Length > 0` 조건이 거짓
+- 프리팹 Skill1 의 기본 스프라이트 `FX2_0` **정지 이미지 한 장**이 그대로 날아간다. '어색하다'의 직접 원인
+- 쓸 수 있는 시트가 이미 있다: `Assets/Art/FX/Slash_BASIC.png`(6장), `Slash_POWERED.png`(6장)
+**적이 크다**: DeathDog 콜라이더 2.00 x 2.50. 판정이 작으면 큰 적을 스치는 일이 잦다
+**개선 방향(미실행)**
+- ① 7번 판정을 그림에 맞춘다: `hitboxSize` 0.35 → **0.62** (x scale 1.3 = 지름 1.61, 그림과 일치)
+- ② 6번에 프레임 시트 연결: `frames` 에 Slash_BASIC 6장 배선 → 날아가는 동안 애니메이션. 판정도 그림에 맞춰 축소(3.00 → 1.2 정도)하거나, 반대로 **그림을 키운다**(scale 3 → 6 이면 1.92x2.64)
+- ③ 타격감 보강 — 이게 '재미없다' 의 본질일 수 있다. 현재 스킬 명중 시 **히트스톱·화면흔들림·피격 플래시가 전혀 없다**. 플레이어 피격에는 4종(플래시·히트스톱·넉백·흔들림)을 다 넣었는데 적 피격에는 없다
+  · EnemyBase 는 `FlashRed` 가 있지만 MonsterHealth 계열(DeathDog)에는 무엇이 있는지 미확인
+- ④ 판정을 살짝 후하게: 그림과 정확히 같게 맞추기보다 **10~20% 크게** 두는 것이 액션게임 관례다. '맞은 것 같은데 안 맞음' 이 '아슬하게 맞음' 보다 훨씬 나쁘게 체감된다
+- 권장 순서: **① → ② → ③**. ①②는 Config·배선이라 즉시, ③은 코드가 필요
+### 검증
+해당 없음 (파일 수정 없음)
+### 커밋
+해당 없음(무수정)
+
+
+## [조사] Scene3 군집 제어를 Scene1 에 적용 가능한가 — 2026-08-10 03:26
+### 프롬프트
+[조사]Scene3 보면 캐릭터 배치와 캐릭터끼리 뭉치지 않도록 배치하도록 한 조치사항 확인 가능하지? Scene1에도 적용하고싶은데
+### 조사 결과
+**Scene3 에 넣은 군집 제어 3종 (EnemyBase 전용)**
+- `stopDistance` — 플레이어 앞 일정 거리에서 정지. 파고들어 겹치지 않는다 (기사 1.0 / 아처 6.0)
+- `separation` — 진행 방향 앞에 동료가 이 거리 안이면 멈춘다. `BlockedAhead()` 가 정적 `All` 목록을 훑는다 (기사 1.0 / 아처 1.6)
+- `fireStagger` + `cooldownJitter` — 첫 공격과 재공격 시점을 개체마다 흩뿌려 동시 타격을 막는다 (기사 1.6/1.2, 아처 2.0/1.4)
+- 추가로 `patrolRange 6` 이 자기 단 밖으로 못 나가게 막는다
+**Scene1 은 다른 시스템이다 — 그대로 옮길 수 없다**
+- Scene1 적: `EnemyAI` + `MonsterController2D` + `MonsterHealth` (팀 NHNDemo/PixelFantasy 계열) **3마리**
+  · DeathDog1 Variant x=41.9 / DeathDog1 Variant (1) x=-25.2 / DeathDog2 Variant x=-19.7
+  · 그 외 MidBoss_FireKnight x=218.8
+- 우리 `EnemyBase` 와 **코드를 전혀 공유하지 않는다**. `stopDistance`/`separation`/`fireStagger` 는 EnemyBase 안에만 있다
+**팀 EnemyAIConfig 에 대응 항목이 있는지 확인 결과**
+```
+있음:  aggroRange 4 / attackRange 0.85 / chaseStopDistance 6 / patrolRadius 1
+       attackCooldown 3 / patrolSpeed 1.1 / chaseSpeed 0.8
+없음:  separation (동료 간격)  ← 뭉침 방지의 핵심
+       cooldownJitter / fireStagger (공격 시점 분산)
+```
+- `chaseStopDistance` 는 이름이 비슷하나 뜻이 다르다 — '이 거리를 넘으면 추격 포기' 이지 '이 거리에서 멈춤' 이 아니다
+- `patrolRadius 1` 은 우리 `patrolRange` 와 같은 역할을 이미 한다
+**현실 평가: Scene1 은 지금 뭉칠 일이 거의 없다**
+- 적이 **3마리뿐**이고, 가장 가까운 둘(-25.2 / -19.7)도 5.5u 떨어져 있다. Scene3 는 9마리가 좁은 통로에 있었다
+- `aggroRange 4` 로 매우 짧아 동시에 달려드는 상황 자체가 드물다
+**개선 방향(미실행)**
+- A안 **적을 우리 잡몹으로 교체**: Scene1 에 KnightEnemy/ArcherEnemy 배치. 군집 제어가 그대로 따라온다. 다만 아트가 바뀌고 팀원 씬을 크게 건드린다
+- B안 **팀 EnemyAI 에 separation 추가**: `EnemyAIConfig` 에 필드 하나, `EnemyAI` 이동부에 동료 간격 검사 추가. 팀원 활선 파일 수정이라 D-day 병합 리스크
+- C안 **배치로만 해결**: 적 3마리를 더 벌려 놓고 `aggroRange` 를 유지. 코드 0, 위험 0
+- 권장: **C안**. 3마리 / 5.5u 간격에 aggroRange 4 면 뭉침은 이론상 거의 없다. 실제로 뭉치는 장면을 보셨다면 그 지점을 알려주시면 원인을 따로 재겠다
+### 검증
+해당 없음 (파일 수정 없음)
+### 커밋
+해당 없음(무수정)
+
+
+## [구현] Scene1 DeathDog3 3마리 배치 — 2026-08-10 03:42
+### 프롬프트
+일단 다 배치해놓고 결정할라니깐 DeathDog3를 넣어줘
+> 맥락: 직전 [조사]에서 Scene1 배치 10마리가 DeathDog2 x6 / DeathDog1 x4 / DeathDog3 x0 으로 확인됨
+### 조작 내역
+- execute_code: PrefabUtility.InstantiatePrefab("Assets/Prefab/DeathDog3 Variant.prefab") x3
+- 배치 위치: 비어 있던 구간 x -19.7~39.9(59.6u)에 균등 → x 0 / 13 / 26
+- Y 는 Physics2D.RaycastAll 로 실측한 지면(27.91) + 0.75 (기존 개체 평균 오프셋)
+- 기존 수동 배치 개체는 이동·삭제하지 않음
+### 검증
+- 종류별 집계: DeathDog1 x4 / DeathDog2 x6 / DeathDog3 x3 = 13마리
+- 신규 3마리 간격 13.0 / 13.0 / 13.9u → aggroRange 4 기준 해당 구간 동시 교전 1마리
+- 동시 교전 시뮬레이션(x -50~240, 0.5u): 최악 x=77.0 에서 3마리 (기존 밀집 구간 때문)
+### 실패와 수정
+없음
+
+## [구현] Scene1 구간 B 몬스터 6마리 배치 — 2026-08-10 03:42
+### 프롬프트
+보트 물 구역에는 몬스터 배치하면 안되고 일단 몇마리 더 배치해봐
+### 조작 내역
+- 배치 전 구간 B(x 116~238) 지면을 2u 간격 레이캐스트로 실측 → 계단식 지형 확인
+- 평탄대 3곳만 사용: x148~170(y46) / x172~188(y48) / x190~230(y34.9)
+- 회피 지점: 보트 79.3(물), Chest 170, SavePoint2 181.1, MidBoss 218.8, Portal 228
+- InstantiatePrefab x6 — DeathDog3 x3(150/176/196), DeathDog1 x2(162/208), DeathDog2 x1(187)
+- 각 지점마다 OverlapBox(0.80x1.00) 사전 검사로 지형 관통 여부 확인 후 생성
+### 검증
+- 6마리 전원 "겹침 없음" (OverlapBox 미검출)
+- 전체 19마리 / DeathDog1 x6 / DeathDog2 x7 / DeathDog3 x6
+- 컴포넌트 검사: 19마리 전원 EnemyAI + MonsterHealth 보유, Missing 스크립트 0
+- 동시 교전 최악 x=77.0 → 3마리 (구간 B 신규 배치 구간은 최대 1마리)
+- 씬 저장: EditorSceneManager.SaveScene → True (Assets/Scenes/ActiveScene/AdventureScene1.unity)
+### 실패와 수정
+- 검증 코드에서 NHNDemo.EnemyAI 로 타입 참조 → CS0234. GetType().Name 문자열 비교로 교체해 통과.
+  씬 데이터에는 영향 없음(검증 전용 코드)
+- LOG 경로를 C:\Users\edwin\Dev\NAN2026Game\Assets 로 가정 → DirectoryNotFound.
+  실제는 NAN2026Game\NAN2026Game\Assets (중첩). Application.dataPath 로 교체
+### 미해결(사용자 판단 대기)
+- x=62.5 DeathDog2 가 지면 대비 -4.00 (지형에 박힘) — 기존 수동 배치라 손대지 않음
+- x 39.9~83.6 구간 9마리가 2.3~7.6u 간격 → 이 구간만 동시 3마리. 간격 조정 여부 대기
+- 위 두 [구현]은 같은 씬 파일을 연속 수정했고 중간 저장이 없어 커밋 1개를 공유한다
+
+
+## [구현] Scene1 복도 천장 스파이크 패링 + 상자 파괴 스킬 흡수 연출 — 2026-08-10 04:09
+### 프롬프트
+[구현]x 94 ~ 115 , y 41 벽면에 우리가 Scene2에 썼던 구체 스파이크 넣고 패링 가능하도록 넣어줄래? 그리고 맵 곳곳에 Chest가 3개 있는데 그걸 쳐서 부수면 SkillImage가 떠오르고 player에게 흡수당하는 연출을 만들고 싶어. 플레이어한테 다가가고 투명해지면서 없어지는거지. 왼쪽 하단에는 SkillImage가 생기는거고
+> 사용자 확인: 스파이크는 y41(바닥 윗면)이 아니라 천장 y54 에 매단다 / 대상 상자는 흩어진 3개
+
+### 조작 내역
+**사전 조사**
+- x68~132 을 1u 격자로 OverlapPoint 스캔해 단면도 작성 → y41 은 바닥 윗면(x88~104, x115~123, 사이 10u 구덩이), 천장은 y54, 천장 위 y55 도 걸어 다니는 상단 루트임을 확인
+- 재생 모드 중(isPlaying=True)이라 스캔이 런타임 상태를 읽고 있었음 → FAIL#5·#20 에 따라 정지 후 재실측
+
+**신규 파일**
+- Assets/Scripts/Core/ChestRewardLogic.cs — 상승/흡수 위상, 이징, 알파, 스케일, 슬롯 번호, 팝 스케일 (순수)
+- Assets/Tests/EditMode/ChestRewardLogicTests.cs — 7개
+- Assets/Scripts/ChestRewardConfig.cs (SO) / ChestSkillReward.cs / ChestSkillBar.cs
+- Assets/Configs/ChestRewardConfig.asset, Assets/Configs/SpikeBallConfig_Scene1.asset
+
+**기존 파일 수정**
+- SpikeBallConfig.cs: killPlaneY(2.6) / maxTravel(40) / onlyBelow(false) 3필드 추가.
+  전부 필드 이니셜라이저 기본값이라 기존 Scene2 자산은 값이 그대로 유지된다(검증함)
+- SpikeBallTrap.cs: 하드코딩 `y < 2.6f`, `거리 > 40f` 를 config 로 이관(숫자 리터럴 금지 규약).
+  onlyBelow 게이트 추가 — 천장 위 루트의 플레이어에게 발사해 천장을 뚫고 올라가는 것을 막는다
+
+**씬 배치**
+- Traps_Corridor/SpikeBall_Corridor_1~3 : (94, 53.5) (104.5, 53.5) (115, 53.5)
+  SpriteRenderer(Cainos Spike Ball 01) + CircleCollider2D(r 0.42, trigger) + Kinematic RB2D(useFullKinematicContacts, FAIL#6) + SpikeBallTrap(config=SpikeBallConfig_Scene1)
+- 상자 3개에 ChestSkillReward 부착: BOX(복도 x89.4) / BOX/Chest (1)(x84.7 y55) / BOX/Chest (2)(x170 y32)
+  (1)(2)에는 HitBox 자식 신설 — BoxCollider2D 1.09x0.91 trigger + MonsterHealth(3) + MonsterSoundPlayer(기존 것 CopyComponent 로 배선 보존)
+- BOX 의 기존 ChestBreakOpen: hitBox 를 명시 배선(자식에 MonsterHealth 가 늘어나 GetComponentInChildren 이 엉뚱한 것을 잡는 것 방지),
+  shakeAmount 0 으로(BOX 를 흔들면 자식 상자 3개가 같이 흔들린다). 흔들림은 ChestSkillReward 가 visual 만 흔든다
+- UI Canvas/ChestSkillBar 신설 — 좌하단 앵커(0,0) 피벗(0,0) (40,40), 3칸 84px. 팀 UI(UI Canvas/Skill)는 건드리지 않음
+
+### 검증
+- EditMode 236/236 통과 (신규 7 포함). 이전 229 → 236
+- 컴파일 후 타입 로드 확인: ChestRewardLogic / ChestRewardConfig / ChestSkillReward / ChestSkillBar / SkillRewardFlyer / ChestRewardEvents 전부 OK
+- read_console error 0 (남은 1건은 기존 'AnimationClip Portal must be marked as Legacy' 경고, 이번 작업과 무관)
+- 스파이크 3기 지형 겹침 0 (OverlapCircleAll), 위 0.50u / 아래 10.6~11.5u
+- 간격 10.5u > 발사 반경 4.95u x 2 = 9.9u → 동시 발사 없음(한 번에 1기)
+- 상자 판정/스프라이트 겹침 3개 모두 100% (BOX 는 정렬 전 저 상태였음 — 아래 참조)
+- Scene2 원본 SpikeBallConfig.asset 재확인: killPlaneY 2.6 / maxTravel 40 / onlyBelow False — 무변경
+- 씬 저장 후 파일 텍스트에 SpikeBall_Corridor_1~3, Traps_Corridor, ChestSkillBar, HitBox x3 존재 확인
+- 테스트 실행 후 DeathDog 20마리 생존 확인(FAIL#12)
+
+### 실패와 수정
+- create_script 가 name/path 조합을 거부(bad_extension) → execute_code + File.WriteAllText 로 전환
+- refresh_unity 가 'Connection closed' 로 두 번 실패해 어셈블리가 낡은 채로 남았고,
+  SerializedObject.FindProperty("onlyBelow") 가 null 이라 NullReference. 재컴파일 완료를 타입 리플렉션으로 확인한 뒤 재실행
+- 검증 코드에서 `a ?? b` 로 SpriteRenderer 를 골랐다가 가짜 null 때문에 '스프라이트 없음' 오판 (FAIL#21 재범).
+  명시적 접근으로 교체하니 BOX/HitBox 가 보이는 상자와 x 로 0.86u 어긋나 있었음이 드러남 → localPosition 을 BOX/Chest 와 맞춰 겹침 26% → 100%
+
+### 눈으로 봐야 판정되는 항목
+- 복도(x94~115) 진입 시 천장 스파이크가 점멸 경고 후 낙하하는지, 스페이스 패링이 붙는지
+- 상자 3개를 3대 때리면 부서지고 스킬 아이콘이 떠올라 플레이어에게 빨려 들어가는지
+- 좌하단 슬롯이 한 칸씩 채워지는지(3칸). 슬롯은 재생 중에만 생성된다
+- 천장 위(y55) 루트로 지나갈 때 스파이크가 반응하지 않는지(onlyBelow)
+
+
+## [수정] 스파이크를 보트 구간 천장(y41)으로 이설 + 보트 속도 1.5배 + 탑승 중 점프 금지 — 2026-08-10 04:22
+### 프롬프트
+x94 y41  ~ x  :115 y:41에 Scene2에 썼던것처럼 스파이크 구체 붙이고 구현해라는게 전혀 없다, 그리고 보트 배의 속도를 1.5배로 올려주고 보트에 올라타면 점프는 불가능하게 만들어줘
+
+### 조작 내역
+**오진 정정**
+- 직전 [구현]에서 y41 을 '플레이어가 딛는 바닥 윗면'으로 읽고 천장을 y54 로 잡아 스파이크를 y53.5 에 달았다.
+  실제로는 **y41 슬래브가 보트 항해 구간의 천장**이었다(보트 갑판 y28.69, 슬래브 밑면 y41.0/40.91).
+  x94~115 를 지나는 것은 위쪽 도보 루트가 아니라 배를 탄 플레이어다.
+- 슬래브 밑면을 x 마다 레이캐스트로 실측해 볼 반지름(0.42)+0.03 만큼 띄워 붙였다
+  → (94, 40.55) (104.5, 40.46) (115, 40.46), 지형 겹침 0
+
+**예측 조준 추가 (없으면 무조건 빗나간다)**
+- 낙차 11.81u / launchSpeed 10 → 비행 1.18초. 그 사이 보트가 3.10u 전진하므로
+  기존의 '현재 위치 조준'으로는 스파이크가 항상 뒤에 떨어져 패링 판정 자체가 성립하지 않는다.
+- SpikeBallConfig 에 aimHeight(0.4, 기존 하드코딩 이관) / leadTarget(false) 추가.
+- SpikeBallTrap 에 플레이어 실측 속도 추적 추가 — 보트는 transform 이동이라 rigidbody 속도로는 안 잡힌다.
+  발사 시 비행시간만큼 앞질러 조준(속도는 launchSpeed 로 상한).
+- 기본값이 false 라 Scene2 자산은 무변경(재확인함)
+
+**보트**
+- BoatRideConfig.sailSpeed 1.750 → 2.625 (x1.5). 항해 33.5u 가 19.1초 → 12.8초
+- PlayerController2D: `public static bool JumpLocked` 추가 + ResetStaticsOnPlay 동봉(DisableDomainReload 대응).
+  입력 수집(upArrow)과 실행(CanJump) 두 곳 모두 게이트 — 탑승 직전에 큐에 들어간 점프가 새는 것을 막는다.
+- BoatRide: `SetJumpLock(aboard && transform.position.x < targetX)` + OnDisable 안전핀(FAIL#27)
+
+### 검증
+- EditMode 236/236 통과
+- read_console error 0 (남은 1건은 기존 'AnimationClip Portal must be marked as Legacy', 무관)
+- 스파이크 3기 지형 겹침 0건 (OverlapCircleAll), 위 슬래브까지 0.03u
+- BoatRide.ComputeWaterEndX 를 에디터에서 재현 → 물 행 y셀 27, 끝 x셀 114, targetX 112.80.
+  스파이크 x 94 / 104.5 / 115 전부 항해 사정권(112.80 + 4.95) 안
+- 간격 10.5u > 발사 반경 4.95u x 2 → 한 번에 1기만 발사. 보트 기준 약 4초 간격
+- 경고 점멸(9u) → 발사(4.95u) 사이 1.54초 예고
+- Scene2 원본 SpikeBallConfig.asset: killPlaneY 2.6 / maxTravel 40 / onlyBelow False / leadTarget False / aimHeight 0.4 — 무변경
+- 테스트 후 DeathDog 20마리 생존(FAIL#12)
+
+### 실패와 수정
+- BoatRide.cs 치환 시 앵커 문자열을 LF 로 만들었는데 파일이 CRLF 라 매칭 실패.
+  줄 리스트 기반 편집(FindIndex + InsertRange)으로 전환해 해결
+- 점프를 '탑승 중 무조건 금지'로 만들면 종점에서 못 내린다. 실측: 종점 갑판 y28.69 에서
+  다음 발판(x120, y30)까지 가로 5.3u·세로 1.3u — 점프 없이 도달 불가.
+  그래서 `transform.position.x < targetX` 조건을 붙여 **항해 중에만** 잠그도록 했다
+
+### 눈으로 봐야 판정되는 항목
+- 배를 타고 x94/104.5/115 을 지날 때 천장 스파이크가 점멸 후 낙하하는지, 스페이스 패링이 붙는지
+- 예측 조준이 실제로 배 위 플레이어를 맞히는지(빗나가면 launchSpeed 나 launchMultiplier 조정 필요)
+- 항해 중 위쪽 방향키로 점프가 안 되는지, 종점 도착 후에는 다시 되는지
+- 보트가 12.8초로 체감상 답답하지 않은지
+
+
+## [수정] 스파이크 6기로 증설 + 보트 점프 제한 해제 + 익사 연출 활성화 — 2026-08-10 04:32
+### 프롬프트
+구체를 좀더 많이 배치하고 보트 위에서 점프 못하게 하는건 막아버리자. 그리고 물에 빠지면 꼬르르 익사하는것처럼 예전에 구현한거 기억나지? 그거 적용시켜줄래?
+> 사용자 확인: '점프 제한 자체를 빼기' / 익사 후에는 '기존 사망 처리에 합류'
+
+### 조작 내역
+**스파이크 3기 → 6기**
+- 천장 밑면을 x 88~120 구간 0.5u 간격으로 재측정 → 전 구간 연속(y41.00, x104.5 부터 40.91).
+  이전 단면도에서 x105~114 를 '구멍'으로 본 것은 y+0.5 지점을 샘플링해서 생긴 오독이었다
+- x 94 / 98.4 / 102.8 / 107.2 / 111.6 / 116, 간격 4.4u. y 는 x 마다 천장 실측 - 반지름 0.42 - 0.03
+- 간격을 좁히면 동시 발사가 생기므로 SpikeBallConfig_Scene1.launchMultiplier 1.1 → 0.45
+  (발사 반경 4.95u → 2.03u). 4.4u > 2.03x2 = 4.05u 라 여전히 한 번에 1기만 발사
+- 경고 반경은 9u 그대로라 예고 시간은 오히려 1.54초 → 2.66초로 늘었다
+- 예측 조준 정합 재계산: 발사 시점 2.03u 앞 → 비행 1.186초 x 보트 2.625u/s = 3.11u 전진,
+  조준점은 스파이크 기준 +1.07u. 오차 0.01u
+
+**보트 점프 제한 해제**
+- BoatRideConfig 에 lockJumpWhileSailing 추가(기본 false), BoatRide 가 이 스위치를 본다.
+  PlayerController2D.JumpLocked 와 BoatRide 의 잠금 코드는 그대로 남겼다 — 되돌리려면 스위치만 켜면 된다
+
+**익사 연출 활성화**
+- 기존 WaterDeath.cs / WaterSinkConfig.asset 은 만들어져 있었으나 **어느 씬에도 붙어 있지 않았다**(미사용)
+- WaterDeath 를 RealPlayer 에 부착, config = WaterSinkConfig
+- WaterSinkConfig 에 useDeathFlow(true) 추가, respawnDelay 2.0 → 0.4
+  (연출 총길이 = peek 0.35 + sink 1.4 + 0.4 = 2.15초)
+- WaterDeath 의 state 3 재작성: 잠긴 뒤 rb.simulated·controller 를 먼저 되살리고
+  PlayerHealth.Kill() 로 **기존 사망·체크포인트·게임오버 흐름에 합류**.
+  PlayerHealth 가 없을 때만 기존의 spawn 복귀를 대비책으로 남겼다
+- state 4(사망 대기) 신설 — 부활로 물 밖에 나갈 때까지 재발동을 막는다
+
+### 검증
+- EditMode 236/236 통과, read_console error 0 (남은 1건은 기존 Portal Legacy 경고, 무관)
+- 스파이크 6기 전부 지형 겹침 0 (OverlapCircleAll)
+- 물 타일 실측: Stage_Wall 의 Water* 69칸, 셀 x78~114 / y26~27 → 월드 x 78.0~115.0, y 26.0~28.0.
+  보트 갑판 y28.69 는 수면보다 0.69u 위라 항해 중 오발동 없음
+- Scene2 원본 SpikeBallConfig.asset: launchMultiplier 1.1 / killPlaneY 2.6 / onlyBelow False / leadTarget False — 무변경
+- 테스트 후 씬 생존 확인: 스파이크 6, DeathDog 20, ChestSkillReward 3
+
+### 실패와 수정
+- execute_code 안에서 지역변수 t 를 재선언해 CS0136 두 건. 이름 변경으로 해결(씬 영향 없음)
+- WaterDeath 는 RealPlayer(PersistentSingleton)에 붙었으므로 다른 씬으로 넘어가면
+  Start 에서 잡아둔 Stage_Wall 이 파괴되어 water 가 null 이 된다 → InWaterCell 이 false 를 반환해 무해하게 비활성.
+  Scene2~4 에서도 익사를 쓰려면 씬마다 물 타일맵을 다시 잡는 처리가 필요하다(현재 범위 밖)
+
+### 눈으로 봐야 판정되는 항목
+- 배 타고 지날 때 스파이크 6기가 1.68초 간격으로 하나씩 떨어지는지, 너무 잦지 않은지
+- 예측 조준이 배 위 플레이어를 실제로 맞히는지
+- 보트 위에서 점프가 다시 되는지
+- 물에 빠졌을 때 수면에서 잠깐 떴다가(0.35초) 가라앉고(1.4초) 사망 처리로 넘어가는지
+- 익사 후 체크포인트 복귀인지 게임오버인지 (PlayerHealth 설정에 달려 있다)
+
+
+## [구현] Scene1 게임오버 화면 조립 (배경·로고·연출 배선) — 2026-08-10 04:46
+### 프롬프트
+맞아 그렇게 조립 진행해
+> 맥락: 직전 대화에서 확인한 조립안 — 배경 GameOverBg, 로고 GameOver.png, GameOverPanelFx(페이드·떠오름·점멸) 부착
+
+### 조사에서 밝혀진 것
+- 스프라이트 유실이 아니라 **배선 누락**이었다. DeathIMG.png 15프레임은 전부 정상 슬라이스 상태
+- 다만 DeathIMG 는 애니메이션 시트가 아니다: 프레임 폭 35~502px(편차 93%), 높이 47~346px(편차 86%).
+  실제로 열어 보니 **'사망' 로고 12종 시안 모음**이었다. 순차 재생하면 FAIL#25 그대로 튄다 → 프레임 애니 배선은 하지 않았다
+- Assets/Art/UI/GameOver.png(금색 GAME OVER, 1024x559)와 GameOverBg.png(던전 방·꽂힌 검·찢긴 망토, 2752x1536)는
+  어느 씬·프리팹에서도 참조되지 않는 미사용 상태였다
+
+### 조작 내역
+- GameOverPanel 자식 재구성 (기존 오브젝트는 삭제하지 않았다)
+  [0] Bg      신설, GameOverBg 전체화면 스트레치(1.79:1 vs 16:9 = 0.8% 차이)
+  [1] Image   기존 DeathIMG_4('사망'). GAME OVER 와 역할이 겹쳐 **비활성만** 시킴
+  [2] Logo    신설, GameOver.png. 앵커 비율 26~74% x 63~90% + preserveAspect
+  [3] Text (TMP)  하단 앵커(0.5,0) +44px 로 이동, CanvasGroup 추가
+- GameOverPanelFx 부착 + 배선: background=Bg / logo=Logo / hintGroup=Text (TMP)
+- 문구 "Please Any Key Press" → "Press ENTER to Continue"
+  (GameOverController 의 AnyKeyPressed 는 Input System 경로에서 **엔터만** 받는다 — 문구가 거짓이었다)
+
+### 검증
+- EditMode 236/236, read_console error 0 (남은 1건은 기존 Portal Legacy 경고, 무관)
+- 원본 PNG 3장을 임시 폴더로 복사해 실제로 열어 확인한 뒤 배치했다(추측 배치 아님). 확인 후 임시 파일 삭제
+- 1280x720 합성 미리보기를 만들어 구도 확인: 로고가 배경의 빈 벽 구역에 들어가고 검·망토를 가리지 않음
+- 해상도별 로고 크기 계산: 1280x720 → 356x194(폭 28%) / 1920x1080 → 534x292(28%) / 1024x768 → 380x207(37%).
+  힌트 문구는 하단 앵커라 모든 해상도에서 화면 안
+- **기존 버그 발견·수정**: Text (TMP) 가 중앙 앵커 y=-389 였다. 캔버스가 ConstantPixelSize(scaleFactor 1)이고
+  현재 게임뷰가 1556x718 이라 반높이가 359 — 즉 **문구가 화면 밖 30px 아래에 있어 안 보이는 상태**였다
+- GameOverController 배선 유지 확인: playerHealth=RealPlayer, panel=GameOverPanel
+
+### 실패와 수정
+- 미리보기용 임시 폴더가 없어 File.Copy 가 DirectoryNotFound. Directory.CreateDirectory 선행으로 해결
+- 텍스처 isReadable 을 건드리지 않으려고 임포트 설정 대신 PNG 바이트를 LoadImage 로 읽어 합성했다
+
+### 눈으로 봐야 판정되는 항목
+- 실제로 죽어서 패널이 뜰 때 배경 0.7초 페이드 → 0.35초 뒤 로고가 40px 떠오르며 등장 → 1.4초 뒤 문구 점멸 순인지
+- 검은 배경(패널 자체 Image)이 즉시 깔린 뒤 던전 배경이 페이드되는 흐름이 어색하지 않은지
+- '사망' 로고를 다시 쓰고 싶으면 GameOverPanel/Image 체크박스를 켜면 된다(대신 GAME OVER 와 겹친다)
+- 이 조립은 **Scene1 에만** 했다. Scene2~4 의 GameOverPanel 은 그대로다
+
 ## [구현] 세이브포인트 누적 저장 + 이전 지점(다른 씬 포함) 이동 메뉴 — 2026-08-10 (세션 시간)
 ### 프롬프트
 [구현] 현재 세이브포인트가 누적되지않고 새로운 세이브포인트를 저장하면 기존의 것이 삭제되는데

@@ -63,9 +63,10 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
     private float activeAttackLunge;
     public static float AttackSpeedMul = 1f; // 그로기 버스트 공속 배율(평시 1)
     public static bool InputLocked = false;  // 연출 락: 입력만 무시(컨트롤러는 계속 구동)
+    public static bool JumpLocked = false;   // 탈것(보트) 위에서는 점프 금지
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-    static void ResetStaticsOnPlay() { InputLocked = false; AttackSpeedMul = 1f; } // DisableDomainReload 대응
+    static void ResetStaticsOnPlay() { InputLocked = false; AttackSpeedMul = 1f; JumpLocked = false; } // DisableDomainReload 대응
     private float attackTimer;
     private bool parryHeld;
     private float parryEndTimer;
@@ -269,7 +270,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
             // 기존에 Shift로 홀드해야 하던 달리기를 기본 동작으로 변경 — 방향키만 눌러도 항상 달린다.
             runHeld = true;
             // 점프는 방향키 위쪽만 (Space 제거)
-            if (kb.upArrowKey.wasPressedThisFrame) jumpQueued = true;
+            if (kb.upArrowKey.wasPressedThisFrame && !JumpLocked) jumpQueued = true;
             // 대쉬(이동기, 공격 아님): Left Shift. 땅에서는 사용할 수 없고 공중에서만
             // 가능하다. 이미 대쉬 중이면 재시작하지 않고, 착지 전까지 maxAirDashes(기본 1회)까지만 허용한다.
             if (kb.leftShiftKey.wasPressedThisFrame && !dashing && !grounded
@@ -281,6 +282,11 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
                 airDashesUsed++;
             }
             // 2단 콤보 (원래 V) → Z: 1타 Slash모션 → 창 내 재입력 시 2타 Combo2모션
+            if (kb.digit2Key.wasPressedThisFrame && NAN2026.SkillGate.IsUnlocked(1) && NAN2026.SkillGate.IsReady(1))
+            {
+                QueueAttack("ComboB1", config.comboB1Duration, config.slashLungeSpeed); // 2번: 가로베기
+                NAN2026.SkillGate.Report(1, config.comboB1Duration);
+            }
             if (kb.zKey.wasPressedThisFrame)
             {
                 if (comboVStage == 1)
@@ -299,9 +305,6 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
             // 보유 스킬 중 다음 스킬로 전환 → C
             if (kb.cKey.wasPressedThisFrame) CycleSkill();
             // 2/3/4 숫자키 = testParry 3동작 개별 발동
-            if (kb.digit2Key.wasPressedThisFrame) QueueAttack("ComboB1", config.comboB1Duration, config.slashLungeSpeed);
-            if (kb.digit3Key.wasPressedThisFrame) QueueAttack("ComboB2", config.combo2Duration, config.combo2LungeSpeed);
-            if (kb.digit4Key.wasPressedThisFrame) QueueAttack("ComboB3", config.combo2Duration, config.combo2LungeSpeed);
             if (kb.lKey.wasPressedThisFrame) QueueAttack("Combo3", config.combo3Duration, config.combo3LungeSpeed);
             // 구르기: G키 제거, Ctrl(좌/우)만 사용. 공중에서는 사용할 수 없다(접지 중에만).
             if (grounded && (kb.leftCtrlKey.wasPressedThisFrame || kb.rightCtrlKey.wasPressedThisFrame))
@@ -362,13 +365,29 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
         }
     }
 
+    /// ComboB1(가로베기) 전용 근접 판정. 보이지 않는 히트박스를 잠깐 띄운다.
+    private void SpawnComboBDamage(float dir, Vector3 pos)
+    {
+        if (basicEffectPrefab == null) return;
+        var go = Instantiate(basicEffectPrefab, pos + new Vector3(0f, effectConfig.comboBHitOffsetY, 0f), Quaternion.identity);
+        var sr2 = go.GetComponent<SpriteRenderer>();
+        if (sr2 != null) sr2.enabled = false; // 시각은 VSlashFx가 담당 — 판정만 사용
+        var ep = go.GetComponent<EffectProjectile>();
+        int baseDamage = effectConfig.comboBDamage;
+        int bonus = progression != null ? Mathf.RoundToInt(progression.DamageBonus) : 0;
+        if (ep != null)
+            ep.Launch(dir, 0f, effectConfig.comboVHitLifetime, null, effectConfig.frameRate,
+                baseDamage + bonus, effectConfig.comboBHitboxSize, true);
+    }
+
     private void SpawnAttackEffect(string attackName)
     {
         if (attackName == "ComboB1")
         {
             float bDir = PlayerLocomotionLogic.EffectDirection(sr.flipX);
             Vector3 bPos = transform.position + new Vector3(config.comboVFxOffsetX * bDir, config.comboVFxOffsetY, 0f);
-            VSlashFx.Play(bPos, comboB1Fx, config.comboVFxFps, bDir < 0f, config.comboVFxScale, config.comboVFxAlpha, transform, config.comboB1FxTint); // 추종+하늘 틴트
+            VSlashFx.Play(bPos, comboB1Fx, config.comboVFxFps, bDir < 0f, config.comboB1FxScale, config.comboVFxAlpha, transform, config.comboB1FxTint); // 추종+하늘 틴트
+            SpawnComboBDamage(bDir, bPos); // 이펙트만 있고 대미지가 없던 문제 보완
             return;
         }
         if (attackName == "ComboV1" || attackName == "ComboV2")
@@ -413,7 +432,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
         int baseDamage = AttackDamageLogic.DamageForComboV(attackName, effectConfig.comboVDamage);
         int damageBonus = progression != null ? Mathf.RoundToInt(progression.DamageBonus) : 0;
 
-        var go = Instantiate(basicEffectPrefab, pos, Quaternion.identity);
+        var go = Instantiate(basicEffectPrefab, pos + new Vector3(0f, effectConfig.comboBHitOffsetY, 0f), Quaternion.identity);
         var sr2 = go.GetComponent<SpriteRenderer>();
         if (sr2 != null) sr2.enabled = false; // 시각 효과는 VSlashFx가 이미 재생 중 — 판정만 담당
         var ep = go.GetComponent<EffectProjectile>();
@@ -579,7 +598,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
         if (jumpQueued)
         {
             jumpQueued = false;
-            if (PlayerLocomotionLogic.CanJump(attacking, jumpsUsed, config.maxJumps))
+            if (!JumpLocked && PlayerLocomotionLogic.CanJump(attacking, jumpsUsed, config.maxJumps))
             {
                 vy = config.jumpVelocity;
                 jumpsUsed++;

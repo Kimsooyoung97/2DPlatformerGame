@@ -61,6 +61,7 @@ namespace NAN2026
 
     public float comboVFxFps = 18f;
     public float comboVFxScale = 1.7f;
+    public float comboB1FxScale = 2.8f; // ComboB1 전용 — Z콤보와 독립 조절
     public float comboVFxOffsetX = 1.2f; // 캐릭터 궤적 너머 전방 이격
     public float comboVFxOffsetY = 0.35f;
     [Range(0f,1f)] public float comboVFxAlpha = 0.85f;

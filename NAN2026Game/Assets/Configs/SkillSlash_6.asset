@@ -12,15 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3da950dabc7eaa847903832f5d2f623f, type: 3}
   m_Name: SkillSlash_6
   m_EditorClassIdentifier: Assembly-CSharp::NAN2026.SkillSlotConfig
-  mpCost: 2
+  mpCost: 1
   cooldown: 0.7
   spawnForward: 0.8
-  spawnHeight: 0.5
+  spawnHeight: 0.9
   speed: 9
-  life: 2
+  life: 8
   damage: 2
   fps: 16
   hitboxSize: 0.6
-  hitbox2D: {x: 3, y: 1.2}
+  hitbox2D: {x: 1, y: 0.4}
   piercing: 0
   scale: 3

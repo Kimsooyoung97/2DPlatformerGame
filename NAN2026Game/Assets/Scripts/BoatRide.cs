@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Tilemaps;
 
 namespace NAN2026
@@ -43,10 +43,25 @@ namespace NAN2026
                 && d.y <= config.deckTopOffset + config.riderGrace;
         }
 
+        private bool jumpLockOn;
+
+        // 내릴 때·씬을 떠날 때 잠금이 남지 않게 하는 안전핀 (FAIL#27: 전역 static 은 참조 카운트가 없다)
+        private void OnDisable() { SetJumpLock(false); }
+
+        private void SetJumpLock(bool on)
+        {
+            if (jumpLockOn == on) return;
+            jumpLockOn = on;
+            PlayerController2D.JumpLocked = on;
+        }
+
         private void FixedUpdate()
         {
             if (config == null) return;
-            if (!RiderOnDeck()) return; // 밟고 있는 동안만 항해
+            bool aboard = RiderOnDeck();
+            // 항해 중에만 잠근다. 종점에 닿으면 풀어야 내릴 수 있다(종점 갑판 y28.69 → 다음 발판까지 5.3u 건너뜀)
+            SetJumpLock(config.lockJumpWhileSailing && aboard && transform.position.x < targetX);
+            if (!aboard) return; // 밟고 있는 동안만 항해
             float nx = Mathf.MoveTowards(transform.position.x, targetX, config.sailSpeed * Time.fixedDeltaTime);
             float dx = nx - transform.position.x;
             if (dx == 0f) return;
