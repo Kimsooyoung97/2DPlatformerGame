@@ -68,6 +68,42 @@ namespace NAN2026.Tests
             Assert.IsFalse(BossRangeLogic.InHitBandBothSides(10f, 3.5f, Reach));
         }
 
+        [Test] public void 세로제한_같은_높이면_맞는다()
+        {
+            Assert.IsTrue(BossRangeLogic.InHitBand(10f, 11f, Reach, 1f, Dead, 0f, 0f, 1.2f));
+        }
+
+        [Test] public void 세로제한_뛰어넘으면_빗나간다()
+        {
+            Assert.IsFalse(BossRangeLogic.InHitBand(10f, 11f, Reach, 1f, Dead, 0f, 1.5f, 1.2f));
+            Assert.IsFalse(BossRangeLogic.InHitBand(10f, 11f, Reach, 1f, Dead, 0f, 2.25f, 1.2f));
+        }
+
+        [Test] public void 세로제한_경계는_포함한다()
+        {
+            Assert.IsTrue(BossRangeLogic.InHitBand(10f, 11f, Reach, 1f, Dead, 0f, 1.2f, 1.2f));
+        }
+
+        [Test] public void 세로제한_낮은_점프는_여전히_맞는다()
+        {
+            Assert.IsTrue(BossRangeLogic.InHitBand(10f, 11f, Reach, 1f, Dead, 0f, 0.5f, 1.2f));
+        }
+
+        [Test] public void 세로제한_아래층도_빗나간다()
+        {
+            Assert.IsFalse(BossRangeLogic.InHitBand(10f, 11f, Reach, 1f, Dead, 0f, -2f, 1.2f));
+        }
+
+        [Test] public void 세로제한_0이면_기존동작()
+        {
+            Assert.IsTrue(BossRangeLogic.InHitBand(10f, 11f, Reach, 1f, Dead, 0f, 99f, 0f));
+        }
+
+        [Test] public void 세로제한이어도_수평_밖이면_빗나간다()
+        {
+            Assert.IsFalse(BossRangeLogic.InHitBand(10f, 20f, Reach, 1f, Dead, 0f, 0f, 1.2f));
+        }
+
         [Test] public void 시간창_판정()
         {
             Assert.IsFalse(BossRangeLogic.WindowOpen(0.5f, 0.62f, 0.82f));
