@@ -1,10 +1,10 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Tilemaps;
 
 namespace NAN2026
 {
     // 입수 연출: 수면에서 살짝 떠올랐다가 가라앉아 물 뒤로 사라짐.
-    // 이후 처리(숨막힘 장면)는 미구현 — respawnDelay는 테스트용 임시 자리표시.
+    // 완전히 잠기면 PlayerHealth.Kill() 로 기존 사망·체크포인트 흐름에 합류한다.
     public class WaterDeath : MonoBehaviour
     {
         public WaterSinkConfig config;
@@ -12,7 +12,7 @@ namespace NAN2026
         private Tilemap water;
         private Rigidbody2D rb;
         private Behaviour controller;
-        private int state; // 0대기 1내밈 2침강 3잠김
+        private int state; // 0대기 1내밈 2침강 3잠김 4사망대기
         private float timer;
         private float surfaceY, sinkFromY;
 
@@ -64,13 +64,28 @@ namespace NAN2026
             }
             else if (state == 3)
             {
-                if (config.respawnDelay <= 0f) return; // 이후 처리는 추후 장면에서
                 timer += Time.fixedDeltaTime;
                 if (timer < config.respawnDelay) return;
-                transform.position = spawn;
+
+                // 물리·조작을 먼저 되살린 뒤 게임의 정상 사망 경로에 넘긴다
                 if (rb != null) { rb.simulated = true; rb.linearVelocity = Vector2.zero; }
                 if (controller != null) controller.enabled = true;
+
+                var hp = GetComponent<PlayerHealth>();
+                if (config.useDeathFlow && hp != null)
+                {
+                    hp.Kill();          // 체크포인트 부활이냐 게임오버냐는 PlayerHealth 가 판단한다
+                    state = 4; timer = 0f;
+                    return;
+                }
+
+                transform.position = spawn;   // PlayerHealth 가 없을 때만 쓰는 대비책
                 state = 0; timer = 0f;
+            }
+            else if (state == 4)
+            {
+                // 부활로 물 밖에 나갈 때까지 대기 — 같은 자리에서 즉시 재발동하는 것을 막는다
+                if (!InWaterCell(transform.position)) { state = 0; timer = 0f; }
             }
         }
     }

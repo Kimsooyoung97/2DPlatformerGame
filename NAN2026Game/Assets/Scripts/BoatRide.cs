@@ -60,7 +60,7 @@ namespace NAN2026
             if (config == null) return;
             bool aboard = RiderOnDeck();
             // 항해 중에만 잠근다. 종점에 닿으면 풀어야 내릴 수 있다(종점 갑판 y28.69 → 다음 발판까지 5.3u 건너뜀)
-            SetJumpLock(aboard && transform.position.x < targetX);
+            SetJumpLock(config.lockJumpWhileSailing && aboard && transform.position.x < targetX);
             if (!aboard) return; // 밟고 있는 동안만 항해
             float nx = Mathf.MoveTowards(transform.position.x, targetX, config.sailSpeed * Time.fixedDeltaTime);
             float dx = nx - transform.position.x;

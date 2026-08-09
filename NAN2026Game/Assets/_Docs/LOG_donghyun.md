@@ -6883,3 +6883,55 @@ x94 y41  ~ x  :115 y:41에 Scene2에 썼던것처럼 스파이크 구체 붙이�
 - 예측 조준이 실제로 배 위 플레이어를 맞히는지(빗나가면 launchSpeed 나 launchMultiplier 조정 필요)
 - 항해 중 위쪽 방향키로 점프가 안 되는지, 종점 도착 후에는 다시 되는지
 - 보트가 12.8초로 체감상 답답하지 않은지
+
+
+## [수정] 스파이크 6기로 증설 + 보트 점프 제한 해제 + 익사 연출 활성화 — 2026-08-10 04:32
+### 프롬프트
+구체를 좀더 많이 배치하고 보트 위에서 점프 못하게 하는건 막아버리자. 그리고 물에 빠지면 꼬르르 익사하는것처럼 예전에 구현한거 기억나지? 그거 적용시켜줄래?
+> 사용자 확인: '점프 제한 자체를 빼기' / 익사 후에는 '기존 사망 처리에 합류'
+
+### 조작 내역
+**스파이크 3기 → 6기**
+- 천장 밑면을 x 88~120 구간 0.5u 간격으로 재측정 → 전 구간 연속(y41.00, x104.5 부터 40.91).
+  이전 단면도에서 x105~114 를 '구멍'으로 본 것은 y+0.5 지점을 샘플링해서 생긴 오독이었다
+- x 94 / 98.4 / 102.8 / 107.2 / 111.6 / 116, 간격 4.4u. y 는 x 마다 천장 실측 - 반지름 0.42 - 0.03
+- 간격을 좁히면 동시 발사가 생기므로 SpikeBallConfig_Scene1.launchMultiplier 1.1 → 0.45
+  (발사 반경 4.95u → 2.03u). 4.4u > 2.03x2 = 4.05u 라 여전히 한 번에 1기만 발사
+- 경고 반경은 9u 그대로라 예고 시간은 오히려 1.54초 → 2.66초로 늘었다
+- 예측 조준 정합 재계산: 발사 시점 2.03u 앞 → 비행 1.186초 x 보트 2.625u/s = 3.11u 전진,
+  조준점은 스파이크 기준 +1.07u. 오차 0.01u
+
+**보트 점프 제한 해제**
+- BoatRideConfig 에 lockJumpWhileSailing 추가(기본 false), BoatRide 가 이 스위치를 본다.
+  PlayerController2D.JumpLocked 와 BoatRide 의 잠금 코드는 그대로 남겼다 — 되돌리려면 스위치만 켜면 된다
+
+**익사 연출 활성화**
+- 기존 WaterDeath.cs / WaterSinkConfig.asset 은 만들어져 있었으나 **어느 씬에도 붙어 있지 않았다**(미사용)
+- WaterDeath 를 RealPlayer 에 부착, config = WaterSinkConfig
+- WaterSinkConfig 에 useDeathFlow(true) 추가, respawnDelay 2.0 → 0.4
+  (연출 총길이 = peek 0.35 + sink 1.4 + 0.4 = 2.15초)
+- WaterDeath 의 state 3 재작성: 잠긴 뒤 rb.simulated·controller 를 먼저 되살리고
+  PlayerHealth.Kill() 로 **기존 사망·체크포인트·게임오버 흐름에 합류**.
+  PlayerHealth 가 없을 때만 기존의 spawn 복귀를 대비책으로 남겼다
+- state 4(사망 대기) 신설 — 부활로 물 밖에 나갈 때까지 재발동을 막는다
+
+### 검증
+- EditMode 236/236 통과, read_console error 0 (남은 1건은 기존 Portal Legacy 경고, 무관)
+- 스파이크 6기 전부 지형 겹침 0 (OverlapCircleAll)
+- 물 타일 실측: Stage_Wall 의 Water* 69칸, 셀 x78~114 / y26~27 → 월드 x 78.0~115.0, y 26.0~28.0.
+  보트 갑판 y28.69 는 수면보다 0.69u 위라 항해 중 오발동 없음
+- Scene2 원본 SpikeBallConfig.asset: launchMultiplier 1.1 / killPlaneY 2.6 / onlyBelow False / leadTarget False — 무변경
+- 테스트 후 씬 생존 확인: 스파이크 6, DeathDog 20, ChestSkillReward 3
+
+### 실패와 수정
+- execute_code 안에서 지역변수 t 를 재선언해 CS0136 두 건. 이름 변경으로 해결(씬 영향 없음)
+- WaterDeath 는 RealPlayer(PersistentSingleton)에 붙었으므로 다른 씬으로 넘어가면
+  Start 에서 잡아둔 Stage_Wall 이 파괴되어 water 가 null 이 된다 → InWaterCell 이 false 를 반환해 무해하게 비활성.
+  Scene2~4 에서도 익사를 쓰려면 씬마다 물 타일맵을 다시 잡는 처리가 필요하다(현재 범위 밖)
+
+### 눈으로 봐야 판정되는 항목
+- 배 타고 지날 때 스파이크 6기가 1.68초 간격으로 하나씩 떨어지는지, 너무 잦지 않은지
+- 예측 조준이 배 위 플레이어를 실제로 맞히는지
+- 보트 위에서 점프가 다시 되는지
+- 물에 빠졌을 때 수면에서 잠깐 떴다가(0.35초) 가라앉고(1.4초) 사망 처리로 넘어가는지
+- 익사 후 체크포인트 복귀인지 게임오버인지 (PlayerHealth 설정에 달려 있다)
