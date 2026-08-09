@@ -7433,3 +7433,41 @@ Secen3다음에는 Secen4 진행하도록 했는데
 - **GroundLevelAt 1차 구현 오류**: '트리거가 아니고 EnemyBase/PlayerHealth 도 아닌 콜라이더'를 지면으로 인정했더니, 팀 몬스터 **KeyMonster 의 non-trigger BoxCollider2D** 가 지면으로 잡혀 KnightEnemy_40 의 순찰 폭이 7.50u → **2.00u 로 잘못 잘렸다**
   · 시뮬레이션에서 발견 → 판정을 **타일맵 계열(CompositeCollider2D / TilemapCollider2D)만 인정** 으로 교체해 해소
   · 교훈: 지면 판정을 '제외 목록'으로 짜면 새 오브젝트가 생길 때마다 뚫린다. **허용 목록(타일맵만)** 으로 짜야 한다
+
+
+## [구현] 1·2단 전멸 시 돌무더기 방어막 붕괴 + 잔여 표시 — 2026-08-09 11:06
+### 프롬프트
+1,2단에 배치된 몬스터 모두 처치하면 돌무더기 방어막이 무너지도록 변경가능하니?
+> 맥락: 질문에 이어 선택지 확인 — KeyMonster는 '아예 제거', 잔여 적 수는 '표시함' 선택
+### 조작 내역
+**지형 확인 (설계 타당성)**
+- Locked(돌무더기 방어막) 실제 점유 셀 = **x 46~48, y 6~8 (3x3)**. 2단(y2)에서 보스 구역(y10, MiddleBoss·석상)으로 올라가는 길을 막고 있다
+- 플레이어 점프 높이 2.25u x 2단 점프 → x=49 의 2u 단차 통과 가능 = 2단 도달 가능
+**KeyMonster 처리 — 삭제가 아니라 비활성화**
+- 사용자 지시는 '아예 제거' 였으나, 규약의 '수동 배치한 씬 오브젝트를 코드로 삭제' 금지에 걸린다. 팀 프리팹 DeathDog1 Variant 인스턴스이기도 하다
+- **SetActive(false)** 로 처리: 스폰·행동·렌더가 모두 멈춰 게임 상 결과는 제거와 동일하고, 체크박스 하나로 되돌릴 수 있다
+- 좌표 기록(복원용): KeyMonster pos (60.06, 2.16, 0.00) scale (0.40, 0.40, 1.00), 프리팹 Assets/Prefab/DeathDog1 Variant.prefab
+- 씬 전수 검사 결과 KeyMonster 를 슬롯으로 참조하는 다른 컴포넌트는 **없음**(KeyMonsterGate 는 자기 자신에 부착) → 배선 유실 없음
+**전멸 게이트 신설**
+- 순수 로직 GateCollapseLogic 에 3함수 추가: `InClearBand(y, minY, maxY)` / `ShouldOpen(remaining, collected, alreadyOpened)` / `TickDue(elapsed, interval)`
+- GateConfig 신규 수치: clearMinY -1 / clearMaxY 5 / clearCheckInterval 0.25 / showRemainingLabel true / labelFadeSeconds 1.5
+- **Assets/Scripts/AreaClearGate.cs 신설** — GateDirector 에 부착, config·sequencer·gateObject 배선 완료
+  · **핵심 판단**: 우리 EnemyBase 와 팀 NHNDemo.MonsterHealth 는 체력 체계가 다르지만 **둘 다 최종적으로 Destroy(gameObject)** 로 끝난다. 그래서 이벤트를 각각 구독하지 않고 **생존 오브젝트 수를 폴링**하는 방식으로 통일했다. 새 적 종류가 늘어도 수집 규칙만 타면 된다
+  · 수집은 Start 가 아니라 **첫 Update** 에서 한다 — 스크립트 실행 순서가 보장되지 않아 EnemyBase 들의 자기 등록이 안 끝났을 수 있다
+  · `ShouldOpen` 은 collected<=0 이면 false — **수집 실패 시 '전멸' 로 오인해 즉시 열리는 사고를 차단**
+  · 비활성 개체는 수집 제외(FindObjectsInactive.Exclude) — 꺼둔 몬스터 때문에 영영 안 열리는 일 방지
+**잔여 표시**
+- ParryMeter 의 라벨 생성 패턴(UI Canvas 하위 Text + Outline, 상단 중앙)을 그대로 재사용
+- '남은 적 n' → 전멸 시 '길이 열렸다!' 로 전환 후 페이드아웃. 값이 바뀔 때만 갱신
+### 검증
+- 컴파일 성공, read_console error 0건
+- EditMode **250/250 통과** (신규 5: 구간 판정 / 전멸 개방 / 재개방 차단 / 대상 0마리 차단 / 폴링 간격)
+- **수집 대상 실측 9마리**: 1단 6(x 12·17·25.79·39.63·42.32·44.99) + 2단 3(x 55·58·61.26)
+- 제외 확인: KeyMonster 비활성이라 미수집 ✓ / MiddleBoss y 10.19 는 구간(-1~5) 밖이라 미수집 ✓
+- 씬 저장 확인(SaveScene=True, dirty=False), GateDirector 최종 구성 = GateCollapseSequencer + GateTestTrigger + AreaClearGate(배선 OK)
+- KeyMonster 오브젝트가 씬에 그대로 남아있고 activeSelf=False 임을 확인 — 삭제하지 않았음을 증명
+- **사용자 눈 판정 필요**: (1) 상단에 '남은 적 9' 가 뜨는지 (2) 잡을 때마다 줄어드는지 (3) 마지막 1마리를 잡으면 방어막 붕괴 연출이 도는지 (4) KeyMonster 가 안 보이는지 (5) 라벨 위치가 다른 UI 와 겹치지 않는지
+### 실패와 수정
+- 테스트 삽입 시 마지막 중괄호 짝을 잘못 잡아 **메서드 안에 [Test] 메서드를 중첩**시켜 CS0106 5건 발생. 해당 파일은 기존 스타일이 `[Test] public void`(한 줄)이라 내 계산이 어긋났다 → 39행 이후를 통째로 재작성해 해소
+  교훈: 테스트 파일 말미 삽입은 '마지막에서 두 번째 중괄호' 휴리스틱에 의존하지 말고, 삽입 후 반드시 컴파일로 확인한다
+- KeyMonsterGate 컴포넌트 자체는 남아 있으나 부착 대상이 비활성이라 무해. 제출 후 정리 대상

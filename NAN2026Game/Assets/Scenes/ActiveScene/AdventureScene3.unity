@@ -8219,6 +8219,7 @@ GameObject:
   - component: {fileID: 895420530}
   - component: {fileID: 895420531}
   - component: {fileID: 895420532}
+  - component: {fileID: 895420533}
   m_Layer: 0
   m_Name: GateDirector
   m_TagString: Untagged
@@ -8560,6 +8561,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NAN2026.GateTestTrigger
   sequencer: {fileID: 895420528}
+--- !u!114 &895420533
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 895420527}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ccfbc39d0bed624d9296f96da82c81b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NAN2026.AreaClearGate
+  config: {fileID: 11400000, guid: 279333213bfee9845ba2dba716e791b4, type: 2}
+  sequencer: {fileID: 895420528}
+  gateObject: {fileID: 251803393}
 --- !u!1001 &898427688
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -21527,6 +21543,10 @@ PrefabInstance:
     - target: {fileID: 4091053138885214117, guid: bfc5166b0562cf54aad6ee34295ab421, type: 3}
       propertyPath: m_Layer
       value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 4091053138885214117, guid: bfc5166b0562cf54aad6ee34295ab421, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4091053140403337725, guid: bfc5166b0562cf54aad6ee34295ab421, type: 3}
       propertyPath: m_Layer
