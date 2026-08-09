@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace NAN2026
 {
@@ -21,6 +21,14 @@ namespace NAN2026
         public int damage = 1;
         public float deflectSpeed = 9f;
         public float respawnDelay = 3f;
+
+        [Header("소멸 조건 (씬마다 다름)")]
+        [Tooltip("이 높이 아래로 내려가면 소멸. Scene2 기본 2.6")]
+        public float killPlaneY = 2.6f;
+        [Tooltip("발사 지점에서 이 거리를 넘으면 소멸")]
+        public float maxTravel = 40f;
+        [Tooltip("플레이어가 스파이크보다 아래에 있을 때만 작동. Scene2 는 false")]
+        public bool onlyBelow = false;
 
         [Header("격돌 이펙트(할로우나이트식)")]
         public float clashDuration = 0.16f;

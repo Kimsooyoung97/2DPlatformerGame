@@ -6776,3 +6776,59 @@ Calling function TakeDamage with 1 parameter but the function requires 2.
 - x=62.5 DeathDog2 가 지면 대비 -4.00 (지형에 박힘) — 기존 수동 배치라 손대지 않음
 - x 39.9~83.6 구간 9마리가 2.3~7.6u 간격 → 이 구간만 동시 3마리. 간격 조정 여부 대기
 - 위 두 [구현]은 같은 씬 파일을 연속 수정했고 중간 저장이 없어 커밋 1개를 공유한다
+
+
+## [구현] Scene1 복도 천장 스파이크 패링 + 상자 파괴 스킬 흡수 연출 — 2026-08-10 04:09
+### 프롬프트
+[구현]x 94 ~ 115 , y 41 벽면에 우리가 Scene2에 썼던 구체 스파이크 넣고 패링 가능하도록 넣어줄래? 그리고 맵 곳곳에 Chest가 3개 있는데 그걸 쳐서 부수면 SkillImage가 떠오르고 player에게 흡수당하는 연출을 만들고 싶어. 플레이어한테 다가가고 투명해지면서 없어지는거지. 왼쪽 하단에는 SkillImage가 생기는거고
+> 사용자 확인: 스파이크는 y41(바닥 윗면)이 아니라 천장 y54 에 매단다 / 대상 상자는 흩어진 3개
+
+### 조작 내역
+**사전 조사**
+- x68~132 을 1u 격자로 OverlapPoint 스캔해 단면도 작성 → y41 은 바닥 윗면(x88~104, x115~123, 사이 10u 구덩이), 천장은 y54, 천장 위 y55 도 걸어 다니는 상단 루트임을 확인
+- 재생 모드 중(isPlaying=True)이라 스캔이 런타임 상태를 읽고 있었음 → FAIL#5·#20 에 따라 정지 후 재실측
+
+**신규 파일**
+- Assets/Scripts/Core/ChestRewardLogic.cs — 상승/흡수 위상, 이징, 알파, 스케일, 슬롯 번호, 팝 스케일 (순수)
+- Assets/Tests/EditMode/ChestRewardLogicTests.cs — 7개
+- Assets/Scripts/ChestRewardConfig.cs (SO) / ChestSkillReward.cs / ChestSkillBar.cs
+- Assets/Configs/ChestRewardConfig.asset, Assets/Configs/SpikeBallConfig_Scene1.asset
+
+**기존 파일 수정**
+- SpikeBallConfig.cs: killPlaneY(2.6) / maxTravel(40) / onlyBelow(false) 3필드 추가.
+  전부 필드 이니셜라이저 기본값이라 기존 Scene2 자산은 값이 그대로 유지된다(검증함)
+- SpikeBallTrap.cs: 하드코딩 `y < 2.6f`, `거리 > 40f` 를 config 로 이관(숫자 리터럴 금지 규약).
+  onlyBelow 게이트 추가 — 천장 위 루트의 플레이어에게 발사해 천장을 뚫고 올라가는 것을 막는다
+
+**씬 배치**
+- Traps_Corridor/SpikeBall_Corridor_1~3 : (94, 53.5) (104.5, 53.5) (115, 53.5)
+  SpriteRenderer(Cainos Spike Ball 01) + CircleCollider2D(r 0.42, trigger) + Kinematic RB2D(useFullKinematicContacts, FAIL#6) + SpikeBallTrap(config=SpikeBallConfig_Scene1)
+- 상자 3개에 ChestSkillReward 부착: BOX(복도 x89.4) / BOX/Chest (1)(x84.7 y55) / BOX/Chest (2)(x170 y32)
+  (1)(2)에는 HitBox 자식 신설 — BoxCollider2D 1.09x0.91 trigger + MonsterHealth(3) + MonsterSoundPlayer(기존 것 CopyComponent 로 배선 보존)
+- BOX 의 기존 ChestBreakOpen: hitBox 를 명시 배선(자식에 MonsterHealth 가 늘어나 GetComponentInChildren 이 엉뚱한 것을 잡는 것 방지),
+  shakeAmount 0 으로(BOX 를 흔들면 자식 상자 3개가 같이 흔들린다). 흔들림은 ChestSkillReward 가 visual 만 흔든다
+- UI Canvas/ChestSkillBar 신설 — 좌하단 앵커(0,0) 피벗(0,0) (40,40), 3칸 84px. 팀 UI(UI Canvas/Skill)는 건드리지 않음
+
+### 검증
+- EditMode 236/236 통과 (신규 7 포함). 이전 229 → 236
+- 컴파일 후 타입 로드 확인: ChestRewardLogic / ChestRewardConfig / ChestSkillReward / ChestSkillBar / SkillRewardFlyer / ChestRewardEvents 전부 OK
+- read_console error 0 (남은 1건은 기존 'AnimationClip Portal must be marked as Legacy' 경고, 이번 작업과 무관)
+- 스파이크 3기 지형 겹침 0 (OverlapCircleAll), 위 0.50u / 아래 10.6~11.5u
+- 간격 10.5u > 발사 반경 4.95u x 2 = 9.9u → 동시 발사 없음(한 번에 1기)
+- 상자 판정/스프라이트 겹침 3개 모두 100% (BOX 는 정렬 전 저 상태였음 — 아래 참조)
+- Scene2 원본 SpikeBallConfig.asset 재확인: killPlaneY 2.6 / maxTravel 40 / onlyBelow False — 무변경
+- 씬 저장 후 파일 텍스트에 SpikeBall_Corridor_1~3, Traps_Corridor, ChestSkillBar, HitBox x3 존재 확인
+- 테스트 실행 후 DeathDog 20마리 생존 확인(FAIL#12)
+
+### 실패와 수정
+- create_script 가 name/path 조합을 거부(bad_extension) → execute_code + File.WriteAllText 로 전환
+- refresh_unity 가 'Connection closed' 로 두 번 실패해 어셈블리가 낡은 채로 남았고,
+  SerializedObject.FindProperty("onlyBelow") 가 null 이라 NullReference. 재컴파일 완료를 타입 리플렉션으로 확인한 뒤 재실행
+- 검증 코드에서 `a ?? b` 로 SpriteRenderer 를 골랐다가 가짜 null 때문에 '스프라이트 없음' 오판 (FAIL#21 재범).
+  명시적 접근으로 교체하니 BOX/HitBox 가 보이는 상자와 x 로 0.86u 어긋나 있었음이 드러남 → localPosition 을 BOX/Chest 와 맞춰 겹침 26% → 100%
+
+### 눈으로 봐야 판정되는 항목
+- 복도(x94~115) 진입 시 천장 스파이크가 점멸 경고 후 낙하하는지, 스페이스 패링이 붙는지
+- 상자 3개를 3대 때리면 부서지고 스킬 아이콘이 떠올라 플레이어에게 빨려 들어가는지
+- 좌하단 슬롯이 한 칸씩 채워지는지(3칸). 슬롯은 재생 중에만 생성된다
+- 천장 위(y55) 루트로 지나갈 때 스파이크가 반응하지 않는지(onlyBelow)

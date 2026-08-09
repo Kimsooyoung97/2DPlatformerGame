@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using NAN2026.Core;
 
 namespace NAN2026
@@ -81,9 +81,12 @@ namespace NAN2026
                     }
                 }
                 transform.Rotate(0f, 0f, config.spinDegPerSec * Time.deltaTime);
-                if (transform.position.y < 2.6f || Vector3.Distance(transform.position, home) > 40f) Break(false);
+                if (transform.position.y < config.killPlaneY || Vector3.Distance(transform.position, home) > config.maxTravel) Break(false);
                 return;
             }
+            // 위쪽 플레이어에게는 반응하지 않는다(천장 위 루트가 있는 씬용)
+            if (config.onlyBelow && player.position.y > transform.position.y)
+            { phase = 0; SetAlpha(1f); return; }
             float dist = Mathf.Abs(transform.position.x - player.position.x); // 천장 트랩: 수평거리 기준
             int p = SpikeBallLogic.Phase(dist, visionR, config.warnMultiplier, config.launchMultiplier);
             if (p >= 2 && phase != 2)
