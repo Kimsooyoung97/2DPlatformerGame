@@ -13,15 +13,15 @@ MonoBehaviour:
   m_Name: DeathDogAIConfig
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAIConfig
   aggroRange: 4
-  attackRange: 1.2
-  attackHeightRange: 1.2
+  attackRange: 0.85
+  attackHeightRange: 0.9
   chaseStopDistance: 6
-  patrolSpeed: 1
-  chaseSpeed: 2
+  patrolSpeed: 1.1
+  chaseSpeed: 0.8
   patrolRadius: 1
   jumpYThreshold: 1.2
   jumpConfirmDuration: 0.6
-  attackCooldown: 1
+  attackCooldown: 3
   attackDamage: 1
   maxHealth: 4
   xpReward: 5

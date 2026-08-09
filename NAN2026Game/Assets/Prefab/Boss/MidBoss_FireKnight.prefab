@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 5458397723063500922}
   - component: {fileID: 728118123929665042}
   - component: {fileID: 6393769773469101078}
+  - component: {fileID: 5766184747688121170}
   m_Layer: 0
   m_Name: MidBoss_FireKnight
   m_TagString: Untagged
@@ -297,3 +298,16 @@ MonoBehaviour:
   - {fileID: 21300000, guid: e2ce2a36ff8954c4faacdd7b68c98255, type: 3}
   - {fileID: 21300000, guid: 13bdd55900a0f1c41963467d90e782e8, type: 3}
   - {fileID: 21300000, guid: 94878575ce74f964f91d0d07f93db3a5, type: 3}
+--- !u!114 &5766184747688121170
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4054037870470603819}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c2d8e5cfcaa45ea4f83eea3c4f0950d8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PortalOpen
+  portal: {fileID: 0}

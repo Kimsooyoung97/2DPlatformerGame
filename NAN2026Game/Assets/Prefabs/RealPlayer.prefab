@@ -21,13 +21,15 @@ GameObject:
   - component: {fileID: 2333715033195273768}
   - component: {fileID: 358792454526322494}
   - component: {fileID: 1788253280997068110}
-  - component: {fileID: 4581387116099040180}
   - component: {fileID: 24102756782323629}
   - component: {fileID: 9064997020484281628}
   - component: {fileID: 5909537138968367621}
   - component: {fileID: 5141673981799727561}
   - component: {fileID: 3480599940953113590}
   - component: {fileID: 5707629816935853389}
+  - component: {fileID: 8192796389872414237}
+  - component: {fileID: 4460800706227028205}
+  - component: {fileID: 3529956322082229866}
   m_Layer: 7
   m_Name: RealPlayer
   m_TagString: Player
@@ -294,7 +296,7 @@ MonoBehaviour:
   levelConfig: {fileID: 11400000, guid: 6ee8e4a35d980c94b9c7d4e55e07cbfb, type: 2}
   augmentConfig: {fileID: 11400000, guid: fdac61d070ce07e47a6e0c361e7904bd, type: 2}
   canvas: {fileID: 0}
-  playerMana: {fileID: 0}
+  playerMana: {fileID: 5909537138968367621}
 --- !u!114 &8839252808961147778
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -530,19 +532,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NAN2026.RopeClimber
   config: {fileID: 11400000, guid: 65a2f16e02858d142870c22dc8905d3d, type: 2}
---- !u!114 &4581387116099040180
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5109878993836927586}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b04142efc651b5449986d115e15d5d25, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::NAN2026.WaterDeath
-  config: {fileID: 11400000, guid: 486cf5e85dc6ca148bacf7d7f77cfb0c, type: 2}
 --- !u!114 &24102756782323629
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -690,6 +679,66 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NAN2026.PlayerHitFeedback
   feel: {fileID: 11400000, guid: 89bad167137e68945b697ff62157a614, type: 2}
   flashColor: {r: 1, g: 0.35, b: 0.35, a: 1}
+--- !u!114 &8192796389872414237
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5109878993836927586}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0ee5a595d744d9408e9555cc8da9577, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NAN2026.PersistentSingleton
+  singletonId: Player
+--- !u!114 &4460800706227028205
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5109878993836927586}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 77edf422f07cb634f8302b3a5bc6162b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NAN2026.SkillSlashCaster
+  config: {fileID: 11400000, guid: b4f7d5c8dd664b84e999d679d24b257a, type: 2}
+  slashPrefab: {fileID: 6711275918333177968, guid: 4ba4d41d34b707c428957b6aea90fa9c, type: 3}
+  frames: []
+--- !u!114 &3529956322082229866
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5109878993836927586}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6bb4a92910d670b40ad6dd313dc25123, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NAN2026.SkillOrbCaster
+  config: {fileID: 11400000, guid: e0990ca9caad5834f91129b061e9437d, type: 2}
+  orbSprite: {fileID: 21300000, guid: 996ea0a8a1a149f469d8b286364ced5f, type: 3}
+  orbFrames:
+  - {fileID: -3231430200900864307, guid: e77bdab8a328a104c89970a40a8e9678, type: 3}
+  - {fileID: -5973904824397065639, guid: e77bdab8a328a104c89970a40a8e9678, type: 3}
+  - {fileID: 2705884630628759931, guid: e77bdab8a328a104c89970a40a8e9678, type: 3}
+  - {fileID: -3429295090346879350, guid: e77bdab8a328a104c89970a40a8e9678, type: 3}
+  - {fileID: -195626202969866518, guid: e77bdab8a328a104c89970a40a8e9678, type: 3}
+  - {fileID: -4926145010122968484, guid: e77bdab8a328a104c89970a40a8e9678, type: 3}
+  - {fileID: -7737874821041375663, guid: e77bdab8a328a104c89970a40a8e9678, type: 3}
+  - {fileID: -638718420141415963, guid: e77bdab8a328a104c89970a40a8e9678, type: 3}
+  - {fileID: 197301128072248517, guid: e77bdab8a328a104c89970a40a8e9678, type: 3}
+  - {fileID: 7058876713671093697, guid: e77bdab8a328a104c89970a40a8e9678, type: 3}
+  - {fileID: 7534374894123231742, guid: e77bdab8a328a104c89970a40a8e9678, type: 3}
+  - {fileID: 7588126878396215438, guid: e77bdab8a328a104c89970a40a8e9678, type: 3}
+  - {fileID: -6021090808734320753, guid: e77bdab8a328a104c89970a40a8e9678, type: 3}
+  - {fileID: -9167021138241908841, guid: e77bdab8a328a104c89970a40a8e9678, type: 3}
+  - {fileID: -2534107101581631383, guid: e77bdab8a328a104c89970a40a8e9678, type: 3}
+  - {fileID: 5008722801022919741, guid: e77bdab8a328a104c89970a40a8e9678, type: 3}
+  spinSpeed: 360
 --- !u!1 &6114823860119314469
 GameObject:
   m_ObjectHideFlags: 0
