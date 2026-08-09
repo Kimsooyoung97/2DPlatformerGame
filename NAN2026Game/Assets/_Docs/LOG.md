@@ -7549,3 +7549,25 @@ NAN2026Game/Assets/_Docs/ASSET_CREDITS.md merge=union
 - manage_scene(save): UITestScene 저장 성공
 ### 실패와 수정
 없음
+
+
+## [수정] FireKnight 패링 판정을 프레임 구간 방식으로 전환 — 2026-08-09 (세션 시간)
+### 프롬프트
+프레임/frac 구간형식으로 바꿔줄 수 있나?
+### 조작 내역
+- MidBossFireKnightConfig.cs: normalHitDelay/fireHitDelay/bombHitDelay/wheelHitDelay/wheelTickInterval/
+  *HitboxLifetime(4개) 제거. normalWinStart~End, fireWinStart~End, bombWinStart~End,
+  wheelWin1Start~End, wheelWin2Start~End(int, 프레임 인덱스) 추가.
+- MidBoss_FireKnight.cs: DoNormalAttack/DoFireAttack/DoFireBomb/DoWheelAttack을 '시간 지나면 1회 스폰'
+  방식에서 '현재 프레임 인덱스가 Win 구간 안이면 히트박스 활성' 방식으로 교체.
+  SpawnMeleeHitbox(1회성, Destroy(lifeTime)) -> UpdateMeleeHitboxState(구간 진입/이탈 시 AddComponent/Destroy)로 교체.
+  더 이상 안 쓰는 dealtThisSwing/wheelTick2Done 필드 제거(SetState 리셋 라인 포함).
+- MidBossFireKnightConfig.asset: 스크립트 필드 변경 반영 위해 재직렬화(SetDirty+SaveAssets) —
+  새 Win 필드는 스크립트 기본값(임의 지정, 실측 아님)으로 채워짐. parryBuffer=0.35는 유지됨.
+### 검증
+- refresh_unity(compile=request) -> read_console(types=error): 0건
+- run_tests(EditMode): 250/250 통과
+- manage_scene(save): UITestScene 저장 성공
+### 실패와 수정
+없음. 단, Win 구간 프레임 값(normalWinStart=4 등)은 실제 스프라이트 시트를 보고 잡은 게 아니라
+공격별 프레임 수 대비 대략적인 비율로 임의 지정한 값 — 실제 플레이 확인 후 조정 필요.

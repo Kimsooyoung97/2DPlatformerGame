@@ -32,10 +32,8 @@ namespace NAN2026
         private float nextNormal, nextFire, nextBomb, nextWheel;
         private int pendingAttack;   // windup 종료 후 진입할 state
         private float curWindupDur;
-        private bool wheelTick2Done;
         private Sprite[] cur;
         private float curFps;
-        private bool dealtThisSwing;
         private int parryCount;
         private Coroutine flashCo;
         private Coroutine sparkleCo;
@@ -100,7 +98,7 @@ namespace NAN2026
 
         private void SetState(int s)
         {
-            state = s; animT = 0f; stateT = 0f; dealtThisSwing = false; wheelTick2Done = false;
+            state = s; animT = 0f; stateT = 0f;
             cur = s == 0 ? idleF
                 : s == 1 ? walkF
                 : s == 2 ? normalF
@@ -371,46 +369,34 @@ namespace NAN2026
 
         private void DoNormalAttack()
         {
-            if (!dealtThisSwing && stateT >= config.normalHitDelay)
-            {
-                dealtThisSwing = true;
-                SpawnMeleeHitbox(normalHitboxObject, config.normalDamage, config.normalHitboxLifetime);
-            }
+            int idx = Mathf.Min((int)animT, cur.Length - 1);
+            bool inWin = idx >= config.normalWinStart && idx <= config.normalWinEnd;
+            UpdateMeleeHitboxState(normalHitboxObject, inWin, config.normalDamage);
             if ((int)animT >= cur.Length) { nextNormal = Time.time + config.normalCooldown; SetState(0); }
         }
 
         private void DoFireAttack()
         {
-            if (!dealtThisSwing && stateT >= config.fireHitDelay)
-            {
-                dealtThisSwing = true;
-                SpawnMeleeHitbox(fireHitboxObject, config.fireDamage, config.fireHitboxLifetime);
-            }
+            int idx = Mathf.Min((int)animT, cur.Length - 1);
+            bool inWin = idx >= config.fireWinStart && idx <= config.fireWinEnd;
+            UpdateMeleeHitboxState(fireHitboxObject, inWin, config.fireDamage);
             if ((int)animT >= cur.Length) { nextFire = Time.time + config.fireCooldown; SetState(0); }
         }
 
         private void DoFireBomb()
         {
-            if (!dealtThisSwing && stateT >= config.bombHitDelay)
-            {
-                dealtThisSwing = true;
-                SpawnMeleeHitbox(bombHitboxObject, config.bombDamage, config.bombHitboxLifetime);
-            }
+            int idx = Mathf.Min((int)animT, cur.Length - 1);
+            bool inWin = idx >= config.bombWinStart && idx <= config.bombWinEnd;
+            UpdateMeleeHitboxState(bombHitboxObject, inWin, config.bombDamage);
             if ((int)animT >= cur.Length) { nextBomb = Time.time + config.bombCooldown; SetState(0); }
         }
 
         private void DoWheelAttack()
         {
-            if (!dealtThisSwing && stateT >= config.wheelHitDelay)
-            {
-                dealtThisSwing = true;
-                SpawnMeleeHitbox(wheelHitboxObject, config.wheelDamagePerTick, config.wheelHitboxLifetime);
-            }
-            if (dealtThisSwing && !wheelTick2Done && stateT >= config.wheelHitDelay + config.wheelTickInterval)
-            {
-                wheelTick2Done = true;
-                SpawnMeleeHitbox(wheelHitboxObject, config.wheelDamagePerTick, config.wheelHitboxLifetime);
-            }
+            int idx = Mathf.Min((int)animT, cur.Length - 1);
+            bool inWin1 = idx >= config.wheelWin1Start && idx <= config.wheelWin1End;
+            bool inWin2 = idx >= config.wheelWin2Start && idx <= config.wheelWin2End;
+            UpdateMeleeHitboxState(wheelHitboxObject, inWin1 || inWin2, config.wheelDamagePerTick);
             if ((int)animT >= cur.Length) { nextWheel = Time.time + config.wheelCooldown; SetState(0); }
         }
 
@@ -428,14 +414,22 @@ namespace NAN2026
             }
         }
 
-        // 기존 방식 그대로: 씬에 미리 배치된 히트박스 오브젝트에 MidBossMeleeHitbox를 붙였다가
-        // lifeTime 후 컴포넌트만 떼어낸다(오브젝트 자체는 재사용을 위해 남겨둔다).
-        private void SpawnMeleeHitbox(GameObject target, int damage, float lifeTime)
+        // 씬에 미리 배치된 히트박스 오브젝트에 MidBossMeleeHitbox를 붙였다 뗀다 — 이제 고정 시간이
+        // 아니라 애니메이션 프레임 구간(WinStart~WinEnd) 안에 있는 동안에만 붙어있는다.
+        // 오브젝트 자체(위치·콜라이더)는 그대로 재사용한다.
+        private void UpdateMeleeHitboxState(GameObject target, bool shouldBeActive, int damage)
         {
             if (target == null) return;
-            MidBossMeleeHitbox hitbox = target.AddComponent<MidBossMeleeHitbox>();
-            hitbox.Init(damage, gameObject, RegisterParrySuccess, ParryBuffered);
-            Destroy(hitbox, lifeTime);
+            MidBossMeleeHitbox hitbox = target.GetComponent<MidBossMeleeHitbox>();
+            if (shouldBeActive && hitbox == null)
+            {
+                hitbox = target.AddComponent<MidBossMeleeHitbox>();
+                hitbox.Init(damage, gameObject, RegisterParrySuccess, ParryBuffered);
+            }
+            else if (!shouldBeActive && hitbox != null)
+            {
+                Destroy(hitbox);
+            }
         }
 
         // 근접 히트박스가 패링 성공을 알려올 때 호출 — 그로기 카운터 공유

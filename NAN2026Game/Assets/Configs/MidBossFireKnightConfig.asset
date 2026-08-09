@@ -17,26 +17,27 @@ MonoBehaviour:
   attackRange: 1.8
   walkSpeed: 2.2
   normalWindup: 0.25
-  normalHitDelay: 0.3
+  normalWinStart: 4
+  normalWinEnd: 6
   normalDamage: 1
   normalCooldown: 1.4
-  normalHitboxLifetime: 0.3
   fireWindup: 0.3
-  fireHitDelay: 0.35
+  fireWinStart: 5
+  fireWinEnd: 8
   fireDamage: 1
   fireCooldown: 2
-  fireHitboxLifetime: 0.3
   bombWindup: 0.35
-  bombHitDelay: 0.4
+  bombWinStart: 4
+  bombWinEnd: 6
   bombDamage: 1
   bombCooldown: 2.2
-  bombHitboxLifetime: 0.3
   wheelWindup: 0.3
-  wheelHitDelay: 0.3
-  wheelTickInterval: 0.25
+  wheelWin1Start: 3
+  wheelWin1End: 4
+  wheelWin2Start: 7
+  wheelWin2End: 8
   wheelDamagePerTick: 1
   wheelCooldown: 2.5
-  wheelHitboxLifetime: 0.3
   fpsIdle: 10
   fpsWalk: 12
   fpsNormal: 12
