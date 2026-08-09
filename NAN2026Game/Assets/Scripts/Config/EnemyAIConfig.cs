@@ -46,4 +46,9 @@ public sealed class EnemyAIConfig : ScriptableObject
     [Header("피격 넉백")]
     public float knockbackForce = 6f;     // 임의값 — 튜닝 필요
     public float knockbackDuration = 0.15f; // 임의값 — 튜닝 필요
+
+    [Header("낭떠러지 감지 (자기 층 지키기)")]
+    public float edgeProbeAhead = 0.55f;  // 발 앞 검사 거리
+    public float edgeProbeDepth = 1.20f;  // 아래로 검사 깊이
+    public LayerMask groundMask = ~0;     // 지면 레이어
 }
