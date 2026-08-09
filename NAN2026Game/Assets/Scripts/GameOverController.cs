@@ -82,20 +82,13 @@ public class GameOverController : MonoBehaviour
 
         _waitingForInput = false;
         Time.timeScale = 1f;   // 복구하지 않으면 타이틀에서 다시 시작한 게임이 정지 상태로 뜬다
-        SceneManager.LoadScene(titleSceneName);
     }
 
     private bool AnyKeyPressed()
     {
 #if ENABLE_INPUT_SYSTEM && !ENABLE_LEGACY_INPUT_MANAGER
         var keyboard = UnityEngine.InputSystem.Keyboard.current;
-        if (keyboard != null && keyboard.anyKey.wasPressedThisFrame) return true;
-
-        var mouse = UnityEngine.InputSystem.Mouse.current;
-        if (mouse != null && mouse.leftButton.wasPressedThisFrame) return true;
-
-        var gamepad = UnityEngine.InputSystem.Gamepad.current;
-        if (gamepad != null && gamepad.startButton.wasPressedThisFrame) return true;
+        if (keyboard != null && keyboard.enterKey.wasPressedThisFrame) return true;
 
         return false;
 #else
