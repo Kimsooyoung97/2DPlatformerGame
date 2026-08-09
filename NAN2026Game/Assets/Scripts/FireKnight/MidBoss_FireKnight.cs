@@ -6,20 +6,13 @@ namespace NAN2026
     // 파이어나이트 미들보스: Idle/Walk/NormalAttack/FireAttack/FireBomb/WheelAttack/Hitted/Death + Windup/Groggy
     // Demon/Mino와 같은 형식: Sprite[] 직접 재생(Animator 미사용), state int + SetState, 공격별 개별
     // windup·쿨타임, 패링 5회 그로기(버스트). 수치는 전부 이 컴포넌트가 아니라 Config가 소유한다.
-    // 근접 판정은 기존 방식 그대로 유지 — MidBoss 자식으로 미리 배치해둔 히트박스 오브젝트에
-    // MidBossMeleeHitbox를 붙였다 떼는 구조를 재사용한다(수동 배치 오브젝트를 새로 만들거나 지우지 않음).
+    // 근접 판정: DemonBoss와 동일하게 물리 콜라이더 없이 거리(dx)+프레임 구간으로 직접 판정한다.
+    // (이전엔 씬에 미리 배치된 히트박스 오브젝트를 썼으나, 사용자 명시적 지시로 그 오브젝트들을
+    // 직접 삭제하고 이 방식으로 전환함 — "수동 배치 오브젝트 삭제 금지" 규칙의 명시적 예외.)
     public class MidBoss_FireKnight : MonoBehaviour, IParryReflector
     {
         public MidBossFireKnightConfig config;
         public Sprite[] idleF, walkF, normalF, fireF, bombF, wheelF, hitF, deathF;
-
-        [Header("MidBoss 자식으로 미리 배치해둔 근접 판정용 콜라이더")]
-        public GameObject normalHitboxObject;
-        public GameObject fireHitboxObject;
-        public GameObject bombHitboxObject;
-        public GameObject wheelHitboxObject;
-        [Tooltip("좌우 반전 시 같이 뒤집을 히트박스 앵커(로컬 x 부호 반전)")]
-        public Transform[] childObjects;
 
         private SpriteRenderer sr;
         private Transform player;
@@ -32,6 +25,8 @@ namespace NAN2026
         private float nextNormal, nextFire, nextBomb, nextWheel;
         private int pendingAttack;   // windup 종료 후 진입할 state
         private float curWindupDur;
+        private bool dealtThisSwing;         // Normal/Fire/Bomb 공용(판정 창 1개)
+        private bool[] wheelSwingResolved = new bool[2]; // Wheel은 판정 창 2개
         private Sprite[] cur;
         private float curFps;
         private int parryCount;
@@ -71,34 +66,16 @@ namespace NAN2026
             }
 
             BuildGroggyPips();
-            EnsureHitboxesAreTriggers();
             SetState(0);
         }
 
-        // 근접 판정용 히트박스 4개는 항상 트리거여야 한다 — 공격 시작 시(Init)에만 isTrigger를
-        // 켜주면, 씬 로드 직후 첫 공격이 나가기 전까지는 인스펙터 기본값(대개 non-trigger)으로
-        // 남아있어서 플레이어가 근접 사거리에 들어오기만 해도 그냥 단단한 콜라이더로 밀려난다.
-        // 시작 시점에 미리 다 트리거로 고정해서 플레이어를 절대 물리적으로 밀지 않게 한다.
-        private void EnsureHitboxesAreTriggers()
-        {
-            SetColliderTrigger(normalHitboxObject);
-            SetColliderTrigger(fireHitboxObject);
-            SetColliderTrigger(bombHitboxObject);
-            SetColliderTrigger(wheelHitboxObject);
-        }
-
-        private void SetColliderTrigger(GameObject go)
-        {
-            if (go == null) return;
-            Collider2D col = go.GetComponent<Collider2D>();
-            if (col != null) col.isTrigger = true;
-        }
-
-        public bool TryParry(GameObject attacker) => false; // 이 보스는 패링 판정을 직접 소유하지 않는다(MidBossMeleeHitbox가 플레이어 쪽에서 판정)
+        public bool TryParry(GameObject attacker) => false; // 이 보스는 패링 판정을 직접 소유하지 않는다(플레이어 쪽에서 판정)
 
         private void SetState(int s)
         {
             state = s; animT = 0f; stateT = 0f;
+            dealtThisSwing = false;
+            wheelSwingResolved[0] = false; wheelSwingResolved[1] = false;
             cur = s == 0 ? idleF
                 : s == 1 ? walkF
                 : s == 2 ? normalF
@@ -260,26 +237,10 @@ namespace NAN2026
             flashCo = null;
         }
 
-        // sr.flipX를 실제로 바꿀 때만 이 경로로 설정한다 — 값이 그대로면 아무것도 안 하고,
-        // 실제로 바뀔 때만 FlipHitBox()를 호출한다(안 바뀌는데도 매 프레임 뒤집으면 위치가 흔들림).
         private void SetFacing(bool flipX)
         {
             if (sr == null) return;
-            if (sr.flipX == flipX) return;
             sr.flipX = flipX;
-            FlipHitBox();
-        }
-
-        private void FlipHitBox()
-        {
-            if (childObjects == null) return;
-            for (int i = 0; i < childObjects.Length; i++)
-            {
-                if (childObjects[i] == null) continue;
-                Vector3 p = childObjects[i].localPosition;
-                p.x *= -1f;
-                childObjects[i].localPosition = p;
-            }
         }
 
         private void Update()
@@ -320,10 +281,10 @@ namespace NAN2026
                 if (dx <= config.attackRange) TryBeginAttack();
                 else if (dx > config.aggroRange) SetState(0);
             }
-            else if (state == 2) DoNormalAttack();
-            else if (state == 3) DoFireAttack();
-            else if (state == 4) DoFireBomb();
-            else if (state == 5) DoWheelAttack();
+            else if (state == 2) DoNormalAttack(dx);
+            else if (state == 3) DoFireAttack(dx);
+            else if (state == 4) DoFireBomb(dx);
+            else if (state == 5) DoWheelAttack(dx);
             else if (state == 6) { if ((int)animT >= cur.Length) SetState(0); }
             else if (state == 8) DoGroggy(dx);
         }
@@ -367,37 +328,80 @@ namespace NAN2026
             }
         }
 
-        private void DoNormalAttack()
+        // DemonBoss 방식: 거리(dx) + 프레임 구간으로 직접 판정. 물리 히트박스 없음.
+        private void DoNormalAttack(float dx)
         {
             int idx = Mathf.Min((int)animT, cur.Length - 1);
             bool inWin = idx >= config.normalWinStart && idx <= config.normalWinEnd;
-            UpdateMeleeHitboxState(normalHitboxObject, inWin, config.normalDamage);
+            if (!dealtThisSwing && inWin && dx <= config.normalHitReach)
+            {
+                dealtThisSwing = true;
+                ResolveMeleeHit(config.normalDamage);
+            }
             if ((int)animT >= cur.Length) { nextNormal = Time.time + config.normalCooldown; SetState(0); }
         }
 
-        private void DoFireAttack()
+        private void DoFireAttack(float dx)
         {
             int idx = Mathf.Min((int)animT, cur.Length - 1);
             bool inWin = idx >= config.fireWinStart && idx <= config.fireWinEnd;
-            UpdateMeleeHitboxState(fireHitboxObject, inWin, config.fireDamage);
+            if (!dealtThisSwing && inWin && dx <= config.fireHitReach)
+            {
+                dealtThisSwing = true;
+                ResolveMeleeHit(config.fireDamage);
+            }
             if ((int)animT >= cur.Length) { nextFire = Time.time + config.fireCooldown; SetState(0); }
         }
 
-        private void DoFireBomb()
+        private void DoFireBomb(float dx)
         {
             int idx = Mathf.Min((int)animT, cur.Length - 1);
             bool inWin = idx >= config.bombWinStart && idx <= config.bombWinEnd;
-            UpdateMeleeHitboxState(bombHitboxObject, inWin, config.bombDamage);
+            if (!dealtThisSwing && inWin && dx <= config.bombHitReach)
+            {
+                dealtThisSwing = true;
+                ResolveMeleeHit(config.bombDamage);
+            }
             if ((int)animT >= cur.Length) { nextBomb = Time.time + config.bombCooldown; SetState(0); }
         }
 
-        private void DoWheelAttack()
+        private void DoWheelAttack(float dx)
         {
             int idx = Mathf.Min((int)animT, cur.Length - 1);
             bool inWin1 = idx >= config.wheelWin1Start && idx <= config.wheelWin1End;
             bool inWin2 = idx >= config.wheelWin2Start && idx <= config.wheelWin2End;
-            UpdateMeleeHitboxState(wheelHitboxObject, inWin1 || inWin2, config.wheelDamagePerTick);
+            if (!wheelSwingResolved[0] && inWin1 && dx <= config.wheelHitReach)
+            {
+                wheelSwingResolved[0] = true;
+                ResolveMeleeHit(config.wheelDamagePerTick);
+            }
+            if (!wheelSwingResolved[1] && inWin2 && dx <= config.wheelHitReach)
+            {
+                wheelSwingResolved[1] = true;
+                ResolveMeleeHit(config.wheelDamagePerTick);
+            }
             if ((int)animT >= cur.Length) { nextWheel = Time.time + config.wheelCooldown; SetState(0); }
+        }
+
+        // 판정 창 안에서 사거리까지 맞았을 때 공통으로 호출 — 패링(버퍼 우선, 리플렉션 폴백) 성공 시
+        // RegisterParrySuccess(그로기 카운트), 실패 시 플레이어에게 데미지. DemonBoss.ResolveHit()와 동일 패턴.
+        private void ResolveMeleeHit(int damage)
+        {
+            bool parried = ParryBuffered();
+            if (!parried && controller != null && tryParry != null)
+            {
+                object r = tryParry.Invoke(controller, new object[] { gameObject });
+                parried = r is bool && (bool)r;
+            }
+            if (parried)
+            {
+                if (player != null) PlayerMana.RewardParry(player);
+                RegisterParrySuccess();
+            }
+            else if (player != null)
+            {
+                player.SendMessage("TakeDamage", (float)damage, SendMessageOptions.DontRequireReceiver);
+            }
         }
 
         private void DoGroggy(float dx)
@@ -414,25 +418,7 @@ namespace NAN2026
             }
         }
 
-        // 씬에 미리 배치된 히트박스 오브젝트에 MidBossMeleeHitbox를 붙였다 뗀다 — 이제 고정 시간이
-        // 아니라 애니메이션 프레임 구간(WinStart~WinEnd) 안에 있는 동안에만 붙어있는다.
-        // 오브젝트 자체(위치·콜라이더)는 그대로 재사용한다.
-        private void UpdateMeleeHitboxState(GameObject target, bool shouldBeActive, int damage)
-        {
-            if (target == null) return;
-            MidBossMeleeHitbox hitbox = target.GetComponent<MidBossMeleeHitbox>();
-            if (shouldBeActive && hitbox == null)
-            {
-                hitbox = target.AddComponent<MidBossMeleeHitbox>();
-                hitbox.Init(damage, gameObject, RegisterParrySuccess, ParryBuffered);
-            }
-            else if (!shouldBeActive && hitbox != null)
-            {
-                Destroy(hitbox);
-            }
-        }
-
-        // 근접 히트박스가 패링 성공을 알려올 때 호출 — 그로기 카운터 공유
+        // 근접 판정(ResolveMeleeHit)이 패링 성공을 알려올 때 호출 — 그로기 카운터 공유
         public void RegisterParrySuccess()
         {
             if (config.clashConfig != null && player != null)

@@ -1019,15 +1019,6 @@ MonoBehaviour:
   - {fileID: 21300000, guid: e2ce2a36ff8954c4faacdd7b68c98255, type: 3}
   - {fileID: 21300000, guid: 13bdd55900a0f1c41963467d90e782e8, type: 3}
   - {fileID: 21300000, guid: 94878575ce74f964f91d0d07f93db3a5, type: 3}
-  normalHitboxObject: {fileID: 1922689418}
-  fireHitboxObject: {fileID: 58264848}
-  bombHitboxObject: {fileID: 649482618}
-  wheelHitboxObject: {fileID: 2053778052}
-  childObjects:
-  - {fileID: 1922689419}
-  - {fileID: 58264850}
-  - {fileID: 649482619}
-  - {fileID: 2053778053}
 --- !u!4 &1624170350 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3122392861472832117, guid: 550ac21977e0bbe4e928cb7e64d71d49, type: 3}

@@ -17,6 +17,7 @@ namespace NAN2026
         public int normalWinEnd = 6;
         public int normalDamage = 1;
         public float normalCooldown = 1.4f;
+        public float normalHitReach = 2.2f;  // DemonBoss 방식: 거리 기반 판정
 
         [Header("Fire Attack (근접 — 검에 불 붙여 내려찍기) — 판정 창은 프레임 구간")]
         public float fireWindup = 0.3f;
@@ -24,6 +25,7 @@ namespace NAN2026
         public int fireWinEnd = 8;
         public int fireDamage = 1;
         public float fireCooldown = 2.0f;
+        public float fireHitReach = 2.5f;
 
         [Header("Fire Bomb (근접 — 아래에서 위로 쳐올리며 폭발 이펙트) — 판정 창은 프레임 구간")]
         public float bombWindup = 0.35f;
@@ -31,6 +33,7 @@ namespace NAN2026
         public int bombWinEnd = 6;
         public int bombDamage = 1;
         public float bombCooldown = 2.2f;
+        public float bombHitReach = 2.0f;
 
         [Header("Wheel Attack (2연속 판정) — 판정 창 2개, 각각 프레임 구간")]
         public float wheelWindup = 0.3f;
@@ -40,6 +43,7 @@ namespace NAN2026
         public int wheelWin2End = 8;
         public int wheelDamagePerTick = 1;
         public float wheelCooldown = 2.5f;
+        public float wheelHitReach = 2.8f;
 
         [Header("프레임 속도")]
         public float fpsIdle = 10f;
