@@ -95,16 +95,12 @@ public sealed class LevelUpSkillManager : MonoBehaviour
         switch (type)
         {
             case AugmentType.DamageUp:
-                skillIcon[idx].sprite = Resources.Load<Sprite>("DamageUp");
                 return "공격 데미지\n+" + m;
             case AugmentType.Heal:
-                skillIcon[idx].sprite = Resources.Load<Sprite>("Heal");
                 return "체력 회복\n+" + m;
             case AugmentType.ManaUp:
-                skillIcon[idx].sprite = Resources.Load<Sprite>("ManaUp");
                 return "마나 수급량\n+" + m;
             case AugmentType.ManaHeal:
-                skillIcon[idx].sprite = Resources.Load<Sprite>("ManaHeal");
                 return "마나 회복\n+" + m;
             default: return string.Empty;
         }
