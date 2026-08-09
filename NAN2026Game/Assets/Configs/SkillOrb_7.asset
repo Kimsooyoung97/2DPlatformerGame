@@ -15,12 +15,12 @@ MonoBehaviour:
   mpCost: 1
   cooldown: 1
   spawnForward: 0.8
-  spawnHeight: 0.5
+  spawnHeight: 0.9
   speed: 10
   life: 3
   damage: 3
   fps: 16
-  hitboxSize: 0.45
+  hitboxSize: 0.35
   hitbox2D: {x: 3, y: 1.2}
   piercing: 0
   scale: 1.3
