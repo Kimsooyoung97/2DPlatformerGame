@@ -6701,3 +6701,273 @@ PlayerController2D가 계속 방향키를 읽어서 캐릭터가 반응함.
 - manage_scene(save): UITestScene 저장 성공
 ### 실패와 수정
 없음
+
+
+## [수정] 다른 씬 세이브포인트 UI 미작동 + 확정 시 UI 안 닫히는 레이스 컨디션 수정 — 2026-08-10
+### 프롬프트
+왜 다른씬에 존재하는 savepoint에서는 안되는지 설명해줘 / 왜 현재 씬에서는 savepoint에서
+ui가 안뜰까 / 왜 ui선택창에서 엔터키 눌러서 선택했는데 이동만되고 ui는 안꺼지는거야
+### 원인 1 — 다른 씬(예: AdventureScene3)에서 UI 자체가 안 뜸
+CheckpointTravelMenu/PlayerScenePositioner를 UITestScene의 RealPlayer 인스턴스에만 직접
+붙였었음. RealPlayer는 Assets/Prefabs/RealPlayer.prefab 인스턴스인데, 각 씬이 자기만의
+RealPlayer 인스턴스를 갖고 있어서(프리팹은 같지만) 그 두 컴포넌트가 프리팹 애셋 자체에는
+없어 다른 씬 인스턴스엔 상속되지 않았음. AdventureScene3 실측: PersistentSingleton=True인데
+CheckpointTravelMenu=False -> Instance가 계속 null -> CheckpointTrigger.Update()의
+"Instance != null" 체크에서 막혀 Open() 자체가 안 불림.
+### 원인 2 — 확정(Enter)했는데 이동만 되고 UI가 안 닫힘
+TravelTo()가 Close()로 메뉴를 닫고 같은 씬이면 그 자리에서 플레이어를 이동시키는데, 플레이어가
+여전히 세이브포인트 트리거 영역 안에 있는 채로 끝남. 그러면 같은 프레임 안에서
+CheckpointTrigger.Update()도 동일한 Enter wasPressedThisFrame을 읽어 Open()을 다시 호출 —
+방금 닫힌 메뉴가 그 자리에서 재개방되는 반대 방향 레이스 컨디션(이전에 고친 openedFrame
+가드와 정반대 방향).
+### 조작 내역
+- Assets/Prefabs/RealPlayer.prefab: manage_prefabs(modify_contents)로 PlayerScenePositioner,
+  CheckpointTravelMenu 두 컴포넌트를 프리팹 애셋 자체에 추가 -> 모든 씬 인스턴스에 한 번에 전파
+- UITestScene의 RealPlayer 인스턴스: 프리팹 전파로 인해 기존 인스턴스 직접 추가분과 중복(2개씩)
+  발생 확인 -> manage_components(remove, component_index=1)로 각각 1개씩 정리해서 1개로 복구
+- Assets/Scripts/Player/CheckpointTravelMenu.cs: closedFrame(int) 필드 추가. Close()에서
+  Time.frameCount 기록, Open()에서 "방금 닫힌 그 프레임이면" 재개방 거부
+- 파일 위치 변경 확인: 이 세션 사이 CheckpointTravelMenu.cs/PlayerScenePositioner.cs가
+  Assets/Scripts/Player/ 로 옮겨져 있었음(사람이 정리한 것으로 추정) -> 경로 재확인 후 진행
+### 검증
+- refresh_unity(compile=request) -> read_console(types=error): 0건
+- run_tests(EditMode): 229/229 통과 (두 차례)
+- **실측 검증(프리팹 전파)**: AdventureScene3 RealPlayer 인스턴스에서 PlayerScenePositioner/
+  CheckpointTravelMenu가 True로 바뀐 것 확인
+- **실측 검증(중복 정리)**: UITestScene RealPlayer의 컴포넌트 개수가 PersistentSingleton=1,
+  PlayerScenePositioner=1, CheckpointTravelMenu=1로 전부 정상화된 것 확인
+- **실측 검증(레이스 수정)**: play mode 진입 -> Open() -> TravelTo()(Close 포함, 같은 씬
+  대상) 호출 후 isOpen=False, 플레이어 위치 목표와 정확히 일치 확인 -> 같은 실행 흐름 안에서
+  CheckpointTrigger의 동시-프레임 재호출을 흉내낸 Open() 재시도 -> isOpen이 False로 유지됨
+  (재개방 차단 확인)
+- manage_scene(save): AdventureScene2 저장 성공(내용 변경 없어 git diff 없음, 정상)
+### 실패와 수정
+- script_apply_edits가 "Script not found at Assets/Scripts/CheckpointTravelMenu.cs"로 실패 ->
+  AssetDatabase.FindAssets로 재검색해서 실제 경로(Assets/Scripts/Player/)가 옮겨져 있었음을
+  확인 후 정정. 관련 파일(CheckpointTrigger 등) 위치도 전수 재확인해서 다른 파일은 안 옮겨진
+  것 확인
+
+
+## [수정] 다른 씬 세이브포인트 UI 미작동 + 확정 시 UI 안 닫히는 레이스 컨디션 수정 — 2026-08-10
+### 프롬프트
+왜 다른씬에 존재하는 savepoint에서는 안되는지 설명해줘 / 왜 현재 씬에서는 savepoint에서
+ui가 안뜰까 / 왜 ui선택창에서 엔터키 눌러서 선택했는데 이동만되고 ui는 안꺼지는거야
+### 원인 1 — 다른 씬(예: AdventureScene3)에서 UI 자체가 안 뜸
+CheckpointTravelMenu/PlayerScenePositioner를 UITestScene의 RealPlayer 인스턴스에만 직접
+붙였었음. RealPlayer는 Assets/Prefabs/RealPlayer.prefab 인스턴스인데, 각 씬이 자기만의
+RealPlayer 인스턴스를 갖고 있어서(프리팹은 같지만) 그 두 컴포넌트가 프리팹 애셋 자체에는
+없어 다른 씬 인스턴스엔 상속되지 않았음. AdventureScene3 실측: PersistentSingleton=True인데
+CheckpointTravelMenu=False -> Instance가 계속 null -> CheckpointTrigger.Update()의
+"Instance != null" 체크에서 막혀 Open() 자체가 안 불림.
+### 원인 2 — 확정(Enter)했는데 이동만 되고 UI가 안 닫힘
+TravelTo()가 Close()로 메뉴를 닫고 같은 씬이면 그 자리에서 플레이어를 이동시키는데, 플레이어가
+여전히 세이브포인트 트리거 영역 안에 있는 채로 끝남. 그러면 같은 프레임 안에서
+CheckpointTrigger.Update()도 동일한 Enter wasPressedThisFrame을 읽어 Open()을 다시 호출 —
+방금 닫힌 메뉴가 그 자리에서 재개방되는 반대 방향 레이스 컨디션(이전에 고친 openedFrame
+가드와 정반대 방향).
+### 조작 내역
+- Assets/Prefabs/RealPlayer.prefab: manage_prefabs(modify_contents)로 PlayerScenePositioner,
+  CheckpointTravelMenu 두 컴포넌트를 프리팹 애셋 자체에 추가 -> 모든 씬 인스턴스에 한 번에 전파
+- UITestScene의 RealPlayer 인스턴스: 프리팹 전파로 인해 기존 인스턴스 직접 추가분과 중복(2개씩)
+  발생 확인 -> manage_components(remove, component_index=1)로 각각 1개씩 정리해서 1개로 복구
+- Assets/Scripts/Player/CheckpointTravelMenu.cs: closedFrame(int) 필드 추가. Close()에서
+  Time.frameCount 기록, Open()에서 "방금 닫힌 그 프레임이면" 재개방 거부
+- 파일 위치 변경 확인: 이 세션 사이 CheckpointTravelMenu.cs/PlayerScenePositioner.cs가
+  Assets/Scripts/Player/ 로 옮겨져 있었음(사람이 정리한 것으로 추정) -> 경로 재확인 후 진행
+### 검증
+- refresh_unity(compile=request) -> read_console(types=error): 0건
+- run_tests(EditMode): 229/229 통과 (두 차례)
+- **실측 검증(프리팹 전파)**: AdventureScene3 RealPlayer 인스턴스에서 PlayerScenePositioner/
+  CheckpointTravelMenu가 True로 바뀐 것 확인
+- **실측 검증(중복 정리)**: UITestScene RealPlayer의 컴포넌트 개수가 PersistentSingleton=1,
+  PlayerScenePositioner=1, CheckpointTravelMenu=1로 전부 정상화된 것 확인
+- **실측 검증(레이스 수정)**: play mode 진입 -> Open() -> TravelTo()(Close 포함, 같은 씬
+  대상) 호출 후 isOpen=False, 플레이어 위치 목표와 정확히 일치 확인 -> 같은 실행 흐름 안에서
+  CheckpointTrigger의 동시-프레임 재호출을 흉내낸 Open() 재시도 -> isOpen이 False로 유지됨
+  (재개방 차단 확인)
+- manage_scene(save): AdventureScene2 저장 성공(내용 변경 없어 git diff 없음, 정상)
+### 실패와 수정
+- script_apply_edits가 "Script not found at Assets/Scripts/CheckpointTravelMenu.cs"로 실패 ->
+  AssetDatabase.FindAssets로 재검색해서 실제 경로(Assets/Scripts/Player/)가 옮겨져 있었음을
+  확인 후 정정. 관련 파일(CheckpointTrigger 등) 위치도 전수 재확인해서 다른 파일은 안 옮겨진
+  것 확인
+
+
+## [수정] 다른 씬 세이브포인트 UI 미작동 + 확정 시 UI 안 닫히는 레이스 컨디션 수정 — 2026-08-10
+### 프롬프트
+왜 다른씬에 존재하는 savepoint에서는 안되는지 설명해줘 / 왜 현재 씬에서는 savepoint에서
+ui가 안뜰까 / 왜 ui선택창에서 엔터키 눌러서 선택했는데 이동만되고 ui는 안꺼지는거야
+### 원인 1 — 다른 씬(예: AdventureScene3)에서 UI 자체가 안 뜸
+CheckpointTravelMenu/PlayerScenePositioner를 UITestScene의 RealPlayer 인스턴스에만 직접
+붙였었음. RealPlayer는 Assets/Prefabs/RealPlayer.prefab 인스턴스인데, 각 씬이 자기만의
+RealPlayer 인스턴스를 갖고 있어서(프리팹은 같지만) 그 두 컴포넌트가 프리팹 애셋 자체에는
+없어 다른 씬 인스턴스엔 상속되지 않았음. AdventureScene3 실측: PersistentSingleton=True인데
+CheckpointTravelMenu=False -> Instance가 계속 null -> CheckpointTrigger.Update()의
+"Instance != null" 체크에서 막혀 Open() 자체가 안 불림.
+### 원인 2 — 확정(Enter)했는데 이동만 되고 UI가 안 닫힘
+TravelTo()가 Close()로 메뉴를 닫고 같은 씬이면 그 자리에서 플레이어를 이동시키는데, 플레이어가
+여전히 세이브포인트 트리거 영역 안에 있는 채로 끝남. 그러면 같은 프레임 안에서
+CheckpointTrigger.Update()도 동일한 Enter wasPressedThisFrame을 읽어 Open()을 다시 호출 —
+방금 닫힌 메뉴가 그 자리에서 재개방되는 반대 방향 레이스 컨디션(이전에 고친 openedFrame
+가드와 정반대 방향).
+### 조작 내역
+- Assets/Prefabs/RealPlayer.prefab: manage_prefabs(modify_contents)로 PlayerScenePositioner,
+  CheckpointTravelMenu 두 컴포넌트를 프리팹 애셋 자체에 추가 -> 모든 씬 인스턴스에 한 번에 전파
+- UITestScene의 RealPlayer 인스턴스: 프리팹 전파로 인해 기존 인스턴스 직접 추가분과 중복(2개씩)
+  발생 확인 -> manage_components(remove, component_index=1)로 각각 1개씩 정리해서 1개로 복구
+- Assets/Scripts/Player/CheckpointTravelMenu.cs: closedFrame(int) 필드 추가. Close()에서
+  Time.frameCount 기록, Open()에서 "방금 닫힌 그 프레임이면" 재개방 거부
+- 파일 위치 변경 확인: 이 세션 사이 CheckpointTravelMenu.cs/PlayerScenePositioner.cs가
+  Assets/Scripts/Player/ 로 옮겨져 있었음(사람이 정리한 것으로 추정) -> 경로 재확인 후 진행
+### 검증
+- refresh_unity(compile=request) -> read_console(types=error): 0건
+- run_tests(EditMode): 229/229 통과 (두 차례)
+- **실측 검증(프리팹 전파)**: AdventureScene3 RealPlayer 인스턴스에서 PlayerScenePositioner/
+  CheckpointTravelMenu가 True로 바뀐 것 확인
+- **실측 검증(중복 정리)**: UITestScene RealPlayer의 컴포넌트 개수가 PersistentSingleton=1,
+  PlayerScenePositioner=1, CheckpointTravelMenu=1로 전부 정상화된 것 확인
+- **실측 검증(레이스 수정)**: play mode 진입 -> Open() -> TravelTo()(Close 포함, 같은 씬
+  대상) 호출 후 isOpen=False, 플레이어 위치 목표와 정확히 일치 확인 -> 같은 실행 흐름 안에서
+  CheckpointTrigger의 동시-프레임 재호출을 흉내낸 Open() 재시도 -> isOpen이 False로 유지됨
+  (재개방 차단 확인)
+- manage_scene(save): AdventureScene2 저장 성공(내용 변경 없어 git diff 없음, 정상)
+### 실패와 수정
+- script_apply_edits가 "Script not found at Assets/Scripts/CheckpointTravelMenu.cs"로 실패 ->
+  AssetDatabase.FindAssets로 재검색해서 실제 경로(Assets/Scripts/Player/)가 옮겨져 있었음을
+  확인 후 정정. 관련 파일(CheckpointTrigger 등) 위치도 전수 재확인해서 다른 파일은 안 옮겨진
+  것 확인
+
+
+## [수정] 다른 씬 세이브포인트 UI 미작동 + 확정 시 UI 안 닫히는 레이스 컨디션 수정 — 2026-08-10
+### 프롬프트
+왜 다른씬에 존재하는 savepoint에서는 안되는지 설명해줘 / 왜 현재 씬에서는 savepoint에서
+ui가 안뜰까 / 왜 ui선택창에서 엔터키 눌러서 선택했는데 이동만되고 ui는 안꺼지는거야
+### 원인 1 — 다른 씬(예: AdventureScene3)에서 UI 자체가 안 뜸
+CheckpointTravelMenu/PlayerScenePositioner를 UITestScene의 RealPlayer 인스턴스에만 직접
+붙였었음. RealPlayer는 Assets/Prefabs/RealPlayer.prefab 인스턴스인데, 각 씬이 자기만의
+RealPlayer 인스턴스를 갖고 있어서(프리팹은 같지만) 그 두 컴포넌트가 프리팹 애셋 자체에는
+없어 다른 씬 인스턴스엔 상속되지 않았음. AdventureScene3 실측: PersistentSingleton=True인데
+CheckpointTravelMenu=False -> Instance가 계속 null -> CheckpointTrigger.Update()의
+"Instance != null" 체크에서 막혀 Open() 자체가 안 불림.
+### 원인 2 — 확정(Enter)했는데 이동만 되고 UI가 안 닫힘
+TravelTo()가 Close()로 메뉴를 닫고 같은 씬이면 그 자리에서 플레이어를 이동시키는데, 플레이어가
+여전히 세이브포인트 트리거 영역 안에 있는 채로 끝남. 그러면 같은 프레임 안에서
+CheckpointTrigger.Update()도 동일한 Enter wasPressedThisFrame을 읽어 Open()을 다시 호출 —
+방금 닫힌 메뉴가 그 자리에서 재개방되는 반대 방향 레이스 컨디션(이전에 고친 openedFrame
+가드와 정반대 방향).
+### 조작 내역
+- Assets/Prefabs/RealPlayer.prefab: manage_prefabs(modify_contents)로 PlayerScenePositioner,
+  CheckpointTravelMenu 두 컴포넌트를 프리팹 애셋 자체에 추가 -> 모든 씬 인스턴스에 한 번에 전파
+- UITestScene의 RealPlayer 인스턴스: 프리팹 전파로 인해 기존 인스턴스 직접 추가분과 중복(2개씩)
+  발생 확인 -> manage_components(remove, component_index=1)로 각각 1개씩 정리해서 1개로 복구
+- Assets/Scripts/Player/CheckpointTravelMenu.cs: closedFrame(int) 필드 추가. Close()에서
+  Time.frameCount 기록, Open()에서 "방금 닫힌 그 프레임이면" 재개방 거부
+- 파일 위치 변경 확인: 이 세션 사이 CheckpointTravelMenu.cs/PlayerScenePositioner.cs가
+  Assets/Scripts/Player/ 로 옮겨져 있었음(사람이 정리한 것으로 추정) -> 경로 재확인 후 진행
+### 검증
+- refresh_unity(compile=request) -> read_console(types=error): 0건
+- run_tests(EditMode): 229/229 통과 (두 차례)
+- **실측 검증(프리팹 전파)**: AdventureScene3 RealPlayer 인스턴스에서 PlayerScenePositioner/
+  CheckpointTravelMenu가 True로 바뀐 것 확인
+- **실측 검증(중복 정리)**: UITestScene RealPlayer의 컴포넌트 개수가 PersistentSingleton=1,
+  PlayerScenePositioner=1, CheckpointTravelMenu=1로 전부 정상화된 것 확인
+- **실측 검증(레이스 수정)**: play mode 진입 -> Open() -> TravelTo()(Close 포함, 같은 씬
+  대상) 호출 후 isOpen=False, 플레이어 위치 목표와 정확히 일치 확인 -> 같은 실행 흐름 안에서
+  CheckpointTrigger의 동시-프레임 재호출을 흉내낸 Open() 재시도 -> isOpen이 False로 유지됨
+  (재개방 차단 확인)
+- manage_scene(save): AdventureScene2 저장 성공(내용 변경 없어 git diff 없음, 정상)
+### 실패와 수정
+- script_apply_edits가 "Script not found at Assets/Scripts/CheckpointTravelMenu.cs"로 실패 ->
+  AssetDatabase.FindAssets로 재검색해서 실제 경로(Assets/Scripts/Player/)가 옮겨져 있었음을
+  확인 후 정정. 관련 파일(CheckpointTrigger 등) 위치도 전수 재확인해서 다른 파일은 안 옮겨진
+  것 확인
+
+
+## [수정] 다른 씬 세이브포인트 UI 미작동 + 확정 시 UI 안 닫히는 레이스 컨디션 수정 — 2026-08-10
+### 프롬프트
+왜 다른씬에 존재하는 savepoint에서는 안되는지 설명해줘 / 왜 현재 씬에서는 savepoint에서
+ui가 안뜰까 / 왜 ui선택창에서 엔터키 눌러서 선택했는데 이동만되고 ui는 안꺼지는거야
+### 원인 1 — 다른 씬(예: AdventureScene3)에서 UI 자체가 안 뜸
+CheckpointTravelMenu/PlayerScenePositioner를 UITestScene의 RealPlayer 인스턴스에만 직접
+붙였었음. RealPlayer는 Assets/Prefabs/RealPlayer.prefab 인스턴스인데, 각 씬이 자기만의
+RealPlayer 인스턴스를 갖고 있어서(프리팹은 같지만) 그 두 컴포넌트가 프리팹 애셋 자체에는
+없어 다른 씬 인스턴스엔 상속되지 않았음. AdventureScene3 실측: PersistentSingleton=True인데
+CheckpointTravelMenu=False -> Instance가 계속 null -> CheckpointTrigger.Update()의
+"Instance != null" 체크에서 막혀 Open() 자체가 안 불림.
+### 원인 2 — 확정(Enter)했는데 이동만 되고 UI가 안 닫힘
+TravelTo()가 Close()로 메뉴를 닫고 같은 씬이면 그 자리에서 플레이어를 이동시키는데, 플레이어가
+여전히 세이브포인트 트리거 영역 안에 있는 채로 끝남. 그러면 같은 프레임 안에서
+CheckpointTrigger.Update()도 동일한 Enter wasPressedThisFrame을 읽어 Open()을 다시 호출 —
+방금 닫힌 메뉴가 그 자리에서 재개방되는 반대 방향 레이스 컨디션(이전에 고친 openedFrame
+가드와 정반대 방향).
+### 조작 내역
+- Assets/Prefabs/RealPlayer.prefab: manage_prefabs(modify_contents)로 PlayerScenePositioner,
+  CheckpointTravelMenu 두 컴포넌트를 프리팹 애셋 자체에 추가 -> 모든 씬 인스턴스에 한 번에 전파
+- UITestScene의 RealPlayer 인스턴스: 프리팹 전파로 인해 기존 인스턴스 직접 추가분과 중복(2개씩)
+  발생 확인 -> manage_components(remove, component_index=1)로 각각 1개씩 정리해서 1개로 복구
+- Assets/Scripts/Player/CheckpointTravelMenu.cs: closedFrame(int) 필드 추가. Close()에서
+  Time.frameCount 기록, Open()에서 "방금 닫힌 그 프레임이면" 재개방 거부
+- 파일 위치 변경 확인: 이 세션 사이 CheckpointTravelMenu.cs/PlayerScenePositioner.cs가
+  Assets/Scripts/Player/ 로 옮겨져 있었음(사람이 정리한 것으로 추정) -> 경로 재확인 후 진행
+### 검증
+- refresh_unity(compile=request) -> read_console(types=error): 0건
+- run_tests(EditMode): 229/229 통과 (두 차례)
+- **실측 검증(프리팹 전파)**: AdventureScene3 RealPlayer 인스턴스에서 PlayerScenePositioner/
+  CheckpointTravelMenu가 True로 바뀐 것 확인
+- **실측 검증(중복 정리)**: UITestScene RealPlayer의 컴포넌트 개수가 PersistentSingleton=1,
+  PlayerScenePositioner=1, CheckpointTravelMenu=1로 전부 정상화된 것 확인
+- **실측 검증(레이스 수정)**: play mode 진입 -> Open() -> TravelTo()(Close 포함, 같은 씬
+  대상) 호출 후 isOpen=False, 플레이어 위치 목표와 정확히 일치 확인 -> 같은 실행 흐름 안에서
+  CheckpointTrigger의 동시-프레임 재호출을 흉내낸 Open() 재시도 -> isOpen이 False로 유지됨
+  (재개방 차단 확인)
+- manage_scene(save): AdventureScene2 저장 성공(내용 변경 없어 git diff 없음, 정상)
+### 실패와 수정
+- script_apply_edits가 "Script not found at Assets/Scripts/CheckpointTravelMenu.cs"로 실패 ->
+  AssetDatabase.FindAssets로 재검색해서 실제 경로(Assets/Scripts/Player/)가 옮겨져 있었음을
+  확인 후 정정. 관련 파일(CheckpointTrigger 등) 위치도 전수 재확인해서 다른 파일은 안 옮겨진
+  것 확인
+
+
+## [수정] 다른 씬 세이브포인트 UI 미작동 + 확정 시 UI 안 닫히는 레이스 컨디션 수정 — 2026-08-10
+### 프롬프트
+왜 다른씬에 존재하는 savepoint에서는 안되는지 설명해줘 / 왜 현재 씬에서는 savepoint에서
+ui가 안뜰까 / 왜 ui선택창에서 엔터키 눌러서 선택했는데 이동만되고 ui는 안꺼지는거야
+### 원인 1 — 다른 씬(예: AdventureScene3)에서 UI 자체가 안 뜸
+CheckpointTravelMenu/PlayerScenePositioner를 UITestScene의 RealPlayer 인스턴스에만 직접
+붙였었음. RealPlayer는 Assets/Prefabs/RealPlayer.prefab 인스턴스인데, 각 씬이 자기만의
+RealPlayer 인스턴스를 갖고 있어서(프리팹은 같지만) 그 두 컴포넌트가 프리팹 애셋 자체에는
+없어 다른 씬 인스턴스엔 상속되지 않았음. AdventureScene3 실측: PersistentSingleton=True인데
+CheckpointTravelMenu=False -> Instance가 계속 null -> CheckpointTrigger.Update()의
+"Instance != null" 체크에서 막혀 Open() 자체가 안 불림.
+### 원인 2 — 확정(Enter)했는데 이동만 되고 UI가 안 닫힘
+TravelTo()가 Close()로 메뉴를 닫고 같은 씬이면 그 자리에서 플레이어를 이동시키는데, 플레이어가
+여전히 세이브포인트 트리거 영역 안에 있는 채로 끝남. 그러면 같은 프레임 안에서
+CheckpointTrigger.Update()도 동일한 Enter wasPressedThisFrame을 읽어 Open()을 다시 호출 —
+방금 닫힌 메뉴가 그 자리에서 재개방되는 반대 방향 레이스 컨디션(이전에 고친 openedFrame
+가드와 정반대 방향).
+### 조작 내역
+- Assets/Prefabs/RealPlayer.prefab: manage_prefabs(modify_contents)로 PlayerScenePositioner,
+  CheckpointTravelMenu 두 컴포넌트를 프리팹 애셋 자체에 추가 -> 모든 씬 인스턴스에 한 번에 전파
+- UITestScene의 RealPlayer 인스턴스: 프리팹 전파로 인해 기존 인스턴스 직접 추가분과 중복(2개씩)
+  발생 확인 -> manage_components(remove, component_index=1)로 각각 1개씩 정리해서 1개로 복구
+- Assets/Scripts/Player/CheckpointTravelMenu.cs: closedFrame(int) 필드 추가. Close()에서
+  Time.frameCount 기록, Open()에서 "방금 닫힌 그 프레임이면" 재개방 거부
+- 파일 위치 변경 확인: 이 세션 사이 CheckpointTravelMenu.cs/PlayerScenePositioner.cs가
+  Assets/Scripts/Player/ 로 옮겨져 있었음(사람이 정리한 것으로 추정) -> 경로 재확인 후 진행
+### 검증
+- refresh_unity(compile=request) -> read_console(types=error): 0건
+- run_tests(EditMode): 229/229 통과 (두 차례)
+- **실측 검증(프리팹 전파)**: AdventureScene3 RealPlayer 인스턴스에서 PlayerScenePositioner/
+  CheckpointTravelMenu가 True로 바뀐 것 확인
+- **실측 검증(중복 정리)**: UITestScene RealPlayer의 컴포넌트 개수가 PersistentSingleton=1,
+  PlayerScenePositioner=1, CheckpointTravelMenu=1로 전부 정상화된 것 확인
+- **실측 검증(레이스 수정)**: play mode 진입 -> Open() -> TravelTo()(Close 포함, 같은 씬
+  대상) 호출 후 isOpen=False, 플레이어 위치 목표와 정확히 일치 확인 -> 같은 실행 흐름 안에서
+  CheckpointTrigger의 동시-프레임 재호출을 흉내낸 Open() 재시도 -> isOpen이 False로 유지됨
+  (재개방 차단 확인)
+- manage_scene(save): AdventureScene2 저장 성공(내용 변경 없어 git diff 없음, 정상)
+### 실패와 수정
+- script_apply_edits가 "Script not found at Assets/Scripts/CheckpointTravelMenu.cs"로 실패 ->
+  AssetDatabase.FindAssets로 재검색해서 실제 경로(Assets/Scripts/Player/)가 옮겨져 있었음을
+  확인 후 정정. 관련 파일(CheckpointTrigger 등) 위치도 전수 재확인해서 다른 파일은 안 옮겨진
+  것 확인

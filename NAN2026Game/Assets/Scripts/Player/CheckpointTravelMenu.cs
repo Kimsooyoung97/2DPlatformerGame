@@ -32,6 +32,10 @@ namespace NAN2026
         // wasPressedThisFrame을 또 읽어 selectedIndex=0(시작 지점)으로 즉시 확정해버리는
         // 버그가 실측으로 확인됐다 — 한 번의 엔터가 열기+확정을 동시에 처리해버림.
         private int openedFrame = -1;
+        // 확정(TravelTo)으로 Close()가 호출된 그 프레임엔 Open()을 막는다. CheckpointTrigger가
+        // 같은 Enter 입력을 같은 프레임에 또 읽어서, 방금 닫힌 메뉴를 그 자리에서 다시 열어버리는
+        // 반대 방향 레이스 컨디션이 실측으로 확인됐다(이동은 되는데 UI가 안 닫히는 증상).
+        private int closedFrame = -1;
 
         // FAIL.md #27: PlayerController2D.InputLocked는 참조 카운트 없는 전역 static이라
         // 여러 시스템이 동시에 쓰면 나중에 false로 푸는 쪽이 이긴다. 최소 안전장치로,
@@ -70,6 +74,7 @@ namespace NAN2026
         public void Open(PlayerHealth health)
         {
             if (isOpen || health == null) return;
+            if (Time.frameCount == closedFrame) return; // 방금 닫힌 그 프레임엔 다시 안 연다
             if (health.Checkpoints.Count == 0) return;
 
             playerHealth = health;
@@ -88,6 +93,7 @@ namespace NAN2026
         {
             isOpen = false;
             playerHealth = null;
+            closedFrame = Time.frameCount;
             Time.timeScale = 1f; // 복구하지 않으면 메뉴 닫은 뒤 게임이 계속 정지 상태로 남는다
             if (weLockedInput)
             {
