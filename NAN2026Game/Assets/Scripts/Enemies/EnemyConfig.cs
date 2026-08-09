@@ -30,6 +30,8 @@ namespace NAN2026
         [Tooltip("이 높이차를 넘어가면(점프) 맞지 않는다. 0이면 세로 제한 없음")]
         public float attackHeight = 1.2f;
 
+        [Tooltip("공격 모션 전용 fps. 0 이면 공용 fps 사용. 낮추면 휘두름만 느려진다")]
+        public float attackFps = 0f;
         [Header("공격 예열 (= 플레이어 반응 시간)")]
         [Tooltip("이 시간 동안 제자리에서 색상 점멸로 경고한 뒤 공격에 들어간다")]
         public float attackWindup = 0.55f;

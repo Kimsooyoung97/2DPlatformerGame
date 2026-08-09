@@ -247,7 +247,7 @@ namespace NAN2026
         /// 공격 진행. 타격 시간창에서 ResolveHit(), 발사형은 오버라이드.
         protected virtual void DoAttack(float dx, float face)
         {
-            Anim(attackFrames, false);
+            Anim(attackFrames, false, SwingFps);
             float frac = stateT / config.attackDur;
             if (!dealtThisSwing && BossRangeLogic.WindowOpen(frac, config.hitWinS, config.hitWinE)
                 && BossRangeLogic.InHitBand(transform.position.x, player.position.x, config.attackRange, face, config.frontDeadZone,
@@ -281,10 +281,15 @@ namespace NAN2026
 
         protected virtual void SetState(int s) { state = s; stateT = 0f; dealtThisSwing = false; }
 
-        protected void Anim(Sprite[] arr, bool loop)
+        protected void Anim(Sprite[] arr, bool loop) { Anim(arr, loop, config.fps); }
+
+        protected void Anim(Sprite[] arr, bool loop, float fps)
         {
             if (arr == null || arr.Length == 0 || sr == null) return;
-            sr.sprite = arr[EnemyStateLogic.AnimIndex(stateT, config.fps, arr.Length, loop)];
+            sr.sprite = arr[EnemyStateLogic.AnimIndex(stateT, fps, arr.Length, loop)];
         }
+
+        /// 공격 모션 재생 fps (config.attackFps 우선, 0 이면 공용 fps)
+        protected float SwingFps { get { return EnemyStateLogic.AttackFps(config.attackFps, config.fps); } }
     }
 }

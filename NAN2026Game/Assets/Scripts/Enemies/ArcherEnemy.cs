@@ -16,7 +16,7 @@ namespace NAN2026
 
         protected override void DoAttack(float dx, float face)
         {
-            Anim(attackFrames, false);
+            Anim(attackFrames, false, SwingFps);
             float frac = stateT / config.attackDur;
             if (EnemyStateLogic.ShouldFire(frac, config.fireFrac, firedThisDraw))
             {

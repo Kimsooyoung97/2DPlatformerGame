@@ -165,5 +165,28 @@ namespace NAN2026.Tests
             Assert.AreEqual(1f, EnemyStateLogic.FaceSign(10f, 17f));
             Assert.AreEqual(1f, EnemyStateLogic.FaceSign(10f, 10f));
         }
+    
+        [Test]
+        public void 공격fps가_0이면_공용fps를_쓴다()
+        {
+            Assert.AreEqual(12f, EnemyStateLogic.AttackFps(0f, 12f));
+            Assert.AreEqual(12f, EnemyStateLogic.AttackFps(-3f, 12f));
+        }
+
+        [Test]
+        public void 공격fps가_양수면_그값을_쓴다()
+        {
+            Assert.AreEqual(8f, EnemyStateLogic.AttackFps(8f, 12f));
+        }
+
+        [Test]
+        public void 프레임수와_fps로_모션_지속시간을_구한다()
+        {
+            // 기사 ATTACK3 6프레임을 8fps 로 재생하면 0.75초. attackDur 는 이 값과 같아야 잘리지 않는다
+            Assert.AreEqual(0.75f, EnemyStateLogic.DurationForFrames(6, 8f), 0.0001f);
+            Assert.AreEqual(0.5f, EnemyStateLogic.DurationForFrames(6, 12f), 0.0001f);
+            Assert.AreEqual(0f, EnemyStateLogic.DurationForFrames(0, 12f));
+            Assert.AreEqual(0f, EnemyStateLogic.DurationForFrames(6, 0f));
+        }
     }
 }

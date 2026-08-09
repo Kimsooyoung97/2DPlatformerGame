@@ -64,6 +64,21 @@ namespace NAN2026.Core
         }
 
         /// 예열 종료 여부.
+        /// 공격 전용 fps. 0 이하면 공용 fps 를 쓴다.
+        /// 걷기·대기 속도를 건드리지 않고 휘두름만 늦추기 위해 분리한다.
+        public static float AttackFps(float attackFps, float baseFps)
+        {
+            return attackFps > 0f ? attackFps : baseFps;
+        }
+
+        /// 프레임 수와 fps 로부터 모션이 끝나는 시간.
+        /// attackDur 가 이 값과 어긋나면 모션이 잘리거나 마지막 프레임에서 늘어진다.
+        public static float DurationForFrames(int frameCount, float fps)
+        {
+            if (frameCount <= 0 || fps <= 0f) return 0f;
+            return frameCount / fps;
+        }
+
         public static bool WindupFinished(float elapsed, float windupDur)
         {
             return windupDur <= 0f || elapsed >= windupDur;

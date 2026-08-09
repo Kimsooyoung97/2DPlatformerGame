@@ -125,3 +125,5 @@
 - #26 디버그/테스트 키를 붙이기 전에 기존 바인딩을 전수 조회하지 않음: digit4 는 이미 PlayerController2D 가 ComboB3 에 쓰고 있었는데 hurt 미리보기를 같은 키에 얹어, 한 번 누르면 두 동작이 동시 발동했다. hurt FX(0.30s)가 ComboB3(0.40s)보다 짧아 FX 종료 후 Animator 복귀 시 칼 모션 0.1초가 노출 → '시트에 이물 프레임이 있다'로 오진하고 멀쩡한 4번째 프레임을 삭제까지 했다. 방지: 키 추가 전 프로젝트 전체에서 해당 Key 심볼을 grep 하고, 증상이 '연출 끝나고 뭔가 더 나온다'면 **키 충돌과 애니메이션 소유권 복귀 타이밍**을 1순위로 의심한다
 
 - #27 PlayerController2D.InputLocked 는 참조 카운트 없는 전역 static: 여러 시스템(보스·디렉터·인트로·피격연출)이 공유하므로 나중에 false 로 푸는 쪽이 이긴다. 연출 락 중 다른 시스템이 짧은 락을 걸었다 풀면 연출이 조기 해제된다. 방지: 짧은 연출에는 InputLocked 를 쓰지 않는다. 꼭 필요하면 카운터 방식으로 바꾼 뒤 쓴다
+
+- #32 필드 삽입 앵커를 `public` 선언줄로 잡으면 그 앞 속성 블록 사이를 갈라 CS0579(Duplicate 'Tooltip') 유발 — EnemyConfig 에 attackFps 를 넣다 attackWindup 의 [Tooltip] 바로 아래에 새 [Tooltip] 이 끼어 컴파일 실패. 방지: C# 필드 추가 시 앵커는 선언줄이 아니라 **그 위에 붙은 [Header]/[Tooltip]/XML 주석 블록의 시작줄**로 잡는다
