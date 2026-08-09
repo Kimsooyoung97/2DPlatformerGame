@@ -26,6 +26,9 @@ namespace NAN2026
         private System.Reflection.PropertyInfo followProp;
         private Text topLabel;
         private TextMesh pips;
+        private Behaviour bossAi;
+        private SpriteRenderer bossSr;
+        private Collider2D bossCol;
 
         private void Start()
         {
@@ -33,7 +36,12 @@ namespace NAN2026
             var p = PlayerLocator.Find();
             if (p != null) player = p.transform;
             var b = GameObject.Find("MinoBoss");
-            if (b != null) boss = b.transform;
+            if (b != null)
+            {
+                boss = b.transform;
+                CacheBossParts(b);
+                SetBossRevealed(false);   // 패링 목표를 채우기 전에는 보스가 없는 것처럼 둔다
+            }
             foreach (var mb in FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
                 if (mb.GetType().Name == "CinemachineCamera") { cmCam = mb; followProp = mb.GetType().GetProperty("Follow"); break; }
             BuildTopLabel();
@@ -43,6 +51,7 @@ namespace NAN2026
                 SpikeParryEvents.Count = config.parryGoal;
                 if (player != null && boss != null)
                     player.position = boss.position + new Vector3(-config.debugSpawnOffsetX, 0.5f, 0f);
+                SetBossRevealed(true);
             }
         }
 
@@ -115,6 +124,24 @@ namespace NAN2026
             if (rb != null && !on) rb.linearVelocity = Vector2.zero;
         }
 
+        private void CacheBossParts(GameObject b)
+        {
+            foreach (var mb in b.GetComponents<MonoBehaviour>())
+                if (mb.GetType().Name == "MinoBoss") { bossAi = mb; break; }
+            bossSr = b.GetComponent<SpriteRenderer>();
+            bossCol = b.GetComponent<Collider2D>();
+        }
+
+        /// 보스를 숨기거나 드러낸다.
+        /// GameObject 자체는 계속 켜둔다 — GameObject.Find 와 보스에 붙인 핍(자식)이 살아 있어야 하기 때문.
+        /// 컴포넌트만 끄므로 AI·렌더·충돌이 전부 멈춘다.
+        private void SetBossRevealed(bool on)
+        {
+            if (bossAi != null) bossAi.enabled = on;
+            if (bossSr != null) bossSr.enabled = on;
+            if (bossCol != null) bossCol.enabled = on;
+        }
+
         private IEnumerator Brighten()
         {
             Time.timeScale = 1f;          // 잔여 히트스톱 청소
@@ -137,6 +164,9 @@ namespace NAN2026
                 }
                 global.intensity = config.brightenTarget;
             }
+            // 어둠이 걷힌 뒤에 보스를 드러낸다. 카메라 팬이 빈 자리를 비추지 않도록 팬보다 먼저.
+            SetBossRevealed(true);
+
             // 보스전 개막: 카메라 보스 팬 → 플레이어 복귀 (씬3 벽붕괴 연출과 동일 문법)
             if (cmCam != null && followProp != null && boss != null)
             {
