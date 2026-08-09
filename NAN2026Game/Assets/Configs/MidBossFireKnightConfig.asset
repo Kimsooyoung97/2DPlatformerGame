@@ -16,24 +16,28 @@ MonoBehaviour:
   aggroRange: 8
   attackRange: 3
   walkSpeed: 2.2
+  frontDeadZone: 1
   normalWindup: 0.25
   normalWinStart: 4
   normalWinEnd: 6
   normalDamage: 1
   normalCooldown: 1.4
   normalHitReach: 2.2
+  normalFrontOnly: 1
   fireWindup: 0.3
   fireWinStart: 5
   fireWinEnd: 8
   fireDamage: 1
   fireCooldown: 2
   fireHitReach: 4
+  fireFrontOnly: 1
   bombWindup: 0.35
   bombWinStart: 4
   bombWinEnd: 6
   bombDamage: 1
   bombCooldown: 2.2
-  bombHitReach: 2
+  bombHitReach: 1
+  bombFrontOnly: 1
   wheelWindup: 0.3
   wheelWin1Start: 3
   wheelWin1End: 4
@@ -42,6 +46,7 @@ MonoBehaviour:
   wheelDamagePerTick: 1
   wheelCooldown: 2.5
   wheelHitReach: 2.8
+  wheelFrontOnly: 0
   fpsIdle: 10
   fpsWalk: 12
   fpsNormal: 12
@@ -56,6 +61,7 @@ MonoBehaviour:
   groggyNeed: 5
   groggyTime: 3
   groggyFxOffsetY: 3.4
+  groggyPipsOffsetY: -0.4
   groggyExitCooldown: 1.6
   burstAtkSpeedMul: 2
   burstDashSpeed: 20
