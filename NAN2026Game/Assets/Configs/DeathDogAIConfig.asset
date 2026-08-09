@@ -14,10 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAIConfig
   aggroRange: 4
   attackRange: 1.2
+  attackHeightRange: 1.2
   chaseStopDistance: 6
   patrolSpeed: 1
   chaseSpeed: 2
-  patrolRadius: 1.5
+  patrolRadius: 1
   jumpYThreshold: 1.2
   jumpConfirmDuration: 0.6
   attackCooldown: 1

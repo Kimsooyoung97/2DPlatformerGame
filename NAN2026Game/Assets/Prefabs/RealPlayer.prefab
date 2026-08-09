@@ -294,6 +294,7 @@ MonoBehaviour:
   levelConfig: {fileID: 11400000, guid: 6ee8e4a35d980c94b9c7d4e55e07cbfb, type: 2}
   augmentConfig: {fileID: 11400000, guid: fdac61d070ce07e47a6e0c361e7904bd, type: 2}
   canvas: {fileID: 0}
+  playerMana: {fileID: 0}
 --- !u!114 &8839252808961147778
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -705,7 +706,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &7718287957970340189
 Transform:
   m_ObjectHideFlags: 0

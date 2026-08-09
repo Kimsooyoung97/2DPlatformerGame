@@ -13,7 +13,7 @@ public class PlayerHealth : MonoBehaviour
     [Header("Death")]
     [SerializeField] private float respawnDelay = 0.2f;
     [SerializeField] private float spawnGrace = 0.5f;
-    [SerializeField] private float fallKillY = -18f;
+    [SerializeField] private float fallKillY = -5f;
 
     [Header("Hazards")]
     [SerializeField] private string hazardNameContains = "Spikes";
@@ -100,7 +100,7 @@ public class PlayerHealth : MonoBehaviour
 
         // Falling out of the world still resets you, even while invincible.
         if (!dying && transform.position.y < fallKillY)
-            Respawn();
+            Kill();
     }
 
     private void OnTriggerEnter2D(Collider2D other)
