@@ -9,7 +9,8 @@ namespace NAN2026.Core
         public const int Attack = 2;
         public const int Hurt = 3;
         public const int Death = 4;
-        public const int Windup = 5;   // 공격 예열(경고). 이 시간이 곧 플레이어의 반응 시간이다
+        public const int Windup = 5;
+        public const int Groggy = 6;      // 패링 성공으로 무방비. 플레이어의 보상 구간   // 공격 예열(경고). 이 시간이 곧 플레이어의 반응 시간이다
 
         /// 평상시 상태 결정. distX 는 수평 거리(절대값).
         /// 사거리 안이고 쿨다운이 끝났으면 공격, 인지 범위 안이면 접근, 아니면 대기.
@@ -66,6 +67,25 @@ namespace NAN2026.Core
         /// 예열 종료 여부.
         /// 공격 전용 fps. 0 이하면 공용 fps 를 쓴다.
         /// 걷기·대기 속도를 건드리지 않고 휘두름만 늦추기 위해 분리한다.
+        /// 패링 성공으로 들어간 그로기가 끝났는가.
+        public static bool GroggyFinished(float elapsed, float dur)
+        {
+            return elapsed >= dur;
+        }
+
+        /// 반사된 화살이 살아 있어야 하는 시간.
+        /// 남은 수명이 짧으면 쏜 사람에게 닿기 전에 사라지므로 최소 수명을 보장한다.
+        public static float ReflectLife(float remainingLife, float minLife)
+        {
+            return remainingLife < minLife ? minLife : remainingLife;
+        }
+
+        /// 반사된 화살의 속도. mul 이 0 이하면 원래 속도를 그대로 쓴다.
+        public static float ReflectSpeed(float speed, float mul)
+        {
+            return mul > 0f ? speed * mul : speed;
+        }
+
         /// 잡몹 한 번의 휘두름에서 이번 프레임에 무엇을 할지 결정한다.
         /// 0 = 아무것도 안 함, 1 = 패링 접수(물어본다), 2 = 데미지 확정.
         /// 판정을 창의 '첫 프레임'이 아니라 '끝'에서 내리는 것이 핵심 —

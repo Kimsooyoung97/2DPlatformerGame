@@ -18,6 +18,7 @@ namespace NAN2026
         protected SpriteRenderer sr;
         protected Transform player;
         private Coroutine flashCo;
+        private bool flashing;      // 피격 플래시 중에는 그로기 금빛 틴트를 양보한다
         private float spawnY;
         private Component parryController;                 // PlayerController2D
         private System.Reflection.MethodInfo tryParry;      // TryParry(GameObject)
@@ -82,6 +83,21 @@ namespace NAN2026
                 if (stateT >= config.hurtLock) SetState(EnemyStateLogic.Idle);
                 return;
             }
+            // 패링 성공 보상: 무방비로 굳는다. 이동·공격 없음, 피격으로 끊기지 않는다.
+            if (state == EnemyStateLogic.Groggy)
+            {
+                Anim(hurtFrames, false);   // 마지막 프레임에서 멈춘 채 비틀거림
+                if (sr != null && !flashing && config.groggyFlashSpeed > 0f)
+                    sr.color = Color.Lerp(Color.white, config.groggyFlashColor,
+                                          EnemyStateLogic.FlashPulse01(stateT, config.groggyFlashSpeed));
+                if (EnemyStateLogic.GroggyFinished(stateT, config.groggyDuration))
+                {
+                    if (sr != null) sr.color = Color.white;
+                    SetState(EnemyStateLogic.Idle);
+                }
+                return;
+            }
+
             // 공격 예열: 제자리에서 색상 점멸로 경고. 이 시간이 플레이어의 반응 시간이다.
             if (state == EnemyStateLogic.Windup)
             {
@@ -270,24 +286,29 @@ namespace NAN2026
         {
             Anim(attackFrames, false, SwingFps);
             float frac = stateT / config.attackDur;
+            int act = EnemyStateLogic.SwingResolve(frac, config.hitWinS, config.hitWinE, dealtThisSwing);
             bool inBand = BossRangeLogic.InHitBand(transform.position.x, player.position.x, config.attackRange, face, config.frontDeadZone,
                                                    transform.position.y, player.position.y, config.attackHeight);
             // 판정을 창의 첫 프레임이 아니라 창 끝에서 내린다.
             // 창이 열려 있는 동안은 매 프레임 패링만 접수하고(성공하면 즉시 종료),
             // 창이 닫히는 프레임에 패링이 없었으면 그때 데미지를 준다.
-            int act = EnemyStateLogic.SwingResolve(frac, config.hitWinS, config.hitWinE, dealtThisSwing);
-            if (act == 1)
+            if (act != 0)
             {
-                if (inBand && TryParried()) dealtThisSwing = true;   // 패링 성공 — 즉시 확정
-            }
-            else if (act == 2)
-            {
-                dealtThisSwing = true;
-                // 창 마지막 프레임의 패링도 인정한다
-                if (inBand && !TryParried())
-                    player.SendMessage("TakeDamage", (float)config.damage, SendMessageOptions.DontRequireReceiver);
+                if (inBand && TryParried()) { EnterGroggy(); return; }   // 패링 성공 — 보상 구간
+                if (act == 2)
+                {
+                    dealtThisSwing = true;
+                    if (inBand) player.SendMessage("TakeDamage", (float)config.damage, SendMessageOptions.DontRequireReceiver);
+                }
             }
             if (frac >= 1f) { nextAtk = NextAttackAt(); SetState(EnemyStateLogic.Idle); }
+        }
+
+        /// 패링당했을 때의 보상 구간. 그로기가 끝나고도 바로 때리지 못하게 쿨다운을 얹는다.
+        protected void EnterGroggy()
+        {
+            nextAtk = NextAttackAt() + config.groggyDuration;
+            SetState(EnemyStateLogic.Groggy);
         }
 
         public void TakeDamage(int amount)
@@ -298,15 +319,18 @@ namespace NAN2026
             if (flashCo != null) StopCoroutine(flashCo);
             flashCo = StartCoroutine(FlashRed());
             if (EnemyStateLogic.IsDead(hits, config.hitsToDie)) { SetState(EnemyStateLogic.Death); return; }
+            if (state == EnemyStateLogic.Groggy) return;   // 보상 구간을 때려서 끊어먹지 않게
             SetState(EnemyStateLogic.Hurt);
         }
 
         private System.Collections.IEnumerator FlashRed()
         {
             if (sr == null) yield break;
+            flashing = true;
             sr.color = new Color(1f, 0.4f, 0.4f);
             yield return new WaitForSeconds(config.hitFlash);
             if (sr != null) sr.color = Color.white;
+            flashing = false;
             flashCo = null;
         }
 

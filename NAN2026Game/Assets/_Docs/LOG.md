@@ -7222,3 +7222,41 @@ Secen3다음에는 Secen4 진행하도록 했는데
 - push 완료 상태 확인: main...origin/main 격차 0 (18커밋 반영, 4e226656)
 ### 실패와 수정
 - 없음. 다만 STATE.md '인계 요약'의 5번(SlashProjectile → NHNDemo.MonsterHealth 클론 실패 위험)이 **낡은 정보**임을 확인. MonsterHealth 는 추적 중인 Assets/Player/Scripts/MonsterHealth.cs 에 있고, gitignore 로 빠지는 .cs 는 에디터 도구 2개뿐이며 이를 참조하는 코드는 없다. STATE 갱신 필요
+
+
+## [구현] 패링 보상 — 기사 그로기 / 아처 화살 반사 — 2026-08-09 10:19
+### 프롬프트
+[구현] 패링 성공시 kight는 그로기가 뜨게 하게 archer은 화살이 되돌아가서 피격이 되게 한다.
+### 조작 내역
+**순수 로직 (NAN2026.Core/EnemyStateLogic) — MonoBehaviour 밖에 먼저 작성**
+- `Groggy = 6` 상태 상수 / `GroggyFinished(elapsed, dur)` / `ReflectLife(remainingLife, minLife)` / `ReflectSpeed(speed, mul)`
+- **BossRangeLogic 은 DemonBoss 와 공유하므로 이번에도 손대지 않았다**
+**EnemyConfig 신규 필드 6종**
+- groggyDuration 1.6 / groggyFlashSpeed 6 / groggyFlashColor(금색 1,0.9,0.3)
+- reflectOnParry true / reflectSpeedMul 1.4 / reflectMinLife 1.5
+- FAIL#32 적용: 삽입 앵커를 `public` 선언줄이 아니라 `[Header("패링")]` 블록 시작줄로 잡아 속성 분리 사고 회피
+**기사 그로기 (EnemyBase)**
+- Hurt 블록 바로 뒤에 Groggy 상태 블록 신설. hurtFrames 를 loop=false 로 재생해 마지막 프레임에서 굳고, 금빛 펄스
+- 배치 위치를 InputLocked 게이트보다 **앞**에 두어 연출이 시작돼도 그로기 보상이 취소되지 않게 함
+- DoAttack: `if (act != 0) { if (inBand && TryParried()) { EnterGroggy(); return; } ... }` — 창 어느 시점의 패링이든 그로기
+- `EnterGroggy()`: nextAtk = NextAttackAt() + groggyDuration → 그로기 직후 즉시 반격당하지 않음
+- **TakeDamage 중 `state == Groggy` 면 Hurt 로 전이하지 않는다** — 때리면 그로기가 끊기던 문제를 미리 차단
+- `flashing` 플래그 신설: 피격 빨간 플래시가 도는 동안은 금빛 틴트를 양보(피격 피드백이 묻히지 않게)
+**아처 화살 반사 (ArcherArrow)**
+- 패링 성공 시 파괴하지 않고 `Reflect()`: dir 반전, 속도 x1.4, 수명은 최소 1.5초 보장, 스프라이트 flipX
+- 시전자 무시 조건을 `!reflected` 로 한정 → 되돌아온 화살은 쏜 아처에게 꽂힌다
+- 반사 후에는 EnemyBase(기사·아처 무관)에게 TakeDamage, 플레이어는 다시 때리지 않음, 타일맵 충돌 시 소멸
+- `OnTriggerStay2D` 추가: 지척 패링 시 반사 시점에 이미 시전자와 겹쳐 있어 Enter 가 다시 오지 않는 문제 대비
+- Launch 시그니처에 반사 3파라미터를 **기본값으로** 추가 → 기존 호출부 무영향
+### 검증
+- 컴파일 성공, read_console error 0건
+- EditMode **238/238 통과** (신규 4: 그로기 상수 고유성 / 그로기 종료판정 / 반사 최소수명 / 반사속도 배율 0 처리)
+- 리플렉션 실행: Groggy=6(Windup=5와 충돌 없음) / GroggyFinished(1.59,1.6)=False·(1.6,1.6)=True / ReflectLife(0.2,1.5)=1.5·(3.0,1.5)=3 / ReflectSpeed(10,1.4)=14·(10,0)=10
+- ArcherArrow.Launch 인자 10개 확인, OnTriggerEnter2D·OnTriggerStay2D·Reflect 전부 존재. EnemyBase.EnterGroggy 존재
+- **신규 Config 필드 직렬화 실측**: 기존 자산 2개 모두 초기값 그대로 반영(groggyDuration 1.6 / reflectOnParry True 등). 0으로 깔리는 Unity 함정 없음
+- **그로기 길이 타당성**: Z 3연타 0.40+0.40+0.55 = 1.35초 < 그로기 1.60초 → 콤보가 잘리지 않고 다 들어감(여유 0.25초). hitsToDie 3 이므로 **패링 1회 = 기사 1마리 처치 가능**
+- **반사 도달 검증**: 10x1.4 = 14u/s x 최소수명 1.5초 = 최대 21u 비행. 아처 사격 거리 최대 7u 대비 3배 여유
+- **물리 구성 실측**: Knight/Archer 프리팹 모두 BoxCollider2D(trigger) + Kinematic Rigidbody2D(useFullKinematicContacts=True). 화살도 동일 → FAIL#6(양쪽 Kinematic 트리거) 조건 충족
+- **사용자 눈 판정 필요**: (1) 기사 패링 시 금빛으로 굳는 게 보이는지 (2) 그 동안 3연타가 다 들어가는지 (3) 패링한 화살이 되돌아가 아처에게 꽂히는지 (4) 반사 화살이 기사에게도 맞는지 (5) 그로기 1.6초가 너무 길지 않은지
+### 실패와 수정
+- execute_code 안에서 지역변수 `t2` 를 중복 선언해 컴파일 실패 1회 → 파일별로 호출을 쪼개 해결(도구 스크립트 문제, 프로젝트 코드와 무관)

@@ -218,5 +218,37 @@ namespace NAN2026.Tests
             Assert.AreEqual(0, EnemyStateLogic.SwingResolve(0.60f, 0.4f, 0.8f, true));
             Assert.AreEqual(0, EnemyStateLogic.SwingResolve(0.99f, 0.4f, 0.8f, true));
         }
+    
+        [Test]
+        public void 그로기_상수는_다른_상태와_겹치지_않는다()
+        {
+            var all = new[] { EnemyStateLogic.Idle, EnemyStateLogic.Walk, EnemyStateLogic.Attack,
+                              EnemyStateLogic.Hurt, EnemyStateLogic.Death, EnemyStateLogic.Windup, EnemyStateLogic.Groggy };
+            CollectionAssert.AllItemsAreUnique(all);
+            Assert.AreEqual(6, EnemyStateLogic.Groggy);
+        }
+
+        [Test]
+        public void 그로기_종료판정()
+        {
+            Assert.IsFalse(EnemyStateLogic.GroggyFinished(1.59f, 1.6f));
+            Assert.IsTrue(EnemyStateLogic.GroggyFinished(1.6f, 1.6f));
+        }
+
+        [Test]
+        public void 반사화살은_최소수명을_보장받는다()
+        {
+            // 수명이 0.2초 남은 화살을 패링하면 되돌아가는 도중 사라진다 → 최소 1.5초 보장
+            Assert.AreEqual(1.5f, EnemyStateLogic.ReflectLife(0.2f, 1.5f), 0.0001f);
+            Assert.AreEqual(3.0f, EnemyStateLogic.ReflectLife(3.0f, 1.5f), 0.0001f);
+        }
+
+        [Test]
+        public void 반사속도는_배율이_0이하면_원속도를_쓴다()
+        {
+            Assert.AreEqual(14f, EnemyStateLogic.ReflectSpeed(10f, 1.4f), 0.0001f);
+            Assert.AreEqual(10f, EnemyStateLogic.ReflectSpeed(10f, 0f), 0.0001f);
+            Assert.AreEqual(10f, EnemyStateLogic.ReflectSpeed(10f, -2f), 0.0001f);
+        }
     }
 }

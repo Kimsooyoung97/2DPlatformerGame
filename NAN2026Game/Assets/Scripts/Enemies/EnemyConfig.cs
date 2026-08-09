@@ -38,6 +38,17 @@ namespace NAN2026
         public float windupFlashSpeed = 12f;
         public Color windupFlashColor = new Color(1f, 0.55f, 0.2f);
 
+        [Header("패링 보상")]
+        [Tooltip("패링 성공 시 무방비로 굳는 시간. 플레이어 3연타(0.40+0.40+0.55=1.35초)가 다 들어가야 보상이 된다")]
+        public float groggyDuration = 1.6f;
+        public float groggyFlashSpeed = 6f;
+        public Color groggyFlashColor = new Color(1f, 0.9f, 0.3f);
+        [Tooltip("패링한 화살을 되돌려 쏜 적에게 맞춘다")]
+        public bool reflectOnParry = true;
+        public float reflectSpeedMul = 1.4f;
+        [Tooltip("반사 후 최소 수명. 짧으면 되돌아가는 도중 사라진다")]
+        public float reflectMinLife = 1.5f;
+
         [Header("패링")]
         [Tooltip("패링 성공 시 격돌 연출. 보스·함정과 같은 자산을 쓴다")]
         public SpikeBallConfig clashConfig;
