@@ -18,6 +18,5 @@ namespace NAN2026
         public float platformMissTolerance = 1.5f; // 전방 착탄이 발보다 이만큼 아래면 발판 이탈 판정
     public float groundSnapDepth;
         public int startFrame;         // 모션 시작 컷 (0-기준, 예비 동작 생략용)  // 이펙트 지면 탐색 깊이 (없으면 생략)
-            public int mpCost = 2; // 번개 스킬 MP 소모
-}
+    }
 }

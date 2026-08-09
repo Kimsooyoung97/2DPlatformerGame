@@ -27,10 +27,8 @@ namespace NAN2026
         private void Update()
         {
             var kb = PlayerController2D.InputLocked ? null : Keyboard.current;
-            if (kb == null || !kb.digit5Key.wasPressedThisFrame) return;
+            if (kb == null || !kb.digit1Key.wasPressedThisFrame) return;
             if (casting || Time.time - lastCast < config.cooldown) return;
-            var mana = GetComponent<NAN2026.PlayerMana>();
-            if (mana != null && !mana.TryUseMp(config.mpCost)) return; // MP 부족 시 불발
             StartCoroutine(Cast());
         }
 
