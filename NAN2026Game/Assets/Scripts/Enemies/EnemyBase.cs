@@ -20,7 +20,8 @@ namespace NAN2026
         private Coroutine flashCo;
         private float spawnY;
         private Component parryController;                 // PlayerController2D
-        private System.Reflection.MethodInfo tryParry;      // TryParry(GameObject)              // 배치 높이를 접지 기준으로 (config.groundY 고정 시 다층 배치 불가)
+        private System.Reflection.MethodInfo tryParry;      // TryParry(GameObject)
+        private System.Reflection.MethodInfo parryActive;   // IsParryWindowActive() — 방향 검사 없는 판정              // 배치 높이를 접지 기준으로 (config.groundY 고정 시 다층 배치 불가)
         private static readonly System.Collections.Generic.List<EnemyBase> All = new System.Collections.Generic.List<EnemyBase>();
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -40,7 +41,15 @@ namespace NAN2026
                 {
                     var m = mb.GetType().GetMethod("TryParry",
                         System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                    if (m != null) { parryController = mb; tryParry = m; break; }
+                    if (m != null)
+                    {
+                        parryController = mb; tryParry = m;
+                        // 잡몹은 좌우 양쪽에서 붙는다. TryParry 의 정면 판정을 우회하려고
+                        // 방향을 보지 않는 IsParryWindowActive 를 함께 잡아둔다(팀 파일 무수정).
+                        parryActive = mb.GetType().GetMethod("IsParryWindowActive",
+                            System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                        break;
+                    }
                 }
             }
             spawnY = transform.position.y;
@@ -211,9 +220,21 @@ namespace NAN2026
         /// 보스·함정과 같은 계약(PlayerController2D.TryParry)을 쓴다.
         protected bool TryParried()
         {
-            if (parryController == null || tryParry == null) return false;
-            object r = tryParry.Invoke(parryController, new object[] { gameObject });
-            bool ok = r is bool && (bool)r;
+            if (parryController == null) return false;
+            bool ok;
+            if (parryActive != null)
+            {
+                // 전방위 패링: 등 뒤에서 때리는 잡몹도 패링된다. 다수에 둘러싸이는 구간에서
+                // '눌렀는데 조용히 실패' 를 없애기 위한 것.
+                object r = parryActive.Invoke(parryController, null);
+                ok = r is bool && (bool)r;
+            }
+            else if (tryParry != null)
+            {
+                object r = tryParry.Invoke(parryController, new object[] { gameObject });
+                ok = r is bool && (bool)r;
+            }
+            else return false;
             if (!ok) return false;
             if (config.clashConfig != null && player != null)
                 ParryClashFx.Play((transform.position + player.position) * 0.5f + Vector3.up, config.clashConfig);
@@ -249,12 +270,22 @@ namespace NAN2026
         {
             Anim(attackFrames, false, SwingFps);
             float frac = stateT / config.attackDur;
-            if (!dealtThisSwing && BossRangeLogic.WindowOpen(frac, config.hitWinS, config.hitWinE)
-                && BossRangeLogic.InHitBand(transform.position.x, player.position.x, config.attackRange, face, config.frontDeadZone,
-                                            transform.position.y, player.position.y, config.attackHeight))
+            bool inBand = BossRangeLogic.InHitBand(transform.position.x, player.position.x, config.attackRange, face, config.frontDeadZone,
+                                                   transform.position.y, player.position.y, config.attackHeight);
+            // 판정을 창의 첫 프레임이 아니라 창 끝에서 내린다.
+            // 창이 열려 있는 동안은 매 프레임 패링만 접수하고(성공하면 즉시 종료),
+            // 창이 닫히는 프레임에 패링이 없었으면 그때 데미지를 준다.
+            int act = EnemyStateLogic.SwingResolve(frac, config.hitWinS, config.hitWinE, dealtThisSwing);
+            if (act == 1)
+            {
+                if (inBand && TryParried()) dealtThisSwing = true;   // 패링 성공 — 즉시 확정
+            }
+            else if (act == 2)
             {
                 dealtThisSwing = true;
-                if (!TryParried()) player.SendMessage("TakeDamage", (float)config.damage, SendMessageOptions.DontRequireReceiver);
+                // 창 마지막 프레임의 패링도 인정한다
+                if (inBand && !TryParried())
+                    player.SendMessage("TakeDamage", (float)config.damage, SendMessageOptions.DontRequireReceiver);
             }
             if (frac >= 1f) { nextAtk = NextAttackAt(); SetState(EnemyStateLogic.Idle); }
         }

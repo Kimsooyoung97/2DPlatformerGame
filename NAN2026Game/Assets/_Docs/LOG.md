@@ -7140,3 +7140,31 @@ Secen3다음에는 Secen4 진행하도록 했는데
 해당 없음 (파일 수정 없음)
 ### 커밋
 해당 없음(무수정)
+
+
+## [수정] 패링 판정을 창 끝으로 + 전방위 패링 — 2026-08-09 09:56
+### 프롬프트
+[수정]`hitWinE 0.80` + 원인 B(전방위 패링)로 진행해라
+### 조작 내역
+**A. 판정 시점을 타격창의 '첫 프레임' → '끝' 으로**
+- NAN2026.Core/EnemyStateLogic: `SwingResolve(frac, winStart, winEnd, alreadyResolved)` 신설 — 0=대기 / 1=패링 접수 / 2=데미지 확정
+- **BossRangeLogic 은 DemonBoss 와 공유하므로 손대지 않았다.** 새 함수는 우리 전용인 EnemyStateLogic 에만 추가
+- EnemyBase.DoAttack 재작성: 창이 열린 동안 매 프레임 패링만 접수하고(성공 시 즉시 확정), 창이 닫히는 프레임에 패링이 없었으면 그때 데미지
+- 창 마지막 프레임(act==2)에서도 패링을 한 번 더 인정
+- KnightEnemyConfig.hitWinE 0.60 → **0.80** (창 실시간 0.150 → 0.300초)
+- Archer 는 DoAttack 을 오버라이드해 화살만 발사하므로 hitWin 미사용 → 무변경
+**B. 전방위 패링 (등 뒤 공격도 패링 가능)**
+- 원인: TryParry → IsAttackerInFront(…, sr.flipX). flipX 는 이동 입력 시에만 갱신되어 뒤쪽 잡몹 공격은 타이밍이 맞아도 무조건 실패
+- EnemyBase 가 `PlayerController2D.IsParryWindowActive()`(이미 존재하는 public 메서드)를 리플렉션으로 잡아 우선 호출. 없으면 기존 TryParry 로 폴백
+- **팀원 파일 PlayerController2D.cs 무수정.** 호출부만 우리 쪽에서 교체
+### 검증
+- 컴파일 성공, read_console error 0건
+- EditMode **234/234 통과** (신규 4: 창 전 대기 / 창 안 패링 접수 / 창 끝 데미지 확정 / 이미 확정 시 무시)
+- 리플렉션 해석 확인: IsParryWindowActive 찾음(반환 Boolean, 인자 0개) / TryParry 폴백도 찾음(Boolean, 인자 1개)
+- SwingResolve 실행: frac 0.00→0, 0.39→0, 0.40→1, 0.60→1, 0.79→1, 0.80→2, 1.00→2, 확정후→0
+- 데미지 확정 시점 **0.600초 = 프레임 f4, 검 돌출 1.244u** — 검이 뻗어 있는 구간(f2~f4, 0.250~0.625초) 안. 시각 어긋남 없음
+- **누를 수 있는 구간 0.350 → 0.650초 (+86%)** (parryWindow 0.35 + 창 0.300)
+- **격리 확인**: git diff 결과 BossRangeLogic.cs / DemonBoss.cs / MinoBoss.cs / PlayerController2D.cs / MovementConfig.asset **전부 무변경**. 보스 패턴·팀원 코드 영향 0
+- **사용자 눈 판정 필요**: (1) 늦게 눌러도 패링이 되는지 (2) 등 뒤 기사 패링이 되는지 (3) 검이 스쳐 지나가는 헛나감이 거슬리는지 (4) 데미지가 0.15초 늦게 들어오는 게 느껴지는지
+### 실패와 수정
+- 없음. 단, 커밋 직전 AdventureScene3.unity 에 **내가 하지 않은 변경**을 발견(KnightEnemy_22 x=22→25.79 이동, KnightEnemy_47 삭제, ArcherEnemy_58 복제본 x=42.32 추가). 사용자 에디터 수동 편집으로 판단해 **이번 커밋에서 씬 파일을 제외**하고 그대로 두었다

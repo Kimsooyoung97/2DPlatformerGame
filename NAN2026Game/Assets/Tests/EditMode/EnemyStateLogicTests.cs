@@ -188,5 +188,35 @@ namespace NAN2026.Tests
             Assert.AreEqual(0f, EnemyStateLogic.DurationForFrames(0, 12f));
             Assert.AreEqual(0f, EnemyStateLogic.DurationForFrames(6, 0f));
         }
+    
+        // 기사 타격창 0.40~0.80 기준. 0=대기, 1=패링 접수, 2=데미지 확정
+        [Test]
+        public void 창_전에는_아무것도_하지_않는다()
+        {
+            Assert.AreEqual(0, EnemyStateLogic.SwingResolve(0.00f, 0.4f, 0.8f, false));
+            Assert.AreEqual(0, EnemyStateLogic.SwingResolve(0.39f, 0.4f, 0.8f, false));
+        }
+
+        [Test]
+        public void 창_안에서는_매_프레임_패링을_접수한다()
+        {
+            Assert.AreEqual(1, EnemyStateLogic.SwingResolve(0.40f, 0.4f, 0.8f, false));
+            Assert.AreEqual(1, EnemyStateLogic.SwingResolve(0.60f, 0.4f, 0.8f, false));
+            Assert.AreEqual(1, EnemyStateLogic.SwingResolve(0.79f, 0.4f, 0.8f, false));
+        }
+
+        [Test]
+        public void 데미지는_창의_끝에서_확정된다()
+        {
+            Assert.AreEqual(2, EnemyStateLogic.SwingResolve(0.80f, 0.4f, 0.8f, false));
+            Assert.AreEqual(2, EnemyStateLogic.SwingResolve(0.95f, 0.4f, 0.8f, false));
+        }
+
+        [Test]
+        public void 이미_확정된_휘두름은_다시_판정하지_않는다()
+        {
+            Assert.AreEqual(0, EnemyStateLogic.SwingResolve(0.60f, 0.4f, 0.8f, true));
+            Assert.AreEqual(0, EnemyStateLogic.SwingResolve(0.99f, 0.4f, 0.8f, true));
+        }
     }
 }

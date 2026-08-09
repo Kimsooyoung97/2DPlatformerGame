@@ -66,6 +66,18 @@ namespace NAN2026.Core
         /// 예열 종료 여부.
         /// 공격 전용 fps. 0 이하면 공용 fps 를 쓴다.
         /// 걷기·대기 속도를 건드리지 않고 휘두름만 늦추기 위해 분리한다.
+        /// 잡몹 한 번의 휘두름에서 이번 프레임에 무엇을 할지 결정한다.
+        /// 0 = 아무것도 안 함, 1 = 패링 접수(물어본다), 2 = 데미지 확정.
+        /// 판정을 창의 '첫 프레임'이 아니라 '끝'에서 내리는 것이 핵심 —
+        /// 창이 열려 있는 동안 매 프레임 패링을 접수하므로 늦게 눌러도 인정된다.
+        public static int SwingResolve(float frac, float winStart, float winEnd, bool alreadyResolved)
+        {
+            if (alreadyResolved) return 0;
+            if (frac >= winEnd) return 2;
+            if (frac >= winStart) return 1;
+            return 0;
+        }
+
         public static float AttackFps(float attackFps, float baseFps)
         {
             return attackFps > 0f ? attackFps : baseFps;
