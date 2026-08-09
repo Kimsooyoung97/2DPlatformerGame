@@ -7861,3 +7861,17 @@ Scene1 스파이크 구체 유도되게, 5·6·7 스킬을 1·2·3으로 이동,
 - 실제 번개 타격·정지 재발 여부는 사용자 재생
 ### 실패와 수정
 - SendMessage 사용 전 대상 시그니처 미확인 자인 — FAIL 등재 대상(인자 2개 이상 메서드는 SendMessage 불가)
+
+
+## [수정] 2번 ComboB1 복구(+피격판정) · 검기 4번 이사 — 2026-08-10 05:01
+### 프롬프트
+A. ComboB1을 2번으로 되돌리고, 검기는 4번으로 이사
+### 조작 내역
+- PC2D에 digit2 → QueueAttack("ComboB1", comboB1Duration, slashLungeSpeed) 복구 (3·4번 테스트키는 복구하지 않음)
+- **ComboB1 피격 판정 신설**: 기존엔 VSlashFx 시각 효과만 있고 대미지 경로가 없었음 → SpawnComboBDamage(dir,pos)로 투명 히트박스(EffectProjectile, SpriteRenderer 비활성) 소환. 대미지=comboVDamage+진행보너스, 판정=comboVHitboxSize(3.2,1.2), 수명=comboVHitLifetime(0.12)
+- SkillSlashCaster digit2 → **digit4**(검기 이사)
+### 검증
+- 컴파일 0 / 최종 키 배치 코드 확인: 1 번개 · 2 가로베기(판정 O) · 3 나선환 · 4 검기
+- 실제 타격·모션은 사용자 재생
+### 실패와 수정
+- 임시 오버로드 1개 남겼다가 즉시 제거

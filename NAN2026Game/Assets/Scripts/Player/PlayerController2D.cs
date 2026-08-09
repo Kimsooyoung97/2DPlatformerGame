@@ -282,6 +282,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
                 airDashesUsed++;
             }
             // 2단 콤보 (원래 V) → Z: 1타 Slash모션 → 창 내 재입력 시 2타 Combo2모션
+            if (kb.digit2Key.wasPressedThisFrame) QueueAttack("ComboB1", config.comboB1Duration, config.slashLungeSpeed); // 2번: 가로베기
             if (kb.zKey.wasPressedThisFrame)
             {
                 if (comboVStage == 1)
@@ -360,6 +361,21 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
         }
     }
 
+    /// ComboB1(가로베기) 전용 근접 판정. 보이지 않는 히트박스를 잠깐 띄운다.
+    private void SpawnComboBDamage(float dir, Vector3 pos)
+    {
+        if (basicEffectPrefab == null) return;
+        var go = Instantiate(basicEffectPrefab, pos, Quaternion.identity);
+        var sr2 = go.GetComponent<SpriteRenderer>();
+        if (sr2 != null) sr2.enabled = false; // 시각은 VSlashFx가 담당 — 판정만 사용
+        var ep = go.GetComponent<EffectProjectile>();
+        int baseDamage = AttackDamageLogic.DamageForComboV("ComboV1", effectConfig.comboVDamage);
+        int bonus = progression != null ? Mathf.RoundToInt(progression.DamageBonus) : 0;
+        if (ep != null)
+            ep.Launch(dir, 0f, effectConfig.comboVHitLifetime, null, effectConfig.frameRate,
+                baseDamage + bonus, effectConfig.comboVHitboxSize, true);
+    }
+
     private void SpawnAttackEffect(string attackName)
     {
         if (attackName == "ComboB1")
@@ -367,6 +383,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
             float bDir = PlayerLocomotionLogic.EffectDirection(sr.flipX);
             Vector3 bPos = transform.position + new Vector3(config.comboVFxOffsetX * bDir, config.comboVFxOffsetY, 0f);
             VSlashFx.Play(bPos, comboB1Fx, config.comboVFxFps, bDir < 0f, config.comboVFxScale, config.comboVFxAlpha, transform, config.comboB1FxTint); // 추종+하늘 틴트
+            SpawnComboBDamage(bDir, bPos); // 이펙트만 있고 대미지가 없던 문제 보완
             return;
         }
         if (attackName == "ComboV1" || attackName == "ComboV2")
