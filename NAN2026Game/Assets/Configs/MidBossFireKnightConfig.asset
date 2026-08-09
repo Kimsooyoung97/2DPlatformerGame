@@ -21,16 +21,19 @@ MonoBehaviour:
   normalWinEnd: 6
   normalDamage: 1
   normalCooldown: 1.4
+  normalHitReach: 2.2
   fireWindup: 0.3
   fireWinStart: 5
   fireWinEnd: 8
   fireDamage: 1
   fireCooldown: 2
+  fireHitReach: 4
   bombWindup: 0.35
   bombWinStart: 4
   bombWinEnd: 6
   bombDamage: 1
   bombCooldown: 2.2
+  bombHitReach: 2
   wheelWindup: 0.3
   wheelWin1Start: 3
   wheelWin1End: 4
@@ -38,6 +41,7 @@ MonoBehaviour:
   wheelWin2End: 8
   wheelDamagePerTick: 1
   wheelCooldown: 2.5
+  wheelHitReach: 2.8
   fpsIdle: 10
   fpsWalk: 12
   fpsNormal: 12
@@ -58,3 +62,7 @@ MonoBehaviour:
   burstDashStopX: 1.7
   sparkleInterval: 0.22
   clashConfig: {fileID: 11400000, guid: 31b4bd26897983b4fb8fcb4703f841b5, type: 2}
+  showRangesInGame: 1
+  showRangeLabels: 1
+  rangeBandHeight: 5
+  rangeBandYOffset: -2
