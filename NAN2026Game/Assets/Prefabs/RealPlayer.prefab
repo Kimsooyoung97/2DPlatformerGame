@@ -28,6 +28,8 @@ GameObject:
   - component: {fileID: 3480599940953113590}
   - component: {fileID: 5707629816935853389}
   - component: {fileID: 8192796389872414237}
+  - component: {fileID: 4460800706227028205}
+  - component: {fileID: 3529956322082229866}
   m_Layer: 7
   m_Name: RealPlayer
   m_TagString: Player
@@ -690,6 +692,36 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NAN2026.PersistentSingleton
   singletonId: Player
+--- !u!114 &4460800706227028205
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5109878993836927586}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 77edf422f07cb634f8302b3a5bc6162b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NAN2026.SkillSlashCaster
+  config: {fileID: 11400000, guid: b4f7d5c8dd664b84e999d679d24b257a, type: 2}
+  slashPrefab: {fileID: 6711275918333177968, guid: 4ba4d41d34b707c428957b6aea90fa9c, type: 3}
+  frames: []
+--- !u!114 &3529956322082229866
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5109878993836927586}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6bb4a92910d670b40ad6dd313dc25123, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NAN2026.SkillOrbCaster
+  config: {fileID: 11400000, guid: e0990ca9caad5834f91129b061e9437d, type: 2}
+  orbSprite: {fileID: 21300000, guid: 996ea0a8a1a149f469d8b286364ced5f, type: 3}
+  spinSpeed: 360
 --- !u!1 &6114823860119314469
 GameObject:
   m_ObjectHideFlags: 0

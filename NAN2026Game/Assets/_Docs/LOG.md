@@ -7758,3 +7758,19 @@ SceneManager.LoadScene() 호출이 파일 전체에 없었음(프로젝트 전�
 해당 없음
 ### 커밋
 해당 없음(무수정)
+
+
+## [구현] 스킬 5·6·7 재배치 + MP 소모 연결 — 2026-08-09 23:59
+### 프롬프트
+[구현] 1번은 A완전 제거로 하고 2번 B 컴포넌트 3개로 부착 3. MP 소모를 지금 연결해서 실제로 MP가 소모되도록 하자
+### 조작 내역
+- ①A: PlayerHurtDeathFx의 digit5·digit6 피격/사망 테스트 입력 2줄 완전 제거
+- ②B: 컴포넌트 3개 체제 — PlayerSkill(번개, digit1→**digit5**) / SkillSlashCaster 신설(digit6, EffectProjectile+Skill1.prefab 재사용) / SkillOrbCaster+SkillOrbFlight 신설(digit7, 회전 원형 투사체·보스/몬스터/타일맵 판정, RB useFullKinematicContacts=true)
+- ③MP 소모 연결: PlayerSkillConfig.mpCost 2 / SkillSlotConfig SO 2종(SkillSlash_6: MP2·쿨0.7·속도14·대미지2 / SkillOrb_7: MP3·쿨1.0·속도10·대미지3·크기1.2). 각 스킬이 TryUseMp 실패 시 불발
+- RealPlayer.prefab(PersistentSingleton)에 3종 부착 → 전 씬 자동 적용
+- 병합 여파 확인: 우리 SecondSceneBoss가 MinoBoss로 되돌아가 있어 오브 판정 대상을 MinoBoss로 맞춤
+### 검증
+- 컴파일 0(잔여 2건은 씬 미싱 스크립트 경고), 프리팹 재읽기: 검기 config/prefab ✓ 오브 config/sprite ✓ 번개 config ✓
+- 실제 발동·MP 감소는 사용자 재생(Scene1부터 시작해야 영속 플레이어 생성)
+### 실패와 수정
+- Launch 인자 타입(float→Vector2) 오류 1회, SecondSceneBoss 미존재 오류 1회 — 둘 다 수정
