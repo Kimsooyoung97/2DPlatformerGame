@@ -41,15 +41,33 @@ public sealed class PlayerProgression : MonoBehaviour
     public float ParryDurationBonus => parryDurationBonus;
     public float ParryCooldownReduction => parryCooldownReduction;
 
+    /// <summary>현재 레벨에서 다음 레벨로 가기 위해 필요한 경험치. LevelProgressionLogic의
+    /// 곡선 공식을 그대로 재사용해서 UI(경험치 바 등)와 실제 레벨업 판정이 항상 일치한다.</summary>
+    public int XpToNextLevel => levelConfig != null
+        ? LevelProgressionLogic.RequiredXpForLevel(level, levelConfig.baseXpToLevel2, levelConfig.xpIncrementPerLevel)
+        : 0;
+
     /// <summary>증강 선택창을 띄워야 할 때 발행(선택지 종류·등급·현재 레벨). 여러 레벨을 한번에\n    /// 오르면 선택이 끝날 때마다 다음 선택을 위해 다시 발행된다.</summary>
     public event System.Action<AugmentType[], int[], int> OnAugmentChoiceReady;
     /// <summary>대기 중이던 증강 선택이 전부 끝났을 때(더 이상 띄울 선택지가 없을 때) 발행.</summary>
     public event System.Action OnAllAugmentChoicesComplete;
 
+    /// <summary>경험치가 바뀔 때마다(획득 직후, 레벨업으로 초과분이 넘어간 뒤 포함) 발행한다.
+    /// (현재 경험치, 다음 레벨까지 필요한 경험치) 순서. 경험치 바 UI가 이걸 구독한다.</summary>
+    public event System.Action<int, int> OnXpChanged;
+
     private void Awake()
     {
         health = GetComponent<PlayerHealth>();
         controller = GetComponent<PlayerController2D>();
+    }
+
+    private void Start()
+    {
+        // 구독자가 늦게 붙거나(씬 재로드 등) 시작 시점에 UI를 즉시 동기화할 수 있도록
+        // 초기값을 한 번 쏴준다. RealPlayer는 DontDestroyOnLoad라 Awake/Start는 게임 전체에서
+        // 딱 한 번만 돌 수 있으니, 실제 동기화는 XpBarUI 쪽 OnEnable에서도 한 번 더 직접 읽는다.
+        OnXpChanged?.Invoke(xp, XpToNextLevel);
     }
 
     /// <summary>몬스터를 처치했을 때 등 경험치를 지급한다. 레벨업이 일어나면 증강 선택 이벤트를 발행한다.</summary>
@@ -73,6 +91,8 @@ public sealed class PlayerProgression : MonoBehaviour
                 BeginAugmentChoice();
             }
         }
+
+        OnXpChanged?.Invoke(xp, XpToNextLevel);
     }
 
     private void BeginAugmentChoice()
@@ -87,7 +107,6 @@ public sealed class PlayerProgression : MonoBehaviour
         var pool = new System.Collections.Generic.List<AugmentType>(allTypes);
         float goldChance = LevelProgressionLogic.GoldChanceForLevel(level, levelConfig.goldBaseChance, levelConfig.goldChancePerLevel, levelConfig.goldMaxChance);
         float silverChance = LevelProgressionLogic.SilverChanceForLevel(level, levelConfig.silverBaseChance, levelConfig.silverChancePerLevel, levelConfig.silverMaxChance);
-
         for (int i = 0; i < count; i++)
         {
             int idx = Random.Range(0, pool.Count);

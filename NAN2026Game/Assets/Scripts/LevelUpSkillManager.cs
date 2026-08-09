@@ -17,7 +17,7 @@ public sealed class LevelUpSkillManager : MonoBehaviour
     [SerializeField] private Image[] cardBackgrounds;
     [SerializeField] private Button[] choiceButtons;
     [SerializeField] private TMP_Text[] choiceTexts;
-
+    [SerializeField] private Image[] skillImage;
     private void Awake()
     {
         if (panel != null) panel.SetActive(false);
@@ -71,7 +71,6 @@ public sealed class LevelUpSkillManager : MonoBehaviour
                 cardBackgrounds[i].color = tiers[i] == 2 ? new Color(1f, 0.85f, 0.3f)
                     : tiers[i] == 1 ? new Color(0.8f, 0.85f, 0.92f)
                     : new Color(0.82f, 0.55f, 0.35f);
-
             if (choiceButtons != null && i < choiceButtons.Length && choiceButtons[i] != null)
             {
                 choiceButtons[i].onClick.RemoveAllListeners();
@@ -95,12 +94,16 @@ public sealed class LevelUpSkillManager : MonoBehaviour
         switch (type)
         {
             case AugmentType.DamageUp:
+                skillImage[idx].sprite = Resources.Load<Sprite>("DamageUp");
                 return "공격 데미지\n+" + m;
             case AugmentType.Heal:
+                skillImage[idx].sprite = Resources.Load<Sprite>("Heal");
                 return "체력 회복\n+" + m;
             case AugmentType.ManaUp:
+                skillImage[idx].sprite = Resources.Load<Sprite>("ManaUp");
                 return "마나 수급량\n+" + m;
             case AugmentType.ManaHeal:
+                skillImage[idx].sprite = Resources.Load<Sprite>("ManaHeal");
                 return "마나 회복\n+" + m;
             default: return string.Empty;
         }

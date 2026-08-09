@@ -5,9 +5,7 @@ public enum AugmentType
     DamageUp,
     Heal,
     ManaHeal,
-    ManaUp,
-    UnlockSkill1, // 기존 Z키(구 Slash) 공격이 스킬화된 것 — 처음 얻는 스킬이면 SkillImage도 갱신됨
-    UnlockSkill2  // 기존 X키(구 Combo2) 공격이 스킬화된 것
+    ManaUp // 기존 X키(구 Combo2) 공격이 스킬화된 것
 }
 
 /// <summary>
