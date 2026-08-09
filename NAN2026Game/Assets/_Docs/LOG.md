@@ -7729,3 +7729,32 @@ SceneManager.LoadScene() 호출이 파일 전체에 없었음(프로젝트 전�
 - manage_scene(save): AdventureScene1 저장 성공(씬 오브젝트 자체는 변경 없음)
 ### 실패와 수정
 없음
+
+
+## [조사] Scene3 스킬 5·6·7 재배치 타당성 — 2026-08-09 23:47
+### 프롬프트
+[조사]AdventureScene3에서 Player 프리팹에 적용. 기존 5,6 적용분은 지우고 5,6,7에 스킬 배치 — 5=1번 자리 번개, 6=검기, 7=나선환류 원형 투사체. 예전에 구현했던 것들이라 어렵지 않을 듯
+### 조사 결과
+- 현재 키 점유: digit1=PlayerSkill(번개, Effect_1 프레임+PlayerSkillConfig 쿨다운/트리거프레임) / digit2·3·4=PC2D 콤보B 1·2·3 / **digit5·6=PlayerHurtDeathFx 피격·사망 연출 테스트용**(사용자 말한 '기존 5,6 적용분'과 일치) / digit7=미사용
+- 재사용 가능 자산 확인: 번개=PlayerSkill+Effect_1.png / 검기=SlashProjectile(3KB)+SwordSlashSpawner(Configure(basic,powered)) 및 프리팹 Skill1·Skill2 / 원형 투사체=OrbProjectile(Launch(startVelocity,life)) + Orb.png·BossOrb.png·ParryOrb.png
+- Player_Knight!!!! 프리팹 구성 확인: PlayerController2D/PlayerHealth/PlayerProgression/PlayerSkill/PlayerMana 등 부착. Scene3 플레이어(RealPlayer)의 프리팹 연결 여부는 이번 출력에서 미확인(다음 단계에서 재확인 필요)
+- 판단: 신규 구현 없이 '키 재배치 + 기존 컴포넌트 배선'으로 달성 가능. 관건은 ①PlayerHurtDeathFx의 5·6 테스트 입력 제거 ②스킬 3종의 발동 주체를 한 곳(PlayerSkill 확장 또는 신규 SkillHotbar)으로 모을지 ③MP 소모 연동 여부(팀 결정 대기 중)
+### 검증
+해당 없음
+### 커밋
+해당 없음(무수정)
+
+
+## [조사] 스킬 부착 시 전 씬 적용 여부(플레이어 영속 구조) — 2026-08-09 23:51
+### 프롬프트
+조사 2 - A, B 둘다 모든 씬에 player 넣기만 하면 적용이 되는거야?
+### 조사 결과
+- **구조 변경 발견**: 팀이 플레이어를 영속 단일 객체로 전환. Assets/Prefabs/RealPlayer.prefab에 PersistentSingleton 부착(DontDestroyOnLoad), 자식 PlayerVisionLight 포함. 컴포넌트: PC2D/Health/Progression/Skill/Mana/HurtDeathFx/SceneParryOverride/HitFeedback/RopeClimber 등
+- 실사용 씬 실태: AdventureScene1만 RealPlayer 인스턴스 보유. **Scene2·3·4에는 플레이어 오브젝트 없음** — Scene3의 SpawnPoint에 PlayerSapwn(PlayerSpawn.cs)이 붙어 Awake에서 GameObject.Find("RealPlayer")로 넘어온 플레이어를 스폰 위치로 이동시키는 방식
+- 따라서 질문 답: 스킬을 **RealPlayer 프리팹에 컴포넌트로 부착하면 A·B 방식 모두 전 씬 자동 적용**(씬마다 플레이어를 넣을 필요 없음). 단 Scene1에서 시작해야 영속 객체가 생성됨(Scene3 단독 재생 시 플레이어 부재)
+- **부작용 경고**: 오늘 Scene3에 배선한 IntroSequencer.playerVisionLight는 씬에 없는 객체를 참조 → 단독 재생 시 무효. FogOfWar.target은 PlayerLocator 폴백이 있어 자가 복구됨. 인트로 시야광도 런타임 탐색으로 바꿔야 안전
+- 잔존 이슈: 구 프리팹 3종(Player_Knight!!!!·Player·Player Variant)이 다른 씬에서 사용 중 — 스킬 부착 대상 통일 필요
+### 검증
+해당 없음
+### 커밋
+해당 없음(무수정)
