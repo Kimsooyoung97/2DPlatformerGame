@@ -8005,3 +8005,16 @@ Scene1에 Skill1 배치돼 있는데 Skill2·Skill3도 배치. Skill1 좌측 첫
 - 좌하단 아이콘 3종 표시는 사용자 재생
 ### 실패와 수정
 없음
+
+
+## [수정] Scene2 스파이크 궤도 원복 — 2026-08-10 07:15
+### 프롬프트
+Scene1 스파이크 수정하면서 Scene2 궤도도 같이 바꾼 것 같다. Scene2 설정은 바꾸면 안 된다
+### 조작 내역
+- 확인: Scene1은 SpikeBallConfig_Scene1(6기), Scene2는 SpikeBallConfig(5기) 사용 — 유도 기능 도입 시 **양쪽 Config에 모두 3.5/1.6을 넣은 것이 잘못**(git 이력상 도입 전 Scene2에는 유도 필드 자체가 없었음 = 직선 궤도)
+- SpikeBallConfig(Scene2): homingTurn 3.50→**0**, homingSeconds 1.60→**0** (유도 완전 해제, 원래 직선 궤도 복원). 발사배율 1.10은 원래 값이라 유지
+- SpikeBallConfig_Scene1: 유도 2.0/1.6 유지(사용자 요청 기능)
+### 검증
+- 재읽기 확인(아래), Scene2 궤도 감각은 사용자 재생
+### 실패와 수정
+- 공용 Config와 씬 전용 Config를 구분하지 않고 일괄 수정한 것 자인 — 이후 수치 변경 시 사용 씬 확인 선행
