@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: SpikeBallConfig_Scene1
   m_EditorClassIdentifier: Assembly-CSharp::NAN2026.SpikeBallConfig
   warnMultiplier: 2
-  launchMultiplier: 0.45
+  launchMultiplier: 1.1
   visionRadiusFallback: 4.5
   blinkHz: 5
   launchSpeed: 10
@@ -41,5 +41,5 @@ MonoBehaviour:
   popupLife: 0.9
   popupFontSize: 64
   popupCharSize: 0.06
-  homingTurn: 3.5
+  homingTurn: 2
   homingSeconds: 1.6
