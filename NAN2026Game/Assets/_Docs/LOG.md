@@ -7901,3 +7901,17 @@ A. ComboB1을 2번으로 되돌리고, 검기는 4번으로 이사
 - 실제 사거리 체감은 사용자 재생
 ### 실패와 수정
 없음
+
+
+## [구현] 스킬 해금 게이트 + 아이콘 쿨타임 표시 — 2026-08-10 05:14
+### 프롬프트
+스킬 이모티콘 먹어야만 활성화되게, 각 스킬 쿨타임만큼 좌하단 아이콘이 회색이었다가 조금씩 원래 색으로 차오르게
+### 조작 내역
+- SkillGate.cs 신설(단일 창구): IsUnlocked(slot)=ChestRewardEvents.Collected>slot / Report(slot,cooldown) / Progress(slot) 0~1 / IsReady(slot). DisableDomainReload 대응 정적 리셋 포함
+- 슬롯 매핑 0=1번 번개(PlayerSkill) · 1=2번 가로베기(PC2D ComboB1) · 2=3번 나선환(SkillOrbCaster) — 좌하단 아이콘 순서와 일치. 각 발동부에 해금 검사 + 쿨타임 보고 이식
+- ChestSkillBar 확장: 슬롯마다 Fill 자식 이미지(Image.Type.Filled·Vertical·아래→위) 추가. 잠김이면 바탕 어둡게(0.55배)·fill 0, 해금 시 쿨타임 진행도만큼 원래 색이 차오름
+### 검증
+- 컴파일 0, 슬롯 수=3 / 아이콘=Skill1 / 채운색=RGBA(1.000, 1.000, 1.000, 1.000) / 빈색=RGBA(1.000, 1.000, 1.000, 0.180)
+- 실제 해금·쿨 차오름은 사용자 재생
+### 실패와 수정
+- 없음. 4번 검기는 슬롯 3칸 밖이라 해금 대상에서 제외(요청 범위 밖)

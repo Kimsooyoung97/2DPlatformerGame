@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using NAN2026.Core;
 
@@ -11,7 +11,8 @@ namespace NAN2026
     {
         public ChestRewardConfig config;
 
-        private Image[] slots;
+        private Image[] slots;   // 회색 바탕(잠김·쿨타임 중)
+        private Image[] fills;   // 원래 색 — 쿨타임만큼 아래에서 위로 차오른다
         private float[] popT;
         private bool[] filled;
 
@@ -40,6 +41,7 @@ namespace NAN2026
             rt.sizeDelta = new Vector2(n * config.slotSize + (n - 1) * config.slotSpacing, config.slotSize);
 
             slots = new Image[n];
+            fills = new Image[n];
             popT = new float[n];
             filled = new bool[n];
 
@@ -63,6 +65,23 @@ namespace NAN2026
                 img.preserveAspect = true;
                 go.SetActive(config.showEmptySlots);
                 slots[i] = img;
+
+                // 같은 아이콘을 겹쳐 두고 fillAmount로 채운다(아래→위)
+                var fgo = new GameObject("Fill", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+                var fr = (RectTransform)fgo.transform;
+                fr.SetParent(go.transform, false);
+                fr.anchorMin = Vector2.zero; fr.anchorMax = Vector2.one;
+                fr.offsetMin = Vector2.zero; fr.offsetMax = Vector2.zero;
+                var fimg = fgo.GetComponent<Image>();
+                fimg.sprite = config.icon;
+                fimg.color = config.tint;
+                fimg.raycastTarget = false;
+                fimg.preserveAspect = true;
+                fimg.type = Image.Type.Filled;
+                fimg.fillMethod = Image.FillMethod.Vertical;
+                fimg.fillOrigin = 0;   // 아래에서 위로
+                fimg.fillAmount = 0f;
+                fills[i] = fimg;
             }
         }
 
@@ -73,12 +92,19 @@ namespace NAN2026
             filled[index] = true;
             popT[index] = 0f;
             slots[index].gameObject.SetActive(true);
-            slots[index].color = config.tint;
+            slots[index].color = config.slotEmptyTint;
         }
 
         private void Update()
         {
             if (slots == null || config == null) return;
+            // 해금 여부·쿨타임 진행도를 아이콘에 반영
+            for (int i = 0; i < slots.Length; i++)
+            {
+                bool unlocked = SkillGate.IsUnlocked(i);
+                if (slots[i] != null) slots[i].color = unlocked ? config.slotEmptyTint : config.slotEmptyTint * 0.55f;
+                if (fills[i] != null) fills[i].fillAmount = unlocked ? SkillGate.Progress(i) : 0f;
+            }
             for (int i = 0; i < slots.Length; i++)
             {
                 if (!filled[i] || popT[i] >= config.popTime) continue;

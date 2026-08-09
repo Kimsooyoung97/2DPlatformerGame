@@ -28,7 +28,9 @@ namespace NAN2026
         {
             var kb = PlayerController2D.InputLocked ? null : Keyboard.current;
             if (kb == null || !kb.digit1Key.wasPressedThisFrame) return;
+            if (!NAN2026.SkillGate.IsUnlocked(0)) return;      // 상자에서 아이콘을 먹어야 사용 가능
             if (casting || Time.time - lastCast < config.cooldown) return;
+            NAN2026.SkillGate.Report(0, config.cooldown);      // 아이콘 쿨타임 표시용
             var mana = GetComponent<NAN2026.PlayerMana>();
             if (mana != null && !mana.TryUseMp(config.mpCost)) return; // MP 부족 시 불발
             StartCoroutine(Cast());

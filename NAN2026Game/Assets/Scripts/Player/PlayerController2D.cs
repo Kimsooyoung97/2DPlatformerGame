@@ -282,7 +282,11 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
                 airDashesUsed++;
             }
             // 2단 콤보 (원래 V) → Z: 1타 Slash모션 → 창 내 재입력 시 2타 Combo2모션
-            if (kb.digit2Key.wasPressedThisFrame) QueueAttack("ComboB1", config.comboB1Duration, config.slashLungeSpeed); // 2번: 가로베기
+            if (kb.digit2Key.wasPressedThisFrame && NAN2026.SkillGate.IsUnlocked(1) && NAN2026.SkillGate.IsReady(1))
+            {
+                QueueAttack("ComboB1", config.comboB1Duration, config.slashLungeSpeed); // 2번: 가로베기
+                NAN2026.SkillGate.Report(1, config.comboB1Duration);
+            }
             if (kb.zKey.wasPressedThisFrame)
             {
                 if (comboVStage == 1)

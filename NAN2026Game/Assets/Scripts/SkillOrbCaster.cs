@@ -26,9 +26,11 @@ namespace NAN2026
             if (kb == null || !kb.digit3Key.wasPressedThisFrame) return;
             bool hasFrames = orbFrames != null && orbFrames.Length > 0;
             if (config == null || (orbSprite == null && !hasFrames)) return;
+            if (!SkillGate.IsUnlocked(2)) return;              // 세 번째 아이콘 필요
             if (Time.time - lastCast < config.cooldown) return;
             if (mana != null && !mana.TryUseMp(config.mpCost)) return;
             lastCast = Time.time;
+            SkillGate.Report(2, config.cooldown);
             float dir = (sr != null && sr.flipX) ? -1f : 1f;
             var go = new GameObject("SkillOrb");
             go.transform.position = transform.position + new Vector3(dir * config.spawnForward, config.spawnHeight, 0f);
