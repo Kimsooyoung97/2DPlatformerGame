@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: defc207cb5290274d84a36d470dc11ad, type: 3}
   m_Name: LichAIConfig
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAIConfig
-  aggroRange: 8
-  attackRange: 5
+  aggroRange: 6.5
+  attackRange: 4
   attackHeightRange: 1.2
   chaseStopDistance: 12
   patrolSpeed: 1
@@ -21,7 +21,7 @@ MonoBehaviour:
   patrolRadius: 1.5
   jumpYThreshold: 1.2
   jumpConfirmDuration: 0.35
-  attackCooldown: 4
+  attackCooldown: 4.5
   attackDamage: 1
   maxHealth: 3
   xpReward: 6
@@ -36,3 +36,4 @@ MonoBehaviour:
   groundMask:
     serializedVersion: 2
     m_Bits: 4294967295
+  firstAttackDelay: 1.4

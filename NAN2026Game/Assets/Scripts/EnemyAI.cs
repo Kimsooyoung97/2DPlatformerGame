@@ -183,8 +183,12 @@ public sealed class EnemyAI : MonoBehaviour
 
         float distance = Mathf.Abs(player.position.x - transform.position.x);
         float heightDiff = Mathf.Abs(player.position.y - transform.position.y);
+        bool wasEngaged = engaged;
         state = EnemyAILogic.DetermineState(distance, heightDiff, engaged, config.aggroRange, config.attackRange, config.chaseStopDistance, config.attackHeightRange);
         engaged = state != EnemyAIState.Patrol;
+        // 발견 직후엔 곧바로 때리지 않는다 — 플레이어가 반응할 틈을 준다
+        if (!wasEngaged && engaged && attackTimer < config.firstAttackDelay)
+            attackTimer = config.firstAttackDelay;
 
         switch (state)
         {
