@@ -129,3 +129,7 @@
 - #32 필드 삽입 앵커를 `public` 선언줄로 잡으면 그 앞 속성 블록 사이를 갈라 CS0579(Duplicate 'Tooltip') 유발 — EnemyConfig 에 attackFps 를 넣다 attackWindup 의 [Tooltip] 바로 아래에 새 [Tooltip] 이 끼어 컴파일 실패. 방지: C# 필드 추가 시 앵커는 선언줄이 아니라 **그 위에 붙은 [Header]/[Tooltip]/XML 주석 블록의 시작줄**로 잡는다
 
 - #33 지면·지형 판정을 '제외 목록'으로 작성하면 새 오브젝트가 생길 때마다 뚫린다 — 순찰 경계 탐침에서 '트리거 아님 + EnemyBase 아님 + PlayerHealth 아님' 을 지면으로 인정했더니 팀 몬스터 KeyMonster 의 non-trigger BoxCollider2D 가 지면으로 잡혀 순찰 폭이 7.5u → 2.0u 로 잘못 잘렸다. 방지: 지형 질의는 **허용 목록**으로 짠다(CompositeCollider2D / TilemapCollider2D 만 인정). 그리고 경계 계산 결과는 반드시 전 개체에 대해 수치로 출력해 눈으로 확인한다
+
+- DH-01 타일맵 구간 절단 시 제거 폭과 이동 폭을 다르게 계산해 이음새마다 빈 열 발생 — [lo,hi] 양끝 포함으로 지우면(hi-lo+1칸) 이동도 hi-lo+1 이어야 하는데 hi-lo 만 당겼다. 방지: 구간 폭은 항상 **hi-lo+1** 로 계산하고, 절단 직후 바닥 표면 높이를 전 구간 스캔해 '타일 없는 열 0개' 를 확인한다
+- DH-02 TilemapCollider2D 는 타일을 코드로 지워도 이전 범위를 유지한다 — CompositeCollider2D.GenerateGeometry() 만으로는 갱신되지 않아 맵 끝 너머 14u 에 보이지 않는 바닥이 남았다. 방지: Tilemap.RefreshAllTiles() + 콜라이더 enabled 토글까지 하고, **Physics2D.Raycast 로 맵 끝 안팎을 찍어 물리로 확인**한다. bounds 값만 믿지 않는다
+- DH-03 씬 오브젝트를 이름으로만 찾고 컴포넌트 타입을 가정함 — Stage_CameraBounds 를 PolygonCollider2D 로 단정해 검색했으나 실제로는 BoxCollider2D 라 보정이 통째로 누락됐다. 방지: 대상 오브젝트의 컴포넌트 목록을 먼저 실측하고 분기한다

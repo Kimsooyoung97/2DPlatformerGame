@@ -1,0 +1,5 @@
+<linker>
+  <!-- 리플렉션으로만 호출되는 멤버는 IL2CPP 스트리핑이 제거한다. 여기서 보존을 명시한다. -->
+  <assembly fullname="Assembly-CSharp" preserve="all"/>
+  <assembly fullname="Unity.Cinemachine" preserve="all"/>
+</linker>

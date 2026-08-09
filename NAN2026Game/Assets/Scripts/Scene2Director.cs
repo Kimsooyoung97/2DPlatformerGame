@@ -9,8 +9,12 @@ namespace NAN2026
     {
         public static int Count; // 정적 누계 — 구독 유실과 무관
 
+        /// 패링 목표를 채운 뒤 켜진다. 런처·투사체·트랩이 각자 Update 첫 줄에서 이걸 보고 스스로 멈춘다.
+        /// 감독이 한 번 훑어 지우는 방식은 연출 4초 사이에 생긴 것을 놓친다 — 그래서 원천 차단으로 바꿨다.
+        public static bool CombatSealed;
+
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void ResetStaticsOnPlay() { Count = 0; OnParry = null; } // DisableDomainReload 대응
+        static void ResetStaticsOnPlay() { Count = 0; CombatSealed = false; OnParry = null; } // DisableDomainReload 대응
         public static System.Action OnParry;
         public static void Report() { Count++; if (OnParry != null) OnParry(); }
     }
@@ -25,7 +29,9 @@ namespace NAN2026
         private Component cmCam;
         private System.Reflection.PropertyInfo followProp;
         private Text topLabel;
-        private TextMesh pips;
+        private Behaviour bossAi;
+        private SpriteRenderer bossSr;
+        private Collider2D bossCol;
 
         private void Start()
         {
@@ -33,16 +39,21 @@ namespace NAN2026
             var p = PlayerLocator.Find();
             if (p != null) player = p.transform;
             var b = GameObject.Find("MinoBoss");
-            if (b != null) boss = b.transform;
+            if (b != null)
+            {
+                boss = b.transform;
+                CacheBossParts(b);
+                SetBossRevealed(false);   // 패링 목표를 채우기 전에는 보스가 없는 것처럼 둔다
+            }
             foreach (var mb in FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
                 if (mb.GetType().Name == "CinemachineCamera") { cmCam = mb; followProp = mb.GetType().GetProperty("Follow"); break; }
             BuildTopLabel();
-            BuildPips();
             if (config != null && config.debugSkipToBoss)
             {
                 SpikeParryEvents.Count = config.parryGoal;
                 if (player != null && boss != null)
                     player.position = boss.position + new Vector3(-config.debugSpawnOffsetX, 0.5f, 0f);
+                SetBossRevealed(true);
             }
         }
 
@@ -52,9 +63,8 @@ namespace NAN2026
             if (SpikeParryEvents.Count != count)
             {
                 count = Mathf.Min(SpikeParryEvents.Count, config.parryGoal);
-                RefreshPips();
                 UpdateTopLabel();
-                if (count >= config.parryGoal) { done = true; StartCoroutine(Brighten()); }
+                if (count >= config.parryGoal) { done = true; SpikeParryEvents.CombatSealed = true; StartCoroutine(Brighten()); }
             }
         }
 
@@ -84,28 +94,6 @@ namespace NAN2026
             topLabel.text = count >= config.parryGoal ? "어둠이 걷혔다!" : "스파이크 패링  " + count + " / " + config.parryGoal;
         }
 
-        private void BuildPips()
-        {
-            if (boss == null || config == null) return;
-            var go = new GameObject("ParryPips");
-            go.transform.SetParent(boss, false);
-            go.transform.localPosition = new Vector3(0f, config.pipOffsetY, 0f);
-            pips = go.AddComponent<TextMesh>();
-            pips.fontSize = 48; pips.characterSize = 0.08f;
-            pips.anchor = TextAnchor.MiddleCenter;
-            pips.color = new Color(1f, 0.85f, 0.2f);
-            go.GetComponent<MeshRenderer>().sortingOrder = 900;
-            RefreshPips();
-        }
-
-        private void RefreshPips()
-        {
-            if (pips == null || config == null) return;
-            var sb = new System.Text.StringBuilder();
-            for (int i = 0; i < config.parryGoal; i++) sb.Append(i < count ? '\u25c6' : '\u25c7');
-            pips.text = sb.ToString();
-        }
-
         private void SetPlayerControl(bool on)
         {
             // 입력 게이트 방식: 컨트롤러는 계속 구동(내부 상태·애니 안전), 입력만 차단
@@ -115,14 +103,39 @@ namespace NAN2026
             if (rb != null && !on) rb.linearVelocity = Vector2.zero;
         }
 
+        private void CacheBossParts(GameObject b)
+        {
+            foreach (var mb in b.GetComponents<MonoBehaviour>())
+                if (mb.GetType().Name == "MinoBoss") { bossAi = mb; break; }
+            bossSr = b.GetComponent<SpriteRenderer>();
+            bossCol = b.GetComponent<Collider2D>();
+        }
+
+        /// 보스를 숨기거나 드러낸다.
+        /// GameObject 자체는 계속 켜둔다 — GameObject.Find 와 보스에 붙인 핍(자식)이 살아 있어야 하기 때문.
+        /// 컴포넌트만 끄므로 AI·렌더·충돌이 전부 멈춘다.
+        private void SetBossRevealed(bool on)
+        {
+            if (bossAi != null) bossAi.enabled = on;
+            if (bossSr != null) bossSr.enabled = on;
+            if (bossCol != null) bossCol.enabled = on;
+            // 보스에 붙은 표시물(GroggyPips 등)도 함께. 보스만 숨기면 핍이 허공에 떠 있게 된다.
+            if (boss != null)
+                foreach (var r in boss.GetComponentsInChildren<Renderer>(true)) r.enabled = on;
+        }
+
         private IEnumerator Brighten()
         {
             Time.timeScale = 1f;          // 잔여 히트스톱 청소
             SetPlayerControl(false);      // 컷신 락
-            foreach (var l in FindObjectsByType<ThrownWeaponLauncher>(FindObjectsSortMode.None)) l.enabled = false;
-            foreach (var pr in FindObjectsByType<ThrownProjectile>(FindObjectsSortMode.None)) Destroy(pr.gameObject);
-            foreach (var mb in FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
-                if (mb.GetType().Name == "SpikeBallTrap") mb.enabled = false;
+            // 비활성 개체까지 포함해 훑는다. 기본값은 비활성 제외라 꺼져 있던 것이 나중에 되살아났다.
+            foreach (var l in FindObjectsByType<ThrownWeaponLauncher>(FindObjectsInactive.Include, FindObjectsSortMode.None)) l.enabled = false;
+            foreach (var pr in FindObjectsByType<ThrownProjectile>(FindObjectsInactive.Include, FindObjectsSortMode.None)) Destroy(pr.gameObject);
+            foreach (var mb in FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            {
+                var n = mb.GetType().Name;
+                if (n == "SwingingBladeTrap") mb.enabled = false;   // 이름이 달라 그동안 정리에서 빠져 있었다
+            }
             Light2D global = null;
             foreach (var l2 in FindObjectsByType<Light2D>(FindObjectsSortMode.None))
                 if (l2.lightType == Light2D.LightType.Global) { global = l2; break; }
@@ -137,6 +150,9 @@ namespace NAN2026
                 }
                 global.intensity = config.brightenTarget;
             }
+            // 어둠이 걷힌 뒤에 보스를 드러낸다. 카메라 팬이 빈 자리를 비추지 않도록 팬보다 먼저.
+            SetBossRevealed(true);
+
             // 보스전 개막: 카메라 보스 팬 → 플레이어 복귀 (씬3 벽붕괴 연출과 동일 문법)
             if (cmCam != null && followProp != null && boss != null)
             {
