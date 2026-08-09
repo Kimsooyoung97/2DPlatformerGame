@@ -256,6 +256,63 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 474607056031827553, guid: 24fd08e77afdb924492efca30059f3ab, type: 3}
   m_PrefabInstance: {fileID: 46234127}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &47248837
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 2682891980725246841, guid: 28e4a5c9e8c519c4a9d10e303617fbfb, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 2.06
+      objectReference: {fileID: 0}
+    - target: {fileID: 2682891980725246841, guid: 28e4a5c9e8c519c4a9d10e303617fbfb, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 3.18
+      objectReference: {fileID: 0}
+    - target: {fileID: 2682891980725246841, guid: 28e4a5c9e8c519c4a9d10e303617fbfb, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2682891980725246841, guid: 28e4a5c9e8c519c4a9d10e303617fbfb, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2682891980725246841, guid: 28e4a5c9e8c519c4a9d10e303617fbfb, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2682891980725246841, guid: 28e4a5c9e8c519c4a9d10e303617fbfb, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2682891980725246841, guid: 28e4a5c9e8c519c4a9d10e303617fbfb, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2682891980725246841, guid: 28e4a5c9e8c519c4a9d10e303617fbfb, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2682891980725246841, guid: 28e4a5c9e8c519c4a9d10e303617fbfb, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2682891980725246841, guid: 28e4a5c9e8c519c4a9d10e303617fbfb, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5109878993836927586, guid: 28e4a5c9e8c519c4a9d10e303617fbfb, type: 3}
+      propertyPath: m_Name
+      value: RealPlayer
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 28e4a5c9e8c519c4a9d10e303617fbfb, type: 3}
 --- !u!1 &56244208
 GameObject:
   m_ObjectHideFlags: 0
@@ -621,13 +678,17 @@ PrefabInstance:
       propertyPath: m_Name
       value: SavePoint1
       objectReference: {fileID: 0}
+    - target: {fileID: 3576910732333444912, guid: 18e5b14087795a7498a4649810ea446d, type: 3}
+      propertyPath: triggerOnce
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5001517998708988740, guid: 18e5b14087795a7498a4649810ea446d, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 4.11058
+      value: 7.26
       objectReference: {fileID: 0}
     - target: {fileID: 5001517998708988740, guid: 18e5b14087795a7498a4649810ea446d, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 3.0362349
+      value: 3.06
       objectReference: {fileID: 0}
     - target: {fileID: 5001517998708988740, guid: 18e5b14087795a7498a4649810ea446d, type: 3}
       propertyPath: m_LocalPosition.z
@@ -18970,7 +19031,7 @@ GameObject:
   - component: {fileID: 707894674}
   - component: {fileID: 707894675}
   m_Layer: 0
-  m_Name: SpawnPoint
+  m_Name: SpawnPoint2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -43845,9 +43906,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 5277710431667870429}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c2d8e5cfcaa45ea4f83eea3c4f0950d8, type: 3}
+  m_Script: {fileID: 11500000, guid: 9be301811aa65734fb378ba7d10f9857, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PortalOpen
+  m_EditorClassIdentifier: Assembly-CSharp::PortalOpen1
   portal: {fileID: 1510970154}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
@@ -43872,3 +43933,4 @@ SceneRoots:
   - {fileID: 1321918483}
   - {fileID: 168424558}
   - {fileID: 707894674}
+  - {fileID: 47248837}

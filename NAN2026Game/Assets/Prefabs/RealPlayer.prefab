@@ -30,6 +30,8 @@ GameObject:
   - component: {fileID: 8192796389872414237}
   - component: {fileID: 4460800706227028205}
   - component: {fileID: 3529956322082229866}
+  - component: {fileID: 5988916152473634532}
+  - component: {fileID: 8405221278776433988}
   m_Layer: 7
   m_Name: RealPlayer
   m_TagString: Player
@@ -739,6 +741,30 @@ MonoBehaviour:
   - {fileID: -2534107101581631383, guid: e77bdab8a328a104c89970a40a8e9678, type: 3}
   - {fileID: 5008722801022919741, guid: e77bdab8a328a104c89970a40a8e9678, type: 3}
   spinSpeed: 360
+--- !u!114 &5988916152473634532
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5109878993836927586}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c408d39f5d0b3640b297973bf867cc6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NAN2026.PlayerScenePositioner
+--- !u!114 &8405221278776433988
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5109878993836927586}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 546f90efa9d3b2f4cb89234429a40836, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NAN2026.CheckpointTravelMenu
 --- !u!1 &6114823860119314469
 GameObject:
   m_ObjectHideFlags: 0

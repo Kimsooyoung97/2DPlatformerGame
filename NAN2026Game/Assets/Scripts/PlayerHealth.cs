@@ -1,7 +1,9 @@
+using System.Collections.Generic;
 using NAN2026;
 using NAN2026.Showroom;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 // 플레이어 HP. 전역 네임스페이스 — 팀 스크립트(OrkanBoss·Spike·Checkpoint2D·OrbProjectile) 계약 준수.
 // 사망: 체크포인트 있으면 그 지점 부활, 없으면 씬 재시작 (SPEC: 죽으면 처음부터)
@@ -15,6 +17,8 @@ public class PlayerHealth : MonoBehaviour
     [SerializeField] private float respawnDelay = 0.2f;
     [SerializeField] private float spawnGrace = 0.5f;
     [SerializeField] private float fallKillY = -18f;
+    [Tooltip("이미 저장된 세이브포인트와 이 거리 안이면(같은 씬 기준) 새로 추가하지 않고 중복으로 친다.")]
+    [SerializeField] private float duplicateCheckpointRadius = 0.5f;
 
     [Header("Hazards")]
     [SerializeField] private string hazardNameContains = "Spikes";
@@ -27,6 +31,9 @@ public class PlayerHealth : MonoBehaviour
     private MonoBehaviour movementController;
     private SpriteRenderer[] visuals;
     private Vector3 checkpoint;
+    // 세이브포인트 누적 목록 — 씬+좌표 쌍이라 다른 씬의 지점도 정확히 되돌아갈 수 있다.
+    // SetCheckpoint()가 호출될 때마다 여기 새 항목이 추가된다(덮어쓰지 않음).
+    private readonly List<CheckpointRecord> checkpoints = new List<CheckpointRecord>();
     private float graceUntil;
     private bool dying;
     private int deaths;
@@ -96,6 +103,9 @@ public class PlayerHealth : MonoBehaviour
         }
 
         checkpoint = transform.position;
+        // 시작 위치도 첫 세이브포인트로 등록해둔다 — 그래야 아무것도 안 밟은 상태에서
+        // 이동 메뉴를 열어도 최소 한 곳(시작 지점)은 나온다.
+        checkpoints.Add(new CheckpointRecord(SceneManager.GetActiveScene().name, checkpoint, "시작 지점"));
         graceUntil = Time.time + spawnGrace;
 
         currentHealth = MaxHealth;
@@ -164,10 +174,28 @@ public class PlayerHealth : MonoBehaviour
             Kill();
     }
 
+    /// <summary>새 세이브포인트를 목록에 추가한다(기존 것을 덮어쓰지 않고 누적). 낙사 시
+    /// 자동 부활 지점(checkpoint)도 항상 가장 최근 것으로 갱신된다.</summary>
     public void SetCheckpoint(Vector3 position)
     {
         checkpoint = position;
+        string scene = SceneManager.GetActiveScene().name;
+
+        // 같은 세이브포인트를 다시 밟아도 목록에 중복으로 안 쌓이게 — 같은 씬 + 근접 좌표면
+        // 새 항목을 추가하지 않는다(이미 있는 걸로 충분).
+        for (int i = 0; i < checkpoints.Count; i++)
+        {
+            CheckpointRecord existing = checkpoints[i];
+            if (existing.sceneName == scene && Vector3.Distance(existing.position, position) <= duplicateCheckpointRadius)
+                return;
+        }
+
+        checkpoints.Add(new CheckpointRecord(scene, position, scene + " #" + checkpoints.Count));
     }
+
+    /// <summary>지금까지 저장된 모든 세이브포인트(씬+좌표). CheckpointTravelMenu가 이걸 읽어서
+    /// 이동 목록을 그린다.</summary>
+    public IReadOnlyList<CheckpointRecord> Checkpoints => checkpoints;
 
     /// <summary>구르기가 시작되는 순간 PlayerController2D가 호출한다. combatConfig.rollInvincibilityDuration 동안 무적.</summary>
     public void BeginRollInvincibility()
@@ -220,13 +248,17 @@ public class PlayerHealth : MonoBehaviour
 
     private void Respawn()
     {
-        transform.position = checkpoint;
-        transform.rotation = Quaternion.identity;
+        // FAIL: transform.position만 바꾸면 Rigidbody2D가 다음 물리 스텝에서 자기가 내부적으로
+        // 추적하던 예전 위치로 되돌려놓는다(보간 때문) — CheckpointTravelMenu에서 실측으로 확인된
+        // 버그와 동일 패턴. body.position도 같이 맞춰야 확실히 고정된다.
         if (body != null)
         {
+            body.position = checkpoint;
             body.SetRotation(0f);
             body.linearVelocity = Vector2.zero;
         }
+        transform.position = checkpoint;
+        transform.rotation = Quaternion.identity;
 
         SetVisible(true);
         SetControllerEnabled(true);
