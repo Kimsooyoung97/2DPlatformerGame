@@ -6455,3 +6455,60 @@ NAN2026Game/Assets/_Docs/ASSET_CREDITS.md merge=union
 - 다른 씬(1·3·4)의 시야광 상태는 텍스트 스캔으로 확인 불가했다(프리팹 자식이라 씬 파일에 m_Name 으로 안 나타남). 각 씬을 열어 확인해야 한다
 ### 실패와 수정
 - 없음
+
+
+## [조사] 패링 5회 달성 후에도 구체가 날아와 피격되는 현상 — 2026-08-09 20:34
+### 프롬프트
+[조사]스파이크 패링 5번을 채웠음에도 불구하고 그 전에 날라오던 구체가 날라와서 캐릭을 떄리는 현상이 있어 이거 어떻게 고치는게 좋을까?
+### 조사 결과
+**먼저 '구체'의 정체를 갈랐다 — 씬에는 두 계열이 있다**
+- `SpikeBallTrap` 5개(SpikeOrb_1·2·3·4·6): 천장에서 돌진하는 가시구. **콜라이더가 0개**라 `OnTriggerEnter2D` 가 절대 발동하지 않는다. 데미지는 `Update()` 의 조기 패링 경로에서 `ResolveHit()` 로만 난다
+- `ThrownWeaponLauncher` 9개(천장구체_*): `천장구체_투사체`(`ThrownProjectile`)를 생성해 날린다. **피격은 이쪽이다** — ThrownProjectile 77행이 `SendMessage("TakeDamage")`
+**Brighten() 의 정리 코드(149~152행)와 그 한계**
+```
+foreach (ThrownWeaponLauncher) l.enabled = false;      // 새 발사 차단
+foreach (ThrownProjectile)     Destroy(gameObject);    // 비행 중 투사체 제거
+foreach (SpikeBallTrap)        mb.enabled = false;     // 가시구 정지
+```
+**확정된 결함 3건**
+1. **일회성 정리다.** Brighten 시작 순간 딱 한 번만 훑는다. 이후 brightenTime 1.8 + revealHold 1.6 + brightenHold 0.6 = **약 4초** 동안 연출이 이어지는데, 그 사이에 남거나 새로 생긴 것은 다시 걸러지지 않는다
+2. **`FindObjectsByType(FindObjectsSortMode.None)` 은 비활성 오브젝트를 제외한다.** 그 순간 비활성이던 런처·투사체는 정리에서 빠지고, 나중에 활성화되면 되살아난다
+3. **`SwingingBladeTrap`(x 17.5) 은 정리 대상에 아예 없다.** 이름이 다르다는 이유로 세 줄 어디에도 안 걸린다
+**부수 결함**
+- `SpikeBallTrap` 을 `enabled = false` 로만 끄면 phase 2(돌진 중)였던 가시구가 **공중에 멈춘 채 그대로 보인다**. Break 를 태우지 않아 스프라이트가 꺼지지 않는다
+- 스크립트 실행 순서상 `SpikeParryEvents.Report()`(5회 도달)와 `Scene2Director.Update()` 감지 사이에 최소 1프레임 지연이 있다. 그 프레임에 발사된 투사체는 Destroy 되지만, 판정이 같은 프레임에 성립하면 통과할 수 있다
+**개선 방향(미실행)**
+- A안 **차단 플래그 + 지속 정리**: `SpikeParryEvents` 에 `CombatSealed` 정적 플래그를 두고, 런처·트랩이 각자 Update 첫 줄에서 이를 보고 즉시 반환하게 한다. 일회성 훑기가 아니라 **원천 차단**이라 타이밍 구멍이 없다. 투사체도 자기 Update 에서 스스로 소멸
+- B안 **정리 반복**: Brighten 코루틴이 연출 4초 동안 매 프레임 정리를 반복. 간단하지만 매 프레임 FindObjectsByType 이라 비용이 크고 근본 차단은 아니다
+- C안 **정리 범위 보정만**: FindObjectsInactive.Include 로 바꾸고 SwingingBladeTrap 추가, SpikeBallTrap 은 enabled=false 대신 Break 호출. 최소 변경이지만 1번(일회성) 은 남는다
+- 권장: **A + C**. A 가 타이밍 구멍을 막고, C 가 이미 떠 있는 잔존물을 치운다
+### 검증
+해당 없음 (파일 수정 없음)
+### 커밋
+해당 없음(무수정)
+
+
+## [수정] 패링 5회 달성 시 비행 중 구체까지 정지·소멸 — 2026-08-09 20:38
+### 프롬프트
+그냥 패링 5번 채우면 날라오던 구체도 멈추고 사라지게 만들어.
+### 조작 내역
+**접근 전환: 감독이 한 번 훑는 방식 → 각자 스스로 멈추는 방식**
+- 기존 `Brighten()` 은 시작 순간 딱 한 번만 정리했다. 연출이 brightenTime 1.8 + revealHold 1.6 + brightenHold 0.6 = **약 4초** 이어지는 동안 생긴 것은 못 걸렀다
+- `SpikeParryEvents.CombatSealed` 정적 플래그 신설. 목표 달성 순간 켜고, 각 스크립트가 **Update 첫 줄에서** 이를 보고 스스로 처리한다 → 타이밍 구멍이 원천적으로 없다
+- `ResetStaticsOnPlay` 에 `CombatSealed = false` 동봉 (DisableDomainReload 프로젝트 필수)
+**개별 반응**
+- `Scene2Director.Update`: 목표 달성 시 `CombatSealed = true` → 그 다음 Brighten 코루틴 시작
+- `ThrownWeaponLauncher.Update`: 봉인이면 즉시 return → **새 발사 없음**
+- `ThrownProjectile.Update`: 봉인이면 `Destroy(gameObject)` → **날아오던 것이 사라짐** (실제 피격 주체는 이쪽이었다)
+- `SpikeBallTrap.Update`: 봉인이면 phase 3 이 아닌 경우 `Break(false)` → 돌진 중이던 가시구가 **멈추고 스프라이트가 꺼진다**. 리스폰도 하지 않는다
+**일회 정리도 함께 보정**
+- `FindObjectsByType(...)` → `FindObjectsByType(FindObjectsInactive.Include, ...)` 3곳. 기본값이 비활성 제외라 꺼져 있던 개체가 나중에 되살아났다
+- `SwingingBladeTrap` 정리 추가 — 이름이 달라 그동안 세 줄 어디에도 안 걸려 있었다
+### 검증
+- 컴파일 성공, read_console error 0건
+- 리플렉션 실행: `CombatSealed` 필드 존재 확인, **true 로 켠 뒤 `ResetStaticsOnPlay()` 호출 → False 로 돌아옴** (재생 간 상태 잔존 없음)
+- 참조 개소 실측: ThrownWeaponLauncher 1 / ThrownProjectile 1 / SpikeBallTrap 1 / Scene2Director 3
+- `FindObjectsInactive.Include` 3곳 반영, `SwingingBladeTrap` 정리 포함 확인
+- **사용자 눈 판정 필요**: (1) 5회 채운 순간 날아오던 구체가 사라지는지 (2) 돌진 중이던 가시구가 공중에 남지 않는지 (3) 연출 4초 동안 새 투사체가 안 나오는지 (4) 보스전 시작 후 트랩이 되살아나지 않는지
+### 실패와 수정
+- 없음

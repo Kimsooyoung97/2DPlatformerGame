@@ -9,8 +9,12 @@ namespace NAN2026
     {
         public static int Count; // 정적 누계 — 구독 유실과 무관
 
+        /// 패링 목표를 채운 뒤 켜진다. 런처·투사체·트랩이 각자 Update 첫 줄에서 이걸 보고 스스로 멈춘다.
+        /// 감독이 한 번 훑어 지우는 방식은 연출 4초 사이에 생긴 것을 놓친다 — 그래서 원천 차단으로 바꿨다.
+        public static bool CombatSealed;
+
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void ResetStaticsOnPlay() { Count = 0; OnParry = null; } // DisableDomainReload 대응
+        static void ResetStaticsOnPlay() { Count = 0; CombatSealed = false; OnParry = null; } // DisableDomainReload 대응
         public static System.Action OnParry;
         public static void Report() { Count++; if (OnParry != null) OnParry(); }
     }
@@ -63,7 +67,7 @@ namespace NAN2026
                 count = Mathf.Min(SpikeParryEvents.Count, config.parryGoal);
                 RefreshPips();
                 UpdateTopLabel();
-                if (count >= config.parryGoal) { done = true; StartCoroutine(Brighten()); }
+                if (count >= config.parryGoal) { done = true; SpikeParryEvents.CombatSealed = true; StartCoroutine(Brighten()); }
             }
         }
 
@@ -146,10 +150,14 @@ namespace NAN2026
         {
             Time.timeScale = 1f;          // 잔여 히트스톱 청소
             SetPlayerControl(false);      // 컷신 락
-            foreach (var l in FindObjectsByType<ThrownWeaponLauncher>(FindObjectsSortMode.None)) l.enabled = false;
-            foreach (var pr in FindObjectsByType<ThrownProjectile>(FindObjectsSortMode.None)) Destroy(pr.gameObject);
-            foreach (var mb in FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
-                if (mb.GetType().Name == "SpikeBallTrap") mb.enabled = false;
+            // 비활성 개체까지 포함해 훑는다. 기본값은 비활성 제외라 꺼져 있던 것이 나중에 되살아났다.
+            foreach (var l in FindObjectsByType<ThrownWeaponLauncher>(FindObjectsInactive.Include, FindObjectsSortMode.None)) l.enabled = false;
+            foreach (var pr in FindObjectsByType<ThrownProjectile>(FindObjectsInactive.Include, FindObjectsSortMode.None)) Destroy(pr.gameObject);
+            foreach (var mb in FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            {
+                var n = mb.GetType().Name;
+                if (n == "SwingingBladeTrap") mb.enabled = false;   // 이름이 달라 그동안 정리에서 빠져 있었다
+            }
             Light2D global = null;
             foreach (var l2 in FindObjectsByType<Light2D>(FindObjectsSortMode.None))
                 if (l2.lightType == Light2D.LightType.Global) { global = l2; break; }
