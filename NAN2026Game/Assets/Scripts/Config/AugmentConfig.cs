@@ -27,7 +27,7 @@ public sealed class AugmentConfig : ScriptableObject
     public float[] manaHealByTier = new float[] { 1, 2, 3 };
 
     [Header("패링 지속시간 증가 (초, parryWindow에 가산)")]
-    public float[] manaUpByTier = new float[] { 1,2,3};
+    public float[] manaUpByTier = new float[] { 1, 1, 1 };
     public float GetMagnitude(AugmentType type, int tier)
     {
         switch (type)
@@ -36,8 +36,6 @@ public sealed class AugmentConfig : ScriptableObject
             case AugmentType.Heal: return healByTier[tier];
             case AugmentType.ManaHeal: return manaHealByTier[tier];
             case AugmentType.ManaUp: return manaUpByTier[tier];
-            case AugmentType.UnlockSkill1: return 1f; // 스킬 획득은 등급과 무관, 값 자체는 안 쓰임
-            case AugmentType.UnlockSkill2: return 1f;
             default: return 0f;
         }
     }

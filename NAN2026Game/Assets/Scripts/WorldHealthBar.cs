@@ -17,7 +17,7 @@ public sealed class WorldHealthBar : MonoBehaviour
     private SpriteRenderer fillRenderer;
     private static Sprite whitePixel;
 
-    private void Awake()
+    private void Start()
     {
         if (target == null) target = GetComponent<MonsterHealth>();
         BuildBar();

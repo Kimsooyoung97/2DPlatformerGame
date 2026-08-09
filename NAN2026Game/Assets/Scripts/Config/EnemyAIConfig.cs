@@ -12,6 +12,7 @@ public sealed class EnemyAIConfig : ScriptableObject
     public float aggroRange = 8f;
     [Tooltip("이 거리 안이면 공격을 시도한다")]
     public float attackRange = 1.5f;
+    public float attackHeightRange = 1.2f; // 임의값 — jumpYThreshold(1.2)와 같은 값으로 시작, 튜닝 필요
     [Tooltip("추적을 시작한 뒤 이 거리를 넘어서면 추적을 포기하고 순찰로 복귀한다")]
     public float chaseStopDistance = 12f;
 
@@ -42,4 +43,7 @@ public sealed class EnemyAIConfig : ScriptableObject
     public Vector3 healthBarOffset = new Vector3(0f, 1.6f, 0f);
     public Color healthBarBackground = new Color(0f, 0f, 0f, 0.75f);
     public Color healthBarFill = new Color(0.85f, 0.15f, 0.15f, 1f);
+    [Header("피격 넉백")]
+    public float knockbackForce = 6f;     // 임의값 — 튜닝 필요
+    public float knockbackDuration = 0.15f; // 임의값 — 튜닝 필요
 }

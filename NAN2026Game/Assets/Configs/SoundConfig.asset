@@ -13,7 +13,11 @@ MonoBehaviour:
   m_Name: SoundConfig
   m_EditorClassIdentifier: Assembly-CSharp::NAN2026.SoundConfig
   walkClips:
-  - {fileID: 8300000, guid: 1c4774d3324474f478cbd467108eda64, type: 3}
+  - {fileID: 8300000, guid: 0415fcd682cb86c42a2793bc0d22eaa5, type: 3}
+  - {fileID: 8300000, guid: 3e97b584fb6bbb94b8e0a50a03fad0a1, type: 3}
+  - {fileID: 8300000, guid: 0d923f3fd9611c74c8895770b5d4eaba, type: 3}
+  - {fileID: 8300000, guid: f42dcb5502bd92840b9b916392340867, type: 3}
+  - {fileID: 8300000, guid: 594969e80cdc6f94bba7e2f9d0d3a472, type: 3}
   stepInterval: 0.4
   walkVelThreshold: 0.5
   stepVolume: 0.7
@@ -22,5 +26,8 @@ MonoBehaviour:
   jumpVolume: 0.35
   attackVolume: 0.8
   attackPitch: 0.85
+  dashClip: {fileID: 8300000, guid: bc00ed7fd97212f478fe67402eaa4ed9, type: 3}
+  dashVolume: 0.7
+  dashPitch: 1
   bgmVolume: 0.55
   bgmFadeSeconds: 1.2

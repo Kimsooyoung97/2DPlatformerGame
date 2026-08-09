@@ -6,20 +6,13 @@ namespace NAN2026
     // 파이어나이트 미들보스: Idle/Walk/NormalAttack/FireAttack/FireBomb/WheelAttack/Hitted/Death + Windup/Groggy
     // Demon/Mino와 같은 형식: Sprite[] 직접 재생(Animator 미사용), state int + SetState, 공격별 개별
     // windup·쿨타임, 패링 5회 그로기(버스트). 수치는 전부 이 컴포넌트가 아니라 Config가 소유한다.
-    // 근접 판정은 기존 방식 그대로 유지 — MidBoss 자식으로 미리 배치해둔 히트박스 오브젝트에
-    // MidBossMeleeHitbox를 붙였다 떼는 구조를 재사용한다(수동 배치 오브젝트를 새로 만들거나 지우지 않음).
+    // 근접 판정: DemonBoss와 동일하게 물리 콜라이더 없이 거리(dx)+프레임 구간으로 직접 판정한다.
+    // (이전엔 씬에 미리 배치된 히트박스 오브젝트를 썼으나, 사용자 명시적 지시로 그 오브젝트들을
+    // 직접 삭제하고 이 방식으로 전환함 — "수동 배치 오브젝트 삭제 금지" 규칙의 명시적 예외.)
     public class MidBoss_FireKnight : MonoBehaviour, IParryReflector
     {
         public MidBossFireKnightConfig config;
         public Sprite[] idleF, walkF, normalF, fireF, bombF, wheelF, hitF, deathF;
-
-        [Header("MidBoss 자식으로 미리 배치해둔 근접 판정용 콜라이더")]
-        public GameObject normalHitboxObject;
-        public GameObject fireHitboxObject;
-        public GameObject bombHitboxObject;
-        public GameObject wheelHitboxObject;
-        [Tooltip("좌우 반전 시 같이 뒤집을 히트박스 앵커(로컬 x 부호 반전)")]
-        public Transform[] childObjects;
 
         private SpriteRenderer sr;
         private Transform player;
@@ -32,10 +25,10 @@ namespace NAN2026
         private float nextNormal, nextFire, nextBomb, nextWheel;
         private int pendingAttack;   // windup 종료 후 진입할 state
         private float curWindupDur;
-        private bool wheelTick2Done;
+        private bool dealtThisSwing;         // Normal/Fire/Bomb 공용(판정 창 1개)
+        private bool[] wheelSwingResolved = new bool[2]; // Wheel은 판정 창 2개
         private Sprite[] cur;
         private float curFps;
-        private bool dealtThisSwing;
         private int parryCount;
         private Coroutine flashCo;
         private Coroutine sparkleCo;
@@ -46,6 +39,7 @@ namespace NAN2026
         private SpriteRenderer playerSr;
         private float lastParryPress = -999f;
         private float lastConsumed = -999f;
+        private float hitInvulnUntil; // 최근 피격 후 재경직 면역 마감 시각
 
         private bool ParryBuffered()
         {
@@ -73,34 +67,16 @@ namespace NAN2026
             }
 
             BuildGroggyPips();
-            EnsureHitboxesAreTriggers();
             SetState(0);
         }
 
-        // 근접 판정용 히트박스 4개는 항상 트리거여야 한다 — 공격 시작 시(Init)에만 isTrigger를
-        // 켜주면, 씬 로드 직후 첫 공격이 나가기 전까지는 인스펙터 기본값(대개 non-trigger)으로
-        // 남아있어서 플레이어가 근접 사거리에 들어오기만 해도 그냥 단단한 콜라이더로 밀려난다.
-        // 시작 시점에 미리 다 트리거로 고정해서 플레이어를 절대 물리적으로 밀지 않게 한다.
-        private void EnsureHitboxesAreTriggers()
-        {
-            SetColliderTrigger(normalHitboxObject);
-            SetColliderTrigger(fireHitboxObject);
-            SetColliderTrigger(bombHitboxObject);
-            SetColliderTrigger(wheelHitboxObject);
-        }
-
-        private void SetColliderTrigger(GameObject go)
-        {
-            if (go == null) return;
-            Collider2D col = go.GetComponent<Collider2D>();
-            if (col != null) col.isTrigger = true;
-        }
-
-        public bool TryParry(GameObject attacker) => false; // 이 보스는 패링 판정을 직접 소유하지 않는다(MidBossMeleeHitbox가 플레이어 쪽에서 판정)
+        public bool TryParry(GameObject attacker) => false; // 이 보스는 패링 판정을 직접 소유하지 않는다(플레이어 쪽에서 판정)
 
         private void SetState(int s)
         {
-            state = s; animT = 0f; stateT = 0f; dealtThisSwing = false; wheelTick2Done = false;
+            state = s; animT = 0f; stateT = 0f;
+            dealtThisSwing = false;
+            wheelSwingResolved[0] = false; wheelSwingResolved[1] = false;
             cur = s == 0 ? idleF
                 : s == 1 ? walkF
                 : s == 2 ? normalF
@@ -128,7 +104,7 @@ namespace NAN2026
         {
             var go = new GameObject("GroggyPips");
             go.transform.SetParent(transform, false);
-            go.transform.localPosition = new Vector3(0f, config.groggyFxOffsetY + 0.7f, 0f);
+            go.transform.localPosition = new Vector3(0f, config.groggyPipsOffsetY, 0f);
             groggyPips = go.AddComponent<TextMesh>();
             groggyPips.fontSize = 40; groggyPips.characterSize = 0.07f;
             groggyPips.anchor = TextAnchor.MiddleCenter;
@@ -235,7 +211,12 @@ namespace NAN2026
             HitFeedback();
             if (hp <= 0) { SetState(7); return; }
             bool attacking = state == 2 || state == 3 || state == 4 || state == 5; // 공격 판정·모션 중엔 경직 없음
-            if (state != 8 && !attacking) SetState(6);
+            bool recentlyHit = Time.time < hitInvulnUntil;
+            if (state != 8 && !attacking && !recentlyHit)
+            {
+                SetState(6);
+                hitInvulnUntil = Time.time + config.hitReStagger; // Config 필드로
+            }
         }
 
         private void HitFeedback()
@@ -262,26 +243,10 @@ namespace NAN2026
             flashCo = null;
         }
 
-        // sr.flipX를 실제로 바꿀 때만 이 경로로 설정한다 — 값이 그대로면 아무것도 안 하고,
-        // 실제로 바뀔 때만 FlipHitBox()를 호출한다(안 바뀌는데도 매 프레임 뒤집으면 위치가 흔들림).
         private void SetFacing(bool flipX)
         {
             if (sr == null) return;
-            if (sr.flipX == flipX) return;
             sr.flipX = flipX;
-            FlipHitBox();
-        }
-
-        private void FlipHitBox()
-        {
-            if (childObjects == null) return;
-            for (int i = 0; i < childObjects.Length; i++)
-            {
-                if (childObjects[i] == null) continue;
-                Vector3 p = childObjects[i].localPosition;
-                p.x *= -1f;
-                childObjects[i].localPosition = p;
-            }
         }
 
         private void Update()
@@ -322,10 +287,10 @@ namespace NAN2026
                 if (dx <= config.attackRange) TryBeginAttack();
                 else if (dx > config.aggroRange) SetState(0);
             }
-            else if (state == 2) DoNormalAttack();
-            else if (state == 3) DoFireAttack();
-            else if (state == 4) DoFireBomb();
-            else if (state == 5) DoWheelAttack();
+            else if (state == 2) DoNormalAttack(dx);
+            else if (state == 3) DoFireAttack(dx);
+            else if (state == 4) DoFireBomb(dx);
+            else if (state == 5) DoWheelAttack(dx);
             else if (state == 6) { if ((int)animT >= cur.Length) SetState(0); }
             else if (state == 8) DoGroggy(dx);
         }
@@ -341,10 +306,16 @@ namespace NAN2026
 
             if (player != null) SetFacing(player.position.x < transform.position.x);
 
-            if (normalReady) BeginWindup(2, config.normalWindup);
-            else if (fireReady) BeginWindup(3, config.fireWindup);
-            else if (bombReady) BeginWindup(4, config.bombWindup);
-            else BeginWindup(5, config.wheelWindup);
+            // 고정 우선순위(Normal>Fire>Bomb>Wheel) 대신, 준비된 공격 중 쿨타임이 가장 먼저 끝난
+            // (가장 오래 대기한) 걸 고른다. 고정 순위면 쿨타임 짧은 Normal이 거의 항상 이겨서
+            // 쿨타임 긴 Wheel 등은 영영 안 나가는 문제가 있었음.
+            int best = -1; float bestNext = float.MaxValue;
+            if (normalReady && nextNormal < bestNext) { best = 2; bestNext = nextNormal; }
+            if (fireReady && nextFire < bestNext) { best = 3; bestNext = nextFire; }
+            if (bombReady && nextBomb < bestNext) { best = 4; bestNext = nextBomb; }
+            if (wheelReady && nextWheel < bestNext) { best = 5; bestNext = nextWheel; }
+
+            BeginWindup(best, best == 2 ? config.normalWindup : best == 3 ? config.fireWindup : best == 4 ? config.bombWindup : config.wheelWindup);
         }
 
         // 공격 예열: idle 프레임 유지한 채 색상 플래시로 경고, 지속 후 실제 공격 state 진입
@@ -369,49 +340,93 @@ namespace NAN2026
             }
         }
 
-        private void DoNormalAttack()
+                // 보스가 바라보는 방향(-1/+1). SetFacing(flipX = player.x < transform.x)와 짝 맞춤 —
+        // flipX가 true면 왼쪽을 바라보는 상태.
+        private float Facing() => sr != null && sr.flipX ? -1f : 1f;
+
+        // FrontOnly 판정용: 보스가 바라보는 방향 쪽에 플레이어가 있는지. frontDeadZone 안이면
+        // 등 뒤라도 정면으로 봐준다(근접 거리에서 살짝 스친 경우 억울하게 판정 안 나는 것 방지).
+        private bool InFront()
         {
-            if (!dealtThisSwing && stateT >= config.normalHitDelay)
+            if (player == null) return true;
+            float signed = (player.position.x - transform.position.x) * Facing();
+            return signed >= -config.frontDeadZone;
+        }
+
+// DemonBoss 방식: 거리(dx) + 프레임 구간으로 직접 판정. 물리 히트박스 없음.
+        private void DoNormalAttack(float dx)
+        {
+            int idx = Mathf.Min((int)animT, cur.Length - 1);
+            bool inWin = idx >= config.normalWinStart && idx <= config.normalWinEnd;
+            if (!dealtThisSwing && inWin && dx <= config.normalHitReach && (!config.normalFrontOnly || InFront()))
             {
                 dealtThisSwing = true;
-                SpawnMeleeHitbox(normalHitboxObject, config.normalDamage, config.normalHitboxLifetime);
+                ResolveMeleeHit(config.normalDamage);
             }
             if ((int)animT >= cur.Length) { nextNormal = Time.time + config.normalCooldown; SetState(0); }
         }
 
-        private void DoFireAttack()
+        private void DoFireAttack(float dx)
         {
-            if (!dealtThisSwing && stateT >= config.fireHitDelay)
+            int idx = Mathf.Min((int)animT, cur.Length - 1);
+            bool inWin = idx >= config.fireWinStart && idx <= config.fireWinEnd;
+            if (!dealtThisSwing && inWin && dx <= config.fireHitReach && (!config.fireFrontOnly || InFront()))
             {
                 dealtThisSwing = true;
-                SpawnMeleeHitbox(fireHitboxObject, config.fireDamage, config.fireHitboxLifetime);
+                ResolveMeleeHit(config.fireDamage);
             }
             if ((int)animT >= cur.Length) { nextFire = Time.time + config.fireCooldown; SetState(0); }
         }
 
-        private void DoFireBomb()
+        private void DoFireBomb(float dx)
         {
-            if (!dealtThisSwing && stateT >= config.bombHitDelay)
+            int idx = Mathf.Min((int)animT, cur.Length - 1);
+            bool inWin = idx >= config.bombWinStart && idx <= config.bombWinEnd;
+            if (!dealtThisSwing && inWin && dx <= config.bombHitReach && (!config.bombFrontOnly || InFront()))
             {
                 dealtThisSwing = true;
-                SpawnMeleeHitbox(bombHitboxObject, config.bombDamage, config.bombHitboxLifetime);
+                ResolveMeleeHit(config.bombDamage);
             }
             if ((int)animT >= cur.Length) { nextBomb = Time.time + config.bombCooldown; SetState(0); }
         }
 
-        private void DoWheelAttack()
+        private void DoWheelAttack(float dx)
         {
-            if (!dealtThisSwing && stateT >= config.wheelHitDelay)
+            int idx = Mathf.Min((int)animT, cur.Length - 1);
+            bool inWin1 = idx >= config.wheelWin1Start && idx <= config.wheelWin1End;
+            bool inWin2 = idx >= config.wheelWin2Start && idx <= config.wheelWin2End;
+            if (!wheelSwingResolved[0] && inWin1 && dx <= config.wheelHitReach && (!config.wheelFrontOnly || InFront()))
             {
-                dealtThisSwing = true;
-                SpawnMeleeHitbox(wheelHitboxObject, config.wheelDamagePerTick, config.wheelHitboxLifetime);
+                wheelSwingResolved[0] = true;
+                ResolveMeleeHit(config.wheelDamagePerTick);
             }
-            if (dealtThisSwing && !wheelTick2Done && stateT >= config.wheelHitDelay + config.wheelTickInterval)
+            if (!wheelSwingResolved[1] && inWin2 && dx <= config.wheelHitReach && (!config.wheelFrontOnly || InFront()))
             {
-                wheelTick2Done = true;
-                SpawnMeleeHitbox(wheelHitboxObject, config.wheelDamagePerTick, config.wheelHitboxLifetime);
+                wheelSwingResolved[1] = true;
+                ResolveMeleeHit(config.wheelDamagePerTick);
             }
             if ((int)animT >= cur.Length) { nextWheel = Time.time + config.wheelCooldown; SetState(0); }
+        }
+
+        // 판정 창 안에서 사거리까지 맞았을 때 공통으로 호출 — 패링(버퍼 우선, 리플렉션 폴백) 성공 시
+        // RegisterParrySuccess(그로기 카운트), 실패 시 플레이어에게 데미지. DemonBoss.ResolveHit()와 동일 패턴.
+        private void ResolveMeleeHit(int damage)
+        {
+            bool parried = ParryBuffered();
+            if (!parried && controller != null && tryParry != null)
+            {
+                object r = tryParry.Invoke(controller, new object[] { gameObject });
+                parried = r is bool && (bool)r;
+            }
+            if (parried)
+            {
+                if (player != null) PlayerMana.RewardParry(player);
+                RegisterParrySuccess();
+            }
+            else if (player != null)
+            {
+                player.SendMessage("TakeDamage", (float)damage, SendMessageOptions.DontRequireReceiver);
+            }
         }
 
         private void DoGroggy(float dx)
@@ -428,17 +443,162 @@ namespace NAN2026
             }
         }
 
-        // 기존 방식 그대로: 씬에 미리 배치된 히트박스 오브젝트에 MidBossMeleeHitbox를 붙였다가
-        // lifeTime 후 컴포넌트만 떼어낸다(오브젝트 자체는 재사용을 위해 남겨둔다).
-        private void SpawnMeleeHitbox(GameObject target, int damage, float lifeTime)
+                // ===== 공격 범위 디버그 표시 (config.showRangesInGame) — DemonBoss와 동일 패턴,
+        // 판정 로직(ResolveMeleeHit 호출 조건)과 같은 값을 그대로 그린다 =====
+        private LineRenderer[] rangeBands; // 0 aggro, 1 attackRange, 2 활성 공격 히트리치
+        private TextMesh rangeLabel;
+
+        private LineRenderer MakeRangeBand(string name, Color c, float width)
         {
-            if (target == null) return;
-            MidBossMeleeHitbox hitbox = target.AddComponent<MidBossMeleeHitbox>();
-            hitbox.Init(damage, gameObject, RegisterParrySuccess, ParryBuffered);
-            Destroy(hitbox, lifeTime);
+            var go = new GameObject(name);
+            go.transform.SetParent(transform, false);
+            var lr = go.AddComponent<LineRenderer>();
+            lr.useWorldSpace = true;
+            lr.loop = true; lr.positionCount = 4;
+            lr.startWidth = width; lr.endWidth = width;
+            lr.material = new Material(Shader.Find("Sprites/Default"));
+            lr.startColor = c; lr.endColor = c;
+            lr.sortingOrder = 860;
+            return lr;
         }
 
-        // 근접 히트박스가 패링 성공을 알려올 때 호출 — 그로기 카운터 공유
+        private void BuildRangeGizmos()
+        {
+            rangeBands = new LineRenderer[3];
+            rangeBands[0] = MakeRangeBand("Band_Aggro", new Color(1f, 0.9f, 0.2f, 0.35f), 0.08f);       // 노랑: 인지
+            rangeBands[1] = MakeRangeBand("Band_AttackRange", new Color(0.35f, 0.7f, 1f, 0.55f), 0.10f); // 파랑: 공격 개시
+            rangeBands[2] = MakeRangeBand("Band_HitReach", new Color(1f, 0.25f, 0.25f, 0.7f), 0.12f);    // 빨강(가변): 현재 공격 리치
+
+            var go = new GameObject("RangeLabel");
+            go.transform.SetParent(transform, false);
+            go.transform.localPosition = new Vector3(0f, config.groggyFxOffsetY + 2.6f, 0f);
+            rangeLabel = go.AddComponent<TextMesh>();
+            rangeLabel.fontSize = 40; rangeLabel.characterSize = 0.055f;
+            rangeLabel.anchor = TextAnchor.MiddleCenter;
+            rangeLabel.color = new Color(0.85f, 1f, 0.85f);
+            go.GetComponent<MeshRenderer>().sortingOrder = 903;
+        }
+
+        private void DestroyRangeGizmos()
+        {
+            if (rangeBands != null) { foreach (var lr in rangeBands) if (lr != null) Destroy(lr.gameObject); rangeBands = null; }
+            if (rangeLabel != null) { Destroy(rangeLabel.gameObject); rangeLabel = null; }
+        }
+
+        private void SetRangeRect(LineRenderer lr, float xMin, float xMax, float yMin, float yMax)
+        {
+            lr.SetPosition(0, new Vector3(xMin, yMin, 0f));
+            lr.SetPosition(1, new Vector3(xMax, yMin, 0f));
+            lr.SetPosition(2, new Vector3(xMax, yMax, 0f));
+            lr.SetPosition(3, new Vector3(xMin, yMax, 0f));
+        }
+
+        // 현재 state에 대응하는 (히트리치, 색상, 판정 창 안인지)를 판정 로직과 동일하게 계산
+        private bool GetActiveAttackRange(out float reach, out Color col, out bool inWin, out bool frontOnly)
+        {
+            reach = 0f; col = Color.white; inWin = false; frontOnly = false;
+            if (cur == null || cur.Length == 0) return false;
+            int idx = Mathf.Min((int)animT, cur.Length - 1);
+            if (state == 2) { reach = config.normalHitReach; col = new Color(1f, 0.6f, 0.2f, 0.7f); inWin = idx >= config.normalWinStart && idx <= config.normalWinEnd; frontOnly = config.normalFrontOnly; return true; }
+            if (state == 3) { reach = config.fireHitReach; col = new Color(1f, 0.35f, 0.1f, 0.7f); inWin = idx >= config.fireWinStart && idx <= config.fireWinEnd; frontOnly = config.fireFrontOnly; return true; }
+            if (state == 4) { reach = config.bombHitReach; col = new Color(0.8f, 0.2f, 1f, 0.7f); inWin = idx >= config.bombWinStart && idx <= config.bombWinEnd; frontOnly = config.bombFrontOnly; return true; }
+            if (state == 5)
+            {
+                reach = config.wheelHitReach; col = new Color(0.2f, 0.8f, 1f, 0.7f);
+                inWin = (idx >= config.wheelWin1Start && idx <= config.wheelWin1End) || (idx >= config.wheelWin2Start && idx <= config.wheelWin2End);
+                frontOnly = config.wheelFrontOnly;
+                return true;
+            }
+            return false;
+        }
+
+        private void HighlightRangeBand(LineRenderer lr, bool on, Color baseCol)
+        {
+            if (lr == null) return;
+            float w = on ? 0.30f : 0.12f;
+            lr.startWidth = w; lr.endWidth = w;
+            lr.startColor = on ? new Color(1f, 1f, 0.5f, 0.95f) : baseCol;
+            lr.endColor = lr.startColor;
+        }
+
+        private void LateUpdate()
+        {
+            if (config == null) return;
+            if (!config.showRangesInGame) { if (rangeBands != null || rangeLabel != null) DestroyRangeGizmos(); return; }
+            if (rangeBands == null) BuildRangeGizmos();
+
+            float bx = transform.position.x;
+            float by = transform.position.y + config.rangeBandYOffset;
+            float h = config.rangeBandHeight;
+
+            SetRangeRect(rangeBands[0], bx - config.aggroRange, bx + config.aggroRange, by - h * 0.5f, by + h * 0.5f);
+            SetRangeRect(rangeBands[1], bx - config.attackRange, bx + config.attackRange, by - h * 0.5f, by + h * 0.35f);
+
+            bool active = GetActiveAttackRange(out float reach, out Color col, out bool inWin, out bool frontOnly);
+            rangeBands[2].gameObject.SetActive(active);
+            if (active)
+            {
+                float faceSign = Facing();
+                float minX, maxX;
+                if (frontOnly)
+                {
+                    // FrontOnly면 판정도 보스가 바라보는 쪽 + frontDeadZone만큼만 유효하므로
+                    // 띠도 그 쪽만 그린다(판정과 표시가 어긋나지 않게).
+                    if (faceSign > 0f) { minX = bx - config.frontDeadZone; maxX = bx + reach; }
+                    else { minX = bx - reach; maxX = bx + config.frontDeadZone; }
+                }
+                else { minX = bx - reach; maxX = bx + reach; }
+                SetRangeRect(rangeBands[2], minX, maxX, by - h * 0.5f, by + h * 0.2f);
+                HighlightRangeBand(rangeBands[2], inWin, col);
+            }
+
+            if (rangeLabel != null)
+            {
+                if (!config.showRangeLabels) { rangeLabel.text = string.Empty; return; }
+                float dx = player != null ? Mathf.Abs(player.position.x - bx) : -1f;
+                string stName = state == 0 ? "idle" : state == 1 ? "walk" : state == 2 ? "normal" : state == 3 ? "fire"
+                    : state == 4 ? "bomb" : state == 5 ? "wheel" : state == 6 ? "hit" : state == 7 ? "death" : state == 8 ? "groggy" : "windup";
+                rangeLabel.text = string.Format("dx {0:F1} | {1}{2}", dx, stName, active ? (inWin ? "  ◆판정중(리치 " + reach.ToString("F1") + ")" : "  리치 " + reach.ToString("F1")) : "");
+            }
+        }
+
+        // 씬 뷰(에디터 전용): 노랑=인지 / 파랑=공격개시 / 각 공격 리치(고정 색)
+        private void DrawReachGizmo(float bx, float by, float height, float reach, bool frontOnly)
+        {
+            float minX, maxX;
+            if (frontOnly)
+            {
+                float faceSign = Facing();
+                if (faceSign > 0f) { minX = bx - config.frontDeadZone; maxX = bx + reach; }
+                else { minX = bx - reach; maxX = bx + config.frontDeadZone; }
+            }
+            else { minX = bx - reach; maxX = bx + reach; }
+            float cx = (minX + maxX) * 0.5f;
+            float w = maxX - minX;
+            Gizmos.DrawWireCube(new Vector3(cx, by, 0f), new Vector3(w, height, 0f));
+        }
+
+        private void OnDrawGizmosSelected()
+        {
+            if (config == null) return;
+            float bx = transform.position.x;
+            float by = transform.position.y + config.rangeBandYOffset;
+            float h = config.rangeBandHeight;
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireCube(new Vector3(bx, by, 0f), new Vector3(config.aggroRange * 2f, h, 0f));
+            Gizmos.color = new Color(0.35f, 0.7f, 1f);
+            Gizmos.DrawWireCube(new Vector3(bx, by, 0f), new Vector3(config.attackRange * 2f, h * 0.7f, 0f));
+            Gizmos.color = new Color(1f, 0.6f, 0.2f);
+            DrawReachGizmo(bx, by, h * 0.4f, config.normalHitReach, config.normalFrontOnly);
+            Gizmos.color = new Color(1f, 0.35f, 0.1f);
+            DrawReachGizmo(bx, by, h * 0.35f, config.fireHitReach, config.fireFrontOnly);
+            Gizmos.color = new Color(0.8f, 0.2f, 1f);
+            DrawReachGizmo(bx, by, h * 0.3f, config.bombHitReach, config.bombFrontOnly);
+            Gizmos.color = new Color(0.2f, 0.8f, 1f);
+            DrawReachGizmo(bx, by, h * 0.25f, config.wheelHitReach, config.wheelFrontOnly);
+        }
+
+// 근접 판정(ResolveMeleeHit)이 패링 성공을 알려올 때 호출 — 그로기 카운터 공유
         public void RegisterParrySuccess()
         {
             if (config.clashConfig != null && player != null)
