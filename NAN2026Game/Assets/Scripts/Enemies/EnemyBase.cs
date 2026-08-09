@@ -365,6 +365,18 @@ namespace NAN2026
             SetState(EnemyStateLogic.Groggy);
         }
 
+        private bool xpGranted;
+
+        /// <summary>처치 시 1회만 경험치를 지급한다.</summary>
+        private void GrantXpOnce()
+        {
+            if (xpGranted || config == null || config.xpReward <= 0) return;
+            xpGranted = true;
+            if (player == null) return;
+            PlayerProgression progression = player.GetComponentInParent<PlayerProgression>();
+            if (progression != null) progression.AddXp(config.xpReward);
+        }
+
         public void TakeDamage(int amount)
         {
             if (state == EnemyStateLogic.Death) return;
@@ -372,7 +384,7 @@ namespace NAN2026
             hits++;
             if (flashCo != null) StopCoroutine(flashCo);
             flashCo = StartCoroutine(FlashRed());
-            if (EnemyStateLogic.IsDead(hits, config.hitsToDie)) { SetState(EnemyStateLogic.Death); return; }
+            if (EnemyStateLogic.IsDead(hits, config.hitsToDie)) { GrantXpOnce(); SetState(EnemyStateLogic.Death); return; }
             if (state == EnemyStateLogic.Groggy) return;   // 보상 구간을 때려서 끊어먹지 않게
             SetState(EnemyStateLogic.Hurt);
         }
