@@ -7605,3 +7605,25 @@ NAN2026Game/Assets/_Docs/ASSET_CREDITS.md merge=union
 - git add 시 경로에 실수로 저장소 루트 기준 접두사("NAN2026Game/")를 그대로 넣어서 처음엔 아무것도
   안 스테이징됐음(git status --porcelain 표시 경로는 repo root 기준이지만, execute_code의 CWD는 이미
   안쪽 Unity 프로젝트 폴더라 상대경로 기준점이 다름) — 접두사 제거 후 재시도해서 해결.
+
+
+## [구현] FireKnight 공격 범위 디버그 표시 추가 — 2026-08-09 (세션 시간)
+### 프롬프트
+demonboss는 거리 +프레임 구간 판정에 개발자가 시각적으로 그 범위를 볼 수 있던데 얘도 추가 되나?
+### 조작 내역
+- DemonBoss.cs의 실제 구현(LineRenderer 기반 런타임 띠 + OnDrawGizmosSelected 씬 뷰 + TextMesh 라벨)을
+  먼저 읽고 동일 패턴으로 이식.
+- MidBossFireKnightConfig.cs: showRangesInGame/showRangeLabels/rangeBandHeight 추가(Demon과 동일 이름).
+- MidBoss_FireKnight.cs: rangeBands(3: aggro/attackRange/활성공격리치), rangeLabel, BuildRangeGizmos/
+  DestroyRangeGizmos/SetRangeRect/HighlightRangeBand/GetActiveAttackRange/LateUpdate/OnDrawGizmosSelected
+  추가. GetActiveAttackRange()가 각 Do*Attack()과 동일한 WinStart~WinEnd·hitReach 값을 그대로 참조해서
+  판정과 표시가 어긋나지 않게 함(Demon 원본 설계 원칙 유지).
+### 검증
+- refresh_unity(compile=request) -> read_console(types=error): FireKnight 관련 에러 0건.
+  단, Assets/Scripts/LevelUpSkillManager.cs에서 무관한 기존 컴파일 에러 4건 발견(CS0103, 필드
+  'skillIcon' 미선언) — git status상 이번 세션에서 수정 이력 없는 파일이라 세션 시작 전부터 있던
+  버그로 판단. 이 에러 때문에 프로젝트 전체가 지금 컴파일 안 됨 -> run_tests 실행 불가.
+  사용자에게 별도 확인 요청함(고칠지 여부).
+- manage_scene(save): UITestScene 저장 성공
+### 실패와 수정
+없음(FireKnight 범위 내). LevelUpSkillManager.cs 이슈는 이번 작업 범위 밖이라 미수정.

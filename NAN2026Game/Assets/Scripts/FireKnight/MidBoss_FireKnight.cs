@@ -418,7 +418,136 @@ namespace NAN2026
             }
         }
 
-        // 근접 판정(ResolveMeleeHit)이 패링 성공을 알려올 때 호출 — 그로기 카운터 공유
+                // ===== 공격 범위 디버그 표시 (config.showRangesInGame) — DemonBoss와 동일 패턴,
+        // 판정 로직(ResolveMeleeHit 호출 조건)과 같은 값을 그대로 그린다 =====
+        private LineRenderer[] rangeBands; // 0 aggro, 1 attackRange, 2 활성 공격 히트리치
+        private TextMesh rangeLabel;
+
+        private LineRenderer MakeRangeBand(string name, Color c, float width)
+        {
+            var go = new GameObject(name);
+            go.transform.SetParent(transform, false);
+            var lr = go.AddComponent<LineRenderer>();
+            lr.useWorldSpace = true;
+            lr.loop = true; lr.positionCount = 4;
+            lr.startWidth = width; lr.endWidth = width;
+            lr.material = new Material(Shader.Find("Sprites/Default"));
+            lr.startColor = c; lr.endColor = c;
+            lr.sortingOrder = 860;
+            return lr;
+        }
+
+        private void BuildRangeGizmos()
+        {
+            rangeBands = new LineRenderer[3];
+            rangeBands[0] = MakeRangeBand("Band_Aggro", new Color(1f, 0.9f, 0.2f, 0.35f), 0.08f);       // 노랑: 인지
+            rangeBands[1] = MakeRangeBand("Band_AttackRange", new Color(0.35f, 0.7f, 1f, 0.55f), 0.10f); // 파랑: 공격 개시
+            rangeBands[2] = MakeRangeBand("Band_HitReach", new Color(1f, 0.25f, 0.25f, 0.7f), 0.12f);    // 빨강(가변): 현재 공격 리치
+
+            var go = new GameObject("RangeLabel");
+            go.transform.SetParent(transform, false);
+            go.transform.localPosition = new Vector3(0f, config.groggyFxOffsetY + 2.6f, 0f);
+            rangeLabel = go.AddComponent<TextMesh>();
+            rangeLabel.fontSize = 40; rangeLabel.characterSize = 0.055f;
+            rangeLabel.anchor = TextAnchor.MiddleCenter;
+            rangeLabel.color = new Color(0.85f, 1f, 0.85f);
+            go.GetComponent<MeshRenderer>().sortingOrder = 903;
+        }
+
+        private void DestroyRangeGizmos()
+        {
+            if (rangeBands != null) { foreach (var lr in rangeBands) if (lr != null) Destroy(lr.gameObject); rangeBands = null; }
+            if (rangeLabel != null) { Destroy(rangeLabel.gameObject); rangeLabel = null; }
+        }
+
+        private void SetRangeRect(LineRenderer lr, float xMin, float xMax, float yMin, float yMax)
+        {
+            lr.SetPosition(0, new Vector3(xMin, yMin, 0f));
+            lr.SetPosition(1, new Vector3(xMax, yMin, 0f));
+            lr.SetPosition(2, new Vector3(xMax, yMax, 0f));
+            lr.SetPosition(3, new Vector3(xMin, yMax, 0f));
+        }
+
+        // 현재 state에 대응하는 (히트리치, 색상, 판정 창 안인지)를 판정 로직과 동일하게 계산
+        private bool GetActiveAttackRange(out float reach, out Color col, out bool inWin)
+        {
+            reach = 0f; col = Color.white; inWin = false;
+            if (cur == null || cur.Length == 0) return false;
+            int idx = Mathf.Min((int)animT, cur.Length - 1);
+            if (state == 2) { reach = config.normalHitReach; col = new Color(1f, 0.6f, 0.2f, 0.7f); inWin = idx >= config.normalWinStart && idx <= config.normalWinEnd; return true; }
+            if (state == 3) { reach = config.fireHitReach; col = new Color(1f, 0.35f, 0.1f, 0.7f); inWin = idx >= config.fireWinStart && idx <= config.fireWinEnd; return true; }
+            if (state == 4) { reach = config.bombHitReach; col = new Color(0.8f, 0.2f, 1f, 0.7f); inWin = idx >= config.bombWinStart && idx <= config.bombWinEnd; return true; }
+            if (state == 5)
+            {
+                reach = config.wheelHitReach; col = new Color(0.2f, 0.8f, 1f, 0.7f);
+                inWin = (idx >= config.wheelWin1Start && idx <= config.wheelWin1End) || (idx >= config.wheelWin2Start && idx <= config.wheelWin2End);
+                return true;
+            }
+            return false;
+        }
+
+        private void HighlightRangeBand(LineRenderer lr, bool on, Color baseCol)
+        {
+            if (lr == null) return;
+            float w = on ? 0.30f : 0.12f;
+            lr.startWidth = w; lr.endWidth = w;
+            lr.startColor = on ? new Color(1f, 1f, 0.5f, 0.95f) : baseCol;
+            lr.endColor = lr.startColor;
+        }
+
+        private void LateUpdate()
+        {
+            if (config == null) return;
+            if (!config.showRangesInGame) { if (rangeBands != null || rangeLabel != null) DestroyRangeGizmos(); return; }
+            if (rangeBands == null) BuildRangeGizmos();
+
+            float bx = transform.position.x;
+            float by = transform.position.y;
+            float h = config.rangeBandHeight;
+
+            SetRangeRect(rangeBands[0], bx - config.aggroRange, bx + config.aggroRange, by - h * 0.5f, by + h * 0.5f);
+            SetRangeRect(rangeBands[1], bx - config.attackRange, bx + config.attackRange, by - h * 0.5f, by + h * 0.35f);
+
+            bool active = GetActiveAttackRange(out float reach, out Color col, out bool inWin);
+            rangeBands[2].gameObject.SetActive(active);
+            if (active)
+            {
+                SetRangeRect(rangeBands[2], bx - reach, bx + reach, by - h * 0.5f, by + h * 0.2f);
+                HighlightRangeBand(rangeBands[2], inWin, col);
+            }
+
+            if (rangeLabel != null)
+            {
+                if (!config.showRangeLabels) { rangeLabel.text = string.Empty; return; }
+                float dx = player != null ? Mathf.Abs(player.position.x - bx) : -1f;
+                string stName = state == 0 ? "idle" : state == 1 ? "walk" : state == 2 ? "normal" : state == 3 ? "fire"
+                    : state == 4 ? "bomb" : state == 5 ? "wheel" : state == 6 ? "hit" : state == 7 ? "death" : state == 8 ? "groggy" : "windup";
+                rangeLabel.text = string.Format("dx {0:F1} | {1}{2}", dx, stName, active ? (inWin ? "  ◆판정중(리치 " + reach.ToString("F1") + ")" : "  리치 " + reach.ToString("F1")) : "");
+            }
+        }
+
+        // 씬 뷰(에디터 전용): 노랑=인지 / 파랑=공격개시 / 각 공격 리치(고정 색)
+        private void OnDrawGizmosSelected()
+        {
+            if (config == null) return;
+            float bx = transform.position.x;
+            float by = transform.position.y;
+            float h = config.rangeBandHeight;
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireCube(new Vector3(bx, by, 0f), new Vector3(config.aggroRange * 2f, h, 0f));
+            Gizmos.color = new Color(0.35f, 0.7f, 1f);
+            Gizmos.DrawWireCube(new Vector3(bx, by, 0f), new Vector3(config.attackRange * 2f, h * 0.7f, 0f));
+            Gizmos.color = new Color(1f, 0.6f, 0.2f);
+            Gizmos.DrawWireCube(new Vector3(bx, by, 0f), new Vector3(config.normalHitReach * 2f, h * 0.4f, 0f));
+            Gizmos.color = new Color(1f, 0.35f, 0.1f);
+            Gizmos.DrawWireCube(new Vector3(bx, by, 0f), new Vector3(config.fireHitReach * 2f, h * 0.35f, 0f));
+            Gizmos.color = new Color(0.8f, 0.2f, 1f);
+            Gizmos.DrawWireCube(new Vector3(bx, by, 0f), new Vector3(config.bombHitReach * 2f, h * 0.3f, 0f));
+            Gizmos.color = new Color(0.2f, 0.8f, 1f);
+            Gizmos.DrawWireCube(new Vector3(bx, by, 0f), new Vector3(config.wheelHitReach * 2f, h * 0.25f, 0f));
+        }
+
+// 근접 판정(ResolveMeleeHit)이 패링 성공을 알려올 때 호출 — 그로기 카운터 공유
         public void RegisterParrySuccess()
         {
             if (config.clashConfig != null && player != null)

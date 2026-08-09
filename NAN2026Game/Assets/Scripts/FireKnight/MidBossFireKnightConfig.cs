@@ -76,5 +76,11 @@ namespace NAN2026
 
         [Header("클래시")]
         public SpikeBallConfig clashConfig;
+
+        [Header("디버그 표시 (제출 전 OFF)")]
+        public bool showRangesInGame = true;  // 게임 뷰에 공격 범위 띠 표시
+        public bool showRangeLabels = true;   // 거리·상태 텍스트 라벨
+        public float rangeBandHeight = 3f;    // 표시용 띠 높이 (판정과 무관, 보기용)
+
     }
 }
