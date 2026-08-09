@@ -103,7 +103,7 @@ namespace NAN2026
         {
             var go = new GameObject("GroggyPips");
             go.transform.SetParent(transform, false);
-            go.transform.localPosition = new Vector3(0f, config.groggyFxOffsetY + 0.7f, 0f);
+            go.transform.localPosition = new Vector3(0f, config.groggyPipsOffsetY, 0f);
             groggyPips = go.AddComponent<TextMesh>();
             groggyPips.fontSize = 40; groggyPips.characterSize = 0.07f;
             groggyPips.anchor = TextAnchor.MiddleCenter;
@@ -328,12 +328,25 @@ namespace NAN2026
             }
         }
 
-        // DemonBoss 방식: 거리(dx) + 프레임 구간으로 직접 판정. 물리 히트박스 없음.
+                // 보스가 바라보는 방향(-1/+1). SetFacing(flipX = player.x < transform.x)와 짝 맞춤 —
+        // flipX가 true면 왼쪽을 바라보는 상태.
+        private float Facing() => sr != null && sr.flipX ? -1f : 1f;
+
+        // FrontOnly 판정용: 보스가 바라보는 방향 쪽에 플레이어가 있는지. frontDeadZone 안이면
+        // 등 뒤라도 정면으로 봐준다(근접 거리에서 살짝 스친 경우 억울하게 판정 안 나는 것 방지).
+        private bool InFront()
+        {
+            if (player == null) return true;
+            float signed = (player.position.x - transform.position.x) * Facing();
+            return signed >= -config.frontDeadZone;
+        }
+
+// DemonBoss 방식: 거리(dx) + 프레임 구간으로 직접 판정. 물리 히트박스 없음.
         private void DoNormalAttack(float dx)
         {
             int idx = Mathf.Min((int)animT, cur.Length - 1);
             bool inWin = idx >= config.normalWinStart && idx <= config.normalWinEnd;
-            if (!dealtThisSwing && inWin && dx <= config.normalHitReach)
+            if (!dealtThisSwing && inWin && dx <= config.normalHitReach && (!config.normalFrontOnly || InFront()))
             {
                 dealtThisSwing = true;
                 ResolveMeleeHit(config.normalDamage);
@@ -345,7 +358,7 @@ namespace NAN2026
         {
             int idx = Mathf.Min((int)animT, cur.Length - 1);
             bool inWin = idx >= config.fireWinStart && idx <= config.fireWinEnd;
-            if (!dealtThisSwing && inWin && dx <= config.fireHitReach)
+            if (!dealtThisSwing && inWin && dx <= config.fireHitReach && (!config.fireFrontOnly || InFront()))
             {
                 dealtThisSwing = true;
                 ResolveMeleeHit(config.fireDamage);
@@ -357,7 +370,7 @@ namespace NAN2026
         {
             int idx = Mathf.Min((int)animT, cur.Length - 1);
             bool inWin = idx >= config.bombWinStart && idx <= config.bombWinEnd;
-            if (!dealtThisSwing && inWin && dx <= config.bombHitReach)
+            if (!dealtThisSwing && inWin && dx <= config.bombHitReach && (!config.bombFrontOnly || InFront()))
             {
                 dealtThisSwing = true;
                 ResolveMeleeHit(config.bombDamage);
@@ -370,12 +383,12 @@ namespace NAN2026
             int idx = Mathf.Min((int)animT, cur.Length - 1);
             bool inWin1 = idx >= config.wheelWin1Start && idx <= config.wheelWin1End;
             bool inWin2 = idx >= config.wheelWin2Start && idx <= config.wheelWin2End;
-            if (!wheelSwingResolved[0] && inWin1 && dx <= config.wheelHitReach)
+            if (!wheelSwingResolved[0] && inWin1 && dx <= config.wheelHitReach && (!config.wheelFrontOnly || InFront()))
             {
                 wheelSwingResolved[0] = true;
                 ResolveMeleeHit(config.wheelDamagePerTick);
             }
-            if (!wheelSwingResolved[1] && inWin2 && dx <= config.wheelHitReach)
+            if (!wheelSwingResolved[1] && inWin2 && dx <= config.wheelHitReach && (!config.wheelFrontOnly || InFront()))
             {
                 wheelSwingResolved[1] = true;
                 ResolveMeleeHit(config.wheelDamagePerTick);

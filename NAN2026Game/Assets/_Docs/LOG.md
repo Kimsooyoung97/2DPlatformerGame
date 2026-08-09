@@ -7646,3 +7646,28 @@ demonboss는 거리 +프레임 구간 판정에 개발자가 시각적으로 그
 - manage_scene(save): UITestScene 저장 성공
 ### 실패와 수정
 - 파일이 LF 개행이라 CRLF 기준 문자열 치환이 처음에 안 먹힘 — LF로 재시도해서 해결.
+
+
+## [수정] FireKnight GroggyPips 위치 조정 + 공격별 전방판정(FrontOnly) 토글 추가 — 2026-08-09 (세션 시간)
+### 프롬프트
+firenight의 GroggyPips가 지금 (0,4.1)인데 (0, -0.4)로 바꿔주고 지금 fireknight의 공격이 각 공격마다
+fireknight를 중간으로 두고 hit reach 크기만큼 양옆으로 벌어지는 느낌인데 이러면 안되는게 전방만
+공격하는 스킬이 있어서 바꿀 수 있게 해줘야할거같다
+### 조작 내역
+- MidBossFireKnightConfig.cs:
+  - groggyPipsOffsetY(float, -0.4) 추가 — 리터럴 금지 규칙 때문에 하드코딩 대신 Config 필드로.
+  - normalFrontOnly/fireFrontOnly/bombFrontOnly/wheelFrontOnly(bool, 기본 false=기존과 동일 양방향) 추가.
+  - frontDeadZone(float, 1.0) 추가 — DemonBoss와 동일 개념(정면 판정 시 등 뒤 근접 허용 오차).
+- MidBoss_FireKnight.cs:
+  - BuildGroggyPips()의 localPosition을 (0, config.groggyFxOffsetY+0.7f) -> (0, config.groggyPipsOffsetY)로 교체.
+  - Facing()/InFront() 헬퍼 추가(DemonBoss 개념 이식).
+  - DoNormalAttack/DoFireAttack/DoFireBomb/DoWheelAttack(2곳) 총 5개 판정 조건에
+    `&& (!config.xxxFrontOnly || InFront())` 추가.
+### 검증
+- refresh_unity(compile=request) -> read_console: CS 컴파일 에러 0건. 무관한 에디터 내부 노이즈
+  (UnityEditor.Graphs NullReferenceException, missing script 2건) 발견했으나 내 코드와 무관 확인.
+- 재생 모드가 세션 중 예상치 못하게 True로 걸려있던 순간 발견(H3 패턴) — 재확인 후 정지 상태로 복귀시킴.
+- run_tests(EditMode): 250/250 통과
+- manage_scene(save): UITestScene 저장 성공
+### 실패와 수정
+없음
