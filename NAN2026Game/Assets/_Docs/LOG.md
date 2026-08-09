@@ -7774,3 +7774,17 @@ SceneManager.LoadScene() 호출이 파일 전체에 없었음(프로젝트 전�
 - 실제 발동·MP 감소는 사용자 재생(Scene1부터 시작해야 영속 플레이어 생성)
 ### 실패와 수정
 - Launch 인자 타입(float→Vector2) 오류 1회, SecondSceneBoss 미존재 오류 1회 — 둘 다 수정
+
+
+## [수정] 스킬 무반응 — 시작 MP 0이 원인 — 2026-08-10 00:05
+### 프롬프트
+AdventureScene1 해도 번개스킬은 물론 이펙트도 아무것도 없는데?
+### 조작 내역
+- 배선 전수 확인(정상): PlayerSkill(config·skillSprites5·effectSprites9) / SkillSlashCaster(config·Skill1) / SkillOrbCaster(config·Orb) 모두 배선·활성
+- 원인: ManaConfig.startMp=0 → 세 스킬 모두 TryUseMp 실패로 발동 자체가 차단(직전 커밋에서 MP 소모를 연결한 여파)
+- ManaConfig.startMp 0 → **6** 설정(스킬 3종 즉시 시험 가능 최소치)
+### 검증
+- 첫 프레임 계측: PlayerMana.mp=6, cfg.startMp=6 ✓ / InputLocked=False ✓ / Keyboard 존재 ✓ / 3종 컴포넌트 enabled ✓
+- 입력 주입(QueueStateEvent) 시도는 프레임 타이밍상 미검증 — 실제 키 입력은 사용자 확인 필요
+### 실패와 수정
+- MP 소모 연결 시 시작값 검토 누락 자인(0이면 전 스킬 봉인)
