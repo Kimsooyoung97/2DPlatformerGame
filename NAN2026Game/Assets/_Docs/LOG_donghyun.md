@@ -6564,3 +6564,63 @@ foreach (SpikeBallTrap)        mb.enabled = false;     // 가시구 정지
   뒤늦게 인지하고 LOG.md에서 해당 항목을 제거한 뒤 이 파일에 다시 기록함. 오늘 세션 이전
   항목들(GameOverController 수정 등)도 LOG.md에 잘못 기록됐을 수 있어 별도로 사용자에게
   확인 요청함.
+
+
+## [구현] 세이브포인트 누적 저장 + 이전 지점(다른 씬 포함) 이동 메뉴 — 2026-08-10 (세션 시간)
+### 프롬프트
+[구현] 현재 세이브포인트가 누적되지않고 새로운 세이브포인트를 저장하면 기존의 것이 삭제되는데
+그렇게 되지 않고 누적되게 바꾸어서 NPC와 스크립트 대화하는 것처럼 세이브포인트에서 Enter키를
+눌러 이전에 저장했던 세이브포인트로 갈 수 있게 할거야 ( 이전 씬이어도 이동 가능하게 )
+(후속 확인 답변: "좌표쌍 구조로 바꿔줘")
+### SPEC 충돌 사전 확인
+SPEC.md "범위 밖: 저장"과 정면 충돌하는 요청이라 진행 전 명시적 확인을 받음(레벨업 때와
+동일한 예외 승인 패턴). 사용자가 명시적으로 진행 지시함.
+### 조작 내역
+- 신규 Assets/Scripts/CheckpointRecord.cs: (sceneName, position, label) 좌표쌍 데이터 구조
+- PlayerHealth.cs:
+  - private List<CheckpointRecord> checkpoints 필드 추가, Awake()에서 시작 위치를 첫 항목으로
+    자동 등록
+  - SetCheckpoint(Vector3)를 덮어쓰기 -> 누적(Add)으로 변경. checkpoint(단일, 낙사 부활용)는
+    항상 최신값 유지
+  - Checkpoints(IReadOnlyList<CheckpointRecord>) 프로퍼티 노출
+  - Respawn()에 FAIL 수정 동봉(아래 참고)
+- Assets/Scripts/CheckpointTrigger.cs 통짜 재작성(FAIL.md #6) — 기존 파일이 한글 주석 인코딩
+  깨짐 상태였어서 이번에 같이 바로잡음. 플레이어가 영역 안에 머무는 동안(OnTriggerEnter/Exit로
+  추적) Enter키 입력 시 CheckpointTravelMenu.Open() 호출하는 로직 추가
+- 신규 Assets/Scripts/CheckpointTravelMenu.cs: NPC 대화창 스타일 이동 메뉴.
+  - uGUI Button이 아니라 OnGUI로 직접 그림 — FAIL.md #17(EventSystem 없어서 버튼 무반응)
+    리스크를 원천 회피하기 위한 설계 선택
+  - ↑↓/WS로 선택, Enter 확정, Esc 취소
+  - 같은 씬이면 즉시 재배치, 다른 씬이면 SceneManager.LoadScene 후 sceneLoaded 콜백에서
+    pendingTravel 좌표로 재배치
+- RealPlayer(UITestScene)에 CheckpointTravelMenu 부착. 겸사겸사 지난 씬 사고 이후 안 붙어있던
+  PlayerScenePositioner도 재부착 확인 후 부착함(누락 발견)
+### 실측으로 발견하고 수정한 버그 (신규 기능과 별개, 기존 코드에도 잠재)
+- **증상**: CheckpointTravelMenu로 다른 씬 이동 시, 이동 직후엔 좌표가 정확한데 몇 프레임 뒤
+  원래 위치로 되돌아감(Debug.Log로 pos-before/after 실측 확인)
+- **원인**: transform.position만 설정하면 Rigidbody2D가 다음 FixedUpdate에서 자기 내부
+  추적 위치(보간용)로 되돌려놓음. body.position을 같이 안 맞추면 발생
+- **수정한 3곳**: CheckpointTravelMenu.MovePlayerTo(), PlayerHealth.Respawn(),
+  PlayerScenePositioner.HandleSceneLoaded(스폰포인트 재배치) — 전부 body.position을 먼저
+  설정하도록 통일
+- 디버그용 Debug.Log는 검증 후 제거함(최종 코드에 없음)
+### 검증
+- refresh_unity(compile=request) -> read_console(types=error): 0건 (버그 수정 전/후 2회 확인)
+- run_tests(EditMode): 229/229 통과
+- **실측 검증(핵심 동작)**:
+  - PlayerHealth.SetCheckpoint() 3회 호출 -> Checkpoints.Count 1(시작 지점 자동 등록) -> 3까지
+    정확히 누적됨을 확인(예전엔 덮어써서 항상 1이었을 것)
+  - CheckpointTravelMenu.Open() -> isOpen=true 확인
+  - 같은 씬 내 TravelTo -> 좌표 정확히 일치 확인
+  - **다른 씬으로 TravelTo** -> SceneManager.LoadScene 실제 실행 -> sceneLoaded 콜백에서
+    Debug.Log로 pendingTravel 값과 health.pos before/after 직접 관찰 -> 버그 발견 -> 수정 ->
+    재검증에서 이동 직후 좌표 정확히 일치 확인(이후 관찰된 추가 이동은 목표 좌표가 허공이라
+    중력으로 자유낙하하다 기존 낙사 안전장치(fallKillY)가 정상 작동한 것으로 확인 — 신규
+    버그 아님, Deaths=0으로 Kill() 아닌 낙사 경로임을 구분 확인)
+- manage_scene(save): UITestScene 저장 성공
+- 씬 배치 확인: CheckpointTrigger 2개가 UITestScene에 이미 배치돼있고 BoxCollider2D
+  isTrigger=True 정상 확인(SavePoint1, SavePoint1 (1))
+### 실패와 수정
+- run_tests 완료 직후 find_gameobjects 호출이 "No Unity Editor instances found"로 실패 —
+  FAIL.md #31(H3 계열 도구 환경 불안정)과 유사한 일시적 연결 끊김으로 추정. refresh_unity
+  재호출로 즉시 복구됨, 재시도 전 별도 조치 불필요했음

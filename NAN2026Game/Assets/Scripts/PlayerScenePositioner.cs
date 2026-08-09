@@ -34,12 +34,15 @@ namespace NAN2026
             ScenePlayerSpawnPoint spawn = FindFirstObjectByType<ScenePlayerSpawnPoint>();
             if (spawn != null)
             {
-                transform.position = spawn.transform.position;
+                // FAIL: transform.position만 바꾸면 Rigidbody2D가 다음 물리 스텝에서 예전
+                // 위치로 되돌려놓는다(보간) — CheckpointTravelMenu에서 실측 확인된 것과 동일 버그.
                 if (body != null)
                 {
+                    body.position = spawn.transform.position;
                     body.linearVelocity = Vector2.zero;
                     body.SetRotation(0f);
                 }
+                transform.position = spawn.transform.position;
             }
             // 스폰 포인트가 없는 씬(예: 시작 씬)이어도 카메라 연결은 아래에서 계속 진행한다.
 

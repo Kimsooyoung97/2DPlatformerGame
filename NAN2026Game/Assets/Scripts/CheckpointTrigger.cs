@@ -1,43 +1,74 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace NAN2026
 {
     /// <summary>
-    /// ¾À¿¡ ¹èÄ¡ÇÏ´Â Ã¼Å©Æ÷ÀÎÆ® Æ®¸®°Å. BoxCollider2D ¿µ¿ª¿¡ ÇÃ·¹ÀÌ¾î°¡ µé¾î¿À¸é
-    /// PlayerHealth.SetCheckpoint(Vector3)¸¦ È£ÃâÇØ ¸®½ºÆù ÁöÁ¡À» °»½ÅÇÑ´Ù.
+    /// ì”¬ì— ë°°ì¹˜í•˜ëŠ” ì²´í¬í¬ì¸íŠ¸ íŠ¸ë¦¬ê±°. BoxCollider2D ì˜ì—­ì— í”Œë ˆì´ì–´ê°€ ë“¤ì–´ì˜¤ë©´
+    /// PlayerHealth.SetCheckpoint(Vector3)ë¥¼ í˜¸ì¶œí•´ ì„¸ì´ë¸Œí¬ì¸íŠ¸ë¥¼ í•˜ë‚˜ ëˆ„ì  ì €ì¥í•œë‹¤.
+    /// í”Œë ˆì´ì–´ê°€ ì´ ì˜ì—­ ì•ˆì— ìˆëŠ” ë™ì•ˆ Enterí‚¤ë¥¼ ëˆ„ë¥´ë©´, NPC ëŒ€í™”ì°½ì²˜ëŸ¼ ì§€ê¸ˆê¹Œì§€ ì €ì¥ëœ
+    /// ì„¸ì´ë¸Œí¬ì¸íŠ¸ ëª©ë¡ì„ ë³´ì—¬ì£¼ëŠ” CheckpointTravelMenuë¥¼ ì—°ë‹¤(ë‹¤ë¥¸ ì”¬ ì§€ì ë„ ì„ íƒ ê°€ëŠ¥).
     /// </summary>
     [RequireComponent(typeof(BoxCollider2D))]
     public sealed class CheckpointTrigger : MonoBehaviour
     {
         [SerializeField] private string playerTag = "Player";
 
-        [Tooltip("ºñ¿öµÎ¸é ÀÌ ¿ÀºêÁ§Æ®(Äİ¶óÀÌ´õ) ÀÚ½ÅÀÇ À§Ä¡¸¦ Ã¼Å©Æ÷ÀÎÆ®·Î ¾´´Ù. " +
-                 "Äİ¶óÀÌ´õ°¡ ¹ßÆÇÃ³·³ ³Ğ°Ô ±ò·ÁÀÖ¾î¼­ ½ÇÁ¦ ½ºÆù ÁöÁ¡À» µû·Î ÁöÁ¤ÇÏ°í ½ÍÀ¸¸é ¿©±â¿¡ ¿¬°á.")]
+        [Tooltip("ë¹„ì›Œë‘ë©´ ì´ ì˜¤ë¸Œì íŠ¸(ì½œë¼ì´ë”) ìì‹ ì˜ ìœ„ì¹˜ë¥¼ ì²´í¬í¬ì¸íŠ¸ë¡œ ì“´ë‹¤. " +
+                 "ì½œë¼ì´ë”ê°€ ë°œíŒì²˜ëŸ¼ ë„“ê²Œ ê¹”ë ¤ìˆì–´ì„œ ì‹¤ì œ ìŠ¤í° ì§€ì ì„ ë”°ë¡œ ì§€ì •í•˜ê³  ì‹¶ìœ¼ë©´ ì—¬ê¸°ì— ì—°ê²°.")]
         [SerializeField] private Transform checkpointPosition;
 
-        [Tooltip("ÇÑ ¹ø ¹âÀ¸¸é ´Ù½Ã ¹İÀÀÇÏÁö ¾Ê°Ô ÇÒÁö. ¿©·¯ ¹ø Áö³ª°¡µµ °è¼Ó ÃÖ½Å À§Ä¡·Î " +
-                 "°»½ÅÇÏ°í ½ÍÀ¸¸é ²¨µĞ´Ù(±âº»°ª).")]
+        [Tooltip("í•œ ë²ˆ ë°Ÿìœ¼ë©´ ë‹¤ì‹œ ì €ì¥í•˜ì§€ ì•Šì„ì§€. ì—¬ëŸ¬ ë²ˆ ì§€ë‚˜ê°€ë©´ ê·¸ë•Œë§ˆë‹¤ ìƒˆ í•­ëª©ì„ " +
+                 "ëˆ„ì  ì €ì¥í•˜ê³  ì‹¶ìœ¼ë©´ êº¼ë‘”ë‹¤(ê¸°ë³¸ê°’) â€” ê°™ì€ ìë¦¬ë¥¼ ì—¬ëŸ¬ ë²ˆ ë°Ÿì•„ë„ ëª©ë¡ì— " +
+                 "ì¤‘ë³µìœ¼ë¡œ ê³„ì† ìŒ“ì´ë‹ˆ, ë°˜ë³µ ì €ì¥ì„ ì›ì¹˜ ì•Šìœ¼ë©´ ì¼œë¼.")]
         [SerializeField] private bool triggerOnce = false;
 
         private bool consumed;
+        private bool playerInside;
+        private PlayerHealth insidePlayerHealth;
 
         private void Awake()
         {
             BoxCollider2D col = GetComponent<BoxCollider2D>();
-            col.isTrigger = true; // Ã¼Å©Æ÷ÀÎÆ®´Â ÇÃ·¹ÀÌ¾î¸¦ ¹ĞÁö ¾Ê°í °¨Áö¸¸ ÇØ¾ß ÇÏ¹Ç·Î °­Á¦·Î Æ®¸®°ÅÈ­
+            col.isTrigger = true; // ì²´í¬í¬ì¸íŠ¸ëŠ” í”Œë ˆì´ì–´ë¥¼ ë°€ì§€ ì•Šê³  ê°ì§€ë§Œ í•´ì•¼ í•˜ë¯€ë¡œ ê°•ì œë¡œ íŠ¸ë¦¬ê±°í™”
         }
 
         private void OnTriggerEnter2D(Collider2D other)
         {
-            if (triggerOnce && consumed) return;
             if (!other.CompareTag(playerTag)) return;
 
             PlayerHealth health = other.GetComponentInParent<PlayerHealth>();
             if (health == null) return;
 
+            playerInside = true;
+            insidePlayerHealth = health;
+
+            if (triggerOnce && consumed) return;
+
             Vector3 point = checkpointPosition != null ? checkpointPosition.position : transform.position;
             health.SetCheckpoint(point);
             consumed = true;
+        }
+
+        private void OnTriggerExit2D(Collider2D other)
+        {
+            if (!other.CompareTag(playerTag)) return;
+            playerInside = false;
+            insidePlayerHealth = null;
+        }
+
+        private void Update()
+        {
+            if (!playerInside || insidePlayerHealth == null) return;
+
+            Keyboard kb = Keyboard.current;
+            if (kb == null) return;
+
+            if ((kb.enterKey.wasPressedThisFrame || kb.numpadEnterKey.wasPressedThisFrame)
+                && CheckpointTravelMenu.Instance != null)
+            {
+                CheckpointTravelMenu.Instance.Open(insidePlayerHealth);
+            }
         }
     }
 }
