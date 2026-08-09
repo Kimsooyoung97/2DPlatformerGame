@@ -33,6 +33,17 @@ MonoBehaviour:
   attackWindup: 0.55
   windupFlashSpeed: 12
   windupFlashColor: {r: 1, g: 0.55, b: 0.2, a: 1}
+  patrolRange: 6
+  patrolProbeStep: 0.5
+  patrolLevelTolerance: 0.6
+  arrowParryZone: 1.5
+  arrowParryHeight: 2
+  groggyDuration: 1.6
+  groggyFlashSpeed: 6
+  groggyFlashColor: {r: 1, g: 0.9, b: 0.3, a: 1}
+  reflectOnParry: 1
+  reflectSpeedMul: 1.4
+  reflectMinLife: 1.5
   clashConfig: {fileID: 11400000, guid: 31b4bd26897983b4fb8fcb4703f841b5, type: 2}
   fps: 12
   snapToGround: 1
@@ -42,7 +53,7 @@ MonoBehaviour:
   arrowSpeed: 9
   arrowLife: 4
   arrowDamage: 1
-  showRangesInGame: 1
-  showRangeLabels: 1
+  showRangesInGame: 0
+  showRangeLabels: 0
   rangeBandHeight: 1.8
   hitFlash: 0.1

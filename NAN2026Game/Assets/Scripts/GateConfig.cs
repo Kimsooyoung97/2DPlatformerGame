@@ -10,6 +10,8 @@ namespace NAN2026
         [Tooltip("이 y 범위에 배치된 몬스터를 전부 처치하면 방어막이 무너진다. 1·2단만 포함하고 보스 구역(y10)은 제외")]
         public float clearMinY = -1f;
         public float clearMaxY = 5f;
+        [Tooltip("팀 체계(NHNDemo.MonsterHealth) 몬스터도 집계에 넣을지. 끄면 우리 잡몹(EnemyBase)만 센다")]
+        public bool countTeamMonsters = false;
         [Tooltip("생존 수를 다시 세는 간격(초)")]
         public float clearCheckInterval = 0.25f;
         [Tooltip("남은 적 라벨 표시 여부")]

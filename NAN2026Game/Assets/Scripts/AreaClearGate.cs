@@ -59,12 +59,18 @@ namespace NAN2026
                 if (!GateCollapseLogic.InClearBand(e.transform.position.y, config.clearMinY, config.clearMaxY)) continue;
                 if (!watched.Contains(e.gameObject)) watched.Add(e.gameObject);
             }
-            // 팀 몬스터(MonsterHealth). 비활성 개체는 제외 — 꺼둔 몬스터 때문에 영영 안 열리는 일을 막는다.
-            foreach (var m in FindObjectsByType<NHNDemo.MonsterHealth>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
+            // 팀 체계(NHNDemo.MonsterHealth)는 기본적으로 세지 않는다.
+            // KeyMonster 처럼 '적이 아닌 장치' 가 섞여 있어, 활성/비활성 상태에 기대면 언제든 다시 끼어든다.
+            // 비활성 개체 제외도 유지 — 꺼둔 몬스터 때문에 영영 안 열리는 일을 막는다.
+            if (config.countTeamMonsters)
             {
-                if (m == null) continue;
-                if (!GateCollapseLogic.InClearBand(m.transform.position.y, config.clearMinY, config.clearMaxY)) continue;
-                if (!watched.Contains(m.gameObject)) watched.Add(m.gameObject);
+                foreach (var m in FindObjectsByType<NHNDemo.MonsterHealth>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
+                {
+                    if (m == null) continue;
+                    if (m.GetComponent<KeyMonsterGate>() != null) continue;   // 열쇠 장치는 적으로 세지 않는다
+                    if (!GateCollapseLogic.InClearBand(m.transform.position.y, config.clearMinY, config.clearMaxY)) continue;
+                    if (!watched.Contains(m.gameObject)) watched.Add(m.gameObject);
+                }
             }
             Debug.Log("[AreaClearGate] 감시 대상 " + watched.Count + "마리 (y " + config.clearMinY + " ~ " + config.clearMaxY + ")", this);
         }

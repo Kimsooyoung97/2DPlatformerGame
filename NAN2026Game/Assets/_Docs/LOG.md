@@ -7471,3 +7471,30 @@ Secen3다음에는 Secen4 진행하도록 했는데
 - 테스트 삽입 시 마지막 중괄호 짝을 잘못 잡아 **메서드 안에 [Test] 메서드를 중첩**시켜 CS0106 5건 발생. 해당 파일은 기존 스타일이 `[Test] public void`(한 줄)이라 내 계산이 어긋났다 → 39행 이후를 통째로 재작성해 해소
   교훈: 테스트 파일 말미 삽입은 '마지막에서 두 번째 중괄호' 휴리스틱에 의존하지 말고, 삽입 후 반드시 컴파일로 확인한다
 - KeyMonsterGate 컴포넌트 자체는 남아 있으나 부착 대상이 비활성이라 무해. 제출 후 정리 대상
+
+
+## [수정] 사거리 표시 OFF + KeyMonster 집계 제외 구조화 — 2026-08-09 11:12
+### 프롬프트
+[수정] 적들의 공격범위들을  게임 화면에서 볼 수 있는 표시들을 지워주고, 자연 몬스터 셀때 keyMonster도 포함시키는거 같은데 이거 수정해줘.
+### 조작 내역
+**① 게임 화면 사거리 표시 OFF (제출 전 필수 항목 소진)**
+- ArcherEnemyConfig / KnightEnemyConfig / DemonBossConfig 의 `showRangesInGame`·`showRangeLabels` 6개 값을 전부 **True → False**
+- 코드는 그대로 두고 값만 껐다. 튜닝이 다시 필요하면 체크박스 하나로 복구된다
+**② KeyMonster 집계 제외 — '지금 안 세어짐' 이 아니라 '구조적으로 안 세어짐' 으로**
+- 실측 결과 현재는 이미 9마리만 집계되고 있었다(KeyMonster 비활성이라 FindObjectsInactive.Exclude 에 걸러짐)
+- 그러나 **활성 상태에 기댄 배제**였다 — 누군가 KeyMonster 를 다시 켜면 즉시 10마리가 된다. 그 취약함을 없앴다
+- GateConfig 신규 `countTeamMonsters = false`: 팀 체계(NHNDemo.MonsterHealth)는 **기본적으로 세지 않는다**. 집계 대상은 우리 잡몹(EnemyBase)뿐
+- 켜더라도 `KeyMonsterGate` 컴포넌트가 붙은 개체는 제외 — 열쇠 장치는 적이 아니다
+### 검증
+- 컴파일 성공, read_console error 0건
+- EditMode **250/250 통과**
+- 사거리 플래그 재읽기: Archer·Knight·Demon 전부 showRangesInGame=False, showRangeLabels=False 확인
+- **KeyMonster 를 일부러 활성화해 재현 검증**: 비활성 상태 9마리 / **강제 활성 상태에서도 9마리** → 활성 여부와 무관하게 제외됨 확인 후 원래 상태(activeSelf=False)로 복구
+- 집계 명단 실측: ArcherEnemy_17, ArcherEnemy_58, ArcherEnemy_58 (1), KnightEnemy_12, KnightEnemy_22, KnightEnemy_31, KnightEnemy_31 (1), KnightEnemy_40, KnightEnemy_55
+- **사용자 눈 판정 필요**: (1) 게임 화면에 사거리 띠·라벨이 사라졌는지 (2) '남은 적 9' 로 시작하는지
+### 남은 디버그 플래그 (요청 범위 밖이라 건드리지 않음)
+- `MinoBossConfig.showParryDebug = True` — 패링 PERFECT/MISS 팝업
+- `PlayerFxConfig.enableDebugKeys = True` — 5=hurt / 6=death 미리보기 키
+  둘 다 제출 전 OFF 대상이지만, 지금 끄면 사용자의 테스트 수단이 사라지므로 지시를 기다린다
+### 실패와 수정
+- 없음
