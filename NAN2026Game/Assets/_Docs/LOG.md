@@ -7990,3 +7990,18 @@ Scene1 몬스터가 나 보자마자 바로 공격해서 난이도가 너무 어
 - 실제 끼임·관통 재발은 사용자 재생
 ### 실패와 수정
 - LayerMask.value 접근 오류 1회(codedom) → (int) 캐스팅으로 정정
+
+
+## [구현] 스킬 아이콘 슬롯별 배치 — 2026-08-10 07:06
+### 프롬프트
+Scene1에 Skill1 배치돼 있는데 Skill2·Skill3도 배치. Skill1 좌측 첫째, Skill2 중간, Skill3 셋째
+### 조작 내역
+- 팀 병합분 확인: ChestRewardConfig에 icons[3]·GetIcon(slot) 헬퍼가 이미 추가돼 있었고 상자 획득 연출(SkillRewardFlyer)은 이미 슬롯별 아이콘 사용 중
+- 비어 있던 icons[3]을 채움: 0=Skill1 / 1=Skill2 / 2=Skill3 (Assets/Resources)
+- ChestSkillBar가 슬롯별 아이콘을 쓰도록 IconFor(i) 추가 후 팀 헬퍼 config.GetIcon(i)로 통일 — 바탕·쿨타임 채움 이미지 모두 적용
+- 병합 후 상자 슬롯 배정 생존 확인: BOX@y44.7=0 / Chest (1)@y55.0=2 / Chest (2)@y32.0=1
+### 검증
+- 컴파일 0, icons[3] = 1번:Skill1 2번:Skill2 3번:Skill3 
+- 좌하단 아이콘 3종 표시는 사용자 재생
+### 실패와 수정
+없음

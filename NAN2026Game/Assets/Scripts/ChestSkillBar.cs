@@ -27,6 +27,12 @@ namespace NAN2026
 
         private void OnDisable() { ChestRewardEvents.OnCollected -= Fill; }
 
+        /// 슬롯별 아이콘 — icons 배열이 있으면 그걸 쓰고, 없으면 공용 icon으로 대체
+        private Sprite IconFor(int i)
+        {
+            return config.GetIcon(i); // 팀 헬퍼와 동일 규칙 사용
+        }
+
         private void Build()
         {
             if (config == null) { Debug.LogWarning("[ChestSkillBar] config 가 비어 있습니다.", this); return; }
