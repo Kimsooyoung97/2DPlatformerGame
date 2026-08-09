@@ -6564,3 +6564,27 @@ foreach (SpikeBallTrap)        mb.enabled = false;     // 가시구 정지
   뒤늦게 인지하고 LOG.md에서 해당 항목을 제거한 뒤 이 파일에 다시 기록함. 오늘 세션 이전
   항목들(GameOverController 수정 등)도 LOG.md에 잘못 기록됐을 수 있어 별도로 사용자에게
   확인 요청함.
+
+
+## [수정] 스킬 MP 소모 1로 통일 + 검기 사거리 연장 — 2026-08-10 03:11
+### 프롬프트
+스킬 한번에 MP 하트 소모량은 1만 되어야 하고 6번 이펙트는 적 몬스터에 부딪힐때까지 또는 벽에 부딪힐때까지 끝까지 가야함
+### 조작 내역
+**① MP 소모 전부 1로**
+- PlayerSkillConfig(5번 번개) mpCost 2 → **1**
+- SkillSlash_6(6번 검기)      mpCost 2 → **1**
+- SkillOrb_7(7번 나선환)      mpCost 3 → **1**
+**② 검기가 끝까지 날아가게 — 코드 수정 없이 수치만**
+- 먼저 원인을 확인했다: `EffectProjectile` 에 **충돌 처리가 이미 구현돼 있었다**
+  · 벽·바닥: `if (!other.isTrigger) Destroy(gameObject);` — 트리거가 아닌 콜라이더면 즉시 소멸
+  · 적 명중: `piercing == false` 면 첫 적에서 소멸 (SkillSlash_6 은 piercing False)
+- 즉 일찍 사라지는 원인은 **수명뿐**이었다. life 2초 x speed 9 = 사거리 18u, 화면 반폭 12u 를 조금 넘고 끝
+- SkillSlash_6 life 2 → **8** (사거리 18u → **72u**, 화면 6배)
+- 수명을 무한으로 두지 않은 이유: 벽 없는 구간에서 투사체가 영원히 남아 누적된다. 수명은 **안전핀**으로만 남긴다
+### 검증
+- 재읽기 확인: PlayerSkillConfig 1 / SkillSlash_6 1 / SkillOrb_7 1
+- SkillSlash_6 life 8 x speed 9 = **사거리 72u**, 화면 반폭 11.95u 대비 6배 → 벽·적을 먼저 만난다
+- 코드 변경 0 (EffectProjectile·SkillSlashCaster 무수정)
+- **사용자 눈 판정 필요**: (1) 스킬 3종 모두 하트 1개만 닳는지 (2) 검기가 벽에 닿을 때까지 날아가는지 (3) 적에 맞으면 그 자리에서 사라지는지 (4) 시작 MP 6 으로 6번 쓸 수 있는지
+### 실패와 수정
+- 없음
