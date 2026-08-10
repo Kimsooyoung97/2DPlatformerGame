@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70990f24a40562d49b119c1a486b285d, type: 3}
   m_Name: MinoBossConfig
   m_EditorClassIdentifier: Assembly-CSharp::NAN2026.MinoBossConfig
-  maxHp: 10
+  maxHp: 200
   aggroX: 9
   attackRange: 3.3799996
   hitReach: 4.42
@@ -57,7 +57,7 @@ MonoBehaviour:
   barUnder: {fileID: 21300000, guid: 6e56a6c15e54bbf44a62fdcdff80e3c5, type: 3}
   barProgress: {fileID: 21300000, guid: 87c8d36c3d4eb584f9d908df57748686, type: 3}
   barOver: {fileID: 21300000, guid: 30667c31bcffce343b89a8ad2dc9bb93, type: 3}
-  xpReward: 20
+  xpReward: 55
   clashConfig: {fileID: 11400000, guid: 31b4bd26897983b4fb8fcb4703f841b5, type: 2}
   atk1Clip: {fileID: 8300000, guid: b542358e1da8ea04086b5af3bc7f2ada, type: 3}
   atk2Clip: {fileID: 8300000, guid: 7b5602b66ec3ffa4c8d18616833b3100, type: 3}

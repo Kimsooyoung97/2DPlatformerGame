@@ -23,7 +23,9 @@ MonoBehaviour:
   jumpConfirmDuration: 0.6
   attackCooldown: 3
   attackDamage: 1
-  maxHealth: 4
+  attackClip: {fileID: 0}
+  attackVolume: 0.85
+  maxHealth: 10
   xpReward: 5
   healthBarSize: {x: 1.2, y: 0.16}
   healthBarOffset: {x: 0, y: 2.4, z: 0}
