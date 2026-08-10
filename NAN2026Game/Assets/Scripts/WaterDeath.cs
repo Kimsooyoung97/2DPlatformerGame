@@ -94,7 +94,7 @@ namespace NAN2026
                 if (config.useDeathFlow && hp != null)
                 {
                     if (hp != null) hp.SinkingInWater = false;
-            hp.Kill();          // 체크포인트 부활이냐 게임오버냐는 PlayerHealth 가 판단한다
+                    hp.Kill();          // 체크포인트 부활이냐 게임오버냐는 PlayerHealth 가 판단한다
                     state = 4; timer = 0f;
                     return;
                 }

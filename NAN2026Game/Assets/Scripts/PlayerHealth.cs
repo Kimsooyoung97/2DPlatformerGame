@@ -132,7 +132,7 @@ public class PlayerHealth : MonoBehaviour
         // 월드 밖으로 떨어지면 무적이어도 사망 — 단 Respawn()을 직접 부르지 않고
         // 정식 사망 경로(Kill)를 태워 death 모션·게임오버 패널이 나오게 한다.
         if (!dying && !SinkingInWater && transform.position.y < fallKillY)
-            Kill(true);
+            Kill();
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -228,13 +228,12 @@ public class PlayerHealth : MonoBehaviour
         OnHealthChanged?.Invoke(currentHealth, MaxHealth);
     }
 
-    public void Kill() { Kill(false); }
 
     /// <summary>낙사·수몰처럼 구제 불가한 상황은 ignoreInvincible=true로 강제 사망시킨다.
     /// (무적 중이라도 월드 밖으로 떨어지면 되돌릴 방법이 없다)</summary>
-    public void Kill(bool ignoreInvincible)
+    public void Kill( )
     {
-        if (dying || (invincible && !ignoreInvincible))
+        if (dying || invincible)
             return;
 
         dying = true;
