@@ -88,7 +88,8 @@ namespace NHNDemo
                 animation.SetAnimatorEnabled(false); // 히트 포즈에서 정지 — 플래시가 애니메이션에 안 묻히게
             }
 
-            PlayClip(hitClip, hitVolume); // 실제로 체력이 깎인 매 순간 1회 (사망 타격 포함)
+            PlayClip(hitClip, hitVolume);
+            // 실제로 체력이 깎인 매 순간 1회 (사망 타격 포함)
             OnHealthChanged?.Invoke(currentHealth, maxHealth);
             OnDamaged?.Invoke(damage, attackDirection);
 

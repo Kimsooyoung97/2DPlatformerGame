@@ -63,44 +63,44 @@ MonoBehaviour:
     m_FaceIndex: 0
     m_FamilyName: DOSIyagiBoldface
     m_StyleName: Regular
-    m_PointSize: 90
+    m_PointSize: 34
     m_Scale: 1
     m_UnitsPerEM: 1024
-    m_LineHeight: 96.328125
-    m_AscentLine: 78.75
-    m_CapLine: 62
-    m_MeanLine: 51
+    m_LineHeight: 36.390625
+    m_AscentLine: 29.75
+    m_CapLine: 24
+    m_MeanLine: 20
     m_Baseline: 0
-    m_DescentLine: -11.25
-    m_SuperscriptOffset: 78.75
+    m_DescentLine: -4.25
+    m_SuperscriptOffset: 29.75
     m_SuperscriptSize: 0.5
-    m_SubscriptOffset: -11.25
+    m_SubscriptOffset: -4.25
     m_SubscriptSize: 0.5
-    m_UnderlineOffset: -8.7890625
-    m_UnderlineThickness: 3.515625
-    m_StrikethroughOffset: 20.4
-    m_StrikethroughThickness: 3.515625
-    m_TabWidth: 45
+    m_UnderlineOffset: -3.3203125
+    m_UnderlineThickness: 1.328125
+    m_StrikethroughOffset: 8
+    m_StrikethroughThickness: 1.328125
+    m_TabWidth: 17
   m_Material: {fileID: 4846904097785221477}
   m_SourceFontFileGUID: c9d6516259d193c43ba0268739953ceb
   m_CreationSettings:
     sourceFontFileName: 
-    sourceFontFileGUID: 
+    sourceFontFileGUID: c9d6516259d193c43ba0268739953ceb
     faceIndex: 0
     pointSizeSamplingMode: 0
-    pointSize: 0
-    padding: 0
-    paddingMode: 0
+    pointSize: 34
+    padding: 3
+    paddingMode: 1
     packingMode: 0
-    atlasWidth: 0
-    atlasHeight: 0
-    characterSetSelectionMode: 0
-    characterSequence: 
+    atlasWidth: 4096
+    atlasHeight: 4096
+    characterSetSelectionMode: 5
+    characterSequence: '32-126,44032-55203,12593-12643,8200-9900 '
     referencedFontAssetGUID: 
     referencedTextAssetGUID: 
     fontStyle: 0
     fontStyleModifier: 0
-    renderMode: 0
+    renderMode: 4165
     includeFontFeatures: 0
   m_SourceFontFile: {fileID: 12800000, guid: c9d6516259d193c43ba0268739953ceb, type: 3}
   m_SourceFontFilePath: 
@@ -114,16 +114,16 @@ MonoBehaviour:
   m_IsMultiAtlasTexturesEnabled: 1
   m_GetFontFeatures: 1
   m_ClearDynamicDataOnBuild: 1
-  m_AtlasWidth: 1024
-  m_AtlasHeight: 1024
-  m_AtlasPadding: 9
+  m_AtlasWidth: 4096
+  m_AtlasHeight: 4096
+  m_AtlasPadding: 3
   m_AtlasRenderMode: 4165
   m_UsedGlyphRects: []
   m_FreeGlyphRects:
   - m_X: 0
     m_Y: 0
-    m_Width: 1023
-    m_Height: 1023
+    m_Width: 4095
+    m_Height: 4095
   m_FontFeatureTable:
     m_MultipleSubstitutionRecords: []
     m_LigatureSubstitutionRecords: []
@@ -219,15 +219,15 @@ Material:
     - _ColorMask: 15
     - _CullMode: 0
     - _FaceDilate: 0
-    - _GradientScale: 10
+    - _GradientScale: 4
     - _MaskSoftnessX: 0
     - _MaskSoftnessY: 0
     - _OutlineSoftness: 0
     - _OutlineWidth: 0
     - _PerspectiveFilter: 0.875
-    - _ScaleRatioA: 0.9
+    - _ScaleRatioA: 0.75
     - _ScaleRatioB: 1
-    - _ScaleRatioC: 0.73125
+    - _ScaleRatioC: 0.609375
     - _ScaleX: 1
     - _ScaleY: 1
     - _ShaderFlags: 0
@@ -237,8 +237,8 @@ Material:
     - _StencilOp: 0
     - _StencilReadMask: 255
     - _StencilWriteMask: 255
-    - _TextureHeight: 1024
-    - _TextureWidth: 1024
+    - _TextureHeight: 4096
+    - _TextureWidth: 4096
     - _UnderlayDilate: 0
     - _UnderlayOffsetX: 0
     - _UnderlayOffsetY: 0

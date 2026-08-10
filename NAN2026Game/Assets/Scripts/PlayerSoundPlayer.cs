@@ -2,17 +2,17 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 namespace NAN2026
 {
-    // 발소리(속도 관찰)·점프(입력 관찰)는 기존 방식 유지.
-    // 공격(ComboV1/ComboV2)·대시·스킬1/2/3은 각 스크립트의 "실제 발동" 이벤트를 구독한다.
-    //   (PlayerController2D.OnAttackPerformed/OnDashPerformed, PlayerSkill.OnSkill1Performed,
-    //    SkillSlashCaster.OnSkill2Performed, SkillOrbCaster.OnSkill3Performed)
+    // 발소리(속도 관찰)는 기존 방식 유지.
+    // 점프/공격(ComboV1/ComboV2)/대시/패링/스킬1/2/3은 각 스크립트의 "실제 발동" 이벤트를 구독한다.
+    //   (PlayerController2D.OnAttackPerformed/OnDashPerformed/OnJumpPerformed/OnParrySuccess,
+    //    PlayerSkill.OnSkill1Performed, SkillSlashCaster.OnSkill2Performed, SkillOrbCaster.OnSkill3Performed)
     // 피격/사망은 같은 오브젝트의 PlayerHealth 인스턴스 이벤트(OnDamaged/OnPlayerDied)를 구독한다.
     // 모두 "실제로 확정된 시점"에만 불리는 이벤트라 연타·중복 트리거로 소리가 겹치지 않는다.
     public class PlayerSoundPlayer : MonoBehaviour
     {
         public SoundConfig config;
         public AudioSource source;
-        public AudioSource attackSource; // 검기/스킬 전용 (피치 독립)
+        public AudioSource attackSource; // 검기/스킬/패링 전용 (피치 독립)
         Rigidbody2D rb;
         PlayerHealth health;
         float stepT;
@@ -28,11 +28,11 @@ namespace NAN2026
         {
             PlayerController2D.OnAttackPerformed += HandleAttackPerformed;
             PlayerController2D.OnDashPerformed += HandleDashPerformed;
+            PlayerController2D.OnJumpPerformed += HandleJumpPerformed;
+            PlayerController2D.OnParrySuccess += HandleParrySuccess;
             PlayerSkill.OnSkill1Performed += HandleSkill1Performed;
             SkillSlashCaster.OnSkill2Performed += HandleSkill2Performed;
             SkillOrbCaster.OnSkill3Performed += HandleSkill3Performed;
-            PlayerController2D.OnJumpPerformed += HandleJumpPerformed; // 추가
-
             if (health != null)
             {
                 health.OnDamaged += HandleDamaged;
@@ -44,11 +44,11 @@ namespace NAN2026
         {
             PlayerController2D.OnAttackPerformed -= HandleAttackPerformed;
             PlayerController2D.OnDashPerformed -= HandleDashPerformed;
+            PlayerController2D.OnJumpPerformed -= HandleJumpPerformed;
+            PlayerController2D.OnParrySuccess -= HandleParrySuccess;
             PlayerSkill.OnSkill1Performed -= HandleSkill1Performed;
             SkillSlashCaster.OnSkill2Performed -= HandleSkill2Performed;
             SkillOrbCaster.OnSkill3Performed -= HandleSkill3Performed;
-            PlayerController2D.OnJumpPerformed -= HandleJumpPerformed; // 추가
-
             if (health != null)
             {
                 health.OnDamaged -= HandleDamaged;
@@ -73,11 +73,7 @@ namespace NAN2026
                 }
             }
             else stepT = config.stepInterval; // 재개 즉시 첫 발소리
-
-            var kb = Keyboard.current;
-            if (kb != null && kb.upArrowKey.wasPressedThisFrame && config.jumpClip != null)
-                source.PlayOneShot(config.jumpClip, config.jumpVolume);
-            // 공격/대시/스킬/피격/사망 사운드는 여기서 키 입력을 보지 않는다 — 아래 이벤트 핸들러 참고
+            // 점프/공격/대시/패링/스킬/피격/사망 사운드는 여기서 키 입력을 보지 않는다 — 아래 이벤트 핸들러 참고
         }
 
         // 실제로 공격이 발동된 프레임에만 정확히 1번 호출된다 (이펙트 스폰과 동일 시점).
@@ -90,17 +86,28 @@ namespace NAN2026
             asrc.pitch = config.attackPitch;
             asrc.PlayOneShot(config.attackClip, config.attackVolume);
         }
-        void HandleJumpPerformed()
-        {
-            if (config == null || config.jumpClip == null || source == null) return;
-            source.PlayOneShot(config.jumpClip, config.jumpVolume);
-        }
+
         void HandleDashPerformed()
         {
             if (config == null || config.dashClip == null || source == null) return;
             source.pitch = config.dashPitch;
             source.PlayOneShot(config.dashClip, config.dashVolume);
             source.pitch = 1f;
+        }
+
+        void HandleJumpPerformed()
+        {
+            if (config == null || config.jumpClip == null || source == null) return;
+            source.PlayOneShot(config.jumpClip, config.jumpVolume);
+        }
+
+        // TryParry() 성공 또는 BossOrb 직접 캐치, 둘 중 어느 경로든 이 한 곳으로 모인다.
+        void HandleParrySuccess()
+        {
+            if (config == null || config.parryClip == null) return;
+            var asrc = attackSource != null ? attackSource : source;
+            asrc.pitch = 1f;
+            asrc.PlayOneShot(config.parryClip, config.parryVolume);
         }
 
         // 1키: 내려찍기 스킬 / 2키: 검기 / 3키: 나선환

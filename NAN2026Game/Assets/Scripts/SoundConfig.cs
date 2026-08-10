@@ -19,6 +19,9 @@ namespace NAN2026
         public AudioClip dashClip;
         public float dashVolume = 0.7f;
         public float dashPitch = 1f;
+        [Header("패링")]
+        public AudioClip parryClip;
+        [Range(0f, 1f)] public float parryVolume = 0.9f;
         [Header("스킬 사운드 (1/2/3키)")]
         public AudioClip skill1Clip;
         public AudioClip skill2Clip;

@@ -98,13 +98,13 @@ public sealed class LevelUpSkillManager : MonoBehaviour
                 return "공격 데미지\n+" + m;
             case AugmentType.Heal:
                 skillImage[idx].sprite = Resources.Load<Sprite>("Heal");
-                return "체력 회복\n+" + m;
+                return "최대 체력 증가\n+" + m;
             case AugmentType.ManaUp:
                 skillImage[idx].sprite = Resources.Load<Sprite>("ManaUp");
                 return "마나 수급량\n+" + m;
             case AugmentType.ManaHeal:
                 skillImage[idx].sprite = Resources.Load<Sprite>("ManaHeal");
-                return "마나 회복\n+" + m;
+                return "최대 마나 증가\n+" + m;
             default: return string.Empty;
         }
     }

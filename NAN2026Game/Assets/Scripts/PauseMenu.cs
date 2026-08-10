@@ -90,14 +90,13 @@ public class PauseMenu : MonoBehaviour
 
     public void QuitToTitle()
     {
-        Time.timeScale = 1f;
-        _paused = false;
-        if (string.IsNullOrEmpty(titleSceneName))
-        {
-            Debug.LogWarning("[PauseMenu] titleSceneName 이 비어 있습니다.");
-            return;
-        }
-        UnityEngine.SceneManagement.SceneManager.LoadScene(titleSceneName);
+#if UNITY_EDITOR
+        // 유니티 에디터에서 실행 중인 경우 Play 모드 종료
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        // 빌드된 실제 게임에서 실행 중인 경우 애플리케이션 종료
+        Application.Quit();
+#endif
     }
 
     public void SetIndex(int i)

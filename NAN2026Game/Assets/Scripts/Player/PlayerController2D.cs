@@ -86,7 +86,8 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
     public bool IsGrounded { get { return grounded; } }       // 대시가 실제로 발동된 순간
     public static event System.Action<string> OnAttackPerformed; // 공격이 실제로 발동된 순간(attackName 전달)
     public static event System.Action OnDashPerformed;           // 대시가 실제로 발동된 순간
-    public static event System.Action OnJumpPerformed; // 추가
+    public static event System.Action OnJumpPerformed;
+    public static event System.Action OnParrySuccess;// 추가
     /// <summary>지금 이 순간 패링 판정 창 안인지. EnemyAI 등 몬스터 공격 판정이 참조한다.</summary>
     private float EffectiveParryWindow()
     {

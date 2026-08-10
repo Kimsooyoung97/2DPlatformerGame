@@ -65,14 +65,11 @@ namespace NAN2026
                     if (m != null) { controller = mb; tryParry = m; break; }
                 }
             }
-            BuildBar();
             BuildGroggyPips();
             SetState(0);
         }
 
-        private void BuildBar() { } // 체력바 HUD 철거 (요청) — 피격 피드백은 점멸+HP 팝업으로
 
-        private void UpdateBar() { }
 
         // clip이 null이거나 AudioSource가 없으면 조용히 무시 — 사운드 미배치 상태에서도 안전.
         private void PlayClip(AudioClip clip, float volume)
