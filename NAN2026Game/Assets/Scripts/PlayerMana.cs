@@ -8,6 +8,7 @@ namespace NAN2026
     {
         public ManaConfig config;
         private int mp;
+        private const int HardCapMp = 15;   // 최대치 상한(런타임 보너스는 팀 필드 maxBonus 사용)
         private int maxBonus;   // 런타임 최대치 보너스 — ScriptableObject를 직접 고치지 않는다(에셋 오염 방지)
         private Image[] hearts;
 
@@ -16,10 +17,9 @@ namespace NAN2026
 
         private void Start()
         {
-            config.maxMp = 10;
-            config.parryGain = 1;
-            config.startMp = 3;
-            mp = config != null ? Mathf.Clamp(config.startMp, 0, config.maxMp) : 0;
+            // Config(ScriptableObject) 값을 코드에서 덮어쓰지 않는다 — 에셋이 영구 오염된다.
+            // 최대치·획득량·시작치는 ManaConfig 에셋에서만 관리한다.
+            mp = config != null ? Mathf.Clamp(config.startMp, 0, MaxMp) : 0;
             BuildHud();
             Refresh();
         }
