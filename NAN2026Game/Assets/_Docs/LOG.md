@@ -8114,3 +8114,17 @@ LOG_donghyun_full.md 새로 작성해서 넣어줄래? git push할때 같이 넣
 - 실제 부활 위치는 사용자 재생
 ### 실패와 수정
 없음
+
+
+## [조사] MP 부족해도 스킬 1·2·3 발동 — 2026-08-10 10:45
+### 프롬프트
+[조사] MP가 떨어져도 스킬 1,2,3 이 나가는 문제가 있어
+### 조사 결과
+- 코드 경로는 정상: 세 캐스터 모두 `if (mana != null && !mana.TryUseMp(config.mpCost)) return;` 보유, TryUseMp는 mp<amount면 false 반환. 배선도 정상(PlayerMana 부착·config=ManaConfig, mpCost 각 1, 시작 3·최대 10)
+- **의심 1(유력): HUD와 실제 MP 불일치.** 팀 추가분 MaxUp(int)이 BuildHud()를 재호출하는데 중복 가드가 없다(기존 MpHud 파괴·재사용 없음) → 새 캔버스가 겹쳐 생기고 hearts 배열은 새 것만 가리킴. 화면에 남은 옛 캔버스가 낡은 값(빈 하트)을 계속 표시 → 실제 MP는 남아 있는데 '떨어졌다'고 보임
+- 의심 2: MaxUp이 config.maxMp를 직접 증가시킴 — ScriptableObject는 에디터에서 값이 영구 변경되어 세션 간 최대치가 누적될 수 있음
+- 해법 3안: ①BuildHud에 중복 가드(기존 MpHud 파괴 후 재생성) ②MaxUp이 HUD를 재생성하지 않고 슬롯만 갱신 ③MaxUp의 config 직접 수정 제거(런타임 보너스는 별도 필드로)
+### 검증
+해당 없음
+### 커밋
+해당 없음(무수정)
