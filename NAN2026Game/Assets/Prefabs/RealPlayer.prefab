@@ -709,12 +709,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NAN2026.SkillSlashCaster
   config: {fileID: 11400000, guid: b4f7d5c8dd664b84e999d679d24b257a, type: 2}
   slashPrefab: {fileID: 6711275918333177968, guid: 4ba4d41d34b707c428957b6aea90fa9c, type: 3}
-  frames:
-  - {fileID: 358773668785758996, guid: 46abc7a1f62f147428bbc0592d7c59f9, type: 3}
-  - {fileID: 3036566232991975274, guid: 46abc7a1f62f147428bbc0592d7c59f9, type: 3}
-  - {fileID: -8249579953693504953, guid: 46abc7a1f62f147428bbc0592d7c59f9, type: 3}
-  - {fileID: 466117090218403094, guid: 46abc7a1f62f147428bbc0592d7c59f9, type: 3}
-  - {fileID: 5737387792536151931, guid: 46abc7a1f62f147428bbc0592d7c59f9, type: 3}
+  frames: []
 --- !u!114 &3529956322082229866
 MonoBehaviour:
   m_ObjectHideFlags: 0
