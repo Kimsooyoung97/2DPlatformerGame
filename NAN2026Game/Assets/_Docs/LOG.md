@@ -8058,3 +8058,17 @@ LOG_donghyun_full.md 새로 작성해서 넣어줄래? git push할때 같이 넣
 - 재읽기: frames 0 / slashPrefab=Skill1 / 키 digit2 / 해금 slot1 유지
 ### 실패와 수정
 - 이미지 계승 요구를 프레임 교체로 잘못 해석 자인 — 아이콘(Skill2) 계승만이 요구였고 이펙트는 원본 유지
+
+
+## [조사] 낙사·수몰 시 게임오버 미발생 — 2026-08-10 10:29
+### 프롬프트
+[조사] 낙사하거나 물에 떨어지면 death 모션 → GAME OVER → SAVE POINT 부활이어야 하는데 이 2가지는 절차가 진행되지 않는다
+### 조사 결과
+- 정상 경로: PlayerHealth.Kill() → 컨트롤러 정지 → **OnPlayerDied 발행**(GameOverController가 구독해 패널 표시) → SuppressRespawnOnDeath=true이므로 부활은 패널의 입력 후 RespawnNow()로 진행
+- **낙사 진범**: PlayerHealth.Update의 `if (!dying && transform.position.y < fallKillY) Respawn();` — Kill()을 거치지 않고 **Respawn()을 직접 호출**. 그래서 death 모션도, OnPlayerDied도, 게임오버 패널도 발생하지 않음(주석상 '무적 중에도 리셋' 목적의 의도적 우회)
+- **수몰 추정**: WaterDeath는 hp.Kill()을 정상 호출하나, 가라앉는 동안 y가 fallKillY 아래로 내려가면 위 낙사 분기가 **먼저 Respawn()을 실행**해 시퀀스를 가로챔(선점)
+- 해법 3안: ①낙사도 Kill() 경로로 통일하되 무적 무시용 ForceKill 추가 ②fallKillY를 수면·수몰 최저점보다 충분히 아래로 내려 선점 방지 ③①+② 병행(권장)
+### 검증
+해당 없음
+### 커밋
+해당 없음(무수정)
