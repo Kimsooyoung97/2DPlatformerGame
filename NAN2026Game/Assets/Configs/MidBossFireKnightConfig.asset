@@ -18,32 +18,32 @@ MonoBehaviour:
   walkSpeed: 2.2
   frontDeadZone: 1
   normalWindup: 0.25
-  normalWinStart: 4
-  normalWinEnd: 6
-  normalDamage: 1
+  normalWinStart: 6
+  normalWinEnd: 10
+  normalDamage: 2
   normalCooldown: 1.4
   normalHitReach: 4
   normalFrontOnly: 1
   fireWindup: 0.3
-  fireWinStart: 7
-  fireWinEnd: 11
-  fireDamage: 1
+  fireWinStart: 9
+  fireWinEnd: 16
+  fireDamage: 2
   fireCooldown: 2
   fireHitReach: 7
   fireFrontOnly: 1
   bombWindup: 0.35
-  bombWinStart: 4
+  bombWinStart: 2
   bombWinEnd: 6
-  bombDamage: 1
+  bombDamage: 3
   bombCooldown: 2.2
   bombHitReach: 5.5
   bombFrontOnly: 1
   wheelWindup: 0.3
-  wheelWin1Start: 3
+  wheelWin1Start: 1
   wheelWin1End: 4
   wheelWin2Start: 7
-  wheelWin2End: 8
-  wheelDamagePerTick: 1
+  wheelWin2End: 10
+  wheelDamagePerTick: 2
   wheelCooldown: 2.5
   wheelHitReach: 4
   wheelFrontOnly: 0

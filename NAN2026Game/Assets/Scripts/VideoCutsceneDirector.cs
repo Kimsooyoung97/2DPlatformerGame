@@ -14,6 +14,10 @@ public class VideoCutsceneDirector : MonoBehaviour
     [Header("다음 씬 (비우면 전환하지 않고 로그만)")]
     [SerializeField] private string nextSceneName = "";
 
+    [Header("WebGL 전용 재생 (VideoClip 에셋은 WebGL에서 재생 불가)")]
+    [Tooltip("Assets/StreamingAssets 안에 넣은 영상 파일명. WebGL 빌드에서만 이 파일을 URL로 재생한다. 비워두면 기존 VideoClip 그대로 시도(WebGL에선 안 나올 수 있음).")]
+    [SerializeField] private string webglStreamingAssetsFileName = "";
+
     [Header("스킵 — C 키 길게 누르기")]
     [SerializeField] private bool allowSkip = true;
     [SerializeField] private float holdSeconds = 3f;
@@ -41,9 +45,21 @@ public class VideoCutsceneDirector : MonoBehaviour
     private float _elapsed;
     private float _hold;
 
-    private void Awake()
+private void Awake()
     {
         _player = GetComponent<VideoPlayer>();
+
+        // WebGL은 VideoClip 에셋(내부 트랜스코딩 포맷)을 재생하지 못한다 — StreamingAssets에 둔
+        // 원본 파일을 URL 소스로 재생해야만 브라우저 네이티브 디코더로 나온다. 다른 플랫폼은
+        // 기존 VideoClip 방식 그대로 둔다(멀쩡히 작동하던 걸 안 건드림).
+#if UNITY_WEBGL && !UNITY_EDITOR
+        if (!string.IsNullOrEmpty(webglStreamingAssetsFileName))
+        {
+            _player.source = VideoSource.Url;
+            _player.url = System.IO.Path.Combine(Application.streamingAssetsPath, webglStreamingAssetsFileName);
+        }
+#endif
+
         _player.loopPointReached += OnVideoEnd;
         if (skipHintUI != null) skipHintUI.SetActive(false);
         if (skipProgressFill != null) skipProgressFill.fillAmount = 0f;

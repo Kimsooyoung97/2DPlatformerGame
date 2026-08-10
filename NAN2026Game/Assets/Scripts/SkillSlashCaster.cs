@@ -38,7 +38,7 @@ namespace NAN2026
             var go = Instantiate(slashPrefab,
                 transform.position + new Vector3(dir * config.spawnForward, config.spawnHeight, 0f),
                 Quaternion.identity);
-            go.transform.localScale = Vector3.one * 5f;
+            go.transform.localScale = Vector3.one * 0.3f;
             var ep = go.GetComponent<EffectProjectile>();
             if (ep != null)
                 ep.Launch(dir, config.speed, config.life, frames, config.fps, config.damage,
