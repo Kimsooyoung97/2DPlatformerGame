@@ -8128,3 +8128,19 @@ LOG_donghyun_full.md 새로 작성해서 넣어줄래? git push할때 같이 넣
 해당 없음
 ### 커밋
 해당 없음(무수정)
+
+
+## [수정] MP 고갈에도 스킬 발동 (C안) — 2026-08-10 10:48
+### 프롬프트
+C. A + config 직접 수정 제거, 런타임 최대치 보너스를 별도 필드로 분리로 진행해. 하트가 비었는데 스킬이 나가
+### 조작 내역
+- BuildHud에 **중복 가드** 추가: 기존 MpHud 캔버스를 전부 파괴 후 재생성 (가드 부재로 MaxUp 호출마다 캔버스가 겹쳐 생기고, 화면엔 낡은 빈 하트가 남아 실제 MP와 어긋나 있었음)
+- MaxUp: `config.maxMp` 직접 증가 제거 → 런타임 전용 필드 **maxBonus** 신설, MaxMp 프로퍼티가 config.maxMp + maxBonus(상한 15)를 계산. ScriptableObject 에셋 오염 차단
+- 하트 개수·패링 획득 상한을 MaxMp 기준으로 통일
+### 검증 (재생 실측)
+- MpHud 캔버스 **1개** / PlayerMana 1개 / mp=3·MaxMp=10·bonus=0
+- TryUseMp(1) → True, 잔여 2 (정상 소모)
+- mp를 0으로 강제 후 TryUseMp(1) → **False** (발동 차단 확인), 화면상 가득 찬 하트 0개 = 표시와 실제 일치
+- ManaConfig.maxMp 오염 여부 점검: 10 (정상)
+### 실패와 수정
+없음
