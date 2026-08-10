@@ -8072,3 +8072,17 @@ LOG_donghyun_full.md 새로 작성해서 넣어줄래? git push할때 같이 넣
 해당 없음
 ### 커밋
 해당 없음(무수정)
+
+
+## [수정] 낙사·수몰 사망 흐름 정상화 (C안) — 2026-08-10 10:33
+### 프롬프트
+[수정] C 방안으로 진행하자
+### 조작 내역
+- **낙사**: PlayerHealth.Update가 Kill()을 건너뛰고 Respawn()을 직접 호출하던 우회 제거 → Kill(true). 무적 무시용 오버로드 `Kill(bool ignoreInvincible)` 신설(기존 Kill()은 그대로 위임) — death 모션·OnPlayerDied·게임오버 패널 정상 발생
+- **수몰 진범 추가 발견**: WaterDeath가 물 타일맵을 `Stage_Wall` 하나에서만 찾는데 실제 Water 타일은 Stage_Ground·Stage_Solid에도 존재 → 4개 층(Wall/Ground/Solid/Water)을 모두 탐색하고, 물이 있던 층을 수면 계산 기준으로 채택하도록 수정
+- **선점 차단**: PlayerHealth.SinkingInWater 플래그 신설 — 침수 시작 시 ON, 사망 호출 직전·물 이탈 시 OFF. 낙사 판정은 이 플래그가 켜져 있으면 개입하지 않음
+### 검증
+- 컴파일 0 / Kill(bool) 오버로드·낙사 우회 제거·다층 탐색·플래그 3지점 배선 확인
+- 실제 절차(death 모션 → GAME OVER → 세이브포인트 부활)는 사용자 재생
+### 실패와 수정
+- 초기 진단에서 수몰 원인을 '낙사 선점'만으로 봤으나, 물 탐지 층 누락이 별개 원인으로 추가 확인됨
