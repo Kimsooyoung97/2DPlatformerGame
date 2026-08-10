@@ -86,5 +86,9 @@ namespace NAN2026
         public float rangeBandHeight = 1.8f;   // 표시용 띠 높이(판정과 무관, 보기용)
         [Header("피격 연출")]
         public float hitFlash = 0.1f;
+
+        [Header("보상")]
+        [Tooltip("이 적을 처치했을 때 플레이어에게 주는 경험치")]
+        public int xpReward = 8;
     }
 }
