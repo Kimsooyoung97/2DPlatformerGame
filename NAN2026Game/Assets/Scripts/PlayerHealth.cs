@@ -108,7 +108,6 @@ public class PlayerHealth : MonoBehaviour
         checkpoint = transform.position;
         // 시작 위치도 첫 세이브포인트로 등록해둔다 — 그래야 아무것도 안 밟은 상태에서
         // 이동 메뉴를 열어도 최소 한 곳(시작 지점)은 나온다.
-        checkpoints.Add(new CheckpointRecord(SceneManager.GetActiveScene().name, checkpoint, "시작 지점"));
         graceUntil = Time.time + spawnGrace;
 
         currentHealth = MaxHealth;

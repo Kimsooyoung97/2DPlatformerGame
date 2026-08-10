@@ -7,6 +7,7 @@ namespace NAN2026
         public SoundConfig config;
         public AudioSource source;
         float t;
+        DemonBoss boss;
 
         void Start()
         {
@@ -18,6 +19,10 @@ namespace NAN2026
 
         void Update()
         {
+            if (boss.death)
+            {
+                source.mute = true;
+            }
             if (source == null || config == null) return;
             t += Time.deltaTime;
             float dur = config.bgmFadeSeconds < 0.0001f ? 0.0001f : config.bgmFadeSeconds;
