@@ -77,6 +77,9 @@ public class PlayerHealth : MonoBehaviour
     /// GameOverController 가 구독 시점에 켠다.</summary>
     public bool SuppressRespawnOnDeath { get; set; }
 
+    /// <summary>수몰 연출 진행 중에는 낙사 판정이 시퀀스를 가로채지 않는다.</summary>
+    public bool SinkingInWater { get; set; }
+
     /// <summary>외부(GameOverController 등)에서 명시적으로 체크포인트 부활을 트리거할 때 쓴다.
     /// SuppressRespawnOnDeath=true 노선(게임오버 패널 등)에서는 Kill()이 자동으로 Respawn을
     /// 예약하지 않으므로, 호출자가 원하는 타이밍(예: 엔터키 입력)에 직접 이걸 부른다.</summary>
@@ -122,9 +125,10 @@ public class PlayerHealth : MonoBehaviour
                 ResetAllTraps();
         }
 
-        // Falling out of the world still resets you, even while invincible.
-        if (!dying && transform.position.y < fallKillY)
-            Respawn();
+        // 월드 밖으로 떨어지면 무적이어도 사망 — 단 Respawn()을 직접 부르지 않고
+        // 정식 사망 경로(Kill)를 태워 death 모션·게임오버 패널이 나오게 한다.
+        if (!dying && !SinkingInWater && transform.position.y < fallKillY)
+            Kill(true);
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -220,9 +224,13 @@ public class PlayerHealth : MonoBehaviour
         OnHealthChanged?.Invoke(currentHealth, MaxHealth);
     }
 
-    public void Kill()
+    public void Kill() { Kill(false); }
+
+    /// <summary>낙사·수몰처럼 구제 불가한 상황은 ignoreInvincible=true로 강제 사망시킨다.
+    /// (무적 중이라도 월드 밖으로 떨어지면 되돌릴 방법이 없다)</summary>
+    public void Kill(bool ignoreInvincible)
     {
-        if (dying || invincible)
+        if (dying || (invincible && !ignoreInvincible))
             return;
 
         dying = true;

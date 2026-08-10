@@ -22,11 +22,13 @@ namespace NAN2026
         private void Update()
         {
             var kb = PlayerController2D.InputLocked ? null : Keyboard.current;
-            if (kb == null || !kb.digit4Key.wasPressedThisFrame) return;
+            if (kb == null || !kb.digit2Key.wasPressedThisFrame) return;
             if (config == null || slashPrefab == null) return;
+            if (!SkillGate.IsUnlocked(1)) return;   // 두 번째 아이콘 해금 필요
             if (Time.time - lastCast < config.cooldown) return;
             if (mana != null && !mana.TryUseMp(config.mpCost)) return; // MP 부족 시 불발
             lastCast = Time.time;
+            SkillGate.Report(1, config.cooldown);   // 아이콘 쿨타임 표시
             float dir = (sr != null && sr.flipX) ? -1f : 1f;
             var go = Instantiate(slashPrefab,
                 transform.position + new Vector3(dir * config.spawnForward, config.spawnHeight, 0f),
