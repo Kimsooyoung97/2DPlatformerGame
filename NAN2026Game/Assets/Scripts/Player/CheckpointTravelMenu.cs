@@ -120,7 +120,7 @@ namespace NAN2026
                 selectedIndex = (selectedIndex + 1) % list.Count;
             else if (kb.enterKey.wasPressedThisFrame || kb.numpadEnterKey.wasPressedThisFrame)
                 TravelTo(list[selectedIndex]);
-            else if (kb.escapeKey.wasPressedThisFrame)
+            else if (kb.xKey.wasPressedThisFrame)
                 Close();
         }
 
@@ -185,7 +185,7 @@ namespace NAN2026
             float startY = Screen.height * 0.5f - totalHeight * 0.5f;
 
             GUI.Box(new Rect(startX, startY, itemWidth, titleHeight),
-                "세이브포인트 이동  (↑↓ 선택 · Enter 확정 · Esc 취소)", titleStyle);
+                "세이브포인트 이동  (↑↓ 선택 · Enter 확정 · X 취소)", titleStyle);
 
             for (int i = 0; i < list.Count; i++)
             {

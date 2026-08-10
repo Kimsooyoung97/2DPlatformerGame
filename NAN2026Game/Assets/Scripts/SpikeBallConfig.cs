@@ -43,6 +43,8 @@ namespace NAN2026
         public float clashRecoilAmp = 0.06f;     // 반동 진폭(유닛)
         public float clashRecoilTime = 0.1f;     // 반동 시간(초)
         public Sprite clashSprite; // 격돌 이펙트 중앙 스프라이트 — 비워두면 기본 흰 점 폴백
+        [Tooltip("중앙 스프라이트 전체 크기 배율(1=기본). 작게 하려면 1보다 작은 값(예: 0.5)")]
+        public float clashFlashScale = 1f;
         public AudioClip clashSound;
         [Range(0f,1f)] public float clashVolume = 0.9f;
         public float clashSoundStartMs = 0f;   // 재생 시작(ms)
