@@ -147,7 +147,7 @@ public sealed class PlayerProgression : MonoBehaviour
                 if (health != null) health.Heal(Mathf.RoundToInt(magnitude));
                 break;
             case AugmentType.ManaHeal:
-                if (playerMana != null) playerMana.MpHeal(Mathf.RoundToInt(magnitude));
+                if (playerMana != null) playerMana.MaxUp(Mathf.RoundToInt(magnitude));
                 break;
             case AugmentType.ManaUp:
                 if (playerMana != null) playerMana.config.parryGain += Mathf.RoundToInt(magnitude);

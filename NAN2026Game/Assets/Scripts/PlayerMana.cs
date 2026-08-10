@@ -15,6 +15,9 @@ namespace NAN2026
 
         private void Start()
         {
+            config.maxMp = 10;
+            config.parryGain = 1;
+            config.startMp = 3;
             mp = config != null ? Mathf.Clamp(config.startMp, 0, config.maxMp) : 0;
             BuildHud();
             Refresh();
@@ -28,10 +31,12 @@ namespace NAN2026
             mp = Mathf.Min(config.maxMp, mp + config.parryGain);
             Refresh();
         }
-        public void MpHeal(int n)
+        public void MaxUp(int n)
         {
             if (config == null) return;
-            mp = Mathf.Min(config.maxMp, mp + n);
+            config.maxMp = Mathf.Min(15, config.maxMp + n);
+            mp = Mathf.Min(15, mp + n);
+            BuildHud();
             Refresh();
 
         }
