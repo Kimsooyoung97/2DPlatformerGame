@@ -20,18 +20,21 @@ namespace NAN2026
     }
 
     // Scene2 연출 감독: 스파이크 패링 집계(폴링) → 목표 달성 시 밝아짐+보스 개막 팬 → 복귀
+    // → 보스 사망(MinoBoss.death) 폴링 → 포탈 개막 팬(포탈 비추고 플레이어로 복귀)
     public class Scene2Director : MonoBehaviour
     {
         public Scene2DirectorConfig config;
         private int count;
         private bool done;
-        private Transform player, boss;
+        private Transform player, boss, portal;
         private Component cmCam;
         private System.Reflection.PropertyInfo followProp;
         private Text topLabel;
         private Behaviour bossAi;
+        private MinoBoss bossMino;
         private SpriteRenderer bossSr;
         private Collider2D bossCol;
+        private bool portalRevealed;
 
         private void Start()
         {
@@ -52,6 +55,8 @@ namespace NAN2026
                 CacheBossParts(b);
                 SetBossRevealed(false);   // 패링 목표를 채우기 전에는 보스가 없는 것처럼 둔다
             }
+            var portalGo = GameObject.Find("Portal");
+            if (portalGo != null) portal = portalGo.transform;
             foreach (var mb in FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
                 if (mb.GetType().Name == "CinemachineCamera") { cmCam = mb; followProp = mb.GetType().GetProperty("Follow"); break; }
             BuildTopLabel();
@@ -66,12 +71,25 @@ namespace NAN2026
 
         private void Update()
         {
-            if (done || config == null) return;
-            if (SpikeParryEvents.Count != count)
+            if (config == null) return;
+
+            if (!done)
             {
-                count = Mathf.Min(SpikeParryEvents.Count, config.parryGoal);
-                UpdateTopLabel();
-                if (count >= config.parryGoal) { done = true; SpikeParryEvents.CombatSealed = true; StartCoroutine(Brighten()); }
+                if (SpikeParryEvents.Count != count)
+                {
+                    count = Mathf.Min(SpikeParryEvents.Count, config.parryGoal);
+                    UpdateTopLabel();
+                    if (count >= config.parryGoal) { done = true; SpikeParryEvents.CombatSealed = true; StartCoroutine(Brighten()); }
+                }
+            }
+
+            // 보스 사망 감지(폴링) — MinoBoss.death는 사망 애니메이션이 끝나는 프레임에 딱 한 번 true가 된다.
+            // PortalOpen1.cs도 같은 필드를 같은 방식으로 폴링해 Portal 오브젝트를 SetActive(true)한다 —
+            // 여기서는 그와 별개로, 그 순간 카메라를 포탈로 팬시켰다가 플레이어로 되돌리는 연출만 담당한다.
+            if (!portalRevealed && bossMino != null && bossMino.death)
+            {
+                portalRevealed = true;
+                StartCoroutine(PortalReveal());
             }
         }
 
@@ -114,6 +132,7 @@ namespace NAN2026
         {
             foreach (var mb in b.GetComponents<MonoBehaviour>())
                 if (mb.GetType().Name == "MinoBoss") { bossAi = mb; break; }
+            bossMino = b.GetComponent<MinoBoss>();
             bossSr = b.GetComponent<SpriteRenderer>();
             bossCol = b.GetComponent<Collider2D>();
         }
@@ -168,6 +187,19 @@ namespace NAN2026
                 if (player != null) followProp.SetValue(cmCam, player, null);
             }
             yield return new WaitForSecondsRealtime(config.brightenHold);
+            SetPlayerControl(true);
+        }
+
+        /// 보스 사망 → 포탈 개막: 카메라를 포탈로 팬 → 유지 → 플레이어로 복귀 (보스 개막 팬과 동일 문법)
+        private IEnumerator PortalReveal()
+        {
+            SetPlayerControl(false);
+            if (cmCam != null && followProp != null && portal != null)
+            {
+                followProp.SetValue(cmCam, portal, null);
+                yield return new WaitForSecondsRealtime(config.portalRevealHold);
+                if (player != null) followProp.SetValue(cmCam, player, null);
+            }
             SetPlayerControl(true);
         }
     }
