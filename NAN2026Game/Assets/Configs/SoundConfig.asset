@@ -29,5 +29,18 @@ MonoBehaviour:
   dashClip: {fileID: 8300000, guid: bc00ed7fd97212f478fe67402eaa4ed9, type: 3}
   dashVolume: 0.7
   dashPitch: 1
+  skill1Clip: {fileID: 8300000, guid: bbc1c1199b9177f4290e0b4c015a52cb, type: 3}
+  skill2Clip: {fileID: 8300000, guid: 275b09f7205309b42b7167592c94718b, type: 3}
+  skill3Clip: {fileID: 8300000, guid: 6aa1bc59e6641b845b64627e70c076ea, type: 3}
+  skillVolume: 1
+  skillPitch: 1
+  hitClips:
+  - {fileID: 8300000, guid: a0b810440c319f94196344d0291b49f0, type: 3}
+  - {fileID: 8300000, guid: 0034954084be95048a447ebb6f60982d, type: 3}
+  hitVolume: 1
+  deathClips:
+  - {fileID: 8300000, guid: 278e01a796a59cb4c945be2996a2ca9f, type: 3}
+  - {fileID: 8300000, guid: 64de853ea26ce6849a43371bcba846e7, type: 3}
+  deathVolume: 1
   bgmVolume: 0.55
   bgmFadeSeconds: 1.2

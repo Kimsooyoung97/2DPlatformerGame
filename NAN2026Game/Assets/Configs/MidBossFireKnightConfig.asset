@@ -68,7 +68,17 @@ MonoBehaviour:
   burstDashStopX: 1.7
   sparkleInterval: 0.22
   clashConfig: {fileID: 11400000, guid: 31b4bd26897983b4fb8fcb4703f841b5, type: 2}
-  showRangesInGame: 1
+  showRangesInGame: 0
   showRangeLabels: 1
   rangeBandHeight: 5
   rangeBandYOffset: -2
+  hitReStagger: 1
+  hitClip: {fileID: 8300000, guid: e07949d49e7e1d14f8928e8aa1f2c38f, type: 3}
+  deathClip: {fileID: 8300000, guid: 067153a6329380248a4fb64c17146f23, type: 3}
+  normalAttackClip: {fileID: 8300000, guid: 84f0db90dd5964f4daf380b52c2c64bf, type: 3}
+  fireAttackClip: {fileID: 8300000, guid: 864b1dd091d71514fb41a6d1010acc19, type: 3}
+  bombAttackClip: {fileID: 8300000, guid: da2f9a2ebfc062e408772f3ea60ed8dd, type: 3}
+  wheelAttackClip: {fileID: 8300000, guid: 25c54c87d3f9cbb4c8375b3e63267cd7, type: 3}
+  hitVolume: 0.8
+  deathVolume: 0.9
+  attackVolume: 0.85

@@ -83,8 +83,10 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
     private bool launching;
     private float launchEndTime;
     private string currentState;
-    public bool IsGrounded { get { return grounded; } }
-
+    public bool IsGrounded { get { return grounded; } }       // 대시가 실제로 발동된 순간
+    public static event System.Action<string> OnAttackPerformed; // 공격이 실제로 발동된 순간(attackName 전달)
+    public static event System.Action OnDashPerformed;           // 대시가 실제로 발동된 순간
+    public static event System.Action OnJumpPerformed; // 추가
     /// <summary>지금 이 순간 패링 판정 창 안인지. EnemyAI 등 몬스터 공격 판정이 참조한다.</summary>
     private float EffectiveParryWindow()
     {
@@ -274,12 +276,13 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
             // 대쉬(이동기, 공격 아님): Left Shift. 땅에서는 사용할 수 없고 공중에서만
             // 가능하다. 이미 대쉬 중이면 재시작하지 않고, 착지 전까지 maxAirDashes(기본 1회)까지만 허용한다.
             if (kb.leftShiftKey.wasPressedThisFrame && !dashing && !grounded
-                && PlayerLocomotionLogic.CanDash(grounded, airDashesUsed, config.maxAirDashes))
+     && PlayerLocomotionLogic.CanDash(grounded, airDashesUsed, config.maxAirDashes))
             {
                 dashing = true;
                 dashStartPos = transform.position;
                 dashDir = PlayerLocomotionLogic.EffectDirection(sr.flipX);
                 airDashesUsed++;
+                OnDashPerformed?.Invoke(); // 실제 대시 발동 순간에만 1회
             }
             // 2단 콤보 (원래 V) → Z: 1타 Slash모션 → 창 내 재입력 시 2타 Combo2모션
             // 2번 키는 검기(SkillSlashCaster)로 이관 — ComboB1 제거
@@ -433,11 +436,6 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
 
     private void FixedUpdate()
     {
-
-
-        // 점프존 슈퍼점프 비행 중에는 물리 궤적(포물선)에 전부 맡기고 평소 이동/공격
-        // 로직을 건너뛴다. 벽 클램프·중력 오버라이드 등과 충돌하면 목표 지점에
-        // 정확히 도착하지 못할 수 있기 때문이다.
         if (launching)
         {
             if (Time.time >= launchEndTime)
@@ -538,6 +536,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
                 attackTimer = queuedAttackDuration;
                 attacking = true;
                 SpawnAttackEffect(queuedAttack);
+                OnAttackPerformed?.Invoke(queuedAttack); // 이펙트 스폰과 동일 시점, 1:1 보장
                 if (queuedAttack == "Roll" && health != null)
                     health.BeginRollInvincibility();
                 queuedAttack = null;
@@ -584,6 +583,7 @@ public class PlayerController2D : MonoBehaviour, IParryReflector
                 vy = config.jumpVelocity;
                 jumpsUsed++;
                 landTimer = 0f;
+                OnJumpPerformed?.Invoke(); // 실제 발동된 순간에만 1회
             }
         }
         rb.linearVelocity = new Vector2(vx, vy);

@@ -66,5 +66,28 @@ namespace NAN2026
 
         [Header("클래시")]
         public SpikeBallConfig clashConfig;
+        [Header("사운드")]
+        public AudioClip atk1Clip;
+        public AudioClip atk2Clip;
+        public AudioClip dashClip;
+        public AudioClip[] hitClips = new AudioClip[2];
+        public AudioClip deathClip;
+        [Range(0f, 1f)] public float attackVolume = 0.85f;
+        [Range(0f, 1f)] public float hitVolume = 0.8f;
+        [Range(0f, 1f)] public float deathVolume = 0.9f;
+
+        /// <summary>배열에서 null 아닌 클립 중 하나를 균등 랜덤 선택. 비어있으면 null.</summary>
+        public AudioClip RandomClip(AudioClip[] clips)
+        {
+            if (clips == null || clips.Length == 0) return null;
+            int start = Random.Range(0, clips.Length);
+            for (int i = 0; i < clips.Length; i++)
+            {
+                var c = clips[(start + i) % clips.Length];
+                if (c != null) return c;
+            }
+            return null;
+        }
+
     }
 }

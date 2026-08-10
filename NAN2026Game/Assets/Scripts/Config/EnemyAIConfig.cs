@@ -1,5 +1,4 @@
 using UnityEngine;
-
 /// <summary>
 /// 적 AI(쫄몹/보스 공용) 수치의 단일 기준. EnemyAI/WorldHealthBar는 이 값만 참조하고
 /// 숫자 리터럴을 직접 갖지 않는다.
@@ -15,7 +14,6 @@ public sealed class EnemyAIConfig : ScriptableObject
     public float attackHeightRange = 1.2f; // 임의값 — jumpYThreshold(1.2)와 같은 값으로 시작, 튜닝 필요
     [Tooltip("추적을 시작한 뒤 이 거리를 넘어서면 추적을 포기하고 순찰로 복귀한다")]
     public float chaseStopDistance = 12f;
-
     [Header("이동")]
     public float patrolSpeed = 1f;
     public float chaseSpeed = 3f;
@@ -25,19 +23,19 @@ public sealed class EnemyAIConfig : ScriptableObject
     public float jumpYThreshold = 1.2f;
     [Tooltip("점프를 확정하기 전에 높이차가 유지돼야 하는 시간(초). 짧으면 플레이어의 제자리 점프에도 따라 뛴다")]
     public float jumpConfirmDuration = 0.35f;
-
     [Header("공격")]
     public float attackCooldown = 1.2f;
     public float attackDamage = 1f;
-
+    [Header("공격 사운드")]
+    [Tooltip("이 몹이 근접 공격을 실제로 확정하는 순간(animation.Attack() 호출 시점) 재생된다")]
+    public AudioClip attackClip;
+    [Range(0f, 1f)] public float attackVolume = 0.85f;
     [Header("체력")]
     [Tooltip("이 몬스터 타입의 최대 체력 (MonsterHealth 컴포넌트에 적용됨)")]
     public int maxHealth = 4;
-
     [Header("보상")]
     [Tooltip("이 몬스터가 죽었을 때 플레이어에게 주는 경험치")]
     public int xpReward = 5;
-
     [Header("체력바 (UI Canvas 미사용, SpriteRenderer 기반)")]
     public Vector2 healthBarSize = new Vector2(1.2f, 0.16f);
     public Vector3 healthBarOffset = new Vector3(0f, 1.6f, 0f);
@@ -46,12 +44,10 @@ public sealed class EnemyAIConfig : ScriptableObject
     [Header("피격 넉백")]
     public float knockbackForce = 6f;     // 임의값 — 튜닝 필요
     public float knockbackDuration = 0.15f; // 임의값 — 튜닝 필요
-
     [Header("낭떠러지 감지 (자기 층 지키기)")]
     public float edgeProbeAhead = 0.55f;  // 발 앞 검사 거리
     public float edgeProbeDepth = 1.20f;  // 아래로 검사 깊이
     public LayerMask groundMask = ~0;     // 지면 레이어
-
     [Header("발견 직후 유예 (난이도 완화)")]
     public float firstAttackDelay = 1.0f; // 플레이어를 처음 발견하고 이만큼 지나야 첫 공격
 }

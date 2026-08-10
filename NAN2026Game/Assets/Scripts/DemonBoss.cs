@@ -6,6 +6,9 @@ namespace NAN2026
 {
     // AdventureScene4 데몬 보스. 입장 시 transform(슬라임→데몬) 인트로 후 전투.
     // 상태: -1 transform / 0 idle / 1 walk / 2 cleave / 7 smash / 3 cast / 6 hit / 5 groggy / 4 death / 8 windup(예열)
+    // 사운드: 피격(hp가 실제로 깎이는 매 순간, 3종 랜덤)·사망(SetState(4) 진입 시)·
+    // 스킬 3종(cleave/smash/cast — windup이 끝나 각 state로 실제 전환되는 순간)을
+    // SetState/TakeDamage 내부에서 직접 재생한다. 수치는 config가 소유, 이 스크립트엔 숫자 리터럴 없음.
     public class DemonBoss : MonoBehaviour
     {
         public DemonBossConfig config;
@@ -23,6 +26,7 @@ namespace NAN2026
         private Transform player;
         private Component controller;
         private System.Reflection.MethodInfo tryParry;
+        private AudioSource audioSource;
         private float lastParryPress = -999f, lastConsumed = -999f;
         private TextMesh groggyPips;
         private GameObject groggyFx, burstMsg;
@@ -35,6 +39,7 @@ namespace NAN2026
             sr = GetComponent<SpriteRenderer>();
             if (sr == null) sr = gameObject.AddComponent<SpriteRenderer>();
             sr.sortingOrder = 50;
+            audioSource = GetComponent<AudioSource>();
             hp = config.maxHp;
             var rb = GetComponent<Rigidbody2D>();
             if (rb != null) rb.useFullKinematicContacts = true; // FAIL: Kinematic 트리거
@@ -59,6 +64,13 @@ namespace NAN2026
             if (Time.time - lastParryPress <= config.parryBuffer && lastParryPress > lastConsumed)
             { lastConsumed = lastParryPress; return true; }
             return false;
+        }
+
+        // clip이 null이거나 AudioSource가 없으면 조용히 무시 — 사운드 미배치 상태에서도 안전.
+        private void PlayClip(AudioClip clip, float volume)
+        {
+            if (audioSource == null || clip == null) return;
+            audioSource.PlayOneShot(clip, volume);
         }
 
         void Update()
@@ -274,6 +286,7 @@ namespace NAN2026
             if (state == 4 || state == -1) return;
             hp -= 1;
             HitFeedback();
+            PlayClip(config.RandomClip(config.hitClips), config.hitVolume); // hp가 실제로 깎인 매 순간, 3종 랜덤
             if (hp <= 0) { SetState(4); return; }
             bool attacking = state == 2 || state == 7 || state == 3; // 공격 판정/모션 중엔 경직 없음(안 씹힘)
             if (state != 5 && !attacking) SetState(6);
@@ -425,6 +438,13 @@ namespace NAN2026
         {
             state = s; stateT = 0f; animT = 0f; dealtThisSwing = false; castFired = false;
             if (s == 5) { BeginGroggyFx(); BeginBurst(); } else { EndGroggyFx(); EndBurst(); }
+
+            // windup이 끝나 실제 공격 state로 "확정 전환"된 순간에만 1회 재생 —
+            // 페이크(windup 캔슬)나 재입력에는 반응하지 않는다.
+            if (s == 2) PlayClip(config.cleaveClip, config.attackVolume);
+            else if (s == 7) PlayClip(config.smashClip, config.attackVolume);
+            else if (s == 3) PlayClip(config.castClip, config.attackVolume);
+            else if (s == 4) PlayClip(config.deathClip, config.deathVolume);
         }
 
         private void Anim(Sprite[] arr, bool loop)

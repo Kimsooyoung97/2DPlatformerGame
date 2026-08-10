@@ -18,6 +18,10 @@ namespace NAN2026
         private bool casting;
         private float lastCast;
 
+        /// <summary>MP 소모까지 통과해 실제로 캐스트가 확정된 순간에만 1회 발생.
+        /// PlayerSoundPlayer가 구독해 스킬 사운드를 재생한다.</summary>
+        public static event System.Action OnSkill1Performed;
+
         private void Awake()
         {
             sr = GetComponent<SpriteRenderer>();
@@ -33,6 +37,7 @@ namespace NAN2026
             NAN2026.SkillGate.Report(0, config.cooldown);      // 아이콘 쿨타임 표시용
             var mana = GetComponent<NAN2026.PlayerMana>();
             if (mana != null && !mana.TryUseMp(config.mpCost)) return; // MP 부족 시 불발
+            OnSkill1Performed?.Invoke();
             StartCoroutine(Cast());
         }
 
@@ -118,16 +123,16 @@ namespace NAN2026
                 break;
             }
             // 폴백: 전방 지점이 좁은 발판을 벗어난 경우 발밑 x 재캐스트
-        float feetY = transform.position.y;
-        if (float.IsNaN(groundY) || groundY < feetY - config.platformMissTolerance)
-        {
-            var o2 = new Vector2(transform.position.x, transform.position.y + 0.5f);
-            float g2 = float.NaN;
-            foreach (var hit in Physics2D.RaycastAll(o2, Vector2.down, config.groundSnapDepth))
-            { if (hit.collider.isTrigger || hit.collider.transform.root == transform.root) continue; g2 = hit.point.y; break; }
-            if (!float.IsNaN(g2)) { groundY = g2; pos.x = transform.position.x; }
-        }
-        if (float.IsNaN(groundY)) { groundY = feetY; pos.x = transform.position.x; } // 최후: 발 높이 시전
+            float feetY = transform.position.y;
+            if (float.IsNaN(groundY) || groundY < feetY - config.platformMissTolerance)
+            {
+                var o2 = new Vector2(transform.position.x, transform.position.y + 0.5f);
+                float g2 = float.NaN;
+                foreach (var hit in Physics2D.RaycastAll(o2, Vector2.down, config.groundSnapDepth))
+                { if (hit.collider.isTrigger || hit.collider.transform.root == transform.root) continue; g2 = hit.point.y; break; }
+                if (!float.IsNaN(g2)) { groundY = g2; pos.x = transform.position.x; }
+            }
+            if (float.IsNaN(groundY)) { groundY = feetY; pos.x = transform.position.x; } // 최후: 발 높이 시전
             var go = new GameObject("SkillSlash_Effect");
             pos.y = groundY;
             if (effectSprites != null && effectSprites.Length > 0)

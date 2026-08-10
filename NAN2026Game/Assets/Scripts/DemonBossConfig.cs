@@ -57,11 +57,33 @@ namespace NAN2026
         public float hitFlash = 0.12f;
         public SpikeBallConfig clashConfig; // 클래시 공유
         [Header("디버그 표시 (제출 전 OFF)")]
-        public bool showRangesInGame = true;  // 게임 뷰에 공격 범위 띠 표시
+        public bool showRangesInGame = false;  // 게임 뷰에 공격 범위 띠 표시
         public bool showRangeLabels = true;   // 거리·상태 숫자 라벨
         public float rangeBandHeight = 11f;   // 표시용 띠 높이 (판정과 무관, 보기용)
         [Header("패턴 가중치 (미사용 — 쿨타임 우선 선택으로 대체됨)")]
         public float castChance = 0.35f;   // 원거리 시 캐스트 확률
         public float smashChance = 0.4f;   // 중거리 시 스매시 확률
+        [Header("사운드")]
+        public AudioClip cleaveClip;
+        public AudioClip smashClip;
+        public AudioClip castClip;
+        public AudioClip[] hitClips = new AudioClip[3];
+        public AudioClip deathClip;
+        [Range(0f, 1f)] public float attackVolume = 0.85f;
+        [Range(0f, 1f)] public float hitVolume = 0.8f;
+        [Range(0f, 1f)] public float deathVolume = 0.9f;
+
+        /// <summary>배열에서 null 아닌 클립 중 하나를 균등 랜덤 선택. 비어있으면 null.</summary>
+        public AudioClip RandomClip(AudioClip[] clips)
+        {
+            if (clips == null || clips.Length == 0) return null;
+            int start = Random.Range(0, clips.Length);
+            for (int i = 0; i < clips.Length; i++)
+            {
+                var c = clips[(start + i) % clips.Length];
+                if (c != null) return c;
+            }
+            return null;
+        }
     }
 }

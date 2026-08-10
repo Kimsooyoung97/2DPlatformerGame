@@ -9,6 +9,8 @@ using Assets.PixelFantasy.PixelMonsters.Common.Scripts.ExampleScripts;
 /// 플레이어가 위 층에 있으면(jumpYThreshold 이상) 점프해서 따라간다.
 /// 이동/점프 물리는 기존 MonsterController2D를, 애니메이션 트리거는 MonsterAnimation을 그대로 재사용한다.
 /// 모든 수치는 EnemyAIConfig가 소유하며 이 클래스에 숫자 리터럴은 없다.
+/// 사운드: IEnemyAttackOverride가 없는(=Lich 등 특수 패턴 없는) 몹이 근접 공격을 실제로
+/// 확정하는 순간(animation.Attack() 호출 시점)에 config.attackClip을 재생한다.
 /// </summary>
 [DisallowMultipleComponent]
 [RequireComponent(typeof(MonsterController2D))]
@@ -33,6 +35,7 @@ public sealed class EnemyAI : MonoBehaviour
     private Transform player;
     private IEnemyAttackOverride attackOverride;
     private NHNDemo.MonsterHealth selfHealthForXp;
+    private AudioSource audioSource;
 
     private EnemyAIState state = EnemyAIState.Patrol;
     private bool engaged;
@@ -41,6 +44,7 @@ public sealed class EnemyAI : MonoBehaviour
     private float leftBoundX;
     private float rightBoundX;
     private float heightGapTimer;
+    public bool death = false;
 
     // 피격 넉백 중엔 AI 로직(Patrol/Chase/Attack)을 완전히 건너뛴다 — 컨트롤러가
     // ApplyKnockback()으로 걸어둔 속도를 우리가 다시 Input으로 덮어쓰지 않기 위함.
@@ -53,6 +57,7 @@ public sealed class EnemyAI : MonoBehaviour
         controller = GetComponent<MonsterController2D>();
         animation = GetComponent<MonsterAnimation>();
         attackOverride = GetComponent<IEnemyAttackOverride>();
+        audioSource = GetComponent<AudioSource>();
 
         // 씬 편집용 데모 컨트롤(키보드 입력) 스크립트가 같이 있으면 Input을 서로 덮어써서
         // 충돌하므로, AI가 대신 조종함을 명시적으로 끈다. (컴포넌트 자체는 지우지 않는다)
@@ -88,9 +93,17 @@ public sealed class EnemyAI : MonoBehaviour
         }
     }
 
+    // clip이 null이거나 AudioSource가 없으면 조용히 무시 — 사운드 미배치 상태에서도 안전.
+    private void PlayClip(AudioClip clip, float volume)
+    {
+        if (audioSource == null || clip == null) return;
+        audioSource.PlayOneShot(clip, volume);
+    }
+
     private void HandleDied()
     {
         if (player == null || config == null) return;
+        death = true;
         PlayerProgression progression = player.GetComponentInParent<PlayerProgression>();
         if (progression != null) progression.AddXp(config.xpReward);
     }
@@ -268,6 +281,7 @@ public sealed class EnemyAI : MonoBehaviour
             return;
 
         animation.Attack();
+        PlayClip(config.attackClip, config.attackVolume); // 근접 공격이 실제로 확정된 순간 1회
 
         if (player == null) return;
 

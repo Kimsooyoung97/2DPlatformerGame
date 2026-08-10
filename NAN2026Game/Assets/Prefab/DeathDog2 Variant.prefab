@@ -26,11 +26,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 946586124018522109, guid: 25ab37668c412a441a40028cc08d8847, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 52.42
+      value: 150.17
       objectReference: {fileID: 0}
     - target: {fileID: 946586124018522109, guid: 25ab37668c412a441a40028cc08d8847, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -6.62
+      value: 32.01
       objectReference: {fileID: 0}
     - target: {fileID: 946586124018522109, guid: 25ab37668c412a441a40028cc08d8847, type: 3}
       propertyPath: m_LocalPosition.z
@@ -76,6 +76,14 @@ PrefabInstance:
       propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1216077943389837535, guid: 25ab37668c412a441a40028cc08d8847, type: 3}
+      propertyPath: m_Interpolate
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1216077943389837535, guid: 25ab37668c412a441a40028cc08d8847, type: 3}
+      propertyPath: m_CollisionDetection
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 1216077943389837532, guid: 25ab37668c412a441a40028cc08d8847, type: 3}
     m_RemovedGameObjects: []
@@ -113,6 +121,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NHNDemo.MonsterHealth
   maxHealth: 4
   knockbackDistance: 0.12
+  flashDuration: 0.11
+  flashColor: {r: 1, g: 0.24, b: 0.2, a: 1}
+  hitClip: {fileID: 0}
+  deathClip: {fileID: 8300000, guid: 7caf82fa1af25034f8728f768b7fd5fe, type: 3}
+  hitVolume: 0.8
+  deathVolume: 0.9
 --- !u!114 &9077008486002205157
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -130,6 +144,7 @@ MonoBehaviour:
   patrolPointB: {fileID: 0}
   usePatrol: 1
   playerTag: Player
+  death: 0
 --- !u!114 &3981064155916394084
 MonoBehaviour:
   m_ObjectHideFlags: 0

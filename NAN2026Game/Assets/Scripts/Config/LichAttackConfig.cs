@@ -15,4 +15,7 @@ public sealed class LichAttackConfig : ScriptableObject
     public float orbSpawnHeight = 1f;
     public float minCooldown = 1.5f;
     public float maxCooldown = 2.5f;
+    [Header("사운드")]
+    public AudioClip attackClip;
+    [Range(0f, 1f)] public float attackVolume = 0.85f;
 }

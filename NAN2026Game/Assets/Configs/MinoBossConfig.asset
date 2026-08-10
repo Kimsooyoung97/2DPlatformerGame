@@ -59,3 +59,13 @@ MonoBehaviour:
   barOver: {fileID: 21300000, guid: 30667c31bcffce343b89a8ad2dc9bb93, type: 3}
   xpReward: 20
   clashConfig: {fileID: 11400000, guid: 31b4bd26897983b4fb8fcb4703f841b5, type: 2}
+  atk1Clip: {fileID: 8300000, guid: b542358e1da8ea04086b5af3bc7f2ada, type: 3}
+  atk2Clip: {fileID: 8300000, guid: 7b5602b66ec3ffa4c8d18616833b3100, type: 3}
+  dashClip: {fileID: 8300000, guid: b4d0bf424db40da459c84f32ebef3965, type: 3}
+  hitClips:
+  - {fileID: 8300000, guid: 4ca4fed73ef16e14683e719b3ab632db, type: 3}
+  - {fileID: 8300000, guid: cc4a8011a06e9914584f4ade7b95a8dc, type: 3}
+  deathClip: {fileID: 8300000, guid: 436e7206932edf74f901a100389a6ca6, type: 3}
+  attackVolume: 0.85
+  hitVolume: 0.8
+  deathVolume: 0.9

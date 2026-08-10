@@ -90,5 +90,15 @@ namespace NAN2026
         public float rangeBandYOffset = -2.5f; // 캔버스 pivot이 캐릭터 몸통보다 위에 있어서 보정용(보기용, 판정과 무관)
         [Header("경직 면역 시간")]
         public float hitReStagger = 1f;
+        [Header("사운드")]
+        public AudioClip hitClip;
+        public AudioClip deathClip;
+        public AudioClip normalAttackClip;
+        public AudioClip fireAttackClip;
+        public AudioClip bombAttackClip;
+        public AudioClip wheelAttackClip;
+        [Range(0f, 1f)] public float hitVolume = 0.8f;
+        [Range(0f, 1f)] public float deathVolume = 0.9f;
+        [Range(0f, 1f)] public float attackVolume = 0.85f;
     }
 }

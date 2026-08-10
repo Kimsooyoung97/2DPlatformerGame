@@ -9,6 +9,9 @@ namespace NAN2026
     // 근접 판정: DemonBoss와 동일하게 물리 콜라이더 없이 거리(dx)+프레임 구간으로 직접 판정한다.
     // (이전엔 씬에 미리 배치된 히트박스 오브젝트를 썼으나, 사용자 명시적 지시로 그 오브젝트들을
     // 직접 삭제하고 이 방식으로 전환함 — "수동 배치 오브젝트 삭제 금지" 규칙의 명시적 예외.)
+    // 사운드: 피격(hp가 실제로 깎이는 매 순간)·사망(SetState(7) 진입 시)·공격 4종(windup이 끝나
+    // 실제 공격 state로 전환되는 순간)을 SetState/TakeDamage 내부에서 직접 재생한다.
+    // 수치는 config가 소유(clip·volume), 이 스크립트엔 숫자 리터럴 없음.
     public class MidBoss_FireKnight : MonoBehaviour, IParryReflector
     {
         public MidBossFireKnightConfig config;
@@ -18,6 +21,7 @@ namespace NAN2026
         private Transform player;
         private Component controller;
         private System.Reflection.MethodInfo tryParry;
+        private AudioSource audioSource;
 
         private int hp;
         private int state; // 0 idle 1 walk 2 normal 3 fire 4 bomb 5 wheel 6 hit 7 death 8 groggy 9 windup
@@ -51,6 +55,7 @@ namespace NAN2026
         private void Start()
         {
             sr = GetComponent<SpriteRenderer>();
+            audioSource = GetComponent<AudioSource>();
             hp = config.maxHp;
             var rbSelf = GetComponent<Rigidbody2D>();
             if (rbSelf != null) rbSelf.useFullKinematicContacts = true; // Kinematic끼리 트리거 이벤트 보장
@@ -71,6 +76,13 @@ namespace NAN2026
         }
 
         public bool TryParry(GameObject attacker) => false; // 이 보스는 패링 판정을 직접 소유하지 않는다(플레이어 쪽에서 판정)
+
+        // clip이 null이거나 AudioSource가 없으면 조용히 무시 — 사운드 미배치 상태에서도 안전.
+        private void PlayClip(AudioClip clip, float volume)
+        {
+            if (audioSource == null || clip == null) return;
+            audioSource.PlayOneShot(clip, volume);
+        }
 
         private void SetState(int s)
         {
@@ -98,6 +110,14 @@ namespace NAN2026
                 : s == 7 ? config.fpsDeath
                 : config.fpsHit;
             if (s == 8) { BeginGroggyFx(); BeginBurst(); } else { EndGroggyFx(); EndBurst(); }
+
+            // windup이 끝나 실제 공격 state로 "확정 전환"된 순간에만 1회 재생 — 페이크(windup
+            // 캔슬)나 재입력 연타에는 반응하지 않는다(TryBeginAttack이 아니라 여기가 확정 지점).
+            if (s == 2) PlayClip(config.normalAttackClip, config.attackVolume);
+            else if (s == 3) PlayClip(config.fireAttackClip, config.attackVolume);
+            else if (s == 4) PlayClip(config.bombAttackClip, config.attackVolume);
+            else if (s == 5) PlayClip(config.wheelAttackClip, config.attackVolume);
+            else if (s == 7) PlayClip(config.deathClip, config.deathVolume);
         }
 
         private void BuildGroggyPips()
@@ -209,6 +229,7 @@ namespace NAN2026
             if (state == 7) return; // death
             hp -= 1;
             HitFeedback();
+            PlayClip(config.hitClip, config.hitVolume); // hp가 실제로 깎인 매 순간 1회 (사망 타격 포함)
             if (hp <= 0) { SetState(7); return; }
             bool attacking = state == 2 || state == 3 || state == 4 || state == 5; // 공격 판정·모션 중엔 경직 없음
             bool recentlyHit = Time.time < hitInvulnUntil;
@@ -340,7 +361,7 @@ namespace NAN2026
             }
         }
 
-                // 보스가 바라보는 방향(-1/+1). SetFacing(flipX = player.x < transform.x)와 짝 맞춤 —
+        // 보스가 바라보는 방향(-1/+1). SetFacing(flipX = player.x < transform.x)와 짝 맞춤 —
         // flipX가 true면 왼쪽을 바라보는 상태.
         private float Facing() => sr != null && sr.flipX ? -1f : 1f;
 
@@ -353,7 +374,7 @@ namespace NAN2026
             return signed >= -config.frontDeadZone;
         }
 
-// DemonBoss 방식: 거리(dx) + 프레임 구간으로 직접 판정. 물리 히트박스 없음.
+        // DemonBoss 방식: 거리(dx) + 프레임 구간으로 직접 판정. 물리 히트박스 없음.
         private void DoNormalAttack(float dx)
         {
             int idx = Mathf.Min((int)animT, cur.Length - 1);
@@ -443,7 +464,7 @@ namespace NAN2026
             }
         }
 
-                // ===== 공격 범위 디버그 표시 (config.showRangesInGame) — DemonBoss와 동일 패턴,
+        // ===== 공격 범위 디버그 표시 (config.showRangesInGame) — DemonBoss와 동일 패턴,
         // 판정 로직(ResolveMeleeHit 호출 조건)과 같은 값을 그대로 그린다 =====
         private LineRenderer[] rangeBands; // 0 aggro, 1 attackRange, 2 활성 공격 히트리치
         private TextMesh rangeLabel;
@@ -598,7 +619,7 @@ namespace NAN2026
             DrawReachGizmo(bx, by, h * 0.25f, config.wheelHitReach, config.wheelFrontOnly);
         }
 
-// 근접 판정(ResolveMeleeHit)이 패링 성공을 알려올 때 호출 — 그로기 카운터 공유
+        // 근접 판정(ResolveMeleeHit)이 패링 성공을 알려올 때 호출 — 그로기 카운터 공유
         public void RegisterParrySuccess()
         {
             if (config.clashConfig != null && player != null)

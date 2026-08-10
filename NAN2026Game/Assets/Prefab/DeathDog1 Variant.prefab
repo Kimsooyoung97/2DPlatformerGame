@@ -16,6 +16,14 @@ PrefabInstance:
       propertyPath: IsGrounded
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7862834921201971437, guid: 2c8177f2561f13e4b9533fa5ac2d4244, type: 3}
+      propertyPath: m_Interpolate
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7862834921201971437, guid: 2c8177f2561f13e4b9533fa5ac2d4244, type: 3}
+      propertyPath: m_CollisionDetection
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7862834921201971438, guid: 2c8177f2561f13e4b9533fa5ac2d4244, type: 3}
       propertyPath: m_Enabled
       value: 0
@@ -42,11 +50,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8132645306870792143, guid: 2c8177f2561f13e4b9533fa5ac2d4244, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 33.43
+      value: 118.84
       objectReference: {fileID: 0}
     - target: {fileID: 8132645306870792143, guid: 2c8177f2561f13e4b9533fa5ac2d4244, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -6.57
+      value: 55.004997
       objectReference: {fileID: 0}
     - target: {fileID: 8132645306870792143, guid: 2c8177f2561f13e4b9533fa5ac2d4244, type: 3}
       propertyPath: m_LocalPosition.z
@@ -114,6 +122,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NHNDemo.MonsterHealth
   maxHealth: 4
   knockbackDistance: 0.12
+  flashDuration: 0.11
+  flashColor: {r: 1, g: 0.24, b: 0.2, a: 1}
+  hitClip: {fileID: 0}
+  deathClip: {fileID: 8300000, guid: aefb679c27e8b534f89154e7b7b6e326, type: 3}
+  hitVolume: 0.8
+  deathVolume: 0.9
 --- !u!114 &6258671999990886511
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -131,6 +145,7 @@ MonoBehaviour:
   patrolPointB: {fileID: 0}
   usePatrol: 1
   playerTag: Player
+  death: 0
 --- !u!114 &1267717596047435793
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -13,6 +13,10 @@ namespace NAN2026
         private PlayerMana mana;
         private SpriteRenderer sr;
 
+        /// <summary>MP 소모까지 통과해 실제로 캐스트가 확정된 순간에만 1회 발생.
+        /// PlayerSoundPlayer가 구독해 스킬 사운드를 재생한다.</summary>
+        public static event System.Action OnSkill2Performed;
+
         private void Awake()
         {
             mana = GetComponent<PlayerMana>();
@@ -29,6 +33,7 @@ namespace NAN2026
             if (mana != null && !mana.TryUseMp(config.mpCost)) return; // MP 부족 시 불발
             lastCast = Time.time;
             SkillGate.Report(1, config.cooldown);   // 아이콘 쿨타임 표시
+            OnSkill2Performed?.Invoke();
             float dir = (sr != null && sr.flipX) ? -1f : 1f;
             var go = Instantiate(slashPrefab,
                 transform.position + new Vector3(dir * config.spawnForward, config.spawnHeight, 0f),

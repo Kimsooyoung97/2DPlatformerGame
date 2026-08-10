@@ -32,6 +32,7 @@ GameObject:
   - component: {fileID: 3529956322082229866}
   - component: {fileID: 5988916152473634532}
   - component: {fileID: 8405221278776433988}
+  - component: {fileID: 4229085140180330594}
   m_Layer: 7
   m_Name: RealPlayer
   m_TagString: Player
@@ -263,7 +264,7 @@ MonoBehaviour:
   - {fileID: 8717991194414603563, guid: b9134e4f56c51e54491b4bb93f2c2f62, type: 3}
   - {fileID: -7787540366204040286, guid: b9134e4f56c51e54491b4bb93f2c2f62, type: 3}
   rollDuration: 0.75
-  rollSpeed: 4
+  rollSpeed: 10
   skillImageUI: {fileID: 0}
 --- !u!114 &5230090458520678121
 MonoBehaviour:
@@ -766,6 +767,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 546f90efa9d3b2f4cb89234429a40836, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NAN2026.CheckpointTravelMenu
+--- !u!114 &4229085140180330594
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5109878993836927586}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b04142efc651b5449986d115e15d5d25, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NAN2026.WaterDeath
+  config: {fileID: 11400000, guid: 486cf5e85dc6ca148bacf7d7f77cfb0c, type: 2}
 --- !u!1 &6114823860119314469
 GameObject:
   m_ObjectHideFlags: 0

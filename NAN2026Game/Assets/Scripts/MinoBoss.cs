@@ -6,6 +6,9 @@ using System.Reflection;
 namespace NAN2026
 {
     // 미노: idle/walk/atk(홀드·패링)/take_hit(항상)/groggy(패링 5회)/death(10타)
+    // 사운드: 피격(hp가 실제로 깎이는 매 순간, 2종 랜덤)·사망(SetState(4) 진입 시)·
+    // 공격 3종(atk1/atk2/dash — windup이 끝나 각 state로 실제 전환되는 순간)을
+    // SetState/TakeDamage 내부에서 직접 재생한다. 수치는 config가 소유, 이 스크립트엔 숫자 리터럴 없음.
     public class MinoBoss : MonoBehaviour
     {
         public MinoBossConfig config;
@@ -14,6 +17,7 @@ namespace NAN2026
         private Transform player;
         private Component controller;
         private MethodInfo tryParry;
+        private AudioSource audioSource;
         private int hp;
         private int state; // 0 idle 1 walk 2 attack 3 hit 4 death 5 groggy 6 windup 7 dash
         private float animT, stateT, nextAtk1, nextAtk2, nextDash, holdT;
@@ -47,6 +51,7 @@ namespace NAN2026
         private void Start()
         {
             sr = GetComponent<SpriteRenderer>();
+            audioSource = GetComponent<AudioSource>();
             hp = config.maxHp;
             var rbSelf = GetComponent<Rigidbody2D>();
             if (rbSelf != null) rbSelf.useFullKinematicContacts = true; // Kinematic끼리 트리거 이벤트 보장 (FAIL#트리거)
@@ -69,6 +74,13 @@ namespace NAN2026
 
         private void UpdateBar() { }
 
+        // clip이 null이거나 AudioSource가 없으면 조용히 무시 — 사운드 미배치 상태에서도 안전.
+        private void PlayClip(AudioClip clip, float volume)
+        {
+            if (audioSource == null || clip == null) return;
+            audioSource.PlayOneShot(clip, volume);
+        }
+
         private void SetState(int s)
         {
             state = s; animT = 0f; stateT = 0f; dealtThisSwing = false; holdDone = false; holdT = 0f;
@@ -89,6 +101,13 @@ namespace NAN2026
                 : config.fpsHit;
             if (s == 4) curFps = config.fpsDeath;
             if (s == 5) { BeginGroggyFx(); BeginBurst(); } else { EndGroggyFx(); EndBurst(); }
+
+            // windup이 끝나 실제 공격/돌진 state로 "확정 전환"된 순간에만 1회 재생 —
+            // 페이크(windup 캔슬)나 재입력에는 반응하지 않는다. atk1/atk2는 이미 정해진
+            // atkIs1 플래그로 구분(BeginWindup 이전에 TryBeginMeleeAttack에서 확정됨).
+            if (s == 2) PlayClip(atkIs1 ? config.atk1Clip : config.atk2Clip, config.attackVolume);
+            else if (s == 7) PlayClip(config.dashClip, config.attackVolume);
+            else if (s == 4) PlayClip(config.deathClip, config.deathVolume);
         }
 
         private void BuildGroggyPips()
@@ -214,6 +233,7 @@ namespace NAN2026
             if (state == 4) return;
             hp -= 1; // 타격 1회 = 10% 고정
             HitFeedback();
+            PlayClip(config.RandomClip(config.hitClips), config.hitVolume); // hp가 실제로 깎인 매 순간, 2종 랜덤
             if (hp <= 0) { GrantXpOnce(); SetState(4); return; }
             bool attacking = state == 2 || state == 7; // 공격/돌진 판정·모션 중엔 경직 없음(안 씹힘)
             if (state != 5 && !attacking) SetState(3); // 그로기 중엔 그로기 유지, 그 외엔 피격 모션

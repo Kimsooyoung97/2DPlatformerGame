@@ -11,11 +11,18 @@ namespace NHNDemo
         [SerializeField] private float flashDuration = 0.11f;
         [SerializeField] private Color flashColor = new Color(1f, 0.24f, 0.2f, 1f);
 
+        [Header("사운드 (비워두면 무음 — 이 인스턴스에만 적용됨)")]
+        [SerializeField] private AudioClip hitClip;
+        [SerializeField] private AudioClip deathClip;
+        [SerializeField, Range(0f, 1f)] private float hitVolume = 0.8f;
+        [SerializeField, Range(0f, 1f)] private float deathVolume = 0.9f;
+
         private int currentHealth;
         private bool dead;
         private SpriteRenderer[] renderers;
         private Color[] originalColors;
         private MonsterAnimation animation;
+        private AudioSource audioSource;
 
         // FlashDamage를 코루틴(한 번 색 바꾸고 대기 후 복원)으로 하던 걸 이걸로 교체했다.
         // 원인 불명이지만 MonsterAnimation 등 다른 스크립트가 매 프레임 SpriteRenderer.color를
@@ -52,11 +59,19 @@ namespace NHNDemo
         private void Awake()
         {
             animation = GetComponent<MonsterAnimation>();
+            audioSource = GetComponent<AudioSource>();
             currentHealth = maxHealth;
             renderers = GetComponentsInChildren<SpriteRenderer>();
             originalColors = new Color[renderers.Length];
             for (int index = 0; index < renderers.Length; index++)
                 originalColors[index] = renderers[index].color;
+        }
+
+        // clip이 null이거나 AudioSource가 없으면 조용히 무시 — 사운드 미배치 상태에서도 안전.
+        private void PlayClip(AudioClip clip, float volume)
+        {
+            if (audioSource == null || clip == null) return;
+            audioSource.PlayOneShot(clip, volume);
         }
 
         public void TakeDamage(int damage, Vector2 attackDirection)
@@ -73,6 +88,7 @@ namespace NHNDemo
                 animation.SetAnimatorEnabled(false); // 히트 포즈에서 정지 — 플래시가 애니메이션에 안 묻히게
             }
 
+            PlayClip(hitClip, hitVolume); // 실제로 체력이 깎인 매 순간 1회 (사망 타격 포함)
             OnHealthChanged?.Invoke(currentHealth, maxHealth);
             OnDamaged?.Invoke(damage, attackDirection);
 
@@ -82,7 +98,7 @@ namespace NHNDemo
 
         // Update가 아니라 LateUpdate인 이유: MonsterAnimation 등 다른 컴포넌트가 자기
         // Update()에서 color/스프라이트를 건드리더라도, 그 다음에 실행되는 LateUpdate가
-        // 항상 마지막에 덮어써서 깜빡임이 확실히 보이게 만든다.
+        // 항상 마지막에 실행돼서 깜빡임이 확실히 보이게 만든다.
         private void LateUpdate()
         {
             if (dead) return; // 사망 페이드(FadeAndDestroy)가 알파를 직접 관리하므로 여기서 건드리지 않는다.
@@ -103,6 +119,7 @@ namespace NHNDemo
         private void Die()
         {
             dead = true;
+            PlayClip(deathClip, deathVolume); // 사망 확정 시 1회
             if (animation != null) animation.SetAnimatorEnabled(true); // 플래시 중 사망해도 죽는 애니메이션은 반드시 재생되게
             OnDied?.Invoke();
             SurfaceMonsterPatrol patrol = GetComponent<SurfaceMonsterPatrol>();

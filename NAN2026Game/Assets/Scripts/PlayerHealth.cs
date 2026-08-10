@@ -62,6 +62,10 @@ public class PlayerHealth : MonoBehaviour
     /// <summary>체력이 바뀔 때마다 (현재, 최대)를 통지한다. 월드스페이스 HP바 등이 구독할 수 있다.</summary>
     public event System.Action<int, int> OnHealthChanged;
 
+    /// <summary>모든 무적/그레이스 판정을 통과해 실제로 체력이 깎인 순간에만 통지한다(회복은 제외).
+    /// PlayerSoundPlayer가 피격 사운드(랜덤) 재생에 구독한다.</summary>
+    public event System.Action OnDamaged;
+
     /// <summary>플레이어가 죽는 순간(Kill 진입 시) 딱 한 번 통지한다. GameOverPanel 등이 구독해
     /// 화면 전환을 시작할 수 있다. 체크포인트 재시작 로직(Respawn)과는 무관하게 별도로 발생한다.</summary>
     public event System.Action OnPlayerDied;
@@ -170,7 +174,7 @@ public class PlayerHealth : MonoBehaviour
         currentHealth -= Mathf.Max(1, Mathf.RoundToInt(damage));
         damageInvulnerableUntil = Time.time + combatConfig.hitInvulnerabilityDuration;
 
-
+        OnDamaged?.Invoke(); // 실제로 데미지가 적용된 순간에만 1회 — 피격 사운드용
         OnHealthChanged?.Invoke(currentHealth, MaxHealth);
 
         if (currentHealth <= 0)

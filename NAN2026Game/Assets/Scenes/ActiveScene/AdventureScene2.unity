@@ -43503,6 +43503,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2130402354947638564, guid: f65beddf16acb6b4dbf4aa06f9d80f5e, type: 3}
+      propertyPath: portal
+      value: 
+      objectReference: {fileID: 1510970154}
     - target: {fileID: 3312377515701631893, guid: f65beddf16acb6b4dbf4aa06f9d80f5e, type: 3}
       propertyPath: m_LocalPosition.x
       value: 113
@@ -43550,29 +43554,8 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 5792550056644840847, guid: f65beddf16acb6b4dbf4aa06f9d80f5e, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 5277710431667870430}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f65beddf16acb6b4dbf4aa06f9d80f5e, type: 3}
---- !u!1 &5277710431667870429 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5792550056644840847, guid: f65beddf16acb6b4dbf4aa06f9d80f5e, type: 3}
-  m_PrefabInstance: {fileID: 5277710431667870428}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &5277710431667870430
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5277710431667870429}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5ac9fc046e0d59948b8b6d9ec9d2d7ce, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PortalOpen1
-  portal: {fileID: 1510970154}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

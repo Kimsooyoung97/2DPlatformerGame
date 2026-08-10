@@ -6,6 +6,8 @@ using NAN2026.Core;
 namespace NAN2026
 {
     // 인트로: 암전 -> 촛불 점화 -> 전역 확장 -> BGM. 아무 키나 누르면 스킵.
+    // 사운드: 초가 하나 켜질 때마다(candleLitNodes[i]가 false->true로 전환되는 그 프레임)
+    // 딱 1번 점화음을 재생한다. 순차 점화(igniteStagger)라 초마다 개별적으로 울린다.
     public class IntroSequencer : MonoBehaviour
     {
         public IntroConfig config;
@@ -15,6 +17,7 @@ namespace NAN2026
         public GameObject[] candleLitNodes;
         public GameObject[] hiddenDuringIgnite; // 촛불 반경 내 이웃 소품 — 확장 전까지 숨김 // 파티클(Flame/Glow) 묶음 — 점화 전 완전 소등용
         public AudioSource bgm;
+        public AudioSource sfxSource; // 점화음 전용 — bgm 채널과 분리(페이드 영향 안 받음)
         public GameObject introCamera;
         public GameObject playerVisionLight; // 주인공 시야광 — 인트로 동안 꺼두고 연출 완주 시 점등 // 촛불을 비추는 인트로 전용 카메라 — 연출 종료 시 꺼지며 플레이어 카메라로 인계
 
@@ -49,7 +52,7 @@ namespace NAN2026
             Apply(0f);
         }
 
-                private bool introLocked, introLockDone;
+        private bool introLocked, introLockDone;
         private System.Collections.Generic.List<AudioSource> mutedSrcs = new System.Collections.Generic.List<AudioSource>();
         private System.Collections.Generic.List<float> mutedVols = new System.Collections.Generic.List<float>();
         private void MuteWorldAudio(bool mute)
@@ -57,7 +60,7 @@ namespace NAN2026
             if (mute)
             {
                 mutedSrcs.Clear(); mutedVols.Clear();
-                foreach (var src in FindObjectsByType<AudioSource>(FindObjectsSortMode.None))
+                foreach (var src in FindObjectsByType<AudioSource>())
                 {
                     if (src == null || src == bgm) continue; // 인트로 BGM은 살림
                     mutedSrcs.Add(src); mutedVols.Add(src.volume);
@@ -78,6 +81,13 @@ namespace NAN2026
             if (pgo == null) return;
             var rb = pgo.GetComponent<Rigidbody2D>();
             if (rb != null && !on) rb.linearVelocity = Vector2.zero;
+        }
+
+        // clip이 null이거나 sfxSource가 없으면 조용히 무시 — 사운드 미배치 상태에서도 안전.
+        private void PlayClip(AudioClip clip, float volume)
+        {
+            if (sfxSource == null || clip == null) return;
+            sfxSource.PlayOneShot(clip, volume);
         }
 
         void Update()
@@ -120,7 +130,13 @@ namespace NAN2026
                 {
                     if (candleLitNodes[i] == null) continue;
                     bool lit = IntroSequenceLogic.CandleFactor(time - config.igniteStagger * i, config.blackSeconds, config.igniteSeconds) > 0f;
-                    if (candleLitNodes[i].activeSelf != lit) candleLitNodes[i].SetActive(lit);
+                    if (candleLitNodes[i].activeSelf != lit)
+                    {
+                        candleLitNodes[i].SetActive(lit);
+                        // 꺼짐->켜짐 전환(=이 초가 방금 점화된 순간)에만 재생. 이론상 소등 전환은
+                        // 없지만(단조 증가하는 gf 기반) 방어적으로 lit==true일 때만 재생한다.
+                        if (lit) PlayClip(config.candleIgniteClip, config.candleIgniteVolume);
+                    }
                 }
 
             if (hiddenDuringIgnite != null)

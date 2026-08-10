@@ -24,5 +24,8 @@ namespace NAN2026
         [Header("BGM")]
         public float bgmVolume = 0.55f;
         public float bgmFadeSeconds = 1.2f;
+        [Header("사운드")]
+        public AudioClip candleIgniteClip;
+        [Range(0f, 1f)] public float candleIgniteVolume = 0.8f;
     }
 }

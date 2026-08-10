@@ -60,3 +60,14 @@ MonoBehaviour:
   rangeBandHeight: 11
   castChance: 0.35
   smashChance: 0.4
+  cleaveClip: {fileID: 8300000, guid: dbcf2f59743085341ac2f4294714ec5d, type: 3}
+  smashClip: {fileID: 8300000, guid: 93f3a6eee38bb4a479439236c86d7916, type: 3}
+  castClip: {fileID: 8300000, guid: c92fd2bb20d506f48b79cd19893e0fb6, type: 3}
+  hitClips:
+  - {fileID: 8300000, guid: f20f19acf3b3b7a44b625e42ed6d175a, type: 3}
+  - {fileID: 8300000, guid: b4c8c8d56816bc542977bc062df50a90, type: 3}
+  - {fileID: 8300000, guid: 08f4d3f62cb271c42810ea5f7e85e430, type: 3}
+  deathClip: {fileID: 8300000, guid: 75bd6a1e14d8713459028593a5aad60e, type: 3}
+  attackVolume: 0.85
+  hitVolume: 0.8
+  deathVolume: 0.9
