@@ -249,19 +249,27 @@ namespace NAN2026
         LineRenderer[] rays; SpriteRenderer flash;
         static UnityEngine.Sprite dot;
         SpikeBallConfig cfgRef;
-        public void Init(float d, int n, float r, float hitstop, SpikeBallConfig cfg2 = null)
+public void Init(float d, int n, float r, float hitstop, SpikeBallConfig cfg2 = null)
         {
             if (hitstop > 0f && d < hitstop + 0.05f) d = hitstop + 0.05f; // 수명 < 히트스톱이면 timeScale 영구 0 — 보정
             dur = d; lines = n; radius = r; cfgRef = cfg2;
-            if (dot == null)
-            {
-                var tx2 = new Texture2D(4, 4, TextureFormat.RGBA32, false);
-                for (int i = 0; i < 16; i++) tx2.SetPixel(i % 4, i / 4, Color.white);
-                tx2.Apply();
-                dot = Sprite.Create(tx2, new Rect(0, 0, 4, 4), new Vector2(0.5f, 0.5f), 4f);
-            }
             flash = gameObject.AddComponent<SpriteRenderer>(); flash.sharedMaterial = NAN2026.FxUnlit.Mat;
-            flash.sprite = dot; flash.color = Color.white; flash.sortingOrder = 950;
+            if (cfg2 != null && cfg2.clashSprite != null)
+            {
+                flash.sprite = cfg2.clashSprite; // 커스텀 스프라이트 우선 사용
+            }
+            else
+            {
+                if (dot == null)
+                {
+                    var tx2 = new Texture2D(4, 4, TextureFormat.RGBA32, false);
+                    for (int i = 0; i < 16; i++) tx2.SetPixel(i % 4, i / 4, Color.white);
+                    tx2.Apply();
+                    dot = Sprite.Create(tx2, new Rect(0, 0, 4, 4), new Vector2(0.5f, 0.5f), 4f);
+                }
+                flash.sprite = dot; // 폴백: 기본 점 스프라이트
+            }
+            flash.color = Color.white; flash.sortingOrder = 950;
             rays = new LineRenderer[lines];
             for (int i = 0; i < lines; i++)
             {

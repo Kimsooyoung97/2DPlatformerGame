@@ -709,7 +709,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NAN2026.SkillSlashCaster
   config: {fileID: 11400000, guid: b4f7d5c8dd664b84e999d679d24b257a, type: 2}
-  slashPrefab: {fileID: 6711275918333177968, guid: 4ba4d41d34b707c428957b6aea90fa9c, type: 3}
+  slashPrefab: {fileID: 8482629981551645561, guid: d7dc767f6d6c5eb47b5225425f22df5a, type: 3}
   frames: []
 --- !u!114 &3529956322082229866
 MonoBehaviour:
@@ -767,6 +767,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 546f90efa9d3b2f4cb89234429a40836, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NAN2026.CheckpointTravelMenu
+  customFont: {fileID: 0}
 --- !u!114 &4229085140180330594
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -8,6 +8,7 @@ public class PauseMenuAudioAndResolution : MonoBehaviour
 {
     [Header("Audio Settings")]
     [SerializeField] private AudioMixer audioMixer;
+    [SerializeField] private string MasterParam = "MasterVolume";
     [SerializeField] private string bgmParamName = "BGMVolume";
     [SerializeField] private string sfxParamName = "SFXVolume";
 

@@ -296,15 +296,7 @@ namespace NAN2026
         {
             if (flashCo != null) StopCoroutine(flashCo);
             flashCo = StartCoroutine(FlashRed());
-            var pop = new GameObject("DemonHpPopup");
-            pop.transform.position = transform.position + Vector3.up * (config.groggyFxOffsetY + 1.2f);
-            var tm = pop.AddComponent<TextMesh>();
-            tm.text = "HP " + Mathf.Max(0, hp) + " / " + config.maxHp;
-            tm.fontSize = 46; tm.characterSize = 0.075f;
-            tm.anchor = TextAnchor.MiddleCenter;
-            tm.color = new Color(1f, 0.3f, 0.25f);
-            pop.GetComponent<MeshRenderer>().sortingOrder = 902;
-            pop.AddComponent<PopupFloater>().Init(1.0f, 0.7f);
+            
         }
 
         private System.Collections.IEnumerator FlashRed()

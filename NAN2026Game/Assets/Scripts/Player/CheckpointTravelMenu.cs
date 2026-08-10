@@ -19,7 +19,7 @@ namespace NAN2026
     public sealed class CheckpointTravelMenu : MonoBehaviour
     {
         public static CheckpointTravelMenu Instance { get; private set; }
-
+        public Font customFont;
         private PlayerHealth playerHealth;
         private bool isOpen;
         private int selectedIndex;
@@ -172,14 +172,14 @@ namespace NAN2026
             if (!isOpen || playerHealth == null) return;
 
             var list = playerHealth.Checkpoints;
-            GUIStyle boxStyle = new GUIStyle(GUI.skin.box) { fontSize = 16, alignment = TextAnchor.MiddleLeft };
+            GUIStyle boxStyle = new GUIStyle(GUI.skin.box) { fontSize = 32, alignment = TextAnchor.MiddleLeft, font = customFont };
             GUIStyle selectedStyle = new GUIStyle(boxStyle);
             selectedStyle.normal.textColor = Color.yellow;
-            GUIStyle titleStyle = new GUIStyle(GUI.skin.box) { fontSize = 14, alignment = TextAnchor.MiddleCenter };
+            GUIStyle titleStyle = new GUIStyle(GUI.skin.box) { fontSize = 28, alignment = TextAnchor.MiddleCenter, font = customFont };
 
-            float itemWidth = 340f;
-            float itemHeight = 30f;
-            float titleHeight = 34f;
+            float itemWidth = 680f;
+            float itemHeight = 60f;
+            float titleHeight = 68f;
             float totalHeight = titleHeight + list.Count * itemHeight;
             float startX = Screen.width * 0.5f - itemWidth * 0.5f;
             float startY = Screen.height * 0.5f - totalHeight * 0.5f;

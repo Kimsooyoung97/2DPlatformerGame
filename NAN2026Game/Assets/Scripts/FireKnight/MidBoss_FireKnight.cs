@@ -12,6 +12,10 @@ namespace NAN2026
     // 사운드: 피격(hp가 실제로 깎이는 매 순간)·사망(SetState(7) 진입 시)·공격 4종(windup이 끝나
     // 실제 공격 state로 전환되는 순간)을 SetState/TakeDamage 내부에서 직접 재생한다.
     // 수치는 config가 소유(clip·volume), 이 스크립트엔 숫자 리터럴 없음.
+    // 패링: 4개 공격 전부 MinoBoss.atk1(이단 베기)과 동일한 다구간 재시도 방식 — 판정 창이
+    // 열려있는 프레임 동안 매 프레임 ParryBuffered()를 재시도하고, 창이 끝날 때까지 한 번도
+    // 성공 못 하면 그제서야 피해가 확정된다. 기존 단발 판정(ResolveMeleeHit, 창 진입 첫 프레임에만
+    // 1회 체크)보다 훨씬 널널하다.
     public class MidBoss_FireKnight : MonoBehaviour, IParryReflector
     {
         public MidBossFireKnightConfig config;
@@ -244,15 +248,6 @@ namespace NAN2026
         {
             if (flashCo != null) StopCoroutine(flashCo);
             flashCo = StartCoroutine(FlashRed());
-            var pop = new GameObject("BossHpPopup");
-            pop.transform.position = transform.position + Vector3.up * (config.groggyFxOffsetY + 1.4f);
-            var tm = pop.AddComponent<TextMesh>();
-            tm.text = "HP " + Mathf.Max(0, hp) + " / " + config.maxHp;
-            tm.fontSize = 46; tm.characterSize = 0.075f;
-            tm.anchor = TextAnchor.MiddleCenter;
-            tm.color = new Color(1f, 0.3f, 0.25f);
-            pop.GetComponent<MeshRenderer>().sortingOrder = 902;
-            pop.AddComponent<PopupFloater>().Init(1.0f, 0.7f);
         }
 
         private System.Collections.IEnumerator FlashRed()
@@ -374,15 +369,38 @@ namespace NAN2026
             return signed >= -config.frontDeadZone;
         }
 
+        // 패링 성공 시 공통 처리 — 그로기 카운트 올리고, 목표치 도달하면 RegisterParrySuccess
+        // 내부에서 SetState(8)까지 처리된다. 호출부는 반드시 이 직후 그 프레임에서 return해야
+        // 아래 쿨타임/애니메이션 종료 체크가 그로기 상태를 덮어쓰지 않는다.
+        private void OnParrySucceeded()
+        {
+            if (player != null) PlayerMana.RewardParry(player);
+            RegisterParrySuccess();
+        }
+
         // DemonBoss 방식: 거리(dx) + 프레임 구간으로 직접 판정. 물리 히트박스 없음.
+        // 패링은 MinoBoss.atk1과 동일한 다구간 재시도 — 판정 창이 열려있는 동안 매 프레임
+        // ParryBuffered()를 재시도하고, 창이 끝날 때까지 한 번도 성공 못 하면 피해 확정.
         private void DoNormalAttack(float dx)
         {
             int idx = Mathf.Min((int)animT, cur.Length - 1);
             bool inWin = idx >= config.normalWinStart && idx <= config.normalWinEnd;
-            if (!dealtThisSwing && inWin && dx <= config.normalHitReach && (!config.normalFrontOnly || InFront()))
+            bool inReach = dx <= config.normalHitReach && (!config.normalFrontOnly || InFront());
+
+            if (!dealtThisSwing)
             {
-                dealtThisSwing = true;
-                ResolveMeleeHit(config.normalDamage);
+                if (inWin && inReach && ParryBuffered())
+                {
+                    dealtThisSwing = true;
+                    OnParrySucceeded();
+                    return;
+                }
+                if (!inWin && idx > config.normalWinEnd)
+                {
+                    dealtThisSwing = true; // 창 종료 — 미패링이면 피해
+                    if (inReach && player != null)
+                        player.SendMessage("TakeDamage", (float)config.normalDamage, SendMessageOptions.DontRequireReceiver);
+                }
             }
             if ((int)animT >= cur.Length) { nextNormal = Time.time + config.normalCooldown; SetState(0); }
         }
@@ -391,10 +409,22 @@ namespace NAN2026
         {
             int idx = Mathf.Min((int)animT, cur.Length - 1);
             bool inWin = idx >= config.fireWinStart && idx <= config.fireWinEnd;
-            if (!dealtThisSwing && inWin && dx <= config.fireHitReach && (!config.fireFrontOnly || InFront()))
+            bool inReach = dx <= config.fireHitReach && (!config.fireFrontOnly || InFront());
+
+            if (!dealtThisSwing)
             {
-                dealtThisSwing = true;
-                ResolveMeleeHit(config.fireDamage);
+                if (inWin && inReach && ParryBuffered())
+                {
+                    dealtThisSwing = true;
+                    OnParrySucceeded();
+                    return;
+                }
+                if (!inWin && idx > config.fireWinEnd)
+                {
+                    dealtThisSwing = true;
+                    if (inReach && player != null)
+                        player.SendMessage("TakeDamage", (float)config.fireDamage, SendMessageOptions.DontRequireReceiver);
+                }
             }
             if ((int)animT >= cur.Length) { nextFire = Time.time + config.fireCooldown; SetState(0); }
         }
@@ -403,10 +433,22 @@ namespace NAN2026
         {
             int idx = Mathf.Min((int)animT, cur.Length - 1);
             bool inWin = idx >= config.bombWinStart && idx <= config.bombWinEnd;
-            if (!dealtThisSwing && inWin && dx <= config.bombHitReach && (!config.bombFrontOnly || InFront()))
+            bool inReach = dx <= config.bombHitReach && (!config.bombFrontOnly || InFront());
+
+            if (!dealtThisSwing)
             {
-                dealtThisSwing = true;
-                ResolveMeleeHit(config.bombDamage);
+                if (inWin && inReach && ParryBuffered())
+                {
+                    dealtThisSwing = true;
+                    OnParrySucceeded();
+                    return;
+                }
+                if (!inWin && idx > config.bombWinEnd)
+                {
+                    dealtThisSwing = true;
+                    if (inReach && player != null)
+                        player.SendMessage("TakeDamage", (float)config.bombDamage, SendMessageOptions.DontRequireReceiver);
+                }
             }
             if ((int)animT >= cur.Length) { nextBomb = Time.time + config.bombCooldown; SetState(0); }
         }
@@ -414,40 +456,29 @@ namespace NAN2026
         private void DoWheelAttack(float dx)
         {
             int idx = Mathf.Min((int)animT, cur.Length - 1);
-            bool inWin1 = idx >= config.wheelWin1Start && idx <= config.wheelWin1End;
-            bool inWin2 = idx >= config.wheelWin2Start && idx <= config.wheelWin2End;
-            if (!wheelSwingResolved[0] && inWin1 && dx <= config.wheelHitReach && (!config.wheelFrontOnly || InFront()))
+            bool inReach = dx <= config.wheelHitReach && (!config.wheelFrontOnly || InFront());
+
+            for (int w = 0; w < 2; w++)
             {
-                wheelSwingResolved[0] = true;
-                ResolveMeleeHit(config.wheelDamagePerTick);
-            }
-            if (!wheelSwingResolved[1] && inWin2 && dx <= config.wheelHitReach && (!config.wheelFrontOnly || InFront()))
-            {
-                wheelSwingResolved[1] = true;
-                ResolveMeleeHit(config.wheelDamagePerTick);
+                if (wheelSwingResolved[w]) continue;
+                int ws = w == 0 ? config.wheelWin1Start : config.wheelWin2Start;
+                int we = w == 0 ? config.wheelWin1End : config.wheelWin2End;
+                bool inWin = idx >= ws && idx <= we;
+
+                if (inWin && inReach && ParryBuffered())
+                {
+                    wheelSwingResolved[w] = true;
+                    OnParrySucceeded();
+                    return; // 그로기 전환 가능성 — 이번 프레임 나머지(다른 창·쿨타임 체크) 스킵
+                }
+                if (!inWin && idx > we)
+                {
+                    wheelSwingResolved[w] = true;
+                    if (inReach && player != null)
+                        player.SendMessage("TakeDamage", (float)config.wheelDamagePerTick, SendMessageOptions.DontRequireReceiver);
+                }
             }
             if ((int)animT >= cur.Length) { nextWheel = Time.time + config.wheelCooldown; SetState(0); }
-        }
-
-        // 판정 창 안에서 사거리까지 맞았을 때 공통으로 호출 — 패링(버퍼 우선, 리플렉션 폴백) 성공 시
-        // RegisterParrySuccess(그로기 카운트), 실패 시 플레이어에게 데미지. DemonBoss.ResolveHit()와 동일 패턴.
-        private void ResolveMeleeHit(int damage)
-        {
-            bool parried = ParryBuffered();
-            if (!parried && controller != null && tryParry != null)
-            {
-                object r = tryParry.Invoke(controller, new object[] { gameObject });
-                parried = r is bool && (bool)r;
-            }
-            if (parried)
-            {
-                if (player != null) PlayerMana.RewardParry(player);
-                RegisterParrySuccess();
-            }
-            else if (player != null)
-            {
-                player.SendMessage("TakeDamage", (float)damage, SendMessageOptions.DontRequireReceiver);
-            }
         }
 
         private void DoGroggy(float dx)
@@ -465,7 +496,7 @@ namespace NAN2026
         }
 
         // ===== 공격 범위 디버그 표시 (config.showRangesInGame) — DemonBoss와 동일 패턴,
-        // 판정 로직(ResolveMeleeHit 호출 조건)과 같은 값을 그대로 그린다 =====
+        // 판정 로직(각 Do*Attack의 호출 조건)과 같은 값을 그대로 그린다 =====
         private LineRenderer[] rangeBands; // 0 aggro, 1 attackRange, 2 활성 공격 히트리치
         private TextMesh rangeLabel;
 
@@ -619,7 +650,7 @@ namespace NAN2026
             DrawReachGizmo(bx, by, h * 0.25f, config.wheelHitReach, config.wheelFrontOnly);
         }
 
-        // 근접 판정(ResolveMeleeHit)이 패링 성공을 알려올 때 호출 — 그로기 카운터 공유
+        // 근접 판정이 패링 성공을 알려올 때 호출 — 그로기 카운터 공유
         public void RegisterParrySuccess()
         {
             if (config.clashConfig != null && player != null)
