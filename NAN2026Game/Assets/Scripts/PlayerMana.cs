@@ -50,6 +50,13 @@ namespace NAN2026
             if (mana != null) mana.AddMp(1);
         }
 
+        /// <summary>현재 마나를 즉시 최대치까지 채운다(세이브포인트 등 완전 회복 지점 전용).
+        /// MaxUp()과 달리 최대치 자체는 건드리지 않고 현재값만 채운다.</summary>
+        public void RefillToMax()
+        {
+            mp = MaxMp;
+            Refresh();
+        }
 
         // 스킬 소모용 API — 소모량·연동은 팀 결정 대기, 아직 아무도 호출 안 함
         public bool TryUseMp(int amount)
