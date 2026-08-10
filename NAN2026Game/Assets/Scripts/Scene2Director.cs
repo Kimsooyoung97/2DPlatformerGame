@@ -57,7 +57,7 @@ namespace NAN2026
             }
             var portalGo = GameObject.Find("Portal");
             if (portalGo != null) portal = portalGo.transform;
-            foreach (var mb in FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
+            foreach (var mb in FindObjectsByType<MonoBehaviour>())
                 if (mb.GetType().Name == "CinemachineCamera") { cmCam = mb; followProp = mb.GetType().GetProperty("Follow"); break; }
             BuildTopLabel();
             if (config != null && config.debugSkipToBoss)
@@ -155,15 +155,15 @@ namespace NAN2026
             Time.timeScale = 1f;          // 잔여 히트스톱 청소
             SetPlayerControl(false);      // 컷신 락
             // 비활성 개체까지 포함해 훑는다. 기본값은 비활성 제외라 꺼져 있던 것이 나중에 되살아났다.
-            foreach (var l in FindObjectsByType<ThrownWeaponLauncher>(FindObjectsInactive.Include, FindObjectsSortMode.None)) l.enabled = false;
-            foreach (var pr in FindObjectsByType<ThrownProjectile>(FindObjectsInactive.Include, FindObjectsSortMode.None)) Destroy(pr.gameObject);
-            foreach (var mb in FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            foreach (var l in FindObjectsByType<ThrownWeaponLauncher>(FindObjectsInactive.Include)) l.enabled = false;
+            foreach (var pr in FindObjectsByType<ThrownProjectile>(FindObjectsInactive.Include)) Destroy(pr.gameObject);
+            foreach (var mb in FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include))
             {
                 var n = mb.GetType().Name;
                 if (n == "SwingingBladeTrap") mb.enabled = false;   // 이름이 달라 그동안 정리에서 빠져 있었다
             }
             Light2D global = null;
-            foreach (var l2 in FindObjectsByType<Light2D>(FindObjectsSortMode.None))
+            foreach (var l2 in FindObjectsByType<Light2D>())
                 if (l2.lightType == Light2D.LightType.Global) { global = l2; break; }
             if (global != null)
             {
@@ -200,6 +200,7 @@ namespace NAN2026
                 yield return new WaitForSecondsRealtime(config.portalRevealHold);
                 if (player != null) followProp.SetValue(cmCam, player, null);
             }
+            Destroy(topLabel.gameObject);
             SetPlayerControl(true);
         }
     }

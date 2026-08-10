@@ -17,7 +17,7 @@ namespace NAN2026
         {
             config.maxMp = 10;
             config.parryGain = 1;
-            config.startMp = 3;
+            config.startMp = 5;
             mp = config != null ? Mathf.Clamp(config.startMp, 0, config.maxMp) : 0;
             BuildHud();
             Refresh();
