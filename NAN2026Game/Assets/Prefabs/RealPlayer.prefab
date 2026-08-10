@@ -281,6 +281,7 @@ MonoBehaviour:
   respawnDelay: 0.2
   spawnGrace: 0.5
   fallKillY: -18
+  duplicateCheckpointRadius: 0.5
   hazardNameContains: Spikes
   combatConfig: {fileID: 11400000, guid: 68ca4e28a24b6d247b3ffab08d653357, type: 2}
 --- !u!114 &737867483448517668

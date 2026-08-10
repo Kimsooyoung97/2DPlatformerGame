@@ -9,6 +9,7 @@ namespace NAN2026
         public float camHold = 0.9f;       // 보스 컷 유지 시간
         public float brightenTarget = 0.55f; // 목표 전역광
         public float brightenTime = 1.8f;  // 밝아지는 시간
+        public float portalRevealHold = 1.6f; // 보스 사망 후 포탈 팬 유지 시간(임의값, 튜닝 필요)
         public float brightenHold = 0.6f;  // 밝아진 뒤 여유(락 유지)
         public float revealHold = 1.6f;    // 보스 팬 유지 시간(보스전 개막 연출)
         public float pipOffsetY = 4.0f;    // 핍 UI 높이(보스 위)

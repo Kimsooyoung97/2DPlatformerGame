@@ -8,14 +8,18 @@ namespace NAN2026
     {
         public ManaConfig config;
         private int mp;
+        private const int HardCapMp = 15;   // 최대치 상한(런타임 보너스는 팀 필드 maxBonus 사용)
+        private int maxBonus;   // 런타임 최대치 보너스 — ScriptableObject를 직접 고치지 않는다(에셋 오염 방지)
         private Image[] hearts;
 
         public int Mp { get { return mp; } }
-        public int MaxMp { get { return config != null ? config.maxMp : 10; } }
+        public int MaxMp { get { return Mathf.Min(15, (config != null ? config.maxMp : 10) + maxBonus); } }
 
         private void Start()
         {
-            mp = config != null ? Mathf.Clamp(config.startMp, 0, config.maxMp) : 0;
+            // Config(ScriptableObject) 값을 코드에서 덮어쓰지 않는다 — 에셋이 영구 오염된다.
+            // 최대치·획득량·시작치는 ManaConfig 에셋에서만 관리한다.
+            mp = config != null ? Mathf.Clamp(config.startMp, 0, MaxMp) : 0;
             BuildHud();
             Refresh();
         }
@@ -25,13 +29,15 @@ namespace NAN2026
         public void AddMp(int ignoredAmount)
         {
             if (config == null) return;
-            mp = Mathf.Min(config.maxMp, mp + config.parryGain);
+            mp = Mathf.Min(MaxMp, mp + config.parryGain);
             Refresh();
         }
-        public void MpHeal(int n)
+        public void MaxUp(int n)
         {
             if (config == null) return;
-            mp = Mathf.Min(config.maxMp, mp + n);
+            maxBonus = Mathf.Min(15 - (config != null ? config.maxMp : 10), maxBonus + n); // 에셋 미수정
+            mp = Mathf.Min(MaxMp, mp + n);
+            BuildHud();   // 슬롯 수가 늘었으므로 재구성 (중복 가드는 BuildHud 내부)
             Refresh();
 
         }
@@ -55,6 +61,9 @@ namespace NAN2026
         private void BuildHud()
         {
             if (config == null || config.heartFull == null) return;
+            // 기존 HUD 제거 — 가드가 없으면 캔버스가 겹쳐 생기고, 화면엔 낡은 하트가 남는다
+            var old = GameObject.Find("MpHud");
+            while (old != null) { DestroyImmediate(old); old = GameObject.Find("MpHud"); }
             // 독립 루트 캔버스 (플레이어 자식 X — 렌더 안정성) + 해상도 스케일러
             var cgo = new GameObject("MpHud");
             DontDestroyOnLoad(cgo);
@@ -65,8 +74,8 @@ namespace NAN2026
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1920f, 1080f);
             scaler.matchWidthOrHeight = 0.5f;
-            hearts = new Image[config.maxMp];
-            for (int i = 0; i < config.maxMp; i++)
+            hearts = new Image[MaxMp];
+            for (int i = 0; i < MaxMp; i++)
             {
                 var h = new GameObject("MpHeart_" + (i + 1));
                 h.transform.SetParent(cgo.transform, false);

@@ -197,12 +197,24 @@ namespace NAN2026
             if (groggyFx != null) Destroy(groggyFx);
         }
 
+        private bool xpGranted;
+
+        /// <summary>처치 시 1회만 경험치를 지급한다. EnemyAI 와 같은 방식.</summary>
+        private void GrantXpOnce()
+        {
+            if (xpGranted || config == null || config.xpReward <= 0) return;
+            xpGranted = true;
+            if (player == null) return;
+            PlayerProgression progression = player.GetComponentInParent<PlayerProgression>();
+            if (progression != null) progression.AddXp(config.xpReward);
+        }
+
         public void TakeDamage(int dmg)
         {
             if (state == 4) return;
             hp -= 1; // 타격 1회 = 10% 고정
             HitFeedback();
-            if (hp <= 0) { SetState(4); return; }
+            if (hp <= 0) { GrantXpOnce(); SetState(4); return; }
             bool attacking = state == 2 || state == 7; // 공격/돌진 판정·모션 중엔 경직 없음(안 씹힘)
             if (state != 5 && !attacking) SetState(3); // 그로기 중엔 그로기 유지, 그 외엔 피격 모션
         }

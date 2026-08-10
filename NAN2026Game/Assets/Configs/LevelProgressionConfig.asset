@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4096ba510dec11243af2be7223bd996b, type: 3}
   m_Name: LevelProgressionConfig
   m_EditorClassIdentifier: Assembly-CSharp::LevelProgressionConfig
-  baseXpToLevel2: 10
-  xpIncrementPerLevel: 5
+  baseXpToLevel2: 25
+  xpIncrementPerLevel: 10
   goldBaseChance: 0.1
   goldChancePerLevel: 0.02
   goldMaxChance: 0.4
