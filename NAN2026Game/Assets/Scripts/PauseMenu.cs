@@ -41,6 +41,9 @@ public class PauseMenu : MonoBehaviour
 
     private void Update()
     {
+        // 대사 연출 중에는 일시정지 메뉴를 열지 않는다 (연출이 이미 게임을 멈춘 상태)
+        if (DialogueWindow.DialogueActive) return;
+
         if (TogglePressed())
         {
             if (_paused && optionsPanel != null && optionsPanel.activeSelf) { CloseOptions(); return; }
