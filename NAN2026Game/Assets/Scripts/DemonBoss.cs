@@ -32,7 +32,15 @@ namespace NAN2026
         private GameObject groggyFx, burstMsg;
         private Coroutine flashCo, sparkleCo, dashCo;
         private SpriteRenderer playerSr;
-        public bool death = false;
+                public bool death = false;
+
+        /// <summary>변신(등장) 인트로가 끝나 전투로 넘어가는 순간 1회 발생. 대사 큐 등이 구독한다.</summary>
+        public event System.Action OnIntroFinished;
+        /// <summary>인트로가 끝났는지. ResetBoss 로 다시 false 가 된다.</summary>
+        public bool IntroFinished { get; private set; }
+        private Vector3 homePosition;   // 최초 활성화 시점의 위치 — 리트라이 때 여기로 되돌린다
+        private bool started;           // Start()가 한 번이라도 돌았는지 (재활성화 시 Start는 다시 안 불린다)
+
         void Start()
         {
             if (config == null) { Debug.LogError("[DemonBoss] config 미배선! 인스펙터에서 DemonBossConfig 연결 필요"); enabled = false; return; }
@@ -41,6 +49,7 @@ namespace NAN2026
             sr.sortingOrder = 50;
             audioSource = GetComponent<AudioSource>();
             hp = config.maxHp;
+            homePosition = transform.position; // 리트라이 시 되돌릴 초기 위치
             var rb = GetComponent<Rigidbody2D>();
             if (rb != null) rb.useFullKinematicContacts = true; // FAIL: Kinematic 트리거
 
@@ -56,8 +65,74 @@ namespace NAN2026
                 }
             }
             BuildGroggyPips();
+            started = true;
             SetState(-1); // 변신 인트로
         }
+
+        /// <summary>
+        /// 리트라이(플레이어 부활) 시 보스를 최초 상태로 되돌린다.
+        /// SetActive 토글만으로는 Start()가 다시 불리지 않으므로(Unity는 Start를 인스턴스당 1회만 호출)
+        /// 체력·그로기·쿨타임·위치를 여기서 직접 복구하고 인트로(state -1)부터 재생한다.
+        /// 아직 한 번도 활성화된 적 없는 보스(started=false)는 곧 Start가 처리하므로 건드리지 않는다.
+        /// </summary>
+        public void ResetBoss()
+        {
+            if (!started || config == null) return;
+
+            transform.position = homePosition;
+            hp = config.maxHp;
+            parryCount = 0;
+            death = false;
+            nextCleave = nextSmash = nextCast = 0f;
+            lastParryPress = -999f;
+            lastConsumed = -999f;
+
+            if (flashCo != null) { StopCoroutine(flashCo); flashCo = null; }
+            if (sr != null) { sr.color = Color.white; sr.flipX = false; }
+
+            CleanupTransient();
+            RefreshGroggyPips();
+            IntroFinished = false;
+            SetState(-1); // 변신 인트로부터 다시
+        }
+
+        // 인트로 종료를 외부에 알린다. 리트라이로 인트로가 다시 재생되면 또 발생하므로,
+        // 대사를 1회만 원하면 DialogueTrigger 쪽 재생조건(OncePerSession)으로 막는다.
+        private void NotifyIntroFinished()
+        {
+            IntroFinished = true;
+            var cb = OnIntroFinished;
+            if (cb != null) cb();
+        }
+
+
+        // 비활성화되는 순간 플레이어 쪽에 남는 부작용을 반드시 되돌린다.
+        // 그로기 연출(BeginBurst)이나 대시(DashToBoss) 도중에 꺼지면 코루틴이 그냥 멈추기 때문에,
+        // AttackSpeedMul=2 나 InputLocked=true 가 그대로 남아 조작 불능이 될 수 있다.
+        void OnDisable()
+        {
+            if (!gameObject.scene.isLoaded) return; // 씬 언로드/플레이 종료 시에는 정리 불필요
+
+            PlayerController2D.AttackSpeedMul = 1f;
+            PlayerController2D.InputLocked = false;
+            if (playerSr != null) playerSr.color = Color.white;
+
+            CleanupTransient();
+            DestroyRangeGizmos();
+            flashCo = null; sparkleCo = null; dashCo = null;
+        }
+
+        // 전투 중 생성된 일회성 오브젝트 정리 (보스 자식이 아니라 씬 루트에 생기는 것들)
+        private void CleanupTransient()
+        {
+            if (burstMsg != null) { Destroy(burstMsg); burstMsg = null; }
+            if (groggyFx != null) { Destroy(groggyFx); groggyFx = null; }
+
+            var projectiles = UnityEngine.Object.FindObjectsByType<DemonProjectile>(FindObjectsSortMode.None);
+            for (int i = 0; i < projectiles.Length; i++)
+                if (projectiles[i] != null) Destroy(projectiles[i].gameObject);
+        }
+
 
         private bool ParryBuffered()
         {
@@ -86,7 +161,8 @@ namespace NAN2026
                 Anim(introFrames, false);
                 if ((int)animT >= introFrames.Length)
                 {
-                    nextCleave = nextSmash = nextCast = Time.time + 1.0f;
+                                        nextCleave = nextSmash = nextCast = Time.time + 1.0f;
+                    NotifyIntroFinished();
                     SetState(0);
                 }
                 return;

@@ -30,5 +30,6 @@ EditorBuildSettings:
     path: Assets/Scenes/ActiveScene/Ending1.unity
     guid: 1b61151a40ac3974e95ea7f7f82b8434
   m_configObjects:
+    com.unity.dt.app-ui: {fileID: 11400000, guid: 1b1c20d82303e4b5781c3ef50ac1449f, type: 2}
     com.unity.input.settings: {fileID: 11400000, guid: 5e2b160f9ef84c143980a75a600cdd9a, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
