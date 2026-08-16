@@ -56,7 +56,14 @@ public class PlayerHealth : MonoBehaviour
     }
 
     public int CurrentHealth { get { return currentHealth; } }
-    public int MaxHealth { get { return (combatConfig != null ? combatConfig.maxHealth : 0) + maxHealthBonus; } }
+    public int MaxHealth
+    {
+        get
+        {
+            if (combatConfig == null) return maxHealthBonus;
+            return NAN2026.Core.HealthProgressionLogic.ClampedMaxHealth(combatConfig.maxHealth, maxHealthBonus, combatConfig.maxHealthCap);
+        }
+    }
     public int ParryCounterDamage { get { return combatConfig != null ? combatConfig.parryCounterDamage : 0; } }
 
     /// <summary>체력이 바뀔 때마다 (현재, 최대)를 통지한다. 월드스페이스 HP바 등이 구독할 수 있다.</summary>
@@ -222,9 +229,12 @@ public class PlayerHealth : MonoBehaviour
     /// <summary>최대 체력을 영구적으로 늘리고, 늘어난 만큼 즉시 회복한다(레벨업 증강 등).</summary>
     public void AddMaxHealthBonus(int amount)
     {
-        if (amount <= 0) return;
+        if (amount <= 0 || combatConfig == null) return;
+
+        int actualGain = NAN2026.Core.HealthProgressionLogic.ActualMaxHealthGain(combatConfig.maxHealth, maxHealthBonus, amount, combatConfig.maxHealthCap);
         maxHealthBonus += amount;
-        currentHealth += amount;
+        if (actualGain > 0)
+            currentHealth += actualGain;
         OnHealthChanged?.Invoke(currentHealth, MaxHealth);
     }
 

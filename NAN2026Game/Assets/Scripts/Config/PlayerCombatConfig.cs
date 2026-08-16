@@ -9,6 +9,8 @@ public sealed class PlayerCombatConfig : ScriptableObject
 {
     [Header("체력")]
     public int maxHealth = 5;
+    [Tooltip("증강(Heal) 등으로 늘어난 최대체력의 상한")]
+    public int maxHealthCap = 20;
 
     [Header("피격")]
     [Tooltip("피격 후 이 시간(초) 동안은 다시 데미지를 받지 않는다 (연속 히트 방지)")]

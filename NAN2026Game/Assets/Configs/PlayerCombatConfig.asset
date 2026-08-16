@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e8dbb21dd0dd2ab479525588f39d7430, type: 3}
   m_Name: PlayerCombatConfig
   m_EditorClassIdentifier: Assembly-CSharp::PlayerCombatConfig
-  maxHealth: 20
+  maxHealth: 5
+  maxHealthCap: 20
   hitInvulnerabilityDuration: 0.6
   knockbackDistance: 0.25
   parryCounterDamage: 2

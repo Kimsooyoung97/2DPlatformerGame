@@ -144,7 +144,8 @@ public sealed class PlayerProgression : MonoBehaviour
                 damageBonus += magnitude;
                 break;
             case AugmentType.Heal:
-                if (health != null) health.Heal(Mathf.RoundToInt(magnitude));
+                // 최대체력을 늘리고(상한까지), 늘어난 만큼 현재체력도 즉시 함께 회복된다.
+                if (health != null) health.AddMaxHealthBonus(Mathf.RoundToInt(magnitude));
                 break;
             case AugmentType.ManaHeal:
                 if (playerMana != null) playerMana.MaxUp(Mathf.RoundToInt(magnitude));

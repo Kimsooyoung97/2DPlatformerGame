@@ -107064,6 +107064,14 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 21300000, guid: 0acf79a403df3e447bfce4443000911a, type: 3}
     - target: {fileID: 6107874327782432534, guid: b7df9596408bfdc4d87c04f66f254534, type: 3}
+      propertyPath: emptySprite
+      value: 
+      objectReference: {fileID: 7110130089200399995, guid: b913b680dad84ff4093ede8baf9f083c, type: 3}
+    - target: {fileID: 6107874327782432534, guid: b7df9596408bfdc4d87c04f66f254534, type: 3}
+      propertyPath: filledSprite
+      value: 
+      objectReference: {fileID: 1491285489860683338, guid: b913b680dad84ff4093ede8baf9f083c, type: 3}
+    - target: {fileID: 6107874327782432534, guid: b7df9596408bfdc4d87c04f66f254534, type: 3}
       propertyPath: playerHealth
       value: 
       objectReference: {fileID: 1214493606}

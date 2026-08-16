@@ -7483,3 +7483,32 @@ ChestRewardConfig.icon(단일 Sprite)을 쓰는 곳 3군데 확인:
 - manage_scene(save): AdventureScene1 저장 성공
 ### 실패와 수정
 없음
+
+
+## [수정] Heal 증강이 최대체력을 늘리도록 수정 + 빈 하트로 최대체력 표시 — 2026-08-17 00:07
+### 프롬프트
+우선 레벨업했을 때 얻는 증강 Heal에서 최대체력을 1 늘려주면서 현재체력을 1회복하도록 할거야 현재 시작하면 player의 체력이 maxhealth로 정해지고 시작되는데 이 maxhealth를 처음엔 5로 시작하고 Heal 증강을 먹어서 늘려가는 식으로 플레이 하되 최대치는 20이야 또한 공격을 받아 체력이 깎이는 상황이 오면 현재 UI Canvas/Health에서 16x16 Heart Health Red를 사용하던 체력 UI를 16x16 Heart Health Red_2(하트가 채워지지 않은 이미지임)로 바꿔서 현재 최대 체력이 몇인지 알 수 있게 해야해
+### 조사
+- PlayerProgression.ApplyAugment의 AugmentType.Heal 분기가 health.Heal(magnitude)만 호출 — 카드 설명("최대 체력 증가")과 실제 동작(현재체력만 회복)이 어긋나 있었음(문서화 안 된 버그)
+- PlayerHealth.AddMaxHealthBonus(int)가 이미 존재(최대+현재를 함께 늘리는 메서드)했지만 어디서도 호출되지 않음
+- PlayerCombatConfig.asset의 실제 시리얼라이즈 값은 maxHealth=20 (C# 기본값 5와 다름) — 요청한 "5로 시작" 요구와 불일치
+- Canvas/Health의 PlayerHealthBarUI는 currentHealth 개수만큼만 하트를 생성/삭제(가득 찬 하트만 존재) — 빈 하트 개념이 없었음. 하트 스프라이트는 "16x16 Heart Health Red.png"가 멀티스프라이트로 슬라이스되어 있고 _0(채움)/_2(빈 하트)가 이미 존재함을 확인
+- Health GameObject는 씬에 직접 배치된 게 아니라 프리팹(Assets/Prefab/UI캔버스/UI Canvas.prefab, AdventureScene1에서만 사용) 인스턴스 — 절대 규칙(프리팹 자체 수정 금지)에 따라 프리팹 자산은 건드리지 않고 신규 스프라이트 필드는 씬 내 인스턴스 오버라이드로만 설정
+### 조작 내역
+- 신규: Assets/Scripts/Core/HealthProgressionLogic.cs (순수 로직 — ClampedMaxHealth, ActualMaxHealthGain)
+- 신규: Assets/Tests/EditMode/HealthProgressionLogicTests.cs (7케이스)
+- Assets/Scripts/Config/PlayerCombatConfig.cs: maxHealthCap(int, 기본 20) 필드 추가
+- Assets/Scripts/PlayerHealth.cs: MaxHealth getter와 AddMaxHealthBonus가 HealthProgressionLogic으로 상한(cap) 클램프하도록 수정
+- Assets/Scripts/PlayerProgression.cs: AugmentType.Heal 분기를 health.Heal(...) -> health.AddMaxHealthBonus(...) 로 교체
+- Assets/Scripts/PlayerHealthBarUI.cs: 하트 생성 기준을 currentHealth -> maxHealth로 변경, filledSprite/emptySprite 필드 추가 후 인덱스별로 채움/빈 스프라이트 적용
+- Assets/Configs/PlayerCombatConfig.asset: maxHealth 20 -> 5 (execute_code로 SerializedObject 직접 수정 후 SaveAssets)
+- Assets/Scenes/ActiveScene/AdventureScene1.unity: Health(PlayerHealthBarUI) 인스턴스에 filledSprite=16x16 Heart Health Red_0, emptySprite=16x16 Heart Health Red_2 배선(인스턴스 오버라이드, 프리팹 자산 미변경)
+### 검증
+- refresh_unity(compile=request, force) -> read_console(types=error): 0건
+- 리플렉션으로 NAN2026.Core.HealthProgressionLogic 로드 확인 + ClampedMaxHealth(5,30,20)=20 직접 호출 검증
+- manage_scene(save) -> manage_scene(load)로 디스크에서 강제 재로드 후 Health.filledSprite/emptySprite, PlayerCombatConfig.maxHealth/maxHealthCap 값을 다시 읽어 저장된 값과 일치함을 재확인(FAIL#14 절차 준수)
+- run_tests(EditMode): 243/243 통과 (신규 HealthProgressionLogicTests 7건 포함), 실패 0건
+- 테스트 실행 후 GameObject.Find("Health")로 씬 오브젝트 및 배선값 생존 확인, scene isDirty=false (FAIL#12 절차 준수)
+- **사람 확인 필요**: 플레이 모드에서 실제로 Heal 증강을 골랐을 때 하트 UI가 시각적으로 기대대로 보이는지(채움/빈 하트 배치, 20칸일 때 레이아웃 줄바꿈 등)는 에디터 플레이로 직접 확인 필요
+### 실패와 수정
+없음
