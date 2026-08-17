@@ -337,7 +337,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f914bbb2bb2ba3342ad2282008c9f695, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VideoCutsceneDirector
-  nextSceneName: 
+  nextSceneName: CreditsScene
   webglStreamingAssetsFileName: Ending.mp4
   allowSkip: 1
   holdSeconds: 3
